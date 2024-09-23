@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, Outlet, Navigate } from 'react-router-dom';
 import useScripts from './scripts';
 import {useStateContext} from '../context/contextAuth'
-import Footer from '../../Layout/Layout'
+import Layout from '../../Layout/Layout'
 
 
 
@@ -13,8 +13,8 @@ export default function navbar() {
     }
     return (
         <>
+        <Layout></Layout>
         <Outlet/>
-        <Footer></Footer>
 
         </>
 
