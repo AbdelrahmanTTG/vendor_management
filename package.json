@@ -1,0 +1,38 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-react": "^4.3.1",
+        "axios": "^1.7.7",
+        "laravel-vite-plugin": "^1.0",
+        "sass-embedded": "^1.79.3",
+        "vite": "^5.4.6"
+    },
+    "dependencies": {
+        "bootstrap": "^5.3.3",
+        "bootstrap-scss": "^5.3.3",
+        "i18next": "^23.15.1",
+        "leaflet": "^1.9.4",
+        "react": "^18.3.1",
+        "react-18-image-lightbox": "^5.1.4",
+        "react-big-calendar": "^1.14.1",
+        "react-clock": "^5.0.0",
+        "react-copy-to-clipboard": "^5.1.0",
+        "react-datepicker": "^7.3.0",
+        "react-dom": "^18.3.1",
+        "react-dragula": "^1.1.17",
+        "react-feather": "^2.0.10",
+        "react-i18next": "^15.0.2",
+        "react-image-crop": "^11.0.7",
+        "react-perfect-scrollbar": "^1.5.8",
+        "react-router-dom": "^6.26.2",
+        "react-toastify": "^10.0.5",
+        "react-vertical-timeline-component": "^3.6.0",
+        "reactstrap": "^9.2.2"
+    }
+}
