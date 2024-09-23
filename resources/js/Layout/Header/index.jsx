@@ -9,8 +9,7 @@ import CustomizerContext from '../../_helper/Customizer';
 
 const Header = () => {
     const [sidebartoogle, setSidebartoogle] = useState(true);
-    // const  [toggleIcon, toggleSidebarResponsive, setToggleIcon]  = useContext(CustomizerContext);
-    
+    const { toggleIcon, toggleSidebarResponsive, setToggleIcon } = useContext(CustomizerContext);
     const [toggle, setToggle] = useState(true);
 
     function useWindowSize() {
@@ -18,11 +17,11 @@ const Header = () => {
         useLayoutEffect(() => {
             function updateSize() {
                 setSize([window.innerWidth, window.innerHeight]);
-                // if (window.innerWidth <= 991) {
-                //     setToggleIcon(true);
-                // } else {
-                //     setToggleIcon(false);
-                // }
+                if (window.innerWidth <= 991) {
+                    setToggleIcon(true);
+                } else {
+                    setToggleIcon(false);
+                }
             }
             window.addEventListener('resize', updateSize);
             updateSize();
@@ -34,20 +33,20 @@ const Header = () => {
     const [width] = useWindowSize();
 
     useEffect(() => {
-        // if (window.innerWidth <= 991) {
-        //     setToggleIcon(true);
-        // } else {
-        //     setToggleIcon(false);
-        // }
+        if (window.innerWidth <= 991) {
+            setToggleIcon(true);
+        } else {
+            setToggleIcon(false);
+        }
     }, []);
 
     const toggleResp = (value) => {
         setToggle(value);
-        // toggleSidebarResponsive(toggle);
+        toggleSidebarResponsive(toggle);
     };
     return (
         <Fragment>
-            <div className={`page-main-header`}>
+            <div className={`page-main-header ${toggleIcon ? 'close_icon' : ''}`}>
                 <Row className="main-header-right m-0">
                     <Leftbar sidebartoogle={sidebartoogle} setSidebartoogle={setSidebartoogle} />
                     <Searchbar />

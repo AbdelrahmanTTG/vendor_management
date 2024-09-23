@@ -4,7 +4,7 @@ import ConfigDB from '../../../Config/ThemeConfig';
 import CustomizerContext from '../../../_helper/Customizer';
 
 const MoonLight = () => {
-    const  addMixBackgroundLayout  = useContext(CustomizerContext);
+    const { addMixBackgroundLayout } = useContext(CustomizerContext);
     const [moonlight, setMoonlight] = useState(false);
     const localStorageLayout = localStorage.getItem('layout_type') || ConfigDB.data.settings.layout_type;
 

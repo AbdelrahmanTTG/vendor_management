@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import CustomContext from '../../../../_helper/Customizer';
 
 const ListOfMenu = ({ searchToggle, searchBar, searchValue, removeFix, setBookmarkItems, bookmarkItems, searchResult }) => {
-    const IsOpen  = useContext(CustomContext);
+    const { IsOpen } = useContext(CustomContext);
     const addToBookmark = (event, items) => {
         const index = bookmarkItems.indexOf(items);
         if (index === -1 && !items.bookmark) {

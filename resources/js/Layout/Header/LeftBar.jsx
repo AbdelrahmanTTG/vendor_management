@@ -6,9 +6,7 @@ import CheckContext from '../../_helper/Customizer';
 
 const Leftbar = () => {
 
-    const  mixLayout   = useContext(CheckContext);
-    const   toggleSidebar  = useContext(CheckContext);
-
+    const { mixLayout, toggleSidebar } = useContext(CheckContext);
     const [toggle, setToggle] = useState(false);
 
 
@@ -22,13 +20,13 @@ const Leftbar = () => {
             <div className="main-header-left">
                 {mixLayout ?
                     <div className="logo-wrapper">
-                        <Link to={`http://127.0.0.1:8000/dashboard/default`}>
-                            <Image attrImage={{ className: 'img-fluid d-inline', src: `${require('../../assets/images/logo/logo.png')}`, alt: '' }} />
+                        <Link to={`/dashboard/default`}>
+                            {/* <Image attrImage={{ className: 'img-fluid d-inline', src: `${require('../../assets/images/logo/logo.png')}`, alt: '' }} /> */}
                         </Link>
                     </div>
                     :
                     <div className="dark-logo-wrapper">
-                        <Link to={`http://127.0.0.1:8000/dashboard/default`}>
+                        <Link to={`/dashboard/default`}>
                             {/* <Image attrImage={{ className: 'img-fluid d-inline', src: `${require('../../assets/images/logo/dark-logo.png')}`, alt: '' }} /> */}
                         </Link>
                     </div>

@@ -5,7 +5,7 @@ import { MENUITEMS } from './Menu';
 import Profile from './Profile';
 
 const SideBarLayout = (props) => {
-  const toggleIcon  = useContext(CustomizerContext);
+  const { toggleIcon } = useContext(CustomizerContext);
   const [currentUrl] = useState(window.location.pathname);
   const id = window.location.pathname.split('/').pop();
   // eslint-disable-next-line

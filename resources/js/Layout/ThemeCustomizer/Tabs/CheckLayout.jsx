@@ -25,19 +25,19 @@ const CheckLayout = () => {
       <UL attrUL={{ className: 'sidebar-type layout-grid layout-types' }}>
         <LI attrLI={{ dataattr: 'defaul-layout' }}>
           <div className='layout-img' onClick={() => handleSttings('default-sidebar')}>
-            <Image attrImage={{ className: 'img-fluid', src: `${require('../../../assets/images/landing/demo/1.jpg')}`, alt: '' }} />
+            {/* <Image attrImage={{ className: 'img-fluid', src: `${require('../../../assets/images/landing/demo/1.jpg')}`, alt: '' }} /> */}
             <H6>Default layout</H6>
           </div>
         </LI>
         <LI attrLI={{ dataattr: 'compact-layout' }}>
           <div className='layout-img' onClick={() => handleSttings('compact-sidebar')}>
-            <Image attrImage={{ className: 'img-fluid', src: `${require('../../../assets/images/landing/demo/2.jpg')}`, alt: '' }} />
+            {/* <Image attrImage={{ className: 'img-fluid', src: `${require('../../../assets/images/landing/demo/2.jpg')}`, alt: '' }} /> */}
             <H6>Compact layout</H6>
           </div>
         </LI>
         <LI attrLI={{ dataattr: 'modern-layout' }}>
           <div className='layout-img' onClick={() => handleSttings('modern-sidebar')}>
-            <Image attrImage={{ className: 'img-fluid', src: `${require('../../../assets/images/landing/demo/3.jpg')}`, alt: '' }} />
+            {/* <Image attrImage={{ className: 'img-fluid', src: `${require('../../../assets/images/landing/demo/3.jpg')}`, alt: '' }} /> */}
             <H6>Modern layout</H6>
           </div>
         </LI>

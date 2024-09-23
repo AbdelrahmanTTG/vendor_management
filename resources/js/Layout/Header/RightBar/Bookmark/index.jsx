@@ -13,7 +13,7 @@ import RemoveBookmark from "./RemoveBookmark";
 const Bookmarks = () => {
   const [mainMenu, setMainMenu] = useState(MENUITEMS);
   const [searchIcon, setSearchIcon] = useState(false);
-  const  setIsClose  = useContext(CustomContext);
+  const { setIsClose } = useContext(CustomContext);
   const [searchValue, setSearchValue] = useState("");
   const [searchResult, setSearchResult] = useState(false);
   const [bookmarkSearch, SetBookmarkSearch] = useState(false);

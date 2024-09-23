@@ -12,7 +12,7 @@ import MoonLight from './MoonLight';
 import Notifications from './Notifiations';
 
 const Rightbar = () => {
-    const  sidebarResponsive  = useContext(CustomizerContext);
+    const { sidebarResponsive } = useContext(CustomizerContext);
     //full screen function
     function goFull() {
         if ((document.fullScreenElement && document.fullScreenElement !== null) ||

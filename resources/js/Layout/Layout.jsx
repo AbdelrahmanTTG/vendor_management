@@ -15,11 +15,11 @@ import ConfigDB from "../Config/ThemeConfig";
 
 const AppLayout = ({ children, classNames, ...rest }) => {
   const location = useLocation();
-  const  sidebar_types = useContext(CustomizerContext);
+  const { sidebar_types } = useContext(CustomizerContext);
   const queryData = location?.search?.split("=")[1]?.toString();
   const settings1 = localStorage.getItem("sidebar_Settings") || ConfigDB.data.settings.sidebar_setting || queryData;
   const sidebar_types1 = localStorage.getItem("sidebar_types") || ConfigDB.data.settings.sidebar.type || sidebar_types;
-  const animation  = useContext(AnimationThemeContext);
+  const { animation } = useContext(AnimationThemeContext);
   const animationTheme = localStorage.getItem("animation") || animation || ConfigDB.data.router_animation;
 
   const nodeRef = useRef(null);
@@ -27,7 +27,7 @@ const AppLayout = ({ children, classNames, ...rest }) => {
   const error = console.error;
   console.error = (...args) => {
     if (/defaultProps/.test(args[0])) return;
-    // error(...args);
+    error(...args);
   };
 
   return (
@@ -48,7 +48,7 @@ const AppLayout = ({ children, classNames, ...rest }) => {
           <Footer />
         </div>
       </div>
-      {/* <ThemeCustomize /> */}
+      <ThemeCustomize />
       <ToastContainer />
     </Fragment>
   );
