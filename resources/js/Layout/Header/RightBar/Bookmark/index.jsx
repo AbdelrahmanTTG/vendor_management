@@ -2,7 +2,7 @@
 import React, { Fragment, useState, useEffect, useCallback, useContext } from "react";
 import { Star } from "react-feather";
 import { Input } from "reactstrap";
-import { MENUITEMS } from "../../../Sidebar/Menu";
+import { Menu } from "../../../Sidebar/Menu";
 import { LI, UL } from "../../../../AbstractElements";
 import ListOfMenu from "./ListOfMenu";
 import EmpltyClass from "./EmptyClass";
@@ -11,6 +11,7 @@ import CustomContext from "../../../../_helper/Customizer";
 import RemoveBookmark from "./RemoveBookmark";
 
 const Bookmarks = () => {
+  const MENUITEMS = Menu();
   const [mainMenu, setMainMenu] = useState(MENUITEMS);
   const [searchIcon, setSearchIcon] = useState(false);
   const { setIsClose } = useContext(CustomContext);

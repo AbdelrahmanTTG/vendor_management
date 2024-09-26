@@ -5,6 +5,10 @@ use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Vendor;
+use App\Models\Permission;
+use App\Models\Group;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
@@ -19,6 +23,24 @@ class AuthController extends Controller
         $user = User::authenticate($request->email, $request->password);
 
         if (!$user) {
+            $user = Vendor::vendor($request->email ,$request->password);
+            if($user){
+                $loginData = [
+                    'id' => $user->id,
+                    'first_login'=>$user->first_login,
+                    'user_name'=> $user->name,
+                    'user_type'=>'vendor',
+                    'loggedin_ttg' => 1,
+                ];
+                $token = JWTAuth::fromUser($user, ['exp' => now()->addHour()->timestamp]);
+                return response()->json([
+                    'message' => 'Login successful',
+                    'user' => $loginData,
+                    'token' => $token,
+                    'token_type' => 'bearer',
+                    'expires_in' => auth('api')->factory()->getTTL()*60
+                ], 200);
+            }
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
@@ -60,8 +82,38 @@ class AuthController extends Controller
      return response()->json(["message"=>'logout Successfuly']);
       
     }
-    public function user (){
-     
+    public function userpermission (Request $request){
+        $validator = Validator::make($request->all(), [
+            'role' => 'required|string',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 'Invalid data provided',
+                'messages' => $validator->errors(),
+            ], 422);
+        };
+        try {
+            $role = Crypt::decrypt($request->input('role'));
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            return response()->json(['error' => 'Failed to decrypt role'], 400);
+        }
+        $Permissions = Permission::getGroupByRole( $role);
+        $permissionsWithScreens = [];
+        $groups =[];
+        foreach ($Permissions as $permission) {
+            $screens = Permission::getScreenByGroupAndRole($permission->groups, $role)->toArray();
+            $group = Group::getGroup($permission->groups);
+            $newData = [
+                'title' => $group->name,
+                'type'  =>"sub",
+                'active'=> false
+            ];
+            $screen = array_merge([$screens], $newData);
+            $permissionsWithScreens[$permission->groups] =['Items'=>[$screen] ] ;
+        }
+        
+        return response()->json($permissionsWithScreens, 200);
+
       
     }
 }

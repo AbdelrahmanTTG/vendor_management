@@ -19,7 +19,7 @@ import router from "./router";
 import "./index.scss";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
+    // <React.StrictMode>
         <div className="App">
         <ContextProvider>
                 <CustomizerProvider>
@@ -35,10 +35,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 </CustomizerProvider>
         </ContextProvider>
         </div>
-
-
-
-
-
-    </React.StrictMode>
+    // </React.StrictMode>
 )

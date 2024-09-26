@@ -9,7 +9,7 @@ Route::group(['prefix' => 'auth'], function() {
 });
 
 Route::middleware(['auth:api'])->group(function() {
-    Route::get('user', [AuthController::class, 'user']);
+    Route::post('permission', [AuthController::class, 'userpermission']);
     Route::get('logout', [AuthController::class, 'logout']);
 
 });

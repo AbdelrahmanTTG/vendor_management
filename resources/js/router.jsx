@@ -3,25 +3,42 @@ import { createBrowserRouter } from "react-router-dom";
 import Home from './pages/Home'
 import About from './pages/About'
 import Login from './pages/Login'
-import Navbar from './pages/layout/navbar'
+import Dashboard from './pages/Dashboard'
+import Dashboard_p from './pages/Dashboard_P'
+
 const router = createBrowserRouter ([
     {
         path:'login',
         element:<Login/>,
     },
     {
-        path:'/',
-        element:<Navbar/>,
+        path:'/VM',
+        element:<Dashboard/>,
         children:[
             {
-                path:'/',
+                path:'',
                 element:<Home/>
             },
             {
-                path:'/about',
+                path:'about',
+                element:<About/>
+            },
+        ]
+    },
+    {
+        path:'/Vendor',
+        element:<Dashboard_p/>,
+        children:[
+            {
+                path:'',
+                element:<Home/>
+            },
+            {
+                path:'about',
                 element:<About/>
             },
         ]
     }
+
 ])
 export default router

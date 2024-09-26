@@ -2,14 +2,12 @@ import React, { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { LI, UL, H6 } from '../../AbstractElements';
-import { Menu } from './Menu';
+import { MENUITEMS } from './Menu';
 import { Label } from 'reactstrap';
 
 const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
-  const MENUITEMS = Menu();
-
   const { t } = useTranslation();
-  // console.log(MENUITEMS)
+
   const toggletNavActive = (item) => {
 
     if (!item.active) {
@@ -46,8 +44,13 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
 
         {MENUITEMS.map((Item, i) => (
           < Fragment key={i} >
+            <LI attrLI={{ className: 'sidebar-main-title' }} >
+              <div>
+                <H6>{t(Item.menutitle)}</H6>
+              </div>
+            </LI>
             {Item.Items.map((menuItem, i) => (
-               <LI attrLI={{ className: 'dropdown' }} key={i}>
+              <LI attrLI={{ className: 'dropdown' }} key={i}>
                 {menuItem.type === 'sub' && (
                   <a href="javascript"
                     id="nav-link"
@@ -66,7 +69,7 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
                     </div>
                   </a>
                 )}
-                {/* {menuItem.type === 'link' && (
+                {menuItem.type === 'link' && (
                   <Link
                     to={menuItem.path}
                     id="nav-link"
@@ -150,10 +153,9 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
                       })}
                     </UL>
                   </UL>
-                )} */}
-              </LI>  
+                )}
+              </LI>
             ))}
-
           </Fragment>
         ))
         }

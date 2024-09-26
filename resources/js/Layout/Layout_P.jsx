@@ -1,7 +1,7 @@
 import Loader from "./Loader";
 import Taptop from "./TapTop";
 import Header from "./Header";
-import Sidebar from "./Sidebar";
+import Sidebar from "./Sidebar_P";
 import Footer from "./Footer";
 import React, { Fragment, useRef } from "react";
 import ThemeCustomize from "../Layout/ThemeCustomizer";
@@ -11,17 +11,17 @@ import CustomizerContext from "../_helper/Customizer";
 import { Outlet, useLocation } from "react-router-dom";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import AnimationThemeContext from "../_helper/AnimationTheme";
-import ConfigDB from "../Config/ThemeConfig";
+import ConfigDB from "../Config/ThemeConfig_P";
 
 const AppLayout = ({ children, classNames, ...rest }) => {
   const location = useLocation();
   const { sidebar_types } = useContext(CustomizerContext);
   const queryData = location?.search?.split("=")[1]?.toString();
-  const settings1 = localStorage.getItem("sidebar_Settings") || ConfigDB.data.settings.sidebar_setting || queryData;
-  const sidebar_types1 = localStorage.getItem("sidebar_types") || ConfigDB.data.settings.sidebar.type || sidebar_types;
+  const settings1 =  ConfigDB.data.settings.sidebar_setting || queryData;
+  const sidebar_types1 =  ConfigDB.data.settings.sidebar.type || sidebar_types;
   const { animation } = useContext(AnimationThemeContext);
   const animationTheme = localStorage.getItem("animation") || animation || ConfigDB.data.router_animation;
-  document.body.classList.add('ltr');
+  document.body.classList.add('box-layout');
   const nodeRef = useRef(null);
 
   const error = console.error;
@@ -45,7 +45,7 @@ const AppLayout = ({ children, classNames, ...rest }) => {
               </div>
             </CSSTransition>
           </TransitionGroup>
-          {/* <Footer /> */}
+          <Footer />
         </div>
       </div>
       <ThemeCustomize />

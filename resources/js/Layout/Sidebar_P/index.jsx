@@ -1,22 +1,18 @@
 import React, { Fragment, useEffect, useState, useContext } from 'react';
 import SidebarMenu from './SidebarMenu';
 import CustomizerContext from '../../_helper/Customizer';
-import { Menu  } from './Menu';
+import { MENUITEMS } from './Menu';
 import Profile from './Profile';
-import {useStateContext} from '../../pages/context/contextAuth'
-import axiosClient from "../../pages/AxiosClint";
 
 const SideBarLayout = (props) => {
-  const MENUITEMS = Menu();
   const { toggleIcon } = useContext(CustomizerContext);
   const [currentUrl] = useState(window.location.pathname);
   const id = window.location.pathname.split('/').pop();
   // eslint-disable-next-line
   const [leftArrow, setLeftArrow] = useState(false);
+  
   const layout = id;
   const [width, setWidth] = useState(0);
-  const {user} = useStateContext();
-
   const handleResize = () => {
     setWidth(window.innerWidth - 500);
   };// eslint-disable-next-line
@@ -30,6 +26,7 @@ const SideBarLayout = (props) => {
         document.querySelector('.main-navbar').className = 'main-navbar';
     }
   };
+ 
 
   const setNavActive = (item) => {
     MENUITEMS.map(menuItems => {
@@ -99,8 +96,6 @@ const SideBarLayout = (props) => {
     document.getElementById('bg-overlay1').classList.remove('active');
     document.getElementById('nav-link').classList.remove('active');
   };
-
- 
 
   return (
     <Fragment>

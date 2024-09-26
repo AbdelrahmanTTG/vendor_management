@@ -66,6 +66,7 @@ class User extends Authenticatable implements JWTSubject
             ->where('id', $userAccount->master_user_id)
             ->update($accountData);
     }
+   
   
     protected $fillable = [
         'name',

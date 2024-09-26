@@ -1,13 +1,13 @@
 import React, { Fragment, useState, useEffect, useCallback, useContext } from 'react';
 import { Col, Form, Input } from 'reactstrap';
-import { MENUITEMS } from '../../Sidebar/Menu';
+import { Menu } from '../../Sidebar/Menu';
 import { LI, UL } from '../../../AbstractElements';
 import EmpltyClass from '../RightBar/Bookmark/EmptyClass';
 import CustomizerContext from '../../../_helper/Customizer';
 import ListOfMenu from '../RightBar/Bookmark/ListOfMenu';
 
 const Searchbar = () => {
-    const mainmenu = MENUITEMS;
+    const mainmenu = Menu();
     const [searchValue, setSearchValue] = useState('');
     const [openResp, setOpenResp] = useState(false);
     const [searchIcon, setSearchIcon] = useState(false);

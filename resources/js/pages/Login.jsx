@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { Fragment, useState } from "react";
 import { Col, Form, FormGroup, Input, Label, Row } from "reactstrap";
 import { Navigate } from 'react-router-dom';
@@ -6,6 +5,7 @@ import { Btn, H4, P } from "../AbstractElements";
 import { toast } from "react-toastify";
 import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
+import ConfigDB from '../Config/ThemeConfig';
 
 const Login = () => {   
   const [email, setEmail] = useState();
@@ -13,7 +13,8 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const { setUser, setToken } = useStateContext();
-  const [redirect, setRedirect] = useState(false);
+  const [redirect, setRedirect] = useState(null);
+  const [togglePassword, setTogglePassword] = useState(false);
 
   const Submit = (e) => {
     e.preventDefault();
@@ -44,8 +45,13 @@ const Login = () => {
     axiosClient.post("auth/login", payload).then(({ data }) => {
       setUser(data.user);
       setToken(data.token);
-      setRedirect(true);  
-    }).catch(err => {
+        if (data.user.user_type) {
+          setRedirect("/vendor");
+         }else{
+          setRedirect("/vm");
+         }
+      setLoading(false);
+        }).catch(err => {
       const response = err.response;
       if (response && response.status === 422) {
         setErrorMessage(response.data.errors);
@@ -54,16 +60,15 @@ const Login = () => {
       } else {
         setErrorMessage("An unexpected error occurred.");
       }
+      console.log(response);
       setLoading(false);
     });
-  }
-
-  const [togglePassword, setTogglePassword] = useState(false);
-
+    
+   
+  }    
   if (redirect) {
-    return <Navigate to="/" />; 
+    return <Navigate to = {redirect} />;
   }
-
   return (
     <Fragment>
       <div className="p-0 container-fluid">
