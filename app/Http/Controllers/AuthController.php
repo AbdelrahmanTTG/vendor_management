@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Vendor;
 use App\Models\Permission;
 use App\Models\Group;
+use App\Models\Screen;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -23,13 +24,13 @@ class AuthController extends Controller
         $user = User::authenticate($request->email, $request->password);
 
         if (!$user) {
-            $user = Vendor::vendor($request->email ,$request->password);
-            if($user){
+            $user = Vendor::vendor($request->email, $request->password);
+            if ($user) {
                 $loginData = [
                     'id' => $user->id,
-                    'first_login'=>$user->first_login,
-                    'user_name'=> $user->name,
-                    'user_type'=>'vendor',
+                    'first_login' => $user->first_login,
+                    'user_name' => $user->name,
+                    'user_type' => 'vendor',
                     'loggedin_ttg' => 1,
                 ];
                 $token = JWTAuth::fromUser($user, ['exp' => now()->addHour()->timestamp]);
@@ -38,7 +39,7 @@ class AuthController extends Controller
                     'user' => $loginData,
                     'token' => $token,
                     'token_type' => 'bearer',
-                    'expires_in' => auth('api')->factory()->getTTL()*60
+                    'expires_in' => auth('api')->factory()->getTTL() * 60
                 ], 200);
             }
             return response()->json(['message' => 'Invalid credentials'], 401);
@@ -70,19 +71,21 @@ class AuthController extends Controller
                 'user' => $loginData,
                 'token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => auth('api')->factory()->getTTL()*60
+                'expires_in' => auth('api')->factory()->getTTL() * 60
             ], 200);
         } else {
             return response()->json(['message' => 'User account not found'], 404);
         }
         //
     }
-    public function logout (){
-     auth()->logout();
-     return response()->json(["message"=>'logout Successfuly']);
-      
+    public function logout()
+    {
+        auth()->logout();
+        return response()->json(["message" => 'logout Successfuly']);
+
     }
-    public function userpermission (Request $request){
+    public function userpermission(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'role' => 'required|string',
         ]);
@@ -91,29 +94,36 @@ class AuthController extends Controller
                 'error' => 'Invalid data provided',
                 'messages' => $validator->errors(),
             ], 422);
-        };
+        }
+        ;
         try {
             $role = Crypt::decrypt($request->input('role'));
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Failed to decrypt role'], 400);
         }
-        $Permissions = Permission::getGroupByRole( $role);
+        $Permissions = Permission::getGroupByRole($role);
         $permissionsWithScreens = [];
-        $groups =[];
+        $groups = [];
         foreach ($Permissions as $permission) {
-            $screens = Permission::getScreenByGroupAndRole($permission->groups, $role)->toArray();
+            $screens = Permission::getScreenByGroupAndRole($permission->groups, $role);
+            foreach ($screens as $key) {
+
+                $screen = Screen::getScreen($key->screen);
+                $screen->type = 'link';  
+                $groups[] = $screen;
+            }
             $group = Group::getGroup($permission->groups);
             $newData = [
                 'title' => $group->name,
-                'type'  =>"sub",
-                'active'=> false
+                'type' => "sub",
+                'active' => false
             ];
-            $screen = array_merge([$screens], $newData);
-            $permissionsWithScreens[$permission->groups] =['Items'=>[$screen] ] ;
+            $screen = array_merge(['children' => $groups], $newData);
+            $permissionsWithScreens[$permission->groups] = $screen;
         }
-        
-        return response()->json($permissionsWithScreens, 200);
 
-      
+        return response()->json(["Items"=>$permissionsWithScreens], 200);
+
+
     }
 }

@@ -11,8 +11,5 @@ Route::group(['prefix' => 'auth'], function() {
 Route::middleware(['auth:api'])->group(function() {
     Route::post('permission', [AuthController::class, 'userpermission']);
     Route::get('logout', [AuthController::class, 'logout']);
-
 });
-
-
 

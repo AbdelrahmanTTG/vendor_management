@@ -15,6 +15,7 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
     if (!item.active) {
       MENUITEMS.map((a) => {
         a.Items.filter((Items) => {
+
           if (a.Items.includes(item)) Items.active = false;
           if (!Items.children) return false;
           Items.children.forEach((b) => {
@@ -43,11 +44,10 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
         <LI attrLI={{ className: 'back-btn' }}>
           <div className="mobile-back text-end"><span>Back</span><i className="fa fa-angle-right ps-2"></i></div>
         </LI>
-
         {MENUITEMS.map((Item, i) => (
           < Fragment key={i} >
             {Item.Items.map((menuItem, i) => (
-               <LI attrLI={{ className: 'dropdown' }} key={i}>
+              <LI attrLI={{ className: 'dropdown' }} key={i}>
                 {menuItem.type === 'sub' && (
                   <a href="javascript"
                     id="nav-link"
@@ -66,92 +66,42 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
                     </div>
                   </a>
                 )}
-                {/* {menuItem.type === 'link' && (
-                  <Link
-                    to={menuItem.path}
-                    id="nav-link"
-                    className={`nav-link menu-title ${menuItem.active ? 'active' : ''
-                      }`}
-                    onClick={() => toggletNavActive(menuItem)}
-                  >
-                    {menuItem.icon !== undefined && <menuItem.icon />}
-
-                    <span>{t(menuItem.title)}</span>
-
-                    {menuItem.badge && (
-                      <Label className={menuItem.badge}>
-                        {menuItem.badgetxt}
-                      </Label>
-                    )}
-                  </Link>
-                )}
                 {menuItem.children && (
                   <UL attrUL={{
                     className: 'simple-list sidebar-submenu',
-                    
+
                   }}>
-                    <UL attrUL={{ className: 'nav-submenu menu-content',
-                    style:
-                      menuItem.active
-                        ? sidebartoogle
-                          ? {
-                            opacity: 1,
-                            transition: 'opacity 500ms ease-in',
-                          }
-                          : { display: 'block' }
-                        : { display: 'none' } }}>
+                    <UL attrUL={{
+                      className: 'nav-submenu menu-content',
+                      style:
+                        menuItem.active
+                          ? sidebartoogle
+                            ? {
+                              opacity: 1,
+                              transition: 'opacity 500ms ease-in',
+                            }
+                            : { display: 'block' }
+                          : { display: 'none' }
+                    }}>
                       {menuItem.children.map((childrenItem, index) => {
                         return (
                           <LI key={index}>
-                            {childrenItem.type === 'sub' && (
-                              <a href="javascript" className={`${childrenItem.active ? 'active' : ''}`}
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  toggletNavActive(childrenItem);
-                                }}>
-                                {t(childrenItem.title)}
-                                <div className="according-menu">
-                                  {childrenItem.active ? (<i className="fa fa-caret-down"></i>) : (<i className="fa fa-caret-right"></i>)} </div>
-                              </a>
-                            )}
+
                             {childrenItem.type === 'link' && (
                               <Link
-                                to={childrenItem.path} className={`${childrenItem.active ? 'active' : ''}`}
+                                to={childrenItem.url} className={`${childrenItem.active ? 'active' : ''}`}
                                 onClick={() => toggletNavActive(childrenItem)} >
-                                {t(childrenItem.title)}
+                                {t(childrenItem.name)}
                               </Link>
                             )}
-                            {childrenItem.children && (
-                              <UL attrUL={{
-                                className: 'simple-list nav-sub-childmenu submenu-content',
-                                style: childrenItem.active
-                                  ? { display: 'block' }
-                                  : { display: 'none' }
-                              }}>
-                                {childrenItem.children.map(
-                                  (childrenSubItem, key) => (
-                                    <LI key={key}>
-                                      {childrenSubItem.type === 'link' && (
-                                        <Link
-                                          to={childrenSubItem.path}
-                                          className={`${childrenSubItem.active ? 'active' : ''}`}
-                                          onClick={() => toggletNavActive(
-                                            childrenSubItem)}>
-                                          {t(childrenSubItem.title)}
-                                        </Link>
-                                      )}
-                                    </LI>
-                                  )
-                                )}
-                              </UL>
-                            )}
+
                           </LI>
                         );
                       })}
                     </UL>
                   </UL>
-                )} */}
-              </LI>  
+                )}
+              </LI>
             ))}
 
           </Fragment>

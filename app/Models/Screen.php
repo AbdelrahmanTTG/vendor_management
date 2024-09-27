@@ -9,5 +9,8 @@ class Screen extends Model
 {
     use HasFactory;
     protected $table = 'screen';
-
+    public static function getScreen($screen)
+    {
+        return self::select('name', 'url')->find($screen);
+    }
 }
