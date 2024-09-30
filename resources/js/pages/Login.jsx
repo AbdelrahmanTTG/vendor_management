@@ -5,7 +5,6 @@ import { Btn, H4, P } from "../AbstractElements";
 import { toast } from "react-toastify";
 import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
-import ConfigDB from '../Config/ThemeConfig';
 
 const Login = () => {   
   const [email, setEmail] = useState();
@@ -24,24 +23,6 @@ const Login = () => {
       email: email,
       password: password
     }
-    // axiosClient.get("/user", {
-    //   headers: {
-    //     Authorization: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3MjcwOTI0NzAsImV4cCI6MTcyNzA5NjA3MCwibmJmIjoxNzI3MDkyNDcwLCJqdGkiOiJXd2NpZXlGOGc2ZkNtR0tXIiwic3ViIjoiMTcyIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.8jOCYb4udt7qjLdhhIWmXvUzWCwvLtmqiVB9C7egSrY`, // استبدل token بالتوكن الفعلي الخاص بك
-    //   },
-    // }).then(({ data }) => {
-    //   console.log(data);
-    //   // معالجة البيانات المستلمة هنا
-    // }).catch(err => {
-    //   const response = err.response;
-    //   if (response && response.status === 422) {
-    //     setErrorMessage(response.data.errors);
-    //   } else if (response && response.status === 401) {
-    //     setErrorMessage(response.data.message);
-    //   } else {
-    //     setErrorMessage("An unexpected error occurred.");
-    //   }
-    //   setLoading(false);
-    // });
     axiosClient.post("auth/login", payload).then(({ data }) => {
       setUser(data.user);
       setToken(data.token);
@@ -60,7 +41,6 @@ const Login = () => {
       } else {
         setErrorMessage("An unexpected error occurred.");
       }
-      console.log(response);
       setLoading(false);
     });
     

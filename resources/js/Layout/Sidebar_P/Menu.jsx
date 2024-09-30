@@ -21,8 +21,8 @@ export const MENUITEMS = [
         type: "sub",
         active: false,
         children: [
-          { path: `http://127.0.0.1:8000/widgets/general`, title: "General", type: "link" },
-          { path: `http://127.0.0.1:8000/widgets/chart`, title: "Chart", type: "link" },
+          { path: `Home_portal`, title: "General", type: "link" },
+          { path: ``, title: "Chart", type: "link" },
         ],
       },
       {

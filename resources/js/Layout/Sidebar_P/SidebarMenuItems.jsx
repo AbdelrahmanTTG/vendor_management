@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { LI, UL, H6 } from '../../AbstractElements';
 import { MENUITEMS } from './Menu';
 import { Label } from 'reactstrap';
-
 const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
   const { t } = useTranslation();
 

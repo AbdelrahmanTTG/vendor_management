@@ -29,7 +29,6 @@ const AppLayout = ({ children, classNames, ...rest }) => {
     if (/defaultProps/.test(args[0])) return;
     error(...args);
   };
-
   return (
     <Fragment>
       <Loader />

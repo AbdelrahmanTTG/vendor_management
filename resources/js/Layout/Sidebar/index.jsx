@@ -3,8 +3,7 @@ import SidebarMenu from './SidebarMenu';
 import CustomizerContext from '../../_helper/Customizer';
 import { Menu  } from './Menu';
 import Profile from './Profile';
-import {useStateContext} from '../../pages/context/contextAuth'
-import axiosClient from "../../pages/AxiosClint";
+
 
 const SideBarLayout = (props) => {
   const MENUITEMS = Menu();
@@ -15,7 +14,6 @@ const SideBarLayout = (props) => {
   const [leftArrow, setLeftArrow] = useState(false);
   const layout = id;
   const [width, setWidth] = useState(0);
-  const {user} = useStateContext();
 
   const handleResize = () => {
     setWidth(window.innerWidth - 500);
@@ -59,6 +57,7 @@ const SideBarLayout = (props) => {
     item.active = !item.active;
     setMainMenu({ mainmenu: MENUITEMS });
   };
+  
   useEffect(() => {
     setLeftArrow(true);
     window.addEventListener('resize', handleResize);

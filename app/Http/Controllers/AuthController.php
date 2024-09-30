@@ -41,8 +41,9 @@ class AuthController extends Controller
                     'token_type' => 'bearer',
                     'expires_in' => auth('api')->factory()->getTTL() * 60
                 ], 200);
+            }else{
+                return response()->json(['message' => 'Invalid credentials'], 400);
             }
-            return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
         // Get the account data associated with the user

@@ -5,6 +5,7 @@ import About from './pages/About'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Dashboard_p from './pages/Dashboard_P'
+import Home_portal from "./pages/Home_portal";
 
 const router = createBrowserRouter ([
     {
@@ -36,6 +37,10 @@ const router = createBrowserRouter ([
             {
                 path:'about',
                 element:<About/>
+            },
+            {
+                path:'Home_portal',
+                element:<Home_portal/>
             },
         ]
     }

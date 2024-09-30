@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment,useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { LI, UL, H6 } from '../../AbstractElements';
@@ -7,9 +7,12 @@ import { Label } from 'reactstrap';
 
 const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
   const MENUITEMS = Menu();
+  const [activeMenu, setActiveMenu] = useState(null); 
 
+  const handleMenuClick = (menuItem) => {
+    setActiveMenu(activeMenu === menuItem ? null : menuItem);
+  };
   const { t } = useTranslation();
-  // console.log(MENUITEMS)
   const toggletNavActive = (item) => {
 
     if (!item.active) {
@@ -45,20 +48,20 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
           <div className="mobile-back text-end"><span>Back</span><i className="fa fa-angle-right ps-2"></i></div>
         </LI>
         {MENUITEMS.map((Item, i) => (
-          < Fragment key={i} >
+          <Fragment key={i}>
             {Item.Items.map((menuItem, i) => (
               <LI attrLI={{ className: 'dropdown' }} key={i}>
                 {menuItem.type === 'sub' && (
                   <a href="javascript"
                     id="nav-link"
-                    className={`nav-link menu-title ${menuItem.active ? 'active' : ''}`}
+                    className={`nav-link menu-title ${activeMenu === menuItem ? 'active' : ''}`}
                     onClick={(event) => {
-                      event.preventDefault(); setNavActive(menuItem);
+                      event.preventDefault(); handleMenuClick(menuItem);
                     }} >
                     {menuItem.icon !== undefined && <menuItem.icon />}
                     <span>{t(menuItem.title)}</span>
                     <div className="according-menu">
-                      {menuItem.active ? (
+                      {activeMenu === menuItem ? (
                         <i className="fa fa-angle-down"></i>
                       ) : (
                         <i className="fa fa-angle-right"></i>
@@ -68,47 +71,33 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
                 )}
                 {menuItem.children && (
                   <UL attrUL={{
-                    className: 'simple-list sidebar-submenu',
-
+                    className: `collapse sidebar-submenu ${activeMenu === menuItem ? 'show' : ''}`,
                   }}>
                     <UL attrUL={{
                       className: 'nav-submenu menu-content',
-                      style:
-                        menuItem.active
-                          ? sidebartoogle
-                            ? {
-                              opacity: 1,
-                              transition: 'opacity 500ms ease-in',
-                            }
-                            : { display: 'block' }
-                          : { display: 'none' }
                     }}>
-                      {menuItem.children.map((childrenItem, index) => {
-                        return (
-                          <LI key={index}>
-
-                            {childrenItem.type === 'link' && (
-                              <Link
-                                to={childrenItem.url} className={`${childrenItem.active ? 'active' : ''}`}
-                                onClick={() => toggletNavActive(childrenItem)} >
-                                {t(childrenItem.name)}
-                              </Link>
-                            )}
-
-                          </LI>
-                        );
-                      })}
+                      {menuItem.children.map((childrenItem, index) => (
+                        <LI key={index}>
+                          {childrenItem.type === 'link' && (
+                            <Link
+                              to={childrenItem.url}
+                              className={`${childrenItem.active ? 'active' : ''}`}
+                              onClick={() => toggletNavActive(childrenItem)} >
+                              {t(childrenItem.name)}
+                            </Link>
+                          )}
+                        </LI>
+                      ))}
                     </UL>
                   </UL>
                 )}
               </LI>
             ))}
-
           </Fragment>
-        ))
-        }
+        ))}
       </UL>
     </Fragment>
   );
+
 };
 export default SidebarMenuItems;

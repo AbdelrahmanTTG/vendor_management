@@ -50,7 +50,7 @@ line-height: 1;
     }
     .icon-stack-base {
       font-size: $base-font-size;
-      *line-height: #{$height / $base-font-size}em;
+      *line-height: calc(#{$height} / #{$base-font-size})em;
     }
   }
 }

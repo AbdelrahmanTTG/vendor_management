@@ -1,6 +1,6 @@
 import Loader from "./Loader";
 import Taptop from "./TapTop";
-import Header from "./Header";
+import Header from "./Header_P";
 import Sidebar from "./Sidebar_P";
 import Footer from "./Footer";
 import React, { Fragment, useRef } from "react";

@@ -1,7 +1,8 @@
 import axios from "axios";
-
+// const baseURL = import.meta.env.VITE_API_BASE_URL;
+const baseURL = window.location.origin;
 const axiosClient = axios.create({
-    baseURL: "http://127.0.0.1:8000/api",
+    baseURL: baseURL+"/api",
 });
 
 axiosClient.interceptors.request.use((config) => {
@@ -19,6 +20,7 @@ axiosClient.interceptors.response.use(
             const { response } = error;
             if (response.status === 401) {
                 localStorage.removeItem("ACCESS_TOKEN");
+                localStorage.removeItem("USER");
                 window.location.href = "/login";
             }
         } catch (err) {
