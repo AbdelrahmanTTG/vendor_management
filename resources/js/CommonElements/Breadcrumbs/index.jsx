@@ -14,7 +14,8 @@ const Breadcrumbs = (props) => {
             </Col>
             <Col sm="6">
               <ol className="breadcrumb">
-                <li className="breadcrumb-item"><Link to={`${process.env.PUBLIC_URL}/dashboard/default`}>Home</Link></li>
+                {/* <li className="breadcrumb-item"><Link to={`${process.env.PUBLIC_URL}/dashboard/default`}>Home</Link></li> */}
+                <li className="breadcrumb-item">dashboard</li>
                 <li className="breadcrumb-item">{props.parent}</li>
                 {props.subParent ? <li className="breadcrumb-item">{props.subParent}</li> : ''}
                 <li className="breadcrumb-item active">{props.title}</li>

@@ -17,11 +17,13 @@ const AppLayout = ({ children, classNames, ...rest }) => {
   const location = useLocation();
   const { sidebar_types } = useContext(CustomizerContext);
   const queryData = location?.search?.split("=")[1]?.toString();
-  const settings1 =  ConfigDB.data.settings.sidebar_setting || queryData;
-  const sidebar_types1 =  ConfigDB.data.settings.sidebar.type || sidebar_types;
+  const settings1 = localStorage.getItem("sidebar_Settings") || ConfigDB.data.settings.sidebar_setting || queryData;
+  const sidebar_types1 = localStorage.getItem("sidebar_types") || ConfigDB.data.settings.sidebar.type || sidebar_types;
   const { animation } = useContext(AnimationThemeContext);
   const animationTheme = localStorage.getItem("animation") || animation || ConfigDB.data.router_animation;
   document.body.classList.add('box-layout');
+  localStorage.setItem('mix_background_layout','light-only');
+
   const nodeRef = useRef(null);
 
   const error = console.error;

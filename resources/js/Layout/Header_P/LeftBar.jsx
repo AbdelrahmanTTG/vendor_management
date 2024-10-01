@@ -3,6 +3,10 @@ import { AlignCenter } from 'react-feather';
 import { Link } from 'react-router-dom';
 import { Image } from '../../AbstractElements';
 import CheckContext from '../../_helper/Customizer';
+import logo from '../../assets/images/logo/logo.png';
+import darkLogo from '../../assets/images/logo/dark-logo.png';
+import LingoTalentsLogo from '../../assets/images/logo/Lingotalents-logo.png';
+import darkLingoTalentsLogo from '../../assets/images/logo/Lingotalents-logo-W.png';
 
 const Leftbar = () => {
 
@@ -18,22 +22,22 @@ const Leftbar = () => {
     return (
         <Fragment>
             <div className="main-header-left">
-                {mixLayout ?
+                {/* {mixLayout ? */}
                     <div className="logo-wrapper">
-                        <Link to={`/dashboard/default`}>
-                            {/* <Image attrImage={{ className: 'img-fluid d-inline', src: `${require('../../assets/images/logo/logo.png')}`, alt: '' }} /> */}
+                        <Link to={`/Vendor`}>
+                        <Image attrImage={{ className: 'img-fluid d-inline', src: `${LingoTalentsLogo}`, alt: '' }} />
                         </Link>
                     </div>
-                    :
+                    {/* : */}
                     <div className="dark-logo-wrapper">
-                        <Link to={`/dashboard/default`}>
-                            {/* <Image attrImage={{ className: 'img-fluid d-inline', src: `${require('../../assets/images/logo/dark-logo.png')}`, alt: '' }} /> */}
+                        <Link to={`/Vendor`}>
+                        <Image attrImage={{ className: 'img-fluid d-inline', src: `${darkLingoTalentsLogo}`, alt: '' }} />
                         </Link>
                     </div>
-                }
-                <div className="toggle-sidebar" onClick={() => openCloseSidebar()}>
-                    <AlignCenter className="status_toggle middle" id="sidebar-toggle" />
-                </div>
+                {/* } */}
+                {/* <div className="toggle-sidebar" onClick={() => openCloseSidebar()}> */}
+                    {/* <AlignCenter className="status_toggle middle" id="sidebar-toggle" /> */}
+                {/* </div> */}
             </div>
         </Fragment >
     );
