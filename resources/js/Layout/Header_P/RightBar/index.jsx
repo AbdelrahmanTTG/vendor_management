@@ -42,8 +42,8 @@ const Rightbar = () => {
                     <LI><a className="text-dark" href="#javascript" onClick={goFull}>
                         <Maximize />
                     </a></LI>
-                    <LanguageClass />
-                    <Bookmarks />
+                    {/* <LanguageClass /> */}
+                    {/* <Bookmarks /> */}
                     <Notifications />
                     <MoonLight />
                     <MessageDrop />
