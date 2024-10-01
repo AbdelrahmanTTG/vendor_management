@@ -2,7 +2,7 @@ import React, { Fragment, useState } from 'react';
 import { Col, Card, CardHeader, CardBody, Form, FormGroup, Label, Input, InputGroup, InputGroupText, Row, Collapse } from 'reactstrap';
 // import { CustomStyles, Username } from '../../../../Constant';
 import { useForm } from 'react-hook-form';
-import { Btn, H5 } from '../../../../AbstractElements';
+import { Btn, H5 } from '../../../AbstractElements';
 import Select from 'react-select';
 import DatePicker from "react-datepicker";
 const CustomerBranchInput = () => {
