@@ -22,6 +22,8 @@ const AppLayout = ({ children, classNames, ...rest }) => {
   const { animation } = useContext(AnimationThemeContext);
   const animationTheme = localStorage.getItem("animation") || animation || ConfigDB.data.router_animation;
   document.body.classList.add('ltr');
+  document.body.classList.remove('box-layout');
+
   const nodeRef = useRef(null);
 
   const error = console.error;
