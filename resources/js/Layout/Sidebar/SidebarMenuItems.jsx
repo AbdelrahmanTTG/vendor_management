@@ -8,7 +8,6 @@ import { Label } from 'reactstrap';
 const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
   const MENUITEMS = Menu();
   const [activeMenu, setActiveMenu] = useState(null); 
-
   const handleMenuClick = (menuItem) => {
     setActiveMenu(activeMenu === menuItem ? null : menuItem);
   };

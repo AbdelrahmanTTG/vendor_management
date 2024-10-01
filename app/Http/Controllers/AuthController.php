@@ -104,8 +104,8 @@ class AuthController extends Controller
         }
         $Permissions = Permission::getGroupByRole($role);
         $permissionsWithScreens = [];
-        $groups = [];
         foreach ($Permissions as $permission) {
+        $groups = [];
             $screens = Permission::getScreenByGroupAndRole($permission->groups, $role);
             foreach ($screens as $key) {
 
