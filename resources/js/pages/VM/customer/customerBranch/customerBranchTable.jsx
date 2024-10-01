@@ -1,6 +1,6 @@
 import React, { Fragment, useContext } from 'react';
 import { Col, Card, CardHeader, Table } from 'reactstrap';
-import { H5 } from '../../../AbstractElements';
+import { H5 } from '../../../../AbstractElements';
 
 const CustomerBranchTable = () => {
     // const { data } = useContext(TableContext);
