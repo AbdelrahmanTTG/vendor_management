@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import SidebarMenuItems from './SidebarMenuItems';
 import { ArrowLeft, ArrowRight } from 'react-feather';
-import ConfigDB from '../../Config/ThemeConfig_p';
+import ConfigDB from '../../Config/ThemeConfig_P';
 
 const SidebarMenu = ({ setMainMenu, props, sidebartoogle, setNavActive, width }) => {
   const [rightArrow, setRightArrow] = useState(false);
@@ -52,7 +52,7 @@ const SidebarMenu = ({ setMainMenu, props, sidebartoogle, setNavActive, width })
             <SidebarMenuItems setMainMenu={setMainMenu} props={props} sidebartoogle={sidebartoogle} setNavActive={setNavActive} />
           </div>
           <div className={`right-arrow ${rightArrow ? 'd-none' : ''}`} onClick={scrollToRight}>
-            {/* <ArrowRight /> */}
+            <ArrowRight />
           </div>
         </div>
       </nav>

@@ -2,7 +2,7 @@ import React, { Fragment, useState, useContext } from 'react';
 import { LI } from '../../../AbstractElements';
 import {Moon ,Sun} from 'react-feather';
 
-import ConfigDB from '../../../Config/ThemeConfig_p';
+import ConfigDB from '../../../Config/ThemeConfig_P';
 import CustomizerContext from '../../../_helper/Customizer';
 
 const MoonLight = () => {

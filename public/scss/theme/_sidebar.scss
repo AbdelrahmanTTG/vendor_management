@@ -30,6 +30,22 @@
 .fadebottom-enter-done {
   animation: fadeInDown 1000ms ease-in-out;
 }
+.modern-sidebar.horizontal-wrapper {
+  .page-body-wrapper.horizontal-menu{
+    @media (min-width: 1200px) {
+      header.main-nav{     
+        width: calc(100% - 60px)!important;
+        top: 100px!important;
+      
+      nav .main-navbar .right-arrow {
+        display: none;
+      }
+      }
+    }
+  }
+} 
+
+
 .page-wrapper {
   position: relative;
   .page-body-wrapper {

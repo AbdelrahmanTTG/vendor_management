@@ -21,7 +21,8 @@ const AppLayout = ({ children, classNames, ...rest }) => {
   const sidebar_types1 = localStorage.getItem("sidebar_types") || ConfigDB.data.settings.sidebar.type || sidebar_types;
   const { animation } = useContext(AnimationThemeContext);
   const animationTheme = localStorage.getItem("animation") || animation || ConfigDB.data.router_animation;
-  document.body.classList.add('box-layout');
+  document.body.classList.add('ltr');
+  document.body.classList.remove('box-layout');
   localStorage.setItem('mix_background_layout','light-only');
 
   const nodeRef = useRef(null);

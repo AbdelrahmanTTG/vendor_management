@@ -5,7 +5,7 @@ export class ConfigDB {
         sidebar: {
           type: "horizontal-wrapper",
         },
-        sidebar_setting: "default-sidebar",
+        sidebar_setting: "modern-sidebar",
       },
       color: {
         primary_color: "#26695c",
