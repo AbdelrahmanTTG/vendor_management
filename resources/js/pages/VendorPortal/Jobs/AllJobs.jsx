@@ -1,11 +1,12 @@
 import React, { Fragment, useContext, useState } from 'react';
-import { Container, Row, Col, Card, CardHeader, Table } from 'reactstrap';
-import { Breadcrumbs, H5, H6, LI, P, UL } from '../../../AbstractElements';
+import { Container, Row, Col, Card, CardHeader,CardBody, Table } from 'reactstrap';
+import { BreadcrumbsPortal, H5, H6, LI, P, UL } from '../../../AbstractElements';
 
 import TableContext from '../../../_helper/Table';
 
 const AllJobs = () => {
-  const data  = [
+    
+    const data1  = [
     {
         "id": 1,
         "first_name": "Alexander",
@@ -50,7 +51,7 @@ const AllJobs = () => {
      
   return (
     <Fragment>
-       <Breadcrumbs mainTitle="All Jobs" parent="My Jobs" title="All Jobs" />
+       <BreadcrumbsPortal mainTitle="All Jobs" parent="My Jobs" title="All Jobs" />
             <Container fluid={true}>
                 <Row>
         <Col sm="12">
@@ -59,9 +60,10 @@ const AllJobs = () => {
                     <H5>Listing</H5>
                     <span> {'Use a class'} <code> {'table'} </code> {'to any table.'}</span>
                 </CardHeader>
-                <div className="table-responsive">
-                    <Table>
-                        <thead>
+                <CardBody>
+                    <div className="table-responsive">
+                        <Table>
+                            <thead className="bg-primary">
                             <tr>
                                 <th scope="col">{'#'}</th>
                                 <th scope="col">{'First Name'}</th>
@@ -70,10 +72,10 @@ const AllJobs = () => {
                                 <th scope="col">{'Role'}</th>
                                 <th scope="col">{'Country'}</th>
                             </tr>
-                        </thead>
-                        <tbody>
+                            </thead>
+                            <tbody>
                             {
-                                data.map((item) =>
+                                data1.map((item) =>
                                     <tr key={item.id}>
                                         <th scope="row">{item.id}</th>
                                         <td>{item.first_name}</td>
@@ -84,9 +86,10 @@ const AllJobs = () => {
                                     </tr>
                                 )
                             }
-                        </tbody>
-                    </Table>
-                </div>
+                            </tbody>
+                        </Table>                       
+                    </div>
+                </CardBody>
             </Card>
         </Col>
         </Row>

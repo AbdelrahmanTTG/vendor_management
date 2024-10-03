@@ -145,6 +145,9 @@ input.radio_animated{
   .breadcrumb {
     justify-content: flex-end;
   }
+  .breadcrumbStart {
+    justify-content: flex-start!important;
+  }
 }
 // setting rotation
 @keyframes rotateInSetting {

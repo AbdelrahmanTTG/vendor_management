@@ -12,6 +12,7 @@ import Badges from './CommonElements/Badge';
 import Alerts from './CommonElements/Alert';
 import BlockQuotes from './CommonElements/BlockQuote';
 import Breadcrumbs from './CommonElements/Breadcrumbs';
+import BreadcrumbsPortal from './CommonElements/BreadcrumbsPortal';
 import Dropdowns from './CommonElements/DropDown';
 import Footer from './CommonElements/Footer';
 import Image from './CommonElements/Media';
@@ -38,6 +39,7 @@ export {
     Alerts,
     BlockQuotes,
     Breadcrumbs,
+    BreadcrumbsPortal,   
     Dropdowns,
     Footer,
     Image,
