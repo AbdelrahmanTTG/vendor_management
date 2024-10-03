@@ -23,6 +23,57 @@
 .customDatePickerWidth > div > div.react-datepicker__input-container input {
    width: 100%;
 }
+table{
+  th{
+    font-size: 12px;
+  }
+}
+
+
+.nav-link {
+    white-space: nowrap; 
+}
+
+.nav-wrapper {
+  position: relative;
+  overflow: hidden; 
+  
+}
+
+.nav-scroll {
+  display: flex;
+  overflow-x: auto; 
+  scroll-behavior: smooth; 
+}
+
+.nav-scroll::-webkit-scrollbar {
+  display: none; 
+}
+
+.scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgb(0, 0, 0,0);
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+ 
+}
+
+.scroll-btn.left {
+  left: 0;
+}
+
+.scroll-btn.right {
+  right: 0;
+}
+input.leg::placeholder {
+    color: red !important; 
+    opacity: 1 !important; 
+    text-align: center !important; 
+}
+
 </style>
 
 <body>

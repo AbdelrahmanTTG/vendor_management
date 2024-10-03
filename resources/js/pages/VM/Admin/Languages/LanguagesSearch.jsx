@@ -2,10 +2,10 @@ import React, { Fragment, useState } from 'react';
 import { Col, Card, CardHeader, CardBody, Form, FormGroup, Label, Input, InputGroup, InputGroupText, Row, Collapse } from 'reactstrap';
 // import { CustomStyles, Username } from '../../../../Constant';
 import { useForm } from 'react-hook-form';
-import { Btn, H5 } from '../../../AbstractElements';
+import { Btn, H5 } from '../../../../AbstractElements';
 import Select from 'react-select';
 import DatePicker from "react-datepicker";
-const CustomerInput = () => {
+const CustomerBranchInput = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [isOpen, setIsOpen] = useState(false);
     const [startDate, setstartDate] = useState(new Date())
@@ -30,7 +30,7 @@ const CustomerInput = () => {
                     onClick={toggleCollapse}
                     style={{ cursor: 'pointer', paddingBottom: '20px' }}
                 >
-                    <H5>Search Customer</H5>
+                    <H5>Search Languages</H5>
                     <i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '24px' }}></i>
                 </CardHeader>
                 <Collapse isOpen={isOpen}>
@@ -38,34 +38,32 @@ const CustomerInput = () => {
                         <Form className="needs-validation" noValidate="" onSubmit={handleSubmit(onSubmit)}>
                             <Row className="g-3 mb-3">
                                 <Col md="4">
-                                    <Label className="form-label" for="validationCustom01">Customer Name</Label>
-                                    <Input className="form-control" type="text" placeholder="" />
+                                    <Label className="form-label" for="validationCustom01">Language</Label>
+                                    <Input className="form-control" type="text" placeholder="Language" />
                                 </Col>
                                 <Col md="4">
-                                    <Label className="form-label" for="validationCustom02">Website</Label>
-                                    <Input className="form-control" type="text" placeholder="" />
+                                    <Label className="form-label" for="validationCustom02">Date To</Label>
+                                    <div className="customDatePickerWidth">
+                                        <DatePicker
+                                            className="form-control digits"
+                                            selected={startDate}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
                                 </Col>
                                 <Col md="4">
-                                    <Label className="form-label" for="validationCustom03">Customer Alias</Label>
-                                    <Input className="form-control" type="text" placeholder="" />
-
+                                    <Label className="form-label" for="validationCustom03">Date From</Label>
+                                    <div className="customDatePickerWidth">
+                                        <DatePicker
+                                            className="form-control digits"
+                                            selected={startDate}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
                                 </Col>
                             </Row>
 
-                            <Row className="g-3 mb-3">
-                                <Col md='4'>
-                                    <Label className="form-label" for="validationCustom04">Status</Label>
-                                    <Select className="js-example-basic-single col-sm-12" />
-                                </Col>
-                                <Col md='4'>
-                                    <Label className="form-label" for="validationCustom05">Created By</Label>
-                                    <Select className="js-example-basic-single col-sm-12" />
-                                </Col>
-                                <Col md="4">
-                                    <Label className="form-label" for="validationCustom06">Client Type</Label>
-                                    <Select className="js-example-basic-single col-sm-12" />
-                               </Col>
-                            </Row>
+                         
                             <Row className="g-3 mb-3 d-flex justify-content-start">
                                 <Col md="auto">
                                     <Btn attrBtn={{ color: 'btn btn-primary-gradien' }} className="me-2 ">{'search'}</Btn>
@@ -89,4 +87,4 @@ const CustomerInput = () => {
 
 };
 
-export default CustomerInput;
+export default CustomerBranchInput;

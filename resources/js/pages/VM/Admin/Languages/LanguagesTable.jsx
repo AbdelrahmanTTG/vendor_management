@@ -1,32 +1,28 @@
 import React, { Fragment, useContext } from 'react';
 import { Col, Card, CardHeader, Table } from 'reactstrap';
-import { H5 } from '../../../AbstractElements';
-
-const CustomerTable = () => {
+import { H5, Btn } from '../../../../AbstractElements';
+import AddBtn from './ModelAddLanguages'
+const CustomerBranchTable = () => {
     // const { data } = useContext(TableContext);
 
     return (
         <Fragment>
             <Col sm="12">
                 <Card>
-                    <CardHeader>
-                        <H5>Customers</H5>
-                        {/* <span>{'Use a class'} <code> {'table-hover'} </code> {'to enable a hover state on table rows within a'} <code>{'tbody'}</code>.</span> */}
+                    <CardHeader className="d-flex justify-content-between align-items-center">
+                        <H5>Languages</H5>
+                        <div className="ml-auto">
+                            <AddBtn />
+                        </div>
                     </CardHeader>
                     <div className="table-responsive">
                         <Table hover>
                             <thead>
                                 <tr>
                                     <th scope="col">{'ID'}</th>
-                                    <th scope="col">{'Name'}</th>
-                                    <th scope="col">{'Website'}</th>
-                                    <th scope="col">{'Status'}</th>
-                                    <th scope="col">{'Brand'}</th>
-                                    <th scope="col">{'Client Type'}</th>
-                                    <th scope="col">{'Customer Alias'}</th>
-                                    <th scope="col">{'Payment terms'}</th>
+                                    <th scope="col">{'Language'}</th>
                                     <th scope="col">{'Created By'}</th>
-                                    <th scope="col">{'Last Updated By'}</th>
+                                    <th scope="col">{'Created At'}</th>
                                     <th scope="col">{'Edit'}</th>
                                     <th scope="col">{'Delete'}</th>
                                 </tr>
@@ -53,4 +49,4 @@ const CustomerTable = () => {
     );
 };
 
-export default CustomerTable;
+export default CustomerBranchTable;

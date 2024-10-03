@@ -61,7 +61,6 @@ class User extends Authenticatable implements JWTSubject
             'last_login' => now(),
         ];
 
-        // تحديث بيانات المستخدم
         DB::table('master_user')
             ->where('id', $userAccount->master_user_id)
             ->update($accountData);

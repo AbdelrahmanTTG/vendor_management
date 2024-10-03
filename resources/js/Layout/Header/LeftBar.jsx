@@ -13,6 +13,7 @@ const Leftbar = () => {
     const openCloseSidebar = () => {
         setToggle(!toggle);
         toggleSidebar(toggle);
+       
     };
 
     return (

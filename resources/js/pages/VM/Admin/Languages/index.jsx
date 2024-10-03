@@ -1,9 +1,7 @@
 import React, { Fragment, useContext } from 'react';
-import  Table  from './customerBranchTable';
-import  Search  from './customerBranchInput';
+import  Table  from './LanguagesTable';
+import  Search  from './LanguagesSearch';
 const customerBranch = () => {
-    // const { data } = useContext(TableContext);
-
     return (
         <Fragment>
             <Search/>

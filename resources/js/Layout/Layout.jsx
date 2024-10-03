@@ -46,7 +46,7 @@ const AppLayout = ({ children, classNames, ...rest }) => {
               </div>
             </CSSTransition>
           </TransitionGroup>
-          {/* <Footer /> */}
+          <Footer />
         </div>
       </div>
       <ThemeCustomize />

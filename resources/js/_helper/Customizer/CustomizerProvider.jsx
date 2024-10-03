@@ -55,10 +55,22 @@ const CustomizerProvider = (props) => {
 
     const toggleSidebar = (toggle) => {
         setToggleIcon(toggle);
+        if(toggle){
+            document.getElementById('nav-componant').style.width = '98%';
+        }else{
+            document.getElementById('nav-componant').style.width = '78%';
+
+        }
     };
 
     const toggleSidebarResponsive = (toggle) => {
         setSidebarResponsive(toggle);
+        if(!toggle){
+            document.getElementById('nav-componant').style.width = '98%';
+        }else{
+            document.getElementById('nav-componant').style.width = '78%';
+
+        }
     };
 
     return (
