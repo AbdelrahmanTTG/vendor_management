@@ -23,11 +23,6 @@ class Vendor extends Model  implements JWTSubject
         return $vendor; 
     }
 
-
-
-
-
-
     protected $fillable = [
         'name',
         'email',

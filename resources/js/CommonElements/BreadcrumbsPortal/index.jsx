@@ -13,8 +13,8 @@ const Breadcrumbs = (props) => {
               <H3>{props.mainTitle}</H3>          
            
               <ol className="breadcrumb breadcrumbStart">
-                {/* <li className="breadcrumb-item"><Link to={`${process.env.PUBLIC_URL}/dashboard/default`}>Home</Link></li> */}
-                <li className="breadcrumb-item">Home</li>
+                <li className="breadcrumb-item"><Link to={`/Vendor`}>Home</Link></li>
+                {/* <li className="breadcrumb-item">Home</li> */}
                 <li className="breadcrumb-item">{props.parent}</li>
                 {props.subParent ? <li className="breadcrumb-item">{props.subParent}</li> : ''}
                 <li className="breadcrumb-item active">{props.title}</li>

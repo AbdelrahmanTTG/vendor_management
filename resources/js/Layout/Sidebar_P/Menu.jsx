@@ -20,8 +20,8 @@ export const MENUITEMS = [
         type: "sub",
         active: false,
         children: [
-          { path: `/Vendor/Jobs/Offers`, title: "Job Offers", type: "link" },
           { path: `/Vendor/Jobs/`, title: "All Jobs", type: "link" },        
+          { path: `/Vendor/Jobs/Offers`, title: "Job Offers", type: "link" },          
           { path: `/Vendor/Jobs/Closed`, title: "Closed Jobs", type: "link" },        
           { path: `/Vendor/Jobs/Notifications`, title: "Jobs Notifications", type: "link" },        
         ],
