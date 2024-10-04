@@ -13,7 +13,13 @@ const Leftbar = () => {
     const openCloseSidebar = () => {
         setToggle(!toggle);
         toggleSidebar(toggle);
-       
+        if (window.innerWidth > 900) {
+            if (toggle) {
+                document.getElementById('nav-componant').style.width = '98%';
+            } else {
+                document.getElementById('nav-componant').style.width = '79%';
+            }
+        }        
     };
 
     return (

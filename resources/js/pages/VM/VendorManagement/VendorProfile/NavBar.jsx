@@ -3,10 +3,10 @@ import { Card, CardBody, CardHeader, Col, Nav, NavItem, NavLink, TabContent, Tab
 import { H5, P } from '../../../../AbstractElements';
 
 const Simple = () => {
-  const [BasicLineTab, setBasicLineTab] = useState('1');
+  const [BasicLineTab, setBasicLineTab] = useState('VendorDetails');
   const scrollNav = (direction) => {
     const scrollContainer = document.querySelector('.nav-scroll');
-    const scrollAmount = 200;
+    const scrollAmount = 190;
 
     if (direction === 'left') {
       scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
@@ -17,13 +17,21 @@ const Simple = () => {
   const handleScroll = (section) => {
     const element = document.getElementById(section);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const offset = 200; 
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - offset;
+  
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
     }
   };
+  
 
   return (
-    <Col sm="12" xl="6" className="xl-100">
-      <Card>
+    <Col sm="12" xl="6" className="xl-100" style={{paddingTop:"1%"}}>
+      <Card >
         <CardBody style={{paddingBottom:"0px"}}>
         <button className="scroll-btn left" onClick={() => scrollNav('left')}><i className={`icon-angle-left`} style={{ fontSize: '24px' }}></i></button>
           <div className="nav-wrapper">
@@ -32,7 +40,7 @@ const Simple = () => {
                 <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
                   className={BasicLineTab === 'VendorDetails' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('1'); handleScroll('personal-data');}} 
+                  onClick={() => {setBasicLineTab('VendorDetails'); handleScroll('personal-data');}} 
                 >
                  <i className="icofont icofont-list"></i>Vendor Details
                 </NavLink>
@@ -41,7 +49,7 @@ const Simple = () => {
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
                   className={BasicLineTab === 'InstantMessaging' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('1'); handleScroll('messaging');}} 
+                  onClick={() => {setBasicLineTab('InstantMessaging'); handleScroll('messaging');}} 
                 >
                   <i className="icofont icofont-ui-messaging"></i>Instant Messaging
                 </NavLink>
@@ -49,19 +57,19 @@ const Simple = () => {
               <NavItem>
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
-                  className={BasicLineTab === 'Files&Certificate' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  className={BasicLineTab === 'VM-Notes' ? 'active' : ''}
+                  onClick={() => {setBasicLineTab('VM-Notes'); handleScroll('VM-Notes')}}
                 >
-                  <i className="icofont icofont-files"></i>Files & Certificate
+                  <i className="icofont icofont-contacts"></i>VM Notes
                 </NavLink>
               </NavItem>
               <NavItem>
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
-                  className={BasicLineTab === 'VM Notes' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  className={BasicLineTab === 'Files-Certificate' ? 'active' : ''}
+                  onClick={() => {setBasicLineTab('Files-Certificate'); handleScroll('Files-Certificate')}}
                 >
-                  <i className="icofont icofont-contacts"></i>VM Notes
+                  <i className="icofont icofont-files"></i>Files & Certificate
                 </NavLink>
               </NavItem>
               <NavItem>

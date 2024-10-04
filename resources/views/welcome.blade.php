@@ -72,8 +72,40 @@ input.leg::placeholder {
     color: red !important; 
     opacity: 1 !important; 
     text-align: center !important; 
+    
 }
+.container-btn-file {
+        display: flex;
+        position: relative;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        width: 100%;
+        border-style: none;
+        padding: 1em 2em;
+        border-radius: 0.5em;
+        overflow: hidden;
+        z-index: 1;
+        box-shadow: 4px 8px 10px -3px rgba(0, 0, 0, 0.356);
+        transition: all 250ms;
+    }
 
+    .container-btn-file input[type="file"] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .container-btn-file>svg {
+        margin-right: 1em;
+    }
+
+
+    .container-btn-file:hover::before {
+        width: 100%;
+    }
 </style>
 
 <body>
