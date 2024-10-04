@@ -1,4 +1,4 @@
-import React , { Suspense } from "react";
+import React, { Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import Home from './pages/Home'
 import About from './pages/About'
@@ -14,94 +14,94 @@ import Portal_Invoices_All from "./pages/VendorPortal/Invoices/AllInvoices";
 import Portal_Invoices_Verified from "./pages/VendorPortal/Invoices/VerifiedInvoices";
 const Languages = React.lazy(() => import('./pages/VM/Admin/Languages'));
 const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
-const LazyWrapper = ({ children }) => (
-  <Suspense fallback={<div>Loading...</div>}>
-    {children}
-  </Suspense>
+
+// A wrapper component for lazy-loading other components
+const LazyLoadComponent = ({ children }) => (
+    <Suspense fallback={<div>Loading...</div>}>
+        {children}
+    </Suspense>
 );
 
-
+// Define the routes for the application
 const router = createBrowserRouter([
     {
         path: 'login',
         element: <Login />,
     },
     {
-      path: '/VM',
-      element: <Dashboard />,
-      children: [
-          {
-              path: '',
-              element: <Home />
-          },
-          {
-              path: 'admin/languages',
-              element: (
-                <LazyWrapper>
-                  <Languages />
-                </LazyWrapper>
-              )
-          },
-          {
-              path: 'vendors/profiletest',
-              element: (
-                <LazyWrapper>
-                  <VendorProfile />
-                </LazyWrapper>
-              )
-          },
-         
-               ]
-  },
-         {
-        path:'/Vendor',
-        element:<Dashboard_p/>,
-        children:[        
+        path: '/vm',
+        element: <Dashboard />,
+        children: [
             {
-                path:'',
-                element:<Home/>
-            },      
-            {              
-                path:'Jobs',              
-                children:[
-                    {   path:'',
-                        element:<Portal_Jobs_All/>}
-                    ,
-                    {
-                        path:'Offers',
-                        element:<Portal_Jobs_Offers/>
-                    },
-                    {
-                        path:'Closed',
-                        element:<Portal_Jobs_Closed/>
-                    },      
-                    {
-                        path:'Notifications',
-                        element:<Portal_Jobs_Notifications/>
-                    },            
-                ]
+                path: '',
+                element: <Home />,
             },
             {
-              
-                path:'Invoices',              
-                children:[
-                    {   path:'',
-                        element:<Portal_Invoices_All/>
-                    }
-                    ,
-                    {
-                        path:'Verified',
-                        element:<Portal_Invoices_Verified/>
-                    },
-                                                                                                                                                                ]
+                path: 'admin/languages',
+                element: (
+                    <LazyLoadComponent>
+                        <Languages />
+                    </LazyLoadComponent>
+                ),
             },
             {
-                path:'Admin',
-                element:<About/>
-            },      
-                       
-        ]
-    }
+                path: 'vendors/profiletest',
+                element: (
+                    <LazyLoadComponent>
+                        <VendorProfile />
+                    </LazyLoadComponent>
+                ),
+            },
+        ],
+    },
+    {
+        path: '/vendor',
+        element: <Dashboard_p />,
+        children: [
+            {
+                path: '',
+                element: <Home />,
+            },
+            {
+                path: 'jobs',
+                children: [
+                    {
+                        path: '',
+                        element: <Portal_Jobs_All />,
+                    },
+                    {
+                        path: 'offers',
+                        element: <Portal_Jobs_Offers />,
+                    },
+                    {
+                        path: 'closed',
+                        element: <Portal_Jobs_Closed />,
+                    },
+                    {
+                        path: 'notifications',
+                        element: <Portal_Jobs_Notifications />,
+                    },
+                ],
+            },
+            {
+                path: 'invoices',
+                children: [
+                    {
+                        path: '',
+                        element: <Portal_Invoices_All />,
+                    },
+                    {
+                        path: 'verified',
+                        element: <Portal_Invoices_Verified />,
+                    },
+                ],
+            },
+            {
+                path: 'admin',
+                element: <About />,
+            },
+        ],
+    },
+]);
 
-])
-export default router
+export default router;
