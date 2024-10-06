@@ -10,7 +10,8 @@ import LogoutClass from './Logout';
 import MessageDrop from './MessageDrop';
 import MoonLight from './MoonLight';
 import Notifications from './Notifiations';
-
+import Profile from './Profile';
+import LeftBar from "../LeftBar";
 const Rightbar = () => {
     const { sidebarResponsive } = useContext(CustomizerContext);
     //full screen function
@@ -47,7 +48,9 @@ const Rightbar = () => {
                     <Notifications />
                     <MoonLight />
                     <MessageDrop />
-                    <LogoutClass />
+                    {/* <LogoutClass /> */}
+                    <Profile />
+
                 </UL>
             </div>
         </Fragment >

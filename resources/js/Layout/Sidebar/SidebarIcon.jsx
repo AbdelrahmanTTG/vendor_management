@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image } from '../../AbstractElements';
-import logo from '../../assets/images/logo/logo.png';
+import logo from '../../assets/images/logo/Lingotalents-logo.png';
 
 const SidebarIcon = () => {
 

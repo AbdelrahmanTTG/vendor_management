@@ -2,22 +2,22 @@
 import axiosClient from "../../pages/AxiosClint";
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {useStateContext} from '../../pages/context/contextAuth'
+import { useStateContext } from '../../pages/context/contextAuth'
 
 export const Menu = () => {
   const [menuItems, setMenuItems] = useState([]);
-  const {user} = useStateContext();
-  
+  const { user } = useStateContext();
+
   useEffect(() => {
     if (user) {
       const payload = {
         'role': user.role
       };
-      
+
       axiosClient.post("permission", payload)
         .then(({ data }) => {
           const Items = Object.values(data.Items);
-          setMenuItems([{Items}])
+          setMenuItems([{ Items }])
         })
         .catch(err => {
           const response = err.response;
