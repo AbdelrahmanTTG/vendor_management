@@ -36,6 +36,15 @@ const Messaging = () => {
       });
       setRows(updatedRows);
   };
+  const handleInputChange = (event, rowId) => {
+    const updatedRows = rows.map(row => {
+        if (row.id === rowId) {
+            return { ...row, inputValue: event.target.value };
+        }
+        return row;
+    });
+    setRows(updatedRows);
+};
   const deleteRow = (rowId) => {
     alert("Are you sure you want to delete the ?")
     const updatedRows = rows.filter(row => row.id !== rowId);

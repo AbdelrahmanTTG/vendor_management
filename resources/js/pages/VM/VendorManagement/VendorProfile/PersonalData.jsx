@@ -82,14 +82,14 @@ const PersonalData = () => {
               </Col>
 
               <Col md="4" className="mb-3">
-                <Label className="form-label" for="validationCustom01">ُEmail</Label>
+                <Label className="form-label" for="validationCustom01">Email</Label>
                 <Input className="form-control" type="email" placeholder="email" />
               </Col>
 
               <Col md="4" className="mb-3">
                 <Label className="form-label" for="validationCustom01">Phone Number</Label>
                 <InputGroup>
-                  <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="Another number" />
+                  <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="First number" />
                   <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="Another number" />
                 </InputGroup>
               </Col>

@@ -4,7 +4,16 @@ import PersonalData from './PersonalData'
 import Messaging from './Messaging'
 import VMnote from "./VMnote"
 import FilesCertificate from "./FilesCertificate"
+import Education from "./Education"
+import Experience from "./Experience"
+import Price_List from "./Price_List"
+import Evaluation from "./Evaluation"
+import Feedback from "./Feedback"
+import Vacation from "./Vacation"
+import Test from "./Test"
+import Billing from "./Billing"
 import NavBar from './NavBar';
+import History from "./History"
 
 const Vendor = () => {
     const [isMobile, setIsMobile] = useState(true);
@@ -38,6 +47,35 @@ const Vendor = () => {
                 <div id='Files-Certificate'>
                     <FilesCertificate/>
                 </div>
+                <div id='Education'>
+                    <Education/>
+                </div>
+                <div id='Experience'>
+                    <Experience/>
+                </div>
+                <div id='Test'>
+                <Test/>
+                </div>
+                <div id='Billing'>
+                    <Billing/>
+                </div>
+                <div id='Price_List'>
+                    <Price_List/>
+                </div>
+                <div id='Evaluation'>
+                <Evaluation/>
+                </div>
+                <div id='Feedback'>
+                    <Feedback/>
+                </div>
+                <div id='Vacation'>
+                    <Vacation/>
+                </div>
+                <div id='History'>
+                    <History/>
+                </div>
+                
+
             </div>
 
 

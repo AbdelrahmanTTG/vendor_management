@@ -76,7 +76,7 @@ const Simple = () => {
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
                   className={BasicLineTab === 'Education' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  onClick={() => {setBasicLineTab('Education'); handleScroll('Education')}}
                 >
                <i className="icofont icofont-hat-alt"></i>Education
                 </NavLink>
@@ -85,7 +85,7 @@ const Simple = () => {
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
                   className={BasicLineTab === 'Experience' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  onClick={() => {setBasicLineTab('Experience'); handleScroll('Experience')}}
                 >
                   <i className="icofont icofont-stock-search"></i>Experience
                 </NavLink>
@@ -94,7 +94,7 @@ const Simple = () => {
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
                   className={BasicLineTab === 'Test' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  onClick={() => {setBasicLineTab('Test'); handleScroll('Test')}}
                 >
                   <i className="icofont icofont-paper"></i>Test
                 </NavLink>
@@ -103,7 +103,7 @@ const Simple = () => {
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
                   className={BasicLineTab === 'Billing' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  onClick={() => {setBasicLineTab('Billing'); handleScroll('Billing')}}
                 >
                   <i className="icofont icofont-credit-card"></i>Billing
                 </NavLink>
@@ -112,7 +112,7 @@ const Simple = () => {
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
                   className={BasicLineTab === 'Price List' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  onClick={() => {setBasicLineTab('Price List'); handleScroll('Price_List')}}
                 >
                   <i className="icofont icofont-coins"></i>Price List
                 </NavLink>
@@ -121,7 +121,7 @@ const Simple = () => {
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
                   className={BasicLineTab === 'Evaluation' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  onClick={() => {setBasicLineTab('Evaluation'); handleScroll('Evaluation')}}
                 >
                   <i className="icofont icofont-star-shape"></i>Evaluation
                 </NavLink>
@@ -130,7 +130,7 @@ const Simple = () => {
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
                   className={BasicLineTab === 'Feedback' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  onClick={() => {setBasicLineTab('Feedback'); handleScroll('Feedback')}}
                 >
                   <i className="icofont icofont-read-book"></i>Feedback
                 </NavLink>
@@ -139,7 +139,8 @@ const Simple = () => {
               <NavLink style={{ fontSize: '14px'}}
                   href="#javascript"
                   className={BasicLineTab === 'Vacation' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  onClick={() => {setBasicLineTab('Vacation'); handleScroll('Vacation')}}
+
                 >
                   <i className="icofont icofont-travelling"></i>Vacation
                 </NavLink>
@@ -148,7 +149,7 @@ const Simple = () => {
               <NavLink style={{ fontSize: '15px'}}
                   href="#javascript"
                   className={BasicLineTab === 'History' ? 'active' : ''}
-                  onClick={() => setBasicLineTab('3')}
+                  onClick={() => {setBasicLineTab('History'); handleScroll('History')}}
                 >
                   <i className="icofont icofont-time"></i>History
                 </NavLink>
