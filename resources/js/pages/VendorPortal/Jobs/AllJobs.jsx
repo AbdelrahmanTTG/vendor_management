@@ -5,6 +5,7 @@ import axios from 'axios';
 import TableContext from '../../../_helper/Table';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import { Link } from 'react-router-dom';
+import  JobsTable from './JobsTable';
 
 const AllJobs = () => {
     const baseURL = window.location.origin;
@@ -22,9 +23,9 @@ const AllJobs = () => {
                     console.log(data);
                     // const [Tasks] = [(data?.Tasks.data)];
                     const [Tasks] = [(data?.Tasks)];
-                   // const [Links] = [(data?.Tasks.links)];
+                    // const [Links] = [(data?.Tasks.links)];
                     setPageTasks(Tasks);
-                   // setTableLinks(Links);
+                    // setTableLinks(Links);
                 });
         }
     }, [user]);
@@ -83,73 +84,11 @@ const AllJobs = () => {
                     <Col sm="12">
                         <Card>
                             <CardHeader>
-                                <H5>Listing</H5>
-                                <span> {'Use a class'} <code> {'table'} </code> {'to any table.'}</span>
+                                <H5>List Of All Jobs</H5>
+                                {/* <span> {'Use a class'} <code> {'table'} </code> {'to any table.'}</span> */}
                             </CardHeader>
                             <CardBody>
-                                <div className="table-responsive">
-                                    <Table>
-                                        <thead className="bg-primary">
-                                            <tr>
-                                                <th scope="col">{'#'}</th>
-                                                <th scope="col">{'Code'}</th>
-                                                <th scope="col">{'Subject'}</th>
-                                                <th scope="col">{'Task Type'}</th>
-                                                <th scope="col">{'Rate'}</th>
-                                                <th scope="col">{'Unit'}</th>
-                                                <th scope="col">{'Total Cost'}</th>
-                                                <th scope="col">{'Currency'}</th>
-                                                <th scope="col">{'Start Date'}</th>
-                                                <th scope="col">{'Delivery Date'}</th>
-                                                <th scope="col">{'Status'}</th>
-                                                <th scope="col">{'Actions'}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {pageTasks.map((item) => (
-                                                <tr key={item.id}>
-                                                    <th scope="row">{item.id}</th>
-                                                    <td>{item.code}</td>
-                                                    <td>{item.subject}</td>
-                                                    <td>{item.task_type.name}</td>
-                                                    <td>{item.rate}</td>
-                                                    <td>{item.count}</td>
-                                                    <td>{item.total_cost}</td>
-                                                    <td>{item.currency.name}</td>
-                                                    <td>{item.start_date}</td>
-                                                    <td>{item.delivery_date}</td>
-                                                    <td>{item.status}</td>
-                                                    <td>
-                                                        <Btn attrBtn={{ className: "btn btn-primary-light", color: "default" }}>
-                                                            <Link to={`/Vendor`}>
-                                                                {'View'}
-                                                            </Link>
-                                                        </Btn>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                            }
-                                        </tbody>
-                                    </Table>
-
-                                    <div className="p-5 m-5">
-                                        {tableLinks.map(link => (
-                                            link.url ? (
-                                                <Link key={link.label}
-                                                    className={`p-1 mx-1 ${link.active ? " text-blue-500 font-bold" : ""}`}
-                                                    href={link.url}
-                                                    dangerouslySetInnerHTML={{ __html: link.label }} />
-
-
-                                            ) : (
-                                                <span key={link.label}
-                                                    className='p-1 mx-1 text-slate-500'
-                                                    dangerouslySetInnerHTML={{ __html: link.label }} />
-                                            )
-                                        ))}
-
-                                    </div>
-                                </div>
+                                <JobsTable pageTasks={pageTasks} tableLinks={tableLinks} />
                             </CardBody>
                         </Card>
                     </Col>

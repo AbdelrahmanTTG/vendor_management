@@ -12,6 +12,8 @@ import Portal_Jobs_Offers from "./pages/VendorPortal/Jobs/Offers";
 import Portal_Jobs_Notifications from "./pages/VendorPortal/Jobs/Notifications";
 import Portal_Invoices_All from "./pages/VendorPortal/Invoices/AllInvoices";
 import Portal_Invoices_Verified from "./pages/VendorPortal/Invoices/VerifiedInvoices";
+import Portal_ViewOffer from "./pages/VendorPortal/Jobs/ViewOffer";
+import Portal_ViewJob from "./pages/VendorPortal/Jobs/ViewJob";
 const Languages = React.lazy(() => import('./pages/VM/Admin/Languages'));
 const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
 const LazyWrapper = ({ children }) => (
@@ -78,6 +80,14 @@ const router = createBrowserRouter([
                     {
                         path:'Notifications',
                         element:<Portal_Jobs_Notifications/>
+                    }, 
+                    {
+                        path:'ViewOffer/:type/:id',
+                        element:<Portal_ViewOffer/>
+                    },            
+                    {
+                        path:'ViewJob/:id',
+                        element:<Portal_ViewJob/>
                     },            
                 ]
             },

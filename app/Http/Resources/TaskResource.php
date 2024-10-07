@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Job;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
+use PhpParser\Node\Expr\Empty_;
 
 class TaskResource extends JsonResource
 {
@@ -30,7 +32,13 @@ class TaskResource extends JsonResource
             'currency' => $this->currencyName,
             'start_date' => $this->start_date,
             'delivery_date' => $this->delivery_date,
-            'status' => $this->getTaskStatus(),
+            'status' => $this->status,          
+            'statusData' => $this->getTaskStatus(),          
+           // 'jobPrice'=> new JobPriceResource($this->jobPrice->priceList), 
+            'jobPrice'=> '', 
+            'type'=>($this->status == 4)?'job_offer': 'job',
+            'offer_type'=>(!empty($this->task_id) && $this->status == 4)?'offer_list': 'task',
+                        
         ];
   }
 }
