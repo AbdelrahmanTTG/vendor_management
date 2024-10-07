@@ -8,6 +8,7 @@ const PersonalData = () => {
   const [nameLabel, setNameLabel] = useState('Name');
   const [ContactLabel, setContactLabel] = useState('Contact name');
   const [isOpen, setIsOpen] = useState(true);
+  const [Status, setStatus] = useState(false);
 
   const toggleCollapse = () => {
     setIsOpen(!isOpen);
@@ -19,6 +20,14 @@ const PersonalData = () => {
     } else {
       setContactLabel('Contact name')
       setNameLabel('Name');
+    }
+  };
+  const handleStatusChange = (selectedOption) => {
+    if (selectedOption.value === 'Rejected') {
+      setStatus(true)
+    } else {
+      setStatus(false)
+
     }
   };
   return (
@@ -54,7 +63,7 @@ const PersonalData = () => {
                   { value: 'Inactive', label: 'Inactive' },
                   { value: 'Rejected', label: 'Rejected' },
                   { value: 'Wait for Approval', label: 'Wait for Approval' },
-                ]} className="js-example-basic-single col-sm-12" />
+                ]} className="js-example-basic-single col-sm-12" onChange={handleStatusChange} />
               </Col>
 
               <Col md="4" className="mb-3">
@@ -78,7 +87,7 @@ const PersonalData = () => {
 
               <Col md="4" className="mb-3">
                 <Label className="form-label" for="validationCustom01">Legal Name</Label>
-                <Input className="form-control leg" type="text" placeholder="As Mentioned in ID and Passport" />
+                <Input className="form-control leg" id='Legal_Name' type="text" placeholder="As Mentioned in ID and Passport" />
               </Col>
 
               <Col md="4" className="mb-3">
@@ -141,12 +150,12 @@ const PersonalData = () => {
 
               <Col md="4" className="mb-3">
                 <Label className="form-label" for="validationCustom01">City/state</Label>
-                <Input className="form-control" type="text" placeholder="" />
+                <Input className="form-control" id='City_state' type="text" placeholder="" />
               </Col>
 
               <Col md="4" className="mb-3">
                 <Label className="form-label" for="validationCustom01">Street</Label>
-                <Input className="form-control" type="text" placeholder="" />
+                <Input className="form-control" id='Street' type="text" placeholder="" />
               </Col>
 
               <Col md="4" className="mb-3">
@@ -158,11 +167,11 @@ const PersonalData = () => {
                 <Label className="form-label" for="validationCustom01">Notes</Label>
                 <CKEditor editor={ClassicEditor} />
               </Col>
-
-              <Col md="4" className="mb-3">
+              {Status && <Col md="4" className="mb-3">
                 <Label className="form-label" for="validationCustom01">Rejection Reason</Label>
                 <CKEditor editor={ClassicEditor} />
-              </Col>
+              </Col>}
+
             </Row>
 
             {/* <Row className="g-3 mb-3">

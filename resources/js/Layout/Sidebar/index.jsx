@@ -1,8 +1,8 @@
 import React, { Fragment, useEffect, useState, useContext } from 'react';
 import SidebarMenu from './SidebarMenu';
 import CustomizerContext from '../../_helper/Customizer';
-import { Menu  } from './Menu';
-import Profile from './Profile';
+import { Menu } from './Menu';
+// import Profile from '../Header/RightBar/Profile';
 
 
 const SideBarLayout = (props) => {
@@ -57,7 +57,7 @@ const SideBarLayout = (props) => {
     item.active = !item.active;
     setMainMenu({ mainmenu: MENUITEMS });
   };
-  
+
   useEffect(() => {
     setLeftArrow(true);
     window.addEventListener('resize', handleResize);
@@ -99,7 +99,7 @@ const SideBarLayout = (props) => {
     document.getElementById('nav-link').classList.remove('active');
   };
 
- 
+
 
   return (
     <Fragment >
@@ -107,7 +107,7 @@ const SideBarLayout = (props) => {
         closeOverlay();
       }} ></div>
       <header className={`main-nav ${toggleIcon ? 'close_icon' : ''}`}>
-        <Profile />
+        {/* <Profile /> */}
         <SidebarMenu setMainMenu={setMainMenu} props={props} sidebartoogle={true} setNavActive={setNavActive} width={width} />
       </header>
     </Fragment>
