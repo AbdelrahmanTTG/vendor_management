@@ -5,7 +5,7 @@ import { Btn } from '../../AbstractElements';
 const CommonModal = (props) => {
   return (
     <Form className="needs-validation" noValidate="" onSubmit={props.onSave}>
-    <Modal isOpen={props.isOpen} toggle={props.toggler} size={props.size} backdrop="static"centered>
+      <Modal isOpen={props.isOpen} toggle={props.toggler} size={props.size} backdrop="static" centered style={{ marginTop: props.marginTop }}>
       <ModalHeader toggle={props.toggler}>
         {props.title}
       </ModalHeader>

@@ -16,6 +16,9 @@ import Portal_ViewOffer from "./pages/VendorPortal/Jobs/ViewOffer";
 import Portal_ViewJob from "./pages/VendorPortal/Jobs/ViewJob";
 const Languages = React.lazy(() => import('./pages/VM/Admin/Languages'));
 const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
+const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable/Form'));
+
+
 const LazyWrapper = ({ children }) => (
   <Suspense fallback={<div>Loading...</div>}>
     {children}
@@ -50,6 +53,14 @@ const router = createBrowserRouter([
                 <LazyWrapper>
                   <VendorProfile />
                 </LazyWrapper>
+              )
+          },
+          {
+              path: 'Time zone',
+              element: (
+                  <LazyWrapper>
+                      <CodeTable table="Time zone"/>
+                  </LazyWrapper>
               )
           },
          

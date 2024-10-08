@@ -60,5 +60,4 @@ const Header = () => {
         </Fragment >
     );
 };
-
 export default Header;

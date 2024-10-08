@@ -541,7 +541,7 @@
             }
             .nav-menu {
               border-radius: 0;
-              height: $sidebar-height;
+              // height: $sidebar-height;
               left: -300px;
               z-index: 99;
               transition: color 1s ease;
@@ -549,6 +549,7 @@
               overflow-y: auto;
               color: rgba(0, 0, 0, 0);
               padding-bottom: 15px;
+              padding-top: 15px;
               &.custom-scrollbar {
                 &::-webkit-scrollbar-track {
                   -webkit-box-shadow: inset 0 0 6px $transparent-color;

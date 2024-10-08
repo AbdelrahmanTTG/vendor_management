@@ -8,9 +8,11 @@ const CustomizerProvider = (props) => {
     const [layout, setLayout] = useState('');
     const [mix_background_layout, setMixBackgroundLayout] = useState('');
     const [toggleIcon, setToggleIcon] = useState(false);
-    const [mixLayout, setMixLayout] = useState(false);
-    const [sidebarResponsive, setSidebarResponsive] = useState(false);
-    const [IsOpen, setIsClose] = useState(false);
+    const [mixLayout, setMixLayout] = useState(true);
+    const [sidebarResponsive, setSidebarResponsive] = useState(true);
+    const [IsOpen, setIsClose] = useState(true);
+    const [size, setsize] = useState('');
+
 
     const addSidebarTypes = (type) => {
         ConfigDB.data.settings.sidebar.type = type;
@@ -55,10 +57,21 @@ const CustomizerProvider = (props) => {
 
     const toggleSidebar = (toggle) => {
         setToggleIcon(toggle);
+        if (toggleIcon) {
+            setsize("99%")
+            document.getElementById('nav-componant').style.width = size;
+        } 
+        if (!toggleIcon) {
+            setsize("")
+            document.getElementById('nav-componant').style.width = size;
+        }
+    
+
     };
 
     const toggleSidebarResponsive = (toggle) => {
         setSidebarResponsive(toggle);
+     
     };
 
     return (

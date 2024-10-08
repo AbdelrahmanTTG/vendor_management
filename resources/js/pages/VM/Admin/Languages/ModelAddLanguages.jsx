@@ -19,7 +19,6 @@ const AddNewBtn = () => {
     return (
         <Fragment>
             <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: toggle }} className="me-2" >Add New Language</Btn>
-
             <CommonModal isOpen={modal} title='Add New Language' toggler={toggle} onSave={handleSubmit(onSubmit)} >
                 <Row className="g-0">
                     <Col  >

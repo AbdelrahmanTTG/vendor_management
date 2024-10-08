@@ -3,6 +3,8 @@ import { AlignCenter } from 'react-feather';
 import { Link } from 'react-router-dom';
 import { Image } from '../../AbstractElements';
 import CheckContext from '../../_helper/Customizer';
+import LingoTalentsLogo from '../../assets/images/logo/Lingotalents-logo.png';
+import darkLingoTalentsLogo from '../../assets/images/logo/Lingotalents-logo-W.png';
 
 const Leftbar = () => {
 
@@ -12,14 +14,8 @@ const Leftbar = () => {
 
     const openCloseSidebar = () => {
         setToggle(!toggle);
-        toggleSidebar(toggle);
-        if (window.innerWidth > 900) {
-            if (toggle) {
-                document.getElementById('nav-componant').style.width = '98%';
-            } else {
-                document.getElementById('nav-componant').style.width = '79%';
-            }
-        }        
+        toggleSidebar(toggle);          
+        
     };
 
     return (
@@ -28,13 +24,13 @@ const Leftbar = () => {
                 {mixLayout ?
                     <div className="logo-wrapper">
                         <Link to={`/dashboard/default`}>
-                            {/* <Image attrImage={{ className: 'img-fluid d-inline', src: `${require('../../assets/images/logo/logo.png')}`, alt: '' }} /> */}
+                            <Image attrImage={{ className: 'img-fluid d-inline', src: `${LingoTalentsLogo}`, alt: '' }} />
                         </Link>
                     </div>
                     :
                     <div className="dark-logo-wrapper">
                         <Link to={`/dashboard/default`}>
-                            {/* <Image attrImage={{ className: 'img-fluid d-inline', src: `${require('../../assets/images/logo/dark-logo.png')}`, alt: '' }} /> */}
+                            <Image attrImage={{ className: 'img-fluid d-inline', src: `${darkLingoTalentsLogo}`, alt: '' }} />
                         </Link>
                     </div>
                 }

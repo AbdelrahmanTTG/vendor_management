@@ -1,7 +1,8 @@
 import React, { Fragment, useState } from 'react';
-import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input , Table } from 'reactstrap';
+import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table } from 'reactstrap';
 import { Btn, H5 } from '../../../../AbstractElements';
 import Select from 'react-select';
+import Model from "./models/modelAddPriceList"
 
 const PriceList = () => {
     const [isOpen, setIsOpen] = useState(true);
@@ -38,6 +39,9 @@ const PriceList = () => {
                                 <Select isDisabled className="js-example-basic-single col-sm-12" />
                             </Col>
                         </Row>
+                        <Col md="12" className="d-flex justify-content-end mb-3">
+                            <Model />
+                        </Col>
                         <Table hover>
                             <thead>
                                 <tr>

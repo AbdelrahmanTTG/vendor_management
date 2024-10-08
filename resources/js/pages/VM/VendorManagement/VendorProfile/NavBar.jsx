@@ -30,136 +30,167 @@ const Simple = () => {
   
 
   return (
-    <Col sm="12" xl="6" className="xl-100" style={{paddingTop:"1%"}}>
+    <Col sm="12" xl="6" className="xl-100">
       <Card >
-        <CardBody style={{paddingBottom:"0px"}}>
-        <button className="scroll-btn left" onClick={() => scrollNav('left')}><i className={`icon-angle-left`} style={{ fontSize: '24px' }}></i></button>
-          <div className="nav-wrapper">
-            <Nav className="border-tab nav-scroll" tabs>
-              <NavItem>
-                <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'VendorDetails' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('VendorDetails'); handleScroll('personal-data');}} 
-                >
-                 <i className="icofont icofont-list"></i>Vendor Details
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'InstantMessaging' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('InstantMessaging'); handleScroll('messaging');}} 
-                >
-                  <i className="icofont icofont-ui-messaging"></i>Instant Messaging
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'VM-Notes' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('VM-Notes'); handleScroll('VM-Notes')}}
-                >
-                  <i className="icofont icofont-contacts"></i>VM Notes
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'Files-Certificate' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('Files-Certificate'); handleScroll('Files-Certificate')}}
-                >
-                  <i className="icofont icofont-files"></i>Files & Certificate
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'Education' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('Education'); handleScroll('Education')}}
-                >
-               <i className="icofont icofont-hat-alt"></i>Education
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'Experience' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('Experience'); handleScroll('Experience')}}
-                >
-                  <i className="icofont icofont-stock-search"></i>Experience
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'Test' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('Test'); handleScroll('Test')}}
-                >
-                  <i className="icofont icofont-paper"></i>Test
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'Billing' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('Billing'); handleScroll('Billing')}}
-                >
-                  <i className="icofont icofont-credit-card"></i>Billing
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'Price List' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('Price List'); handleScroll('Price_List')}}
-                >
-                  <i className="icofont icofont-coins"></i>Price List
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'Evaluation' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('Evaluation'); handleScroll('Evaluation')}}
-                >
-                  <i className="icofont icofont-star-shape"></i>Evaluation
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'Feedback' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('Feedback'); handleScroll('Feedback')}}
-                >
-                  <i className="icofont icofont-read-book"></i>Feedback
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '14px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'Vacation' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('Vacation'); handleScroll('Vacation')}}
+        <CardBody style={{ paddingBottom: '0px' ,paddingRight:"0px",paddingLeft:"0px"}}>
+          <Nav className="border-tab flex-wrap" tabs style={{margin:0}}>
+            <NavItem className="fw-bold" style={{ margin: 0 }}>
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'VendorDetails' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('VendorDetails'); handleScroll('personal-data'); }}
+              >
+                <i className="icofont icofont-list"></i> Vendor Details
+              </NavLink>
+            </NavItem>
 
-                >
-                  <i className="icofont icofont-travelling"></i>Vacation
-                </NavLink>
-              </NavItem>
-              <NavItem>
-              <NavLink style={{ fontSize: '15px'}}
-                  href="#javascript"
-                  className={BasicLineTab === 'History' ? 'active' : ''}
-                  onClick={() => {setBasicLineTab('History'); handleScroll('History')}}
-                >
-                  <i className="icofont icofont-time"></i>History
-                </NavLink>
-              </NavItem>
-            </Nav>
-          </div>
-          <button  className="scroll-btn right" onClick={() => scrollNav('right')}><i className={`icon-angle-right`} style={{ fontSize: '24px' }}></i></button>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'InstantMessaging' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('InstantMessaging'); handleScroll('messaging'); }}
+              >
+                <i className="icofont icofont-ui-messaging"></i> Instant Messaging
+              </NavLink>
+            </NavItem>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'VM-Notes' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('VM-Notes'); handleScroll('VM-Notes'); }}
+              >
+                <i className="icofont icofont-contacts"></i> VM Notes
+              </NavLink>
+            </NavItem>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'Files-Certificate' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('Files-Certificate'); handleScroll('Files-Certificate'); }}
+              >
+                <i className="icofont icofont-files"></i> Files & Certificate
+              </NavLink>
+            </NavItem>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'Education' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('Education'); handleScroll('Education'); }}
+              >
+                <i className="icofont icofont-hat-alt"></i> Education
+              </NavLink>
+            </NavItem>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'Experience' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('Experience'); handleScroll('Experience'); }}
+              >
+                <i className="icofont icofont-stock-search"></i> Experience
+              </NavLink>
+            </NavItem>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'Test' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('Test'); handleScroll('Test'); }}
+              >
+                <i className="icofont icofont-paper"></i> Test
+              </NavLink>
+            </NavItem>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'Billing' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('Billing'); handleScroll('Billing'); }}
+              >
+                <i className="icofont icofont-credit-card"></i> Billing
+              </NavLink>
+            </NavItem>
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'Portal_User' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('Portal_User'); handleScroll('Portal_User'); }}
+              >
+                <i className="icofont icofont-credit-card"></i> Portal User
+              </NavLink>
+            </NavItem>
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'Price List' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('Price List'); handleScroll('Price_List'); }}
+              >
+                <i className="icofont icofont-coins"></i> Price List
+              </NavLink>
+            </NavItem>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'Evaluation' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('Evaluation'); handleScroll('Evaluation'); }}
+              >
+                <i className="icofont icofont-star-shape"></i> Evaluation
+              </NavLink>
+            </NavItem>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'Feedback' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('Feedback'); handleScroll('Feedback'); }}
+              >
+                <i className="icofont icofont-read-book"></i> Feedback
+              </NavLink>
+            </NavItem>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'Vacation' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('Vacation'); handleScroll('Vacation'); }}
+              >
+                <i className="icofont icofont-travelling"></i> Vacation
+              </NavLink>
+            </NavItem>
+
+            <NavItem className="fw-bold">
+              <NavLink
+                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                href="#javascript"
+                className={BasicLineTab === 'History' ? 'active' : ''}
+                onClick={() => { setBasicLineTab('History'); handleScroll('History'); }}
+              >
+                <i className="icofont icofont-time"></i> History
+              </NavLink>
+            </NavItem>
+          </Nav>
         </CardBody>
       </Card>
     </Col>
+ 
   );
 };
 

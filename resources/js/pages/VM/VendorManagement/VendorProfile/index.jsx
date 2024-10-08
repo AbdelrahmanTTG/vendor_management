@@ -14,27 +14,20 @@ import Test from "./Test"
 import Billing from "./Billing"
 import NavBar from './NavBar';
 import History from "./History"
-
+import Portal_User from "./Portal_User"
 const Vendor = () => {
     const [isMobile, setIsMobile] = useState(true);
 
-    useEffect(() => {
-        const mediaQuery = window.matchMedia('(max-width: 900px)');
-        const handleMediaQueryChange = (event) => {
-            setIsMobile(event.matches);
-        };
-
-        handleMediaQueryChange(mediaQuery);
-        mediaQuery.addEventListener('change', handleMediaQueryChange);
-
-        return () => mediaQuery.removeEventListener('change', handleMediaQueryChange);
-    }, []);
     return (
         <Fragment >
-            <Card id='nav-componant' style={{ position: 'fixed', top: "9.8vh", width: isMobile ? '98%' : '79%', zIndex: 1000, backgroundColor: "#f5f7fb",border:"none" }}>
-                <NavBar />
-            </Card>
-            <div style={{ marginTop: "15vh" }}>
+
+            <div id='nav-componant' class=" position-fixed  " style={{ zIndex: "1", top: "9vh" }} >
+                <div class="position-relative  nav_div" style={{ width: "99%" }}>
+                    <NavBar />
+                </div>
+            </div>
+
+            <div style={{ marginTop: "25vh" }}>
                 <div id="personal-data">
                     <PersonalData />
                 </div>
@@ -45,36 +38,38 @@ const Vendor = () => {
                     <VMnote />
                 </div>
                 <div id='Files-Certificate'>
-                    <FilesCertificate/>
+                    <FilesCertificate />
                 </div>
                 <div id='Education'>
-                    <Education/>
+                    <Education />
                 </div>
                 <div id='Experience'>
-                    <Experience/>
+                    <Experience />
                 </div>
                 <div id='Test'>
-                <Test/>
+                    <Test />
                 </div>
                 <div id='Billing'>
-                    <Billing/>
+                    <Billing />
+                </div>
+                <div id='Portal_User'>
+                    <Portal_User />
                 </div>
                 <div id='Price_List'>
-                    <Price_List/>
+                    <Price_List />
                 </div>
                 <div id='Evaluation'>
-                <Evaluation/>
+                    <Evaluation />
                 </div>
                 <div id='Feedback'>
-                    <Feedback/>
+                    <Feedback />
                 </div>
                 <div id='Vacation'>
-                    <Vacation/>
+                    <Vacation />
                 </div>
                 <div id='History'>
-                    <History/>
+                    <History />
                 </div>
-                
 
             </div>
 

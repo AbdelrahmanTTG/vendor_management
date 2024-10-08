@@ -106,7 +106,7 @@ const SideBarLayout = (props) => {
       <div id="bg-overlay1" onClick={() => {
         closeOverlay();
       }} ></div>
-      <header className={`main-nav ${toggleIcon ? 'close_icon' : ''}`}>
+      <header className={`main-nav ${toggleIcon ? 'close_icon' : ''}`} style={{ top: "4.6rem" }}>
         {/* <Profile /> */}
         <SidebarMenu setMainMenu={setMainMenu} props={props} sidebartoogle={true} setNavActive={setNavActive} width={width} />
       </header>

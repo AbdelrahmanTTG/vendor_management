@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table } from 'reactstrap';
+import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table, FormGroup } from 'reactstrap';
 import { Btn, H5 } from '../../../../AbstractElements';
 import Select from 'react-select';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
@@ -55,23 +55,41 @@ const Experience = () => {
                     <CardBody>
                         <Row className="g-3 mb-3">
                             <Col md="6" className="mb-3">
-                                <Label className="form-label" for="validationCustom01">Started working from year</Label>
-                                <Select
-                                    defaultValue={{ isDisabled: true, label: '-- Select year Started working --' }}
-                                    options={yearOptions}
-                                    className="js-example-basic-single col-sm-12"
-                                    onChange={handleYearChange}
-                                    value={yearOptions.find(option => option.value === selectedYear)}
-                                />
+                                <FormGroup className="row">
+
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Started working from year</Label>
+                                    <Col sm="9">
+
+                                        <Select
+                                            defaultValue={{ isDisabled: true, label: '-- Select year Started working --' }}
+                                            options={yearOptions}
+                                            className="js-example-basic-single col-sm-12"
+                                            onChange={handleYearChange}
+                                            value={yearOptions.find(option => option.value === selectedYear)}
+                                        />
+                                    </Col>
+                                </FormGroup>
+
                             </Col>
                             <Col md="6" className="mb-3">
-                                <Label className="form-label" for="validationCustom01">Experience year</Label>
-                                <Input disabled value={experienceYears} className="form-control" type="text" placeholder="Experience year" />
+                                <FormGroup className="row">
+
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Experience year</Label>
+                                    <Col sm="9">
+
+                                        <Input disabled value={experienceYears} className="form-control" type="text" placeholder="Experience year" />
+                                    </Col>
+                                </FormGroup>
                             </Col>
 
                             <Col md="12" className="mb-3">
-                                <Label className="form-label" for="validationCustom01">Summary of Experience</Label>
-                                <CKEditor editor={ClassicEditor} />
+                                <FormGroup className="row">
+
+                                <Label className="col-sm-2 col-form-label" for="validationCustom01">Summary of Experience</Label>
+                                    <Col sm="10">
+                                        <CKEditor editor={ClassicEditor} />
+                                        </Col>
+                                    </FormGroup>
                             </Col>
                         </Row>
                         <Label className="form-label" for="validationCustom01">Skill</Label>

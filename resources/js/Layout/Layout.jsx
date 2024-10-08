@@ -41,7 +41,7 @@ const AppLayout = ({ children, classNames, ...rest }) => {
           <Sidebar />
           <TransitionGroup {...rest}>
             <CSSTransition key={location.key} timeout={100} classNames={animationTheme} nodeRef={nodeRef} unmountOnExit>
-              <div className='page-body' ref={nodeRef}>
+              <div className='page-body' id="page-body" ref={nodeRef}>
                 <Outlet />
               </div>
             </CSSTransition>

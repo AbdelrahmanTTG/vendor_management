@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import { Card, CardBody, CardHeader, Col, Collapse, Label, Row,Input } from 'reactstrap';
+import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, FormGroup } from 'reactstrap';
 import { H5 } from '../../../../AbstractElements';
 import Select from 'react-select';
 
@@ -26,32 +26,53 @@ const Education = () => {
                     <CardBody>
                         <Row className="g-3 mb-3">
                             <Col md="6" className="mb-3">
-                                <Label className="form-label" for="validationCustom01">University name</Label>
-                                <Input className="form-control" type="text" placeholder="University name" />
+                                <FormGroup className="row">
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">University name</Label>
+                                    <Col sm="9">
+                                        <Input className="form-control" type="text" placeholder="University name" />
+                                    </Col>
+                                </FormGroup>
                             </Col>
 
                             <Col md="6" className="mb-3">
-                                <Label className="form-label" for="validationCustom01">Latest Degree</Label>
-                                <Select defaultValue={{ isDisabled: true, label: '-- Select Latest Degree --' }} options={[
-                                    { value: 'Associate degree', label: 'Associate degree' },
-                                    { value: "Bachelor's degree", label: "Bachelor's degree" },
-                                    { value: "Master's degree", label: "Master's degree" },
-                                    { value: "Doctoral degree", label: "Doctoral degree" },
-                                ]} className="js-example-basic-single col-sm-12" />
+                                <FormGroup className="row">
+
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Latest Degree</Label>
+                                    <Col sm="9">
+
+                                        <Select defaultValue={{ isDisabled: true, label: '-- Select Latest Degree --' }} options={[
+                                            { value: 'Associate degree', label: 'Associate degree' },
+                                            { value: "Bachelor's degree", label: "Bachelor's degree" },
+                                            { value: "Master's degree", label: "Master's degree" },
+                                            { value: "Doctoral degree", label: "Doctoral degree" },
+                                        ]} className="js-example-basic-single col-sm-12" />
+                                    </Col>
+                                </FormGroup>
                             </Col>
                             <Col md="6" className="mb-3">
-                                <Label className="form-label" for="validationCustom01">Year of graduation</Label>
-                                <Input className="form-control" type="text" placeholder="" />
+                                <FormGroup className="row">
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Year of graduation</Label>
+                                    <Col sm="9">
+
+                                        <Input className="form-control" type="text" placeholder="" />
+                                    </Col>
+                                </FormGroup>
                             </Col>
                             <Col md="6" className="mb-3">
-                                <Label className="form-label" for="validationCustom01">Status</Label>
+                                <FormGroup className="row">
+
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Status</Label>
+                                    <Col sm="9">
+
                                 <Select defaultValue={{ isDisabled: true, label: '-- Select Major --' }} options={[
                                     { value: 'Information Technology', label: 'Information Technology' },
                                     { value: "Mechanical Engineering", label: "Mechanical Engineering" },
                                     { value: "Statistics", label: "Statistics" },
                                     { value: "Engineering", label: "Engineering" },
                                     { value: "Other", label: "Other" },
-                                ]} className="js-example-basic-single col-sm-12" />
+                                        ]} className="js-example-basic-single col-sm-12" />
+                                        </Col>
+                                    </FormGroup>
                             </Col>
                         </Row>
                     </CardBody>

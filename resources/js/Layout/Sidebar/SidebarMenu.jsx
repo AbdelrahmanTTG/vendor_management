@@ -41,14 +41,9 @@ const SidebarMenu = ({ setMainMenu, props, sidebartoogle, setNavActive, width })
   return (
     <Fragment>
       <nav>
-        <div className="main-navbar" >
+        <div className="main-navbar"  >
           <div className={`left-arrow ${leftArrow ? 'd-none' : ''}`} id="left-arrow" onClick={scrollToLeft}><ArrowLeft /></div>
-          <div id="sidebar-menu"
-            style={
-              wrapper.split(' ').includes('horizontal-wrapper')
-                ? { marginLeft: margin + 'px' }
-                : { margin: '0px' }
-            }>
+          <div id="sidebar-menu"style={wrapper.split(' ').includes('horizontal-wrapper')? { marginLeft: margin + 'px' }: { margin: '0px' } }>
             <SidebarMenuItems setMainMenu={setMainMenu} props={props} sidebartoogle={sidebartoogle} setNavActive={setNavActive} />
           </div>
           <div className={`right-arrow ${rightArrow ? 'd-none' : ''}`} onClick={scrollToRight}>
