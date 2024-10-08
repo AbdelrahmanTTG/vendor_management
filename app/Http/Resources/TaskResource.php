@@ -30,14 +30,16 @@ class TaskResource extends JsonResource
             'count' => $this->count,
             'total_cost' => $this->rate * $this->count,
             'currency' => $this->currencyName,
+            'unit' => $this->unitName,
             'start_date' => $this->start_date,
             'delivery_date' => $this->delivery_date,
             'status' => $this->status,          
             'statusData' => $this->getTaskStatus(),          
-           // 'jobPrice'=> new JobPriceResource($this->jobPrice->priceList), 
-            'jobPrice'=> '', 
+            'jobPrice'=> $this->jobPrice?new JobPriceResource($this->jobPrice->priceList):'',             
             'type'=>($this->status == 4)?'job_offer': 'job',
             'offer_type'=>(!empty($this->task_id) && $this->status == 4)?'offer_list': 'task',
+            'file'=> $this->file,
+            'fileLink'=> "https://aixnexus.com/erp/assets/uploads/taskFile/$this->file",
                         
         ];
   }

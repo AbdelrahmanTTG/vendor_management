@@ -20,8 +20,8 @@ class JobPriceResource extends JsonResource
     {
         return [        
                                   
-            'source_name' => $this->SourceName,            
-            'target_name' => $this->TargetName,            
+            'source_name' => $this->SourceName->name,            
+            'target_name' => $this->TargetName->name,            
                                                                                                             
         ];
   }

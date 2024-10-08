@@ -63,6 +63,9 @@ class TaskController extends Controller
         return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
     }
 
+     /**
+  * View Job Task Offer & Job Offer List Details
+  */
     public function ViewOffer(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -71,28 +74,63 @@ class TaskController extends Controller
             'type' => 'required|string',
         ]);
         $type = $request->type;
-        if($type =='task'){
-            $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();        
-        }elseif($type == 'offer_list'){                     
-            $task  = OfferList::where('vendor_list','Like', "%$request->vendor,%")->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();            
+        if ($type == 'task') {
+            $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
+        } elseif ($type == 'offer_list') {
+            $task  = OfferList::where('vendor_list', 'Like', "%$request->vendor,%")->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         }
         return response()->json(["Task" => new TaskResource($task)], 200);
     }
 
+     /**
+  * View Job Task
+  */
     public function ViewJob(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
-            'vendor' => 'required',
-            'type' => 'required|string',
+            'vendor' => 'required'           
         ]);
-        $type = $request->type;
-       
+        
+
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->first();
-       // $data['timeline'] = $this->db->get_where('job_task_conversation', array('task' => $data['jobID']))->result();
-       // $data['jobHisory'] = $this->db->get_where('job_task_log', array('task' => $data['jobID']))->result();
+        // $data['timeline'] = $this->db->get_where('job_task_conversation', array('task' => $data['jobID']))->result();
+        // $data['jobHisory'] = $this->db->get_where('job_task_log', array('task' => $data['jobID']))->result();
         return response()->json(["Task" => new TaskResource($task)], 200);
     }
+
+    /**
+     * Cancel Task Offer
+     */
+    public function cancelOffer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'vendor' => 'required'            
+        ]);
+       
+        $data['status'] = 4;
+     //   $data['status'] = 3;
+        $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
+        
+       // $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);
+       
+        if ($task->update($data)) {
+            //  add to task log
+          //  $this->admin_model->addToTaskLogger($data['id'], 2);
+          //  $this->admin_model->sendVendorRejectionMail($data['id'], $this->user);
+            $msg['type'] = "success";           
+            $message = "Your Offer Rejected Successfully";           
+           
+        } else {
+            $msg['type'] = "Error";           
+            $message = "Error Cancelling Offer Job, Please Try Again!";           
+           
+        }
+        $msg['message'] = $message;    
+        echo json_encode($msg);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

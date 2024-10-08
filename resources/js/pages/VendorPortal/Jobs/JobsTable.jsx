@@ -1,9 +1,6 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Container, Row, Col, Card, CardHeader, CardBody, Table } from 'reactstrap';
-import { BreadcrumbsPortal, H5, Btn, LI, P, UL } from '../../../AbstractElements';
-import axios from 'axios';
-import TableContext from '../../../_helper/Table';
-import { useStateContext } from '../../context/contextAuth';
+import { Table } from 'reactstrap';
+import { Btn } from '../../../AbstractElements';
 import { Link } from 'react-router-dom';
 
 const JobsTable = (props) => {

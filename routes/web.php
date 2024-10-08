@@ -17,6 +17,7 @@ Route::group(['prefix' => 'Portal'], function () {
     Route::post('Vendor/allPlannedJobs', [TaskController::class, 'allPlannedJobs'])->name('Vendor.allPlannedJobs');
     Route::post('Vendor/ViewOffer', [TaskController::class, 'ViewOffer'])->name('Vendor.ViewOffer');
     Route::post('Vendor/ViewJob', [TaskController::class, 'ViewJob'])->name('Vendor.ViewJob');
+    Route::post('Vendor/cancelOffer', [TaskController::class, 'cancelOffer'])->name('Vendor.cancelOffer');
 
 });
 

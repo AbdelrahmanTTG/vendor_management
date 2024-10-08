@@ -83,7 +83,7 @@ const AllJobs = () => {
                 <Row>
                     <Col sm="12">
                         <Card>
-                            <CardHeader>
+                            <CardHeader className=' b-l-primary'>
                                 <H5>List Of All Jobs</H5>
                                 {/* <span> {'Use a class'} <code> {'table'} </code> {'to any table.'}</span> */}
                             </CardHeader>
