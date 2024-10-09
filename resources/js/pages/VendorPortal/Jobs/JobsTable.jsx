@@ -41,17 +41,18 @@ const JobsTable = (props) => {
                                 <td>{item.statusData}</td>
                                 <td>
                                     {item.type == 'job_offer' ? (
-                                        <Btn attrBtn={{ className: "btn btn-primary-light", color: "default" }}>
-                                            <Link to={`/Vendor/Jobs/ViewOffer/${item.offer_type}/${item.id}`}>
+                                        <Link to={`/Vendor/Jobs/viewOffer/${item.offer_type}/${item.id}`}>
+                                            <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
                                                 {'View Offer'}
-                                            </Link>
-                                        </Btn>) :
-                                        (
-                                            <Btn attrBtn={{ className: "btn btn-primary-light", color: "default" }}>
-                                                <Link to={`/Vendor/Jobs/ViewJob/${item.id}`}>
-                                                    {'View Job'}
-                                                </Link>
                                             </Btn>
+                                        </Link>
+                                        ) :
+                                        (
+                                            <Link to={`/Vendor/Jobs/viewJob/${item.id}`}>
+                                                <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
+                                                    {'View Job'}
+                                                </Btn>
+                                            </Link>
                                         )}
                                 </td>
                             </tr>

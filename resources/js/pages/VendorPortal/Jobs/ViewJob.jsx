@@ -1,16 +1,16 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody, Table, Media, TabContent, TabPane, Nav, NavItem, NavLink } from 'reactstrap';
-import { BreadcrumbsPortal, H5, Btn, LI, P, UL, H4 } from '../../../AbstractElements';
+import { BreadcrumbsPortal, H5, Btn, LI, P, UL, H4, H6 } from '../../../AbstractElements';
 import axios from 'axios';
 import { useStateContext } from '../../context/contextAuth';
 import { Link, useParams } from 'react-router-dom';
-
-const ViewOffer = () => {
-    const baseURL = window.location.origin;
-    const [pageTask, setPageTask] = useState([]);
-
+import comment from '../../../assets/images/blog/comment.jpg';
+const ViewJob = () => {
+    const baseURL = window.location.origin + "/Portal/Vendor";
     const { user } = useStateContext();
-    const { id, type } = useParams();
+    const { id } = useParams();
+    const [pageTask, setPageTask] = useState([]);
+    const [timeline, setTimeline] = useState([]);
 
     const [activeTab, setActiveTab] = useState('1');
     const Discription = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum';
@@ -20,16 +20,16 @@ const ViewOffer = () => {
             const payload = {
                 'vendor': user.id,
                 'id': id,
-                'type': type,
             };
 
-            axios.post(baseURL + "/Portal/Vendor/ViewOffer", payload)
+            axios.post(baseURL + "/viewJob", payload)
                 .then(({ data }) => {
                     console.log(data);
                     // const [Tasks] = [(data?.Tasks.data)];
                     const [Task] = [(data?.Task)];
-                    // const [Links] = [(data?.Tasks.links)];
+                    const [Timeline] = [(data?.Timeline)];
                     setPageTask(Task);
+                    setTimeline(Timeline);
 
                 });
         }
@@ -44,10 +44,18 @@ const ViewOffer = () => {
                         <Card>
                             <CardBody className=' b-t-primary'>
                                 <div className="pro-group pb-0" style={{ textAlign: 'right' }}>
-                                    <div className="pro-shop ">
-                                        <Link to={`/app/ecommerce/cart`}> <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2' }}><i class="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn></Link>
-                                        <Btn attrBtn={{ color: 'secondary', className: 'btn btn-danger', onClick: () => addWishList(singleItem) }}><i class="icofont icofont-close-line-circled me-2"></i>{'Reject'} </Btn>
-                                    </div>
+                                    {pageTask.status == 0 && (
+                                        <div className="pro-shop ">
+                                            <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: () => acceptOffer() }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
+                                            <Btn attrBtn={{ color: 'secondary', className: 'btn btn-danger', onClick: () => rejectOffer() }}><i className="icofont icofont-close-line-circled me-2"></i>{'Reject'} </Btn>
+                                        </div>
+                                    )}
+                                    {pageTask.status == 7 && (
+                                        <div className="pro-shop ">
+                                            <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: () => acceptOfferList() }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
+                                        </div>
+                                    )
+                                    }
                                 </div>
                                 <Nav tabs className="border-tab">
                                     <NavItem id="myTab" role="tablist">
@@ -58,18 +66,24 @@ const ViewOffer = () => {
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
                                         <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} onClick={() => setActiveTab('2')}>
-                                            {'Instruction'}
+                                            {'Files'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
                                         <NavLink href="#javascript" className={activeTab === '3' ? 'active' : ''} onClick={() => setActiveTab('3')}>
-                                            {'Notes'}
+                                            {'Instruction'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
                                         <NavLink href="#javascript" className={activeTab === '4' ? 'active' : ''} onClick={() => setActiveTab('4')}>
+                                            {'Notes'}
+                                        </NavLink>
+                                        <div className="material-border"></div>
+                                    </NavItem>
+                                    <NavItem id="myTab" role="tablist">
+                                        <NavLink href="#javascript" className={activeTab === '5' ? 'active' : ''} onClick={() => setActiveTab('5')}>
                                             {'Job history'}
                                         </NavLink>
                                         <div className="material-border"></div>
@@ -77,74 +91,131 @@ const ViewOffer = () => {
                                 </Nav>
                                 <TabContent activeTab={activeTab}>
                                     <TabPane tabId="1">
-                                        <div className="table-responsive">
-                                            <Table>
-                                                <tbody>
-                                                    <tr >
-                                                        <th scope="row">{'Code'}</th>
-                                                        <td>{pageTask.code}</td>
-                                                    </tr>
-                                                    <tr >
-                                                        <th scope="row">{'Subject'}</th>
-                                                        <td>{pageTask.subject}</td>
-                                                    </tr>
-                                                    <tr >
-                                                        <th scope="row">{'Task Type'}</th>
-                                                        <td>{pageTask.task_type?.name}</td>
-                                                    </tr>
-                                                    <tr >
-                                                        <th scope="row">{'Rate'}</th>
-                                                        <td>{pageTask.rate} {pageTask.currency?.name}</td>
-                                                    </tr>
-                                                    <tr >
-                                                        <th scope="row">{'Volume'}</th>
-                                                        <td>{pageTask.count} {pageTask.unit?.name}</td>
-                                                    </tr>
-                                                    <tr >
-                                                        <th scope="row">{'Source Language'}</th>
-                                                        <td>{pageTask.jobPrice?.source_name}</td>
-                                                    </tr>
-                                                    <tr >
-                                                        <th scope="row">{'Target Language'}</th>
-                                                        <td>{pageTask.jobPrice?.target_name}</td>
-                                                    </tr>
-                                                    <tr >
-                                                        <th scope="row">{'Start Date'}</th>
-                                                        <td>{pageTask.start_date}</td>
-                                                    </tr>
-                                                    <tr >
-                                                        <th scope="row">{'Delivery Date'}</th>
-                                                        <td>{pageTask.delivery_date}</td>
-                                                    </tr>
-                                                    <tr >
-                                                        <th scope="row">{'Status'}</th>
-                                                        <td><span className='badge badge-info p-2'>{pageTask.statusData}</span></td>
-                                                    </tr>
-                                                </tbody>
-                                            </Table>
-                                        </div>
+                                        <Card >
+                                            <CardBody>
+                                                <div className="table-responsive">
+                                                    <Table>
+                                                        <tbody>
+                                                            <tr >
+                                                                <th scope="row">{'Code'}</th>
+                                                                <td>{pageTask.code}</td>
+                                                            </tr>
+                                                            <tr >
+                                                                <th scope="row">{'Subject'}</th>
+                                                                <td>{pageTask.subject}</td>
+                                                            </tr>
+                                                            <tr >
+                                                                <th scope="row">{'Task Type'}</th>
+                                                                <td>{pageTask.task_type?.name}</td>
+                                                            </tr>
+                                                            <tr >
+                                                                <th scope="row">{'Rate'}</th>
+                                                                <td>{pageTask.rate} {pageTask.currency?.name}</td>
+                                                            </tr>
+                                                            <tr >
+                                                                <th scope="row">{'Volume'}</th>
+                                                                <td>{pageTask.count} {pageTask.unit?.name}</td>
+                                                            </tr>
+                                                            <tr >
+                                                                <th scope="row">{'Source Language'}</th>
+                                                                <td>{pageTask.jobPrice?.source_name}</td>
+                                                            </tr>
+                                                            <tr >
+                                                                <th scope="row">{'Target Language'}</th>
+                                                                <td>{pageTask.jobPrice?.target_name}</td>
+                                                            </tr>
+                                                            <tr >
+                                                                <th scope="row">{'Start Date'}</th>
+                                                                <td>{pageTask.start_date}</td>
+                                                            </tr>
+                                                            <tr >
+                                                                <th scope="row">{'Delivery Date'}</th>
+                                                                <td>{pageTask.delivery_date}</td>
+                                                            </tr>
+                                                            <tr >
+                                                                <th scope="row">{'Status'}</th>
+                                                                <td><span className='badge badge-info p-2'>{pageTask.statusData}</span></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </Table>
+                                                </div>
+                                            </CardBody>
+                                        </Card>
                                     </TabPane>
                                     <TabPane tabId="2">
-                                        <Table>
-                                            <tbody>
-                                                <tr>
-                                                    <th scope="row">{'Task File'}</th>
-                                                    <td>
-                                                        {pageTask.file != '' ? (
-                                                            <Link to={pageTask.fileLink}> <Btn attrBtn={{ color: 'secondary', className: 'btn btn-secondary' }}> {'View Task'}</Btn></Link>
-                                                        ) : (
-                                                            <P attrPara={{ className: 'txt-danger f-w-600' }}>{'No File Found'}</P>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </Table>
+                                        <Card >
+                                            <CardBody>
+                                                <Table>
+                                                    <tbody>
+                                                        <tr>
+                                                            <th scope="row">{'Task File'}</th>
+                                                            <td>
+                                                                {pageTask.file != '' ? (
+                                                                    <Link to={pageTask.fileLink}> <Btn attrBtn={{ color: 'secondary', className: 'btn btn-secondary' }}> {'View Task'}</Btn></Link>
+                                                                ) : (
+                                                                    <P attrPara={{ className: 'txt-danger f-w-600' }}>{'No File Found'}</P>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">{'Job File'}</th>
+                                                            <td>
+                                                                {pageTask.job_file != null ? (
+                                                                    <Link to={pageTask.job_fileLink}> <Btn attrBtn={{ color: 'secondary', className: 'btn btn-secondary' }}> {'View File'}</Btn></Link>
+                                                                ) : (
+                                                                    <P attrPara={{ className: 'txt-danger f-w-600' }}>{'No File Found'}</P>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </Table>
+                                            </CardBody>
+                                        </Card>
                                     </TabPane>
                                     <TabPane tabId="3">
-                                        <P attrPara={{ className: 'mb-0 m-t-20' }}> {Discription}</P>
+                                        <Card >
+                                            <CardBody>
+                                                <P attrPara={{ className: 'mb-0 m-t-20' }}>  {pageTask.insrtuctions}</P>
+                                            </CardBody>
+                                        </Card>
                                     </TabPane>
                                     <TabPane tabId="4">
-                                        <P attrPara={{ className: 'mb-0 m-t-20' }}>{Discription}</P>
+                                        <Card className="comment-box">
+                                            <CardBody>                                               
+                                                <ul>
+                                                {timeline.map((item) =>
+                                                 <li key={item.id}>
+                                                  
+                                                  
+                                                  
+                                                <Media className="align-self-center">
+                                                <Media className="align-self-center" src={comment} alt="" />
+                                                <Media body>
+                                                <Row>
+                                                <Col md="4">
+                                                <H6 attrH6={{ className: 'mt-0' }} >{item.created_by}</H6>
+                                                </Col>
+                                                <Col md="8">
+                                                <UL attrUL={{ className: 'comment-social float-left float-md-right simple-list' }} >
+                                                    <LI attrLI={{ className: 'digits' }} >{item.created_at}</LI>                                                
+                                                </UL>
+                                                </Col>
+                                                </Row>
+                                                <P>{item.message}</P>
+                                                </Media>
+                                                </Media>
+                                                </li>
+                                               )}
+                                                 </ul>
+                                            </CardBody>
+                                        </Card>
+                                    </TabPane>
+                                    <TabPane tabId="5">
+                                        <Card >
+                                            <CardBody>
+                                                <P attrPara={{ className: 'mb-0 m-t-20' }}>{Discription}</P>
+                                            </CardBody>
+                                        </Card>
                                     </TabPane>
                                 </TabContent>
                             </CardBody>
@@ -156,4 +227,4 @@ const ViewOffer = () => {
     );
 };
 
-export default ViewOffer;
+export default ViewJob;

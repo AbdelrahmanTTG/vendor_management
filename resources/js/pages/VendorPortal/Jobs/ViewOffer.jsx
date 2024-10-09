@@ -6,14 +6,17 @@ import { useStateContext } from '../../context/contextAuth';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-const ViewOffer = () => { 
+const ViewOffer = () => {
     const navigate = useNavigate();
-    const baseURL = window.location.origin +"/Portal/Vendor/";
+    const baseURL = window.location.origin + "/Portal/Vendor/";
     const [pageTask, setPageTask] = useState([]);
     const [activeTab, setActiveTab] = useState('1');
     const { user } = useStateContext();
     const { id, type } = useParams();
-
+    const vendorRes = {
+        'vendor': user.id,
+        'id': pageTask.id,
+    };
     useEffect(() => {
         if (user) {
             const payload = {
@@ -22,7 +25,7 @@ const ViewOffer = () => {
                 'type': type,
             };
 
-            axios.post(baseURL + "ViewOffer", payload)
+            axios.post(baseURL + "viewOffer", payload)
                 .then(({ data }) => {
                     const [Task] = [(data?.Task)];
                     setPageTask(Task);
@@ -30,14 +33,10 @@ const ViewOffer = () => {
         }
     }, [user]);
 
-    const rejectTask = (task) => {        
+    const rejectOffer = (task) => {
         if (!window.confirm("Are you sure you want to reject the offer?")) {
             return;
         }
-        const vendorRes = {
-            'vendor': user.id,
-            'id': task.id,
-        };
         axios.post(baseURL + "cancelOffer", vendorRes)
             .then(({ data }) => {
                 switch (data.type) {
@@ -47,13 +46,45 @@ const ViewOffer = () => {
                     case 'error':
                         toast.error(data.message);
                         break;
-                }  
-                navigate("/Vendor/Jobs",{ replace: true });             
+                }
+                navigate("/Vendor/Jobs", { replace: true });
             });
-          
-
     };
 
+    const acceptOffer = () => {
+        if (!window.confirm("Are you sure you want to accept the offer?")) {
+            return;
+        }
+        axios.post(baseURL + "acceptOffer", vendorRes)
+            .then(({ data }) => {
+                switch (data.type) {
+                    case 'success':
+                        toast.success(data.message);
+                        break;
+                    case 'error':
+                        toast.error(data.message);
+                        break;
+                }
+                navigate("/Vendor/Jobs", { replace: true });
+            });
+    };
+    const acceptOfferList = () => {
+        if (!window.confirm("Are you sure you want to accept the offer?")) {
+            return;
+        }
+        axios.post(baseURL + "acceptOfferList", vendorRes)
+            .then(({ data }) => {
+                switch (data.type) {
+                    case 'success':
+                        toast.success(data.message);
+                        break;
+                    case 'error':
+                        toast.error(data.message);
+                        break;
+                }
+                navigate("/Vendor/Jobs", { replace: true });
+            });
+    };
     return (
         <Fragment>
             <BreadcrumbsPortal mainTitle={pageTask.code} parent="My Jobs" title="Offer Details" />
@@ -63,14 +94,15 @@ const ViewOffer = () => {
                         <Card>
                             <CardBody className=' b-t-primary'>
                                 <div className="pro-group pb-0" style={{ textAlign: 'right' }}>
-                                    {pageTask.offer_type == 'task' ? (
+                                    {pageTask.offer_type == 'task' && (
                                         <div className="pro-shop ">
-                                            <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2' }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
-                                            <Btn onClick={(e) => rejectTask(pageTask)} attrBtn={{ color: 'secondary', className: 'btn btn-danger', onClick: () => rejectTask(pageTask) }}><i className="icofont icofont-close-line-circled me-2"></i>{'Reject'} </Btn>
+                                            <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: () => acceptOffer() }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
+                                            <Btn attrBtn={{ color: 'secondary', className: 'btn btn-danger', onClick: () => rejectOffer() }}><i className="icofont icofont-close-line-circled me-2"></i>{'Reject'} </Btn>
                                         </div>
-                                    ) : (
+                                    )}
+                                    {pageTask.offer_type == 'offer_list' && (
                                         <div className="pro-shop ">
-                                            <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2' }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
+                                            <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: () => acceptOfferList() }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
                                         </div>
                                     )
                                     }
@@ -84,11 +116,16 @@ const ViewOffer = () => {
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
                                         <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} onClick={() => setActiveTab('2')}>
+                                            {'Files'}
+                                        </NavLink>
+                                        <div className="material-border"></div>
+                                    </NavItem>
+                                    <NavItem id="myTab" role="tablist">
+                                        <NavLink href="#javascript" className={activeTab === '3' ? 'active' : ''} onClick={() => setActiveTab('3')}>
                                             {'Instruction'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
-
 
                                 </Nav>
                                 <TabContent activeTab={activeTab}>
@@ -155,6 +192,9 @@ const ViewOffer = () => {
                                                 </tr>
                                             </tbody>
                                         </Table>
+                                    </TabPane>
+                                    <TabPane tabId="3">
+                                        <P attrPara={{ className: 'mb-0 m-t-20' }}>  {pageTask.insrtuctions}</P>
                                     </TabPane>
                                 </TabContent>
                             </CardBody>

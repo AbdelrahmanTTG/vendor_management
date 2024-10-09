@@ -40,6 +40,10 @@ class TaskResource extends JsonResource
             'offer_type'=>(!empty($this->task_id) && $this->status == 4)?'offer_list': 'task',
             'file'=> $this->file,
             'fileLink'=> "https://aixnexus.com/erp/assets/uploads/taskFile/$this->file",
+            'job_file'=> $this->jobFile?$this->jobFile->job_file:null,
+            'job_fileLink'=> "https://aixnexus.com/erp/assets/uploads/jobFile/$this->job_file",
+            'insrtuctions'=>$this->insrtuctions,
+            
                         
         ];
   }

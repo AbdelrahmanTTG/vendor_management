@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Http\Resources\TaskResource;
 use App\Models\OfferList;
-use Illuminate\Http\Request;
 use App\Models\Task;
-use App\Models\Vendor;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -63,10 +62,10 @@ class TaskController extends Controller
         return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
     }
 
-     /**
-  * View Job Task Offer & Job Offer List Details
-  */
-    public function ViewOffer(Request $request)
+    /**
+     * View Job Task Offer & Job Offer List Details
+     */
+    public function viewOffer(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
@@ -82,21 +81,21 @@ class TaskController extends Controller
         return response()->json(["Task" => new TaskResource($task)], 200);
     }
 
-     /**
-  * View Job Task
-  */
-    public function ViewJob(Request $request)
+    /**
+     * Display the specified Job Task.
+     */
+    public function viewJob(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
-            'vendor' => 'required'           
+            'vendor' => 'required'
         ]);
-        
-
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->first();
-        // $data['timeline'] = $this->db->get_where('job_task_conversation', array('task' => $data['jobID']))->result();
-        // $data['jobHisory'] = $this->db->get_where('job_task_log', array('task' => $data['jobID']))->result();
-        return response()->json(["Task" => new TaskResource($task)], 200);
+        return response()->json([
+            "Task" => new TaskResource($task),
+            "Timeline" => $task->conversation,
+            "JobHisory" => $task->log,
+        ], 200);
     }
 
     /**
@@ -106,29 +105,127 @@ class TaskController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
-            'vendor' => 'required'            
+            'vendor' => 'required'
         ]);
-       
+
         $data['status'] = 4;
-     //   $data['status'] = 3;
+        //   $data['status'] = 3;
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
-        
-       // $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);
-       
-        if ($task->update($data)) {
-            //  add to task log
-          //  $this->admin_model->addToTaskLogger($data['id'], 2);
-          //  $this->admin_model->sendVendorRejectionMail($data['id'], $this->user);
-            $msg['type'] = "success";           
-            $message = "Your Offer Rejected Successfully";           
-           
+        if ($task) {
+            // $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);
+            if ($task->update($data)) {
+                //  add to task log
+                //  $this->admin_model->addToTaskLogger($data['id'], 2);
+                //  $this->admin_model->sendVendorRejectionMail($data['id'], $this->user);
+                $msg['type'] = "success";
+                $message = "Your Offer Rejected Successfully";
+            } else {
+                $msg['type'] = "error";
+                $message = "Error Cancelling Offer Job, Please Try Again!";
+            }
+
+            $msg['message'] = $message;
         } else {
-            $msg['type'] = "Error";           
-            $message = "Error Cancelling Offer Job, Please Try Again!";           
-           
+            $msg['type'] = "error";
+            $msg['message'] = "Error Cancelling Offer Job, Please Try Again!";
         }
-        $msg['message'] = $message;    
-        echo json_encode($msg);
+        return response()->json($msg);
+    }
+    /**
+     * accept Task Offer
+     */
+    public function acceptOffer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'vendor' => 'required'
+        ]);
+        $data['status'] = 4;
+        //     $data['status'] = 0;
+        $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
+        if ($task) {
+            // $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);
+            if ($task->update($data)) {
+                // add to task log
+                //    $this->admin_model->addToTaskLogger($data['id'], 1);
+                //    $this->admin_model->sendVendorAcceptanceMail($data['id'], $this->user);
+                $msg['type'] = "success";
+                $message = "Your Offer Accepted Successfully";
+            } else {
+                $msg['type'] = "error";
+                $message = "Error Accepting Offer, Please Try Again!";
+            }
+            $msg['message'] = $message;
+        } else {
+            $msg['type'] = "error";
+            $msg['message'] = "Error Accepting Offer, Please Try Again!";
+        }
+        return response()->json($msg);
+    }
+    /**
+     * accept Task Offer List & send to job task table
+     */
+    public function acceptOfferList(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'vendor' => 'required'
+        ]);
+        $offer = OfferList::where('vendor_list', 'Like', "%$request->vendor,%")->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
+        if ($offer) {
+            $data['status'] = 0;
+            // $this->admin_model->addToLoggerUpdate('job_offer_list', 'id', $request->id, $request->vendor);
+            if ($offer->update($data)) {
+                $job_data['job_id'] = $offer->job_id;
+                $job_data['subject'] = $offer->subject;
+                $job_data['task_type'] = $offer->task_type;
+                $job_data['count'] = $offer->count;
+                $job_data['start_date'] = $offer->start_date;
+                $job_data['delivery_date'] = $offer->delivery_date;
+                $job_data['time_zone'] = $offer->time_zone;
+                $job_data['insrtuctions'] = $offer->insrtuctions;
+                $job_data['job_portal'] = 1;
+                $job_data['status'] = 0;
+                $job_data['rate'] = $offer->rate;
+                $job_data['currency'] = $offer->currency;
+                $job_data['unit'] = $offer->unit;
+                $job_data['vendor'] = $request->vendor;
+                $job_data['file'] = $offer->file;
+                $job_data['created_by'] = $offer->created_by;
+                $job_data['created_at'] = $offer->created_at;
+                $job_data['start_after_id'] = $offer->start_after_id;
+                $job_data['start_after_type'] = $offer->start_after_type;
+                // generate job code
+                $job_data['code'] = $offer->generateTaskCode();
+                // insert data into job_task   
+                $task = Task::create($job_data);
+                if (Task::create($job_data)) {
+                    $insert_id = $task->id;
+                    // add to task log
+                    //   $this->admin_model->addToTaskLogger($insert_id, 1);
+                    $data['task_id'] = $insert_id;
+                    //  $this->admin_model->addToLoggerUpdate('job_offer_list', 'id', $data['id'], $this->user);
+                    $offer->update($data);
+                    //    $this->admin_model->sendVendorAcceptanceMail($insert_id, $this->user);
+                    // send to other vendors emails --
+                    //   $this->admin_model->SendVendorTaskAlreadyAcceptedEmail($data['id']);
+
+                    $msg['type'] = "success";
+                    $message = "Your Offer Accepted Successfully";
+                } else {
+                    $msg['type'] = "error";
+                    $message = "Error Accepting Offer, Please Try Again!";
+                }
+            } else {
+                $msg['type'] = "error";
+                $message = "Error Accepting Offer, Please Try Again!";
+            }
+            $msg['message'] = $message;
+        } else {
+            $msg['type'] = "error";
+            $msg['message'] = "Error Accepting Offer, Please Try Again!";
+        }
+        return response()->json($msg);
     }
 
     /**
