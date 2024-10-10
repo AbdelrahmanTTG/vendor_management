@@ -190,11 +190,21 @@ const ViewOffer = () => {
                                                         )}
                                                     </td>
                                                 </tr>
+                                                <tr>
+                                                    <th scope="row">{'Other File'}</th>
+                                                    <td>
+                                                        {pageTask.job_file != null ? (
+                                                            <Link to={pageTask.job_fileLink}> <Btn attrBtn={{ color: 'secondary', className: 'btn btn-secondary' }}> {'View File'}</Btn></Link>
+                                                        ) : (
+                                                            <P attrPara={{ className: 'txt-danger f-w-600' }}>{'No File Found'}</P>
+                                                        )}
+                                                    </td>
+                                                </tr>
                                             </tbody>
                                         </Table>
                                     </TabPane>
                                     <TabPane tabId="3">
-                                        <P attrPara={{ className: 'mb-0 m-t-20' }}>  {pageTask.insrtuctions}</P>
+                                        <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: pageTask.insrtuctions }} />
                                     </TabPane>
                                 </TabContent>
                             </CardBody>

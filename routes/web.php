@@ -20,6 +20,9 @@ Route::group(['prefix' => 'Portal'], function () {
     Route::post('Vendor/cancelOffer', [TaskController::class, 'cancelOffer'])->name('Vendor.cancelOffer');
     Route::post('Vendor/acceptOffer', [TaskController::class, 'acceptOffer'])->name('Vendor.acceptOffer');
     Route::post('Vendor/acceptOfferList', [TaskController::class, 'acceptOfferList'])->name('Vendor.acceptOfferList');
+    Route::post('Vendor/sendMessage', [TaskController::class, 'sendMessage'])->name('Vendor.sendMessage');
+    Route::post('Vendor/finishJob', [TaskController::class, 'finishJob'])->name('Vendor.finishJob');
+    Route::post('Vendor/planTaskReply', [TaskController::class, 'planTaskReply'])->name('Vendor.planTaskReply');
 
 });
 

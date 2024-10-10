@@ -1,19 +1,29 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Container, Row, Col, Card, CardHeader, CardBody, Table, Media, TabContent, TabPane, Nav, NavItem, NavLink } from 'reactstrap';
-import { BreadcrumbsPortal, H5, Btn, LI, P, UL, H4, H6 } from '../../../AbstractElements';
 import axios from 'axios';
+import React, { Fragment, useEffect, useState } from 'react';
+import { Container, Row, Col, Card, CardBody, Table, TabContent, TabPane, Nav, NavItem, NavLink, InputGroup, Input } from 'reactstrap';
+import { BreadcrumbsPortal, Btn, LI, P, UL, H6, Image } from '../../../AbstractElements';
+import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
 import { useStateContext } from '../../context/contextAuth';
 import { Link, useParams } from 'react-router-dom';
-import comment from '../../../assets/images/blog/comment.jpg';
+import comment from '../../../assets/images/user/user.png';
+import { toast } from 'react-toastify';
+import { Edit } from 'react-feather';
+import FinishModal from './FinishModal';
+import PlanModal from './PlanModal';
+
 const ViewJob = () => {
-    const baseURL = window.location.origin + "/Portal/Vendor";
+    const baseURL = window.location.origin + "/Portal/Vendor";    
     const { user } = useStateContext();
     const { id } = useParams();
     const [pageTask, setPageTask] = useState([]);
-    const [timeline, setTimeline] = useState([]);
-
+    const [notes, setNotes] = useState([]);
+    const [history, setHistory] = useState([]);
+    const [messageInput, setMessageInput] = useState("");
     const [activeTab, setActiveTab] = useState('1');
-    const Discription = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum';
+    const [modal, setModal] = useState(false);
+    const [modal2, setModal2] = useState(false);
+    const toggle = () => setModal(!modal);
+    const toggle2 = () => setModal2(!modal2);
 
     useEffect(() => {
         if (user) {
@@ -21,20 +31,50 @@ const ViewJob = () => {
                 'vendor': user.id,
                 'id': id,
             };
-
             axios.post(baseURL + "/viewJob", payload)
                 .then(({ data }) => {
                     console.log(data);
                     // const [Tasks] = [(data?.Tasks.data)];
                     const [Task] = [(data?.Task)];
-                    const [Timeline] = [(data?.Timeline)];
+                    const [Notes] = [(data?.Notes)];
+                    const [History] = [(data?.History)];
                     setPageTask(Task);
-                    setTimeline(Timeline);
-
+                    setNotes(Notes);
+                    setHistory(History);
                 });
         }
     }, [user]);
 
+    // send message
+    const handleMessageChange = (message) => {
+        setMessageInput(message);
+    };
+    const handleMessagePress = (e) => {
+        if (e.key === "Enter" || e === "send") {
+            if (messageInput.length > 0) {
+                axios.post(baseURL + "/sendMessage", { 'vendor': user.id, 'task_id': pageTask.id, 'message': messageInput })
+                    .then(({ data }) => {
+                        switch (data.msg.type) {
+                            case 'success':
+                                toast.success(data.msg.message);
+                                break;
+                            case 'error':
+                                toast.error(data.msg.message);
+                                break;
+                        }
+                        setNotes(data.Notes);
+
+                    });
+                setMessageInput("");
+            }
+        }
+    };
+    // end send message
+    const vendorRes = {
+        'vendor': user.id,
+        'id': pageTask.id,        
+        
+    };
     return (
         <Fragment>
             <BreadcrumbsPortal mainTitle={pageTask.code} parent="My Jobs" title="Job Details" />
@@ -42,49 +82,50 @@ const ViewJob = () => {
                 <Row>
                     <Col sm="12">
                         <Card>
-                            <CardBody className=' b-t-primary'>
+                            <CardBody className='b-t-primary'>  
+                                <FinishModal isOpen={modal} title={'Finish and Send File'} toggler={toggle} fromInuts ={vendorRes} ></FinishModal>
+                                <PlanModal isOpen={modal2} title={'Send Reply'} toggler={toggle2} fromInuts ={vendorRes} ></PlanModal>
+
                                 <div className="pro-group pb-0" style={{ textAlign: 'right' }}>
                                     {pageTask.status == 0 && (
-                                        <div className="pro-shop ">
-                                            <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: () => acceptOffer() }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
-                                            <Btn attrBtn={{ color: 'secondary', className: 'btn btn-danger', onClick: () => rejectOffer() }}><i className="icofont icofont-close-line-circled me-2"></i>{'Reject'} </Btn>
-                                        </div>
+                                        <div className="pro-shop">
+                                            <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle }}><i className="icofont icofont-check-circled me-2"></i> {'Finished This Job'}</Btn>
+                                        </div>   
                                     )}
                                     {pageTask.status == 7 && (
                                         <div className="pro-shop ">
-                                            <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: () => acceptOfferList() }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
+                                            <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle2 }}><i className="icofont icofont-reply me-2"></i> {'Send Reply'}</Btn>
                                         </div>
-                                    )
-                                    }
+                                    )}
                                 </div>
                                 <Nav tabs className="border-tab">
                                     <NavItem id="myTab" role="tablist">
                                         <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} onClick={() => setActiveTab('1')}>
-                                            {'Details'}
+                                            <i className="icofont icofont-list me-1"></i>{'Details'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
                                         <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} onClick={() => setActiveTab('2')}>
-                                            {'Files'}
+                                            <i className="icofont icofont-clip me-1"></i>{'Files'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
                                         <NavLink href="#javascript" className={activeTab === '3' ? 'active' : ''} onClick={() => setActiveTab('3')}>
-                                            {'Instruction'}
+                                            <i className="icofont icofont-file-document me-1"></i>{'Instruction'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
                                         <NavLink href="#javascript" className={activeTab === '4' ? 'active' : ''} onClick={() => setActiveTab('4')}>
-                                            {'Notes'}
+                                            <i className="icofont icofont-ui-messaging me-1"></i>{'Notes'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
                                         <NavLink href="#javascript" className={activeTab === '5' ? 'active' : ''} onClick={() => setActiveTab('5')}>
-                                            {'Job history'}
+                                            <i className="icofont icofont-history me-1"></i>{'Job history'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
@@ -158,7 +199,7 @@ const ViewJob = () => {
                                                             </td>
                                                         </tr>
                                                         <tr>
-                                                            <th scope="row">{'Job File'}</th>
+                                                            <th scope="row">{'Other File'}</th>
                                                             <td>
                                                                 {pageTask.job_file != null ? (
                                                                     <Link to={pageTask.job_fileLink}> <Btn attrBtn={{ color: 'secondary', className: 'btn btn-secondary' }}> {'View File'}</Btn></Link>
@@ -175,45 +216,78 @@ const ViewJob = () => {
                                     <TabPane tabId="3">
                                         <Card >
                                             <CardBody>
-                                                <P attrPara={{ className: 'mb-0 m-t-20' }}>  {pageTask.insrtuctions}</P>
+                                                <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: pageTask.insrtuctions }} />
                                             </CardBody>
                                         </Card>
                                     </TabPane>
                                     <TabPane tabId="4">
-                                        <Card className="comment-box">
-                                            <CardBody>                                               
-                                                <ul>
-                                                {timeline.map((item) =>
-                                                 <li key={item.id}>
-                                                  
-                                                  
-                                                  
-                                                <Media className="align-self-center">
-                                                <Media className="align-self-center" src={comment} alt="" />
-                                                <Media body>
-                                                <Row>
-                                                <Col md="4">
-                                                <H6 attrH6={{ className: 'mt-0' }} >{item.created_by}</H6>
-                                                </Col>
-                                                <Col md="8">
-                                                <UL attrUL={{ className: 'comment-social float-left float-md-right simple-list' }} >
-                                                    <LI attrLI={{ className: 'digits' }} >{item.created_at}</LI>                                                
-                                                </UL>
-                                                </Col>
-                                                </Row>
-                                                <P>{item.message}</P>
-                                                </Media>
-                                                </Media>
-                                                </li>
-                                               )}
-                                                 </ul>
+                                        <Card className="chat-box">
+                                            <CardBody className='chat-right-aside'>
+                                                <div className='chat'>
+                                                    <div className='chat-history chat-msg-box custom-scrollbar h-auto mb-0'>
+                                                        <UL className="chatingdata">
+                                                            {notes.map((item, i) =>
+                                                                <LI attrLI={{ className: "clearfix" }} key={i}>
+                                                                    <div className={`message w-100  ${item.from != 1 ? "my-message " : "other-message pull-right"}`}>
+                                                                        <Image
+                                                                            attrImage={{
+                                                                                src: `${comment}`,
+                                                                                className: `rounded-circle ${item.from != 1 ? "float-start " : "float-end "} chat-user-img img-30`,
+                                                                                alt: "",
+                                                                            }}
+                                                                        />
+                                                                        <div className={`message-data ${item.from != 1 ? "text-end " : ""}`}>
+                                                                            <span className='message-data-time'>{new Date(item.created_at).toLocaleString()}</span>
+                                                                        </div>
+                                                                        <div className='message-data'>
+                                                                            {/* {item.from == 1 ?( */}
+                                                                            {/*    <H6 attrH6={{ className: 'mt-0 txt-primary' }} >{item.created_by}</H6> ) */}
+                                                                            {/*  :''} */}
+                                                                            {item.message}
+                                                                        </div>
+                                                                    </div>
+                                                                </LI>
+                                                            )}
+                                                        </UL>
+                                                    </div>
+                                                    <div className="chat-message clearfix" style={{ position: 'relative' }}>
+                                                        <div className="row">
+                                                            <Col xl='12' className='d-flex'>
+                                                                <InputGroup className='text-box'>
+                                                                    <Input type='text' className='form-control input-txt-bx' placeholder='Type a message......' value={messageInput} onChange={(e) => handleMessageChange(e.target.value)} />
+                                                                    <Btn
+                                                                        attrBtn={{
+                                                                            color: "primary",
+                                                                            onClick: () => handleMessagePress("send"),
+                                                                        }}
+                                                                    >
+                                                                        Send
+                                                                    </Btn>
+                                                                </InputGroup>
+                                                            </Col>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </CardBody>
                                         </Card>
                                     </TabPane>
                                     <TabPane tabId="5">
                                         <Card >
                                             <CardBody>
-                                                <P attrPara={{ className: 'mb-0 m-t-20' }}>{Discription}</P>
+                                                <VerticalTimeline layout={'1-column'}>
+                                                    {history.map((item, i) =>
+                                                        <VerticalTimelineElement key={i}
+                                                            className="vertical-timeline-element--work"
+                                                            animate={true}
+                                                            date={new Date(item.created_at).toLocaleString()}
+                                                            icon={<Edit />}>
+                                                            <H6 attrH6={{ className: 'vertical-timeline-element-subtitle f-14' }}>{item.status}</H6>
+                                                            <P>
+                                                                {item.comment}
+                                                            </P>
+                                                        </VerticalTimelineElement>
+                                                    )}
+                                                </VerticalTimeline>
                                             </CardBody>
                                         </Card>
                                     </TabPane>

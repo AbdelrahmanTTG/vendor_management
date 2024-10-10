@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TaskHistoryResource;
+use App\Http\Resources\TaskNotesResource;
 use Illuminate\Http\Request;
 use App\Http\Resources\TaskResource;
 use App\Models\OfferList;
 use App\Models\Task;
+use App\Models\TaskConversation;
+use App\Models\TaskLog;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -17,6 +21,9 @@ class TaskController extends Controller
      */
     public function index() {}
 
+    /**
+     * List All Jobs 
+     */
     public function allJobs(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -28,20 +35,22 @@ class TaskController extends Controller
 
         return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
     }
-
+    /**
+     * List All Offers 
+     */
     public function allJobOffers(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required|string',
         ]);
-        $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4);
-        $tasks = $query->orderBy('created_at', 'desc')->get();
+        $tasks = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->get();
+        $tasks2  = OfferList::query()->where('vendor_list', 'Like', "%$request->id,%")->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->get();
 
-        // $data['jobOfferVL'] = $this->db->query("select * from job_offer_list where status = 4 and job_portal = 1 and vendor_list Like '%$this->user,%'")->result();
-        // ->paginate(10);
-        return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
+        return response()->json(["Tasks" => TaskResource::collection($tasks->merge($tasks2))], 200);
     }
-
+    /**
+     * List All Finished 
+     */
     public function allClosedJobs(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -51,7 +60,9 @@ class TaskController extends Controller
         $tasks = $query->orderBy('created_at', 'desc')->get();
         return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
     }
-
+    /**
+     * List All Scheduled Jobs  
+     */
     public function allPlannedJobs(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -61,7 +72,6 @@ class TaskController extends Controller
         $tasks = $query->orderBy('created_at', 'desc')->get();
         return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
     }
-
     /**
      * View Job Task Offer & Job Offer List Details
      */
@@ -80,7 +90,6 @@ class TaskController extends Controller
         }
         return response()->json(["Task" => new TaskResource($task)], 200);
     }
-
     /**
      * Display the specified Job Task.
      */
@@ -93,11 +102,38 @@ class TaskController extends Controller
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->first();
         return response()->json([
             "Task" => new TaskResource($task),
-            "Timeline" => $task->conversation,
-            "JobHisory" => $task->log,
+            "Notes" => TaskNotesResource::collection($task->conversation),
+            "History" => TaskHistoryResource::collection($task->log),
         ], 200);
     }
-
+    /**
+     * Task conversation
+     */
+    public function sendMessage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'task_id' => 'required',
+            'vendor' => 'required',
+            'message' => 'required'
+        ]);
+        $data['message'] = $request->message;
+        $data['task'] =  $request->task_id;
+        $data['from'] = 2;
+        $data['created_by'] = $request->vendor;
+        $data['created_at'] = date("Y-m-d H:i:s");
+        $task = Task::find($request->task_id);
+        // echo $message;
+        if (TaskConversation::create($data)) {
+            //   $this->admin_model->sendVendorMessageMail($data['task'], $this->user, $data['message']);
+            $msg['type'] = "success";
+            $message = "Your Message Send Successfully";
+        } else {
+            $msg['type'] = "error";
+            $message = "Error Sending Messgae, Please Try Again!";
+        }
+        $msg['message'] = $message;
+        return response()->json(["msg" => $msg, "Notes" => TaskNotesResource::collection($task->conversation)]);
+    }
     /**
      * Cancel Task Offer
      */
@@ -108,14 +144,13 @@ class TaskController extends Controller
             'vendor' => 'required'
         ]);
 
-        $data['status'] = 4;
-        //   $data['status'] = 3;
+        $data['status'] = 3;
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($task) {
             // $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);
             if ($task->update($data)) {
                 //  add to task log
-                //  $this->admin_model->addToTaskLogger($data['id'], 2);
+                $this->addToTaskLogger($request->id, 2, $request->vendor);
                 //  $this->admin_model->sendVendorRejectionMail($data['id'], $this->user);
                 $msg['type'] = "success";
                 $message = "Your Offer Rejected Successfully";
@@ -147,6 +182,7 @@ class TaskController extends Controller
             // $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);
             if ($task->update($data)) {
                 // add to task log
+                $this->addToTaskLogger($request->id, 1, $request->vendor);
                 //    $this->admin_model->addToTaskLogger($data['id'], 1);
                 //    $this->admin_model->sendVendorAcceptanceMail($data['id'], $this->user);
                 $msg['type'] = "success";
@@ -202,7 +238,7 @@ class TaskController extends Controller
                 if (Task::create($job_data)) {
                     $insert_id = $task->id;
                     // add to task log
-                    //   $this->admin_model->addToTaskLogger($insert_id, 1);
+                    $this->addToTaskLogger($insert_id, 1, $request->vendor);
                     $data['task_id'] = $insert_id;
                     //  $this->admin_model->addToLoggerUpdate('job_offer_list', 'id', $data['id'], $this->user);
                     $offer->update($data);
@@ -227,52 +263,126 @@ class TaskController extends Controller
         }
         return response()->json($msg);
     }
-
     /**
-     * Show the form for creating a new resource.
+     * Finish JOB and Send File .
      */
-    public function create()
+    public function finishJob(Request $request)
     {
-        //
-    }
+        $validator = Validator::make($request->all(), [
+            'task_id' => 'required',
+            'vendor' => 'required',
+            'file' => 'mimes:zip,rar|max:2048',
+        ]);
 
+        $data['vendor_notes'] = $request->note ?? '';
+        $data['status'] = 5;
+
+        $offer = Task::where('vendor', $request->vendor)->where('id', $request->task_id)->where('job_portal', 1)->where('status', 0)->first();
+        if ($offer) {
+            if ($request->file('file') != null) {
+                $file = $request->file('file');
+                $path = $file->store('uploads/jobTaskVendorFiles/', 'public');
+                if (!$path) {
+                    $msg['type'] = "error";
+                    $message = "Error Uploading File, Please Try Again!";
+                } else {
+                    $data['vendor_attachment'] = $file->hashName();
+                }
+            }
+            //   $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);        
+            if ($offer->update($data)) {
+                //    $evaluation = $this->db->get('vm_setup')->row();
+                // $dataEV['vendor_ev_select'] = $_POST['v_ev_select'];
+                // $dataEV['vendor_ev_type'] = ($_POST['v_ev_select'] < 5) ? 2 : 1;
+                // $dataEV['vendor_note'] = $_POST['v_note'];
+                // for ($i = 1; $i <= 6; $i++) {
+                // $v_ev_name = "v_ev_name" . $i;
+                // $v_ev_per = "v_ev_per" . $i;
+                // if ($evaluation->$v_ev_name != null) {
+                // $dataEV["vendor_ev_text$i"] = $evaluation->$v_ev_name;
+                // $dataEV["vendor_ev_per$i"] = $evaluation->$v_ev_per;
+                // $dataEV["vendor_ev_val$i"] = $_POST["v_ev_val$i"] ?? 0;
+                // }
+                //  }
+                /*  $task_ev = $this->db->get_where('task_evaluation', array('task_id' => $data['id']))->row();
+            if (empty($task_ev)) {
+                // get job task info
+                $taskData = $this->admin_model->getData('job_task',['id'=>$data['id'] ,'job_portal' => 1]);
+                $jobData = $this->admin_model->getData('job',['id'=>$taskData->job_id]);
+                $dataEV['task_id'] = $data['id'];
+                $dataEV['project_id'] = $jobData->project_id;
+                $dataEV['job_id'] = $taskData->job_id;
+                $dataEV['vendor_id'] = $this->user;
+                $dataEV['vendor_ev_created_at'] = date("Y-m-d H:i:s");
+
+                $this->db->insert('task_evaluation', $dataEV);
+            } else {
+                // do edit 
+                if ($task_ev->vendor_ev_type == null)
+                    $dataEV['vendor_ev_created_at'] = date("Y-m-d H:i:s");
+                $this->admin_model->addToLoggerUpdate('task_evaluation', 'task_id', $data['id'], $this->user);
+                $this->db->update('task_evaluation', $dataEV, array('task_id' => $data['id']));
+            }*/
+                // add to task log
+                $this->addToTaskLogger($request->task_id, 3, $request->vendor);
+
+                //  $this->admin_model->sendVendorFinishMail($data['id'], $this->user);
+                //  $this->admin_model->sendFinishMailForPm($data['id']);
+                $msg['type'] = "success";
+                $message = "Your Offer Accepted Successfully";
+            }
+        } else {
+            $msg['type'] = "error";
+            $message = "Error, Please Try Again!";
+        }
+        $msg['message'] = $message;
+        return response()->json($msg);
+    }
     /**
-     * Store a newly created resource in storage.
+     * Store Scheduled Jobs relpy.
      */
-    public function store(Request $request)
+    public function planTaskReply(Request $request)
     {
-        //
-    }
+        $validator = Validator::make($request->all(), [
+            'task_id' => 'required',
+            'vendor' => 'required',
+            'status' => 'required',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Task $task)
-    {
-        //
-    }
+        $offer = Task::where('vendor', $request->vendor)->where('id', $request->task_id)->where('job_portal', 1)->where('status', 7)->first();
+        if ($offer) {
+            $status = $data['status'] = $request->status;
+            $data['plan_comment'] = $request->note ?? '';
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Task $task)
-    {
-        //
-    }
+            //  $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);
 
+            if ($offer->update($data)) {
+                // add to task log
+                $this->addToTaskLogger($request->task_id, $status + 1, $request->vendor);
+
+                // $this->admin_model->sendVendorPlanMail($data['id'], $this->user);
+
+                $msg['type'] = "success";
+                $message = "Your Reply sent Successfully";
+            } else {
+                $msg['type'] = "error";
+                $message = "Error, Please Try Again!";
+            }
+        }
+
+        $msg['message'] = $message;
+        return response()->json($msg);
+    }
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function addToTaskLogger($id, $status, $user)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Task $task)
-    {
-        //
+        $log_data['from'] = 2;
+        $log_data['task'] = $id;
+        $log_data['status'] = $status;
+        $log_data['created_by'] = $user;
+        $log_data['created_at'] = date("Y-m-d H:i:s");
+        TaskLog::create($log_data);
     }
 }

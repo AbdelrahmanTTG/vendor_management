@@ -9,8 +9,9 @@ class Task extends Model
 {
     use HasFactory;
     protected $table = 'job_task';
+    public $timestamps = false;
     protected $fillable = [
-        'status',
+        'status','vendor_attachment','vendor_notes','plan_comment'
         
     ];
 
@@ -48,6 +49,7 @@ class Task extends Model
     {
         return  $this->belongsTo(Job::class, 'job_id')->select(['job_file']);
     }
+
     public function getTaskStatus()
     {
         $taskArray = array("In Progress", "Delivered", "Cancelled", "Rejected", "Waiting Your Confirmation", "Waiting PM Confirmation", " ", "Heads-Up ", "Heads-Up ( Marked as Available )", "Heads-Up ( Marked as Not Available )");

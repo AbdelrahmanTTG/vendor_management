@@ -37,7 +37,7 @@ class TaskResource extends JsonResource
             'statusData' => $this->getTaskStatus(),          
             'jobPrice'=> $this->jobPrice?new JobPriceResource($this->jobPrice->priceList):'',             
             'type'=>($this->status == 4)?'job_offer': 'job',
-            'offer_type'=>(!empty($this->task_id) && $this->status == 4)?'offer_list': 'task',
+            'offer_type'=>(isset($this->task_id))?'offer_list': 'task',
             'file'=> $this->file,
             'fileLink'=> "https://aixnexus.com/erp/assets/uploads/taskFile/$this->file",
             'job_file'=> $this->jobFile?$this->jobFile->job_file:null,
