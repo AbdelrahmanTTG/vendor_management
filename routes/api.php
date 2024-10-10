@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VmCodeTableController;
+
 
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -11,5 +13,6 @@ Route::group(['prefix' => 'auth'], function () {
 Route::middleware(['auth:api'])->group(function () {
     Route::post('permission', [AuthController::class, 'userpermission']);
     Route::get('logout', [AuthController::class, 'logout']);
+    Route::post('tableDate', [VmCodeTableController::class,'SelectDataTable']);
 });
 

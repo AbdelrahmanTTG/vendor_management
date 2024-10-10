@@ -27,6 +27,10 @@ table{
   th{
     font-size: 12px;
   }
+  td{
+    font-size: 12px;
+
+  }
 }
 #page-body{
   padding-top: 0px;
