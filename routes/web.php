@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +24,6 @@ Route::group(['prefix' => 'Portal'], function () {
     Route::post('Vendor/sendMessage', [TaskController::class, 'sendMessage'])->name('Vendor.sendMessage');
     Route::post('Vendor/finishJob', [TaskController::class, 'finishJob'])->name('Vendor.finishJob');
     Route::post('Vendor/planTaskReply', [TaskController::class, 'planTaskReply'])->name('Vendor.planTaskReply');
-
+    Route::post('Vendor/allInvoices', [InvoiceController::class, 'allInvoices'])->name('Vendor.allInvoices');
 });
 

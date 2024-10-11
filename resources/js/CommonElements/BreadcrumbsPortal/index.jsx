@@ -10,8 +10,8 @@ const Breadcrumbs = (props) => {
         <div className="page-header">
           <Row>
             <Col sm="6">
-              <H3>{props.mainTitle}</H3>          
-           
+              <H3>{props.mainTitle}</H3>
+
               <ol className="breadcrumb breadcrumbStart">
                 <li className="breadcrumb-item"><Link to={`/Vendor`}>Home</Link></li>
                 {/* <li className="breadcrumb-item">Home</li> */}
@@ -20,7 +20,8 @@ const Breadcrumbs = (props) => {
                 <li className="breadcrumb-item active">{props.title}</li>
               </ol>
             </Col>
-            <Col sm="6">
+            <Col sm="6" className='text-end'>
+              {props.children}
             </Col>
 
           </Row>
