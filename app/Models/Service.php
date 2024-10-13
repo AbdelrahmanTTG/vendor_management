@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Language extends Model
+class Service extends Model
 {
     use HasFactory;
-    protected $table = 'languages';
+    protected $table = 'services';
+
     public static function SelectData($searchTerm = null)
     {
 
@@ -20,5 +21,4 @@ class Language extends Model
         }
         return $query->get();
     }
-                   
 }

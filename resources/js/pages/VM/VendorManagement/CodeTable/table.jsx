@@ -2,7 +2,7 @@ import React, { Fragment, useEffect ,useState} from 'react';
 import { Col, Card, CardHeader, Table, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 import { Pagi_Nations, Previous, Next } from '../../../../Constant';
 
-import { Btn, H5 } from '../../../../AbstractElements';
+import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Add from "./ModelAdd"
 import axiosClient from "../../../../pages/AxiosClint";
 
@@ -11,6 +11,10 @@ const table = (props) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1); 
     const [errorMessage, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState(true);
+    const onAddData = (newData) => {
+        setdataTable(prevData => [...prevData, newData]);
+    };
     useEffect(() => {
       
         const fetchData = async () => {
@@ -23,6 +27,7 @@ const table = (props) => {
             };
 
             try {
+                setLoading(true);
                 const { data } = await axiosClient.post("tableDate", payload);
                 setdataTable(data.data);
                 setTotalPages(data.last_page);
@@ -35,6 +40,8 @@ const table = (props) => {
                 } else {
                     setErrorMessage("An unexpected error occurred.");
                 }
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -105,7 +112,7 @@ const table = (props) => {
                     <CardHeader className="d-flex justify-content-between align-items-center">
                         <H5>{props.table}</H5>
                         <div className="ml-auto">
-                            <Add nameBtm={`Add ${props.table}`} titelModel={`Add New ${props.table}`} fields={props.fields} />
+                            <Add nameBtm={`Add ${props.table}`} titelModel={`Add New ${props.table}`} fields={props.fields} dataTable={props.dataTable} onAddData={onAddData} />
                         </div>
                     </CardHeader>
                     <div className="table-responsive">
@@ -124,24 +131,47 @@ const table = (props) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {
-                                    dataTable.map((item) =>
-                                        <tr key={item.id}>
-                                            {Object.entries(item).map(([key, value]) =>
-                                                key !== 'Active' && (
-                                                    <td key={key}> {value}</td>
-                                                )
-                                            )}
-                                            <td key="Active">
-                                                {item.Active === 0 ? <i className="fa fa-circle font-danger f-12" /> : <i className="fa fa-circle font-success f-12" />}
-                                            </td>
-
-                                            <td><button style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}><i className="icofont icofont-ui-edit"></i></button> </td>
-                                            <td><button style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}><i className="icofont icofont-ui-delete"></i></button></td>
-
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={props.header.length}>
+                                            <div className="loader-box">
+                                                <Spinner attrSpinner={{ className: 'loader-9' }} />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    dataTable.length === 0 ? (
+                                        <tr>
+                                                <td colSpan={props.header.length}>No data yet</td>
                                         </tr>
+                                    ) : (
+                                        dataTable.map((item) => (
+                                            <tr key={item.id}>
+                                                <td key="id">
+                                                    {item.id}
+                                                </td>
+                                                {Object.entries(item).map(([key, value]) =>
+                                                    key !== 'id' && key !== 'Active' && (
+                                                        <td key={key}>{value}</td>
+                                                    )
+                                                )}
+                                                <td key="Active">
+                                                    {item.Active == 0 ? <i className="fa fa-circle font-danger f-12" /> : <i className="fa fa-circle font-success f-12" />}
+                                                </td>
+                                                <td>
+                                                    <button style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                                        <i className="icofont icofont-ui-edit"></i>
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <button style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                                        <i className="icofont icofont-ui-delete"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
                                     )
-                                }
+                                )}
                             </tbody>
                         </Table>
                         <Pagination aria-label="Page navigation example" className="pagination-primary">

@@ -11,47 +11,47 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::table('regions', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
-        // });
-        // Schema::table('time_zone', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
-        // });
+        Schema::table('regions', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
+        });
+        Schema::table('time_zone', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
+        });
 
-        // Schema::table('countries', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
-        // });
+        Schema::table('countries', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
+        });
 
-        // Schema::table('fields', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
-        // });
+        Schema::table('fields', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
+        });
 
-        // Schema::table('services', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
-        // });
+        Schema::table('services', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
+        });
 
-        // Schema::table('task_type', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
-        // });
-        // Schema::table('currency', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
-        // });
-        // Schema::table('tools', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
+        Schema::table('task_type', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
+        });
+        Schema::table('currency', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
+        });
+        Schema::table('tools', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
 
-        // });
-        // Schema::table('languages', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
+        });
+        Schema::table('languages', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
 
-        // });
-        // Schema::table('unit', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
+        });
+        Schema::table('unit', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
 
-        // });
-        // Schema::table('languages_dialect', function (Blueprint $table) {
-        //     $table->boolean('Active')->default(false);
+        });
+        Schema::table('languages_dialect', function (Blueprint $table) {
+            $table->boolean('Active')->default(false);
 
-        // });
+        });
     }
 
     /**
@@ -59,47 +59,47 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::table('regions', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
-        // });
+        Schema::table('regions', function (Blueprint $table) {
+            $table->dropColumn('Active');
+        });
 
-        // Schema::table('time_zone', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
-        // });
+        Schema::table('time_zone', function (Blueprint $table) {
+            $table->dropColumn('Active');
+        });
 
-        // Schema::table('countries', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
-        // });
+        Schema::table('countries', function (Blueprint $table) {
+            $table->dropColumn('Active');
+        });
 
-        // Schema::table('fields', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
-        // });
+        Schema::table('fields', function (Blueprint $table) {
+            $table->dropColumn('Active');
+        });
 
-        // Schema::table('services', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
-        // });
+        Schema::table('services', function (Blueprint $table) {
+            $table->dropColumn('Active');
+        });
 
-        // Schema::table('task_type', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
-        // });
-        //  Schema::table('currency', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
-        // });
-        // Schema::table('tools', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
+        Schema::table('task_type', function (Blueprint $table) {
+            $table->dropColumn('Active');
+        });
+         Schema::table('currency', function (Blueprint $table) {
+            $table->dropColumn('Active');
+        });
+        Schema::table('tools', function (Blueprint $table) {
+            $table->dropColumn('Active');
 
-        // });
-        // Schema::table('languages', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
+        });
+        Schema::table('languages', function (Blueprint $table) {
+            $table->dropColumn('Active');
 
-        // });
-        // Schema::table('unit', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
-        // });
-        // Schema::table('languages_dialect', function (Blueprint $table) {
-        //     $table->dropColumn('Active');
+        });
+        Schema::table('unit', function (Blueprint $table) {
+            $table->dropColumn('Active');
+        });
+        Schema::table('languages_dialect', function (Blueprint $table) {
+            $table->dropColumn('Active');
 
-        // });
+        });
 
     }
 };

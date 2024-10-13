@@ -29,7 +29,12 @@ export const VM = [
                     fields={[
                         { name: 'zone', type: 'text', field: "input" },
                         { name: 'gmt', type: 'text', field: "input" },
-                        { name: 'Active', type: 'number', field: "selec" }
+                        {
+                            name: 'Active', type: 'number', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
                     columns={["id", "zone", "gmt", "Active"]}
@@ -50,7 +55,12 @@ export const VM = [
                     fields={[
                         { name: 'name', type: 'text', field: "input" },
                         { name: 'abbreviations', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
                 />
@@ -61,19 +71,24 @@ export const VM = [
         path: 'Country',
         element: (
             <LazyWrapper>
-                <CodeTable table="Country" dataTable="countries" header={["id", " name", "region","Active" , "Edit", "Delete"]} related={{
-                    'table' : 'regions',     
-                    'foreign_key' : 'region', 
-                    'primary_key' :'id',   
-                    'columns' : ['name']
+                <CodeTable table="Country" dataTable="countries" header={["id", " name", "region", "Active", "Edit", "Delete"]} related={{
+                    'table': 'regions',
+                    'foreign_key': 'region',
+                    'primary_key': 'id',
+                    'columns': ['name']
                 }}
                     fields={[
-                        { name: 'name', type: 'text', field:"input"},
-                        { name: 'region', type: 'text', field: "selec" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        { name: 'name', type: 'text', field: "input" },
+                        { name: 'region', type: 'text', field: "selec", tableData: "regions" },
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
-                    columns={["id", "name","Active"]}
+                    columns={["id", "name", "Active"]}
 
                 />
             </LazyWrapper>
@@ -88,7 +103,12 @@ export const VM = [
                     columns={["id", "name", "Active"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
                 />
@@ -99,11 +119,16 @@ export const VM = [
         path: 'Main-Subject Matter',
         element: (
             <LazyWrapper>
-                    
+
                 <CodeTable table="Main-Subject Matter" dataTable="fields" columns={["id", "name", "Active"]} header={["id", " name", "Active", "Edit", "Delete"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
                 />
@@ -117,7 +142,12 @@ export const VM = [
                 <CodeTable table="Sub–Subject Matter" dataTable="fields" columns={["id", "name", "Active"]} header={["id", " name", "Active", "Edit", "Delete"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
                 />
@@ -128,13 +158,18 @@ export const VM = [
         path: 'Service',
         element: (
             <LazyWrapper>
-                    
+
                 <CodeTable table="Service" dataTable="services" columns={["id", "name", "abbreviations", "Active"]}
                     header={["id", " name", "abbreviations", "Active", "Edit", "Delete"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input" },
                         { name: 'abbreviations', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
                     ]}
                 />
             </LazyWrapper>
@@ -154,8 +189,13 @@ export const VM = [
                     columns={["id", "name", "Active"]}
                     fields={[
                         { name: 'Name', type: 'text', field: "input" },
-                        { name: 'Service', type: 'text', field: "selec" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        { name: 'Service', type: 'text', field: "selec", tableData: "services" },
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
                 />
@@ -170,7 +210,12 @@ export const VM = [
                     columns={["id", "name", "Active"]}
                     fields={[
                         { name: 'Name', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
                 />
@@ -192,7 +237,12 @@ export const VM = [
                 <CodeTable table="Tools" dataTable="tools" columns={["id", "name", "Active"]} header={["id", " name", "Active", "Edit", "Delete"]}
                     fields={[
                         { name: 'Name', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
                 />
@@ -208,7 +258,12 @@ export const VM = [
                     columns={["id", "name", "Active"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
                 />
@@ -221,16 +276,21 @@ export const VM = [
             <LazyWrapper>
                 <CodeTable table="Dialect" dataTable="languages_dialect" header={["id", "dialect", "language", "Active", "Edit", "Delete"]}
                     columns={["id", "dialect", "Active"]}
-                related={{
-                    'table': 'languages',
-                    'foreign_key': 'language',
-                    'primary_key': 'id',
-                    'columns': ['name']
+                    related={{
+                        'table': 'languages',
+                        'foreign_key': 'language',
+                        'primary_key': 'id',
+                        'columns': ['name']
                     }}
                     fields={[
                         { name: 'name', type: 'text', field: "input" },
-                        { name: 'language', type: 'text', field: "selec" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        { name: 'language', type: 'text', field: "selec", tableData: "languages" },
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]}
                 />
@@ -245,7 +305,12 @@ export const VM = [
                     columns={["id", "name", "Active"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
                     ]}
                 />
             </LazyWrapper>
@@ -260,7 +325,12 @@ export const VM = [
                     columns={["id", "name", "Active"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]} />
             </LazyWrapper>
@@ -275,7 +345,12 @@ export const VM = [
                     columns={["id", "name", "Active"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input" },
-                        { name: 'Active', type: 'text', field: "selec" }
+                        {
+                            name: 'Active', type: 'text', field: "selec", static: [
+                                { value: '1', label: 'Active' },
+                                { value: '0', label: 'Inactive' },
+                            ]
+                        }
 
                     ]} />
             </LazyWrapper>
