@@ -9,6 +9,8 @@ class Service extends Model
 {
     use HasFactory;
     protected $table = 'services';
+    protected $fillable = ['name', 'abbreviations', 'Active'];
+    public $timestamps = false;
 
     public static function SelectData($searchTerm = null)
     {
@@ -20,5 +22,9 @@ class Service extends Model
 
         }
         return $query->get();
+    }
+    public static function insert($data)
+    {
+        return self::create($data);
     }
 }

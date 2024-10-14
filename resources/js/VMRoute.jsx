@@ -188,8 +188,8 @@ export const VM = [
                     }}
                     columns={["id", "name", "Active"]}
                     fields={[
-                        { name: 'Name', type: 'text', field: "input" },
-                        { name: 'Service', type: 'text', field: "selec", tableData: "services" },
+                        { name: 'name', type: 'text', field: "input" },
+                        { name: 'service', type: 'text', field: "selec", tableData: "services" },
                         {
                             name: 'Active', type: 'text', field: "selec", static: [
                                 { value: '1', label: 'Active' },
@@ -209,7 +209,7 @@ export const VM = [
                 <CodeTable table="Currency" dataTable="currency" header={["id", " name", "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[
-                        { name: 'Name', type: 'text', field: "input" },
+                        { name: 'name', type: 'text', field: "input" },
                         {
                             name: 'Active', type: 'text', field: "selec", static: [
                                 { value: '1', label: 'Active' },
@@ -236,7 +236,7 @@ export const VM = [
             <LazyWrapper>
                 <CodeTable table="Tools" dataTable="tools" columns={["id", "name", "Active"]} header={["id", " name", "Active", "Edit", "Delete"]}
                     fields={[
-                        { name: 'Name', type: 'text', field: "input" },
+                        { name: 'name', type: 'text', field: "input" },
                         {
                             name: 'Active', type: 'text', field: "selec", static: [
                                 { value: '1', label: 'Active' },
@@ -283,7 +283,7 @@ export const VM = [
                         'columns': ['name']
                     }}
                     fields={[
-                        { name: 'name', type: 'text', field: "input" },
+                        { name: 'dialect', type: 'text', field: "input" },
                         { name: 'language', type: 'text', field: "selec", tableData: "languages" },
                         {
                             name: 'Active', type: 'text', field: "selec", static: [

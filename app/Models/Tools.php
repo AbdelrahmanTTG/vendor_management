@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Currency extends Model
+class Tools extends Model
 {
     use HasFactory;
-    protected $table = 'currency';
-    protected $fillable = [ 'name', 'Active'];
     public $timestamps = false;
+    protected $fillable = ['name', 'parent', 'Active'];
     public static function insert($data)
     {
-        return self::create($data);
+        $data['parent'] = 0;
+        $insertedData = self::create($data);
+        unset($insertedData['parent']);
+        return $insertedData;
     }
-
 }

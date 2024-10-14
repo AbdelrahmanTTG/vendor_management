@@ -5,22 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TaskType extends Model
+class Dialect extends Model
 {
     use HasFactory;
-    protected $table = 'task_type';
-
     public $timestamps = false;
-    protected $fillable = ['name', 'parent', 'Active'];
+    protected $fillable = ['language', 'dialect', 'Active'];
+    protected $table = 'languages_dialect';
     public static function insert($data)
     {
-        if(isset($data['service'])){
-            $data = [
-                'name' => $data['name'],
-                'Active' => $data['Active'],
-                'parent' => $data['service'],
-            ];
-        }
         $insetData = self::create($data);
         $relatedRecord = Service::find($insetData->parent);
         return [
@@ -29,6 +21,6 @@ class TaskType extends Model
             'Service' => $relatedRecord->name,
             'Active' => $insetData->Active,
         ];
-       
+
     }
 }

@@ -9,6 +9,8 @@ class Language extends Model
 {
     use HasFactory;
     protected $table = 'languages';
+    protected $fillable = ['name', 'Active',"created_by"];
+    public $timestamps = false;
     public static function SelectData($searchTerm = null)
     {
 
@@ -19,6 +21,14 @@ class Language extends Model
 
         }
         return $query->get();
+    }
+    public static function insert($data)
+    {
+        $data['created_by'] = 0;
+        $insertedData = self::create($data);
+        unset($insertedData['created_by']);
+        unset($insertedData['created_at']);
+        return $insertedData;
     }
                    
 }

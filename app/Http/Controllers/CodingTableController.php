@@ -10,6 +10,12 @@ use App\Models\TimeZone;
 use App\Models\Countries;
 use App\Models\Messaging;
 use App\Models\MainSubjectMatter;
+use App\Models\TaskType;
+use App\Models\Currency;
+use App\Models\Tools;
+
+
+
 
 
 use Illuminate\Support\Facades\Validator;
@@ -18,7 +24,7 @@ use Illuminate\Support\Facades\Validator;
 
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['regions', 'services', 'languages',"time_zone","countries" ,"messaging_types" ,"fields"];
+    protected static $validTables = ['regions', 'services', 'languages',"time_zone","countries" ,"messaging_types" ,"fields","task_type","currency" ,"tools"];
 
     protected static $models = [
         'regions' =>   Regions::class,
@@ -27,7 +33,10 @@ class CodingTableController extends Controller
         "time_zone"=>  TimeZone::class,
         "countries"=>  Countries::class,
         "messaging_types" =>Messaging::class,
-        "fields"=> MainSubjectMatter::class
+        "fields"=> MainSubjectMatter::class,
+        "task_type"=> TaskType::class,
+        "currency"=> Currency::class,
+        "tools"=> Tools::class
     ];
     public function SelectDatatTable(Request $request)
     {
@@ -73,14 +82,14 @@ class CodingTableController extends Controller
             return response()->json(['error' => 'No data provided'], 400);
         }
 
-        try {
+        // try {
             $inserted = $modelClass::insert($data);
             return response()->json($inserted, 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'An error occurred while adding the data. Please try again later.'
-            ], 500);
-        }
+        // } catch (\Exception $e) {
+        //     return response()->json([
+        //         'message' => 'An error occurred while adding the data. Please try again later.'
+        //     ], 500);
+        // }
     }
 
     protected function containsScript($request)
