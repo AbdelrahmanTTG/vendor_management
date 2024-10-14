@@ -1,0 +1,8 @@
+alter table master_user add column `use_system` varchar(50);
+alter table master_user add column `use_type` int
+
+alter table screen add column `use_system` varchar(50);
+
+update master_user set use_system = 'ERP',use_type = '1'
+update screen set use_system = 'ERP'
+
