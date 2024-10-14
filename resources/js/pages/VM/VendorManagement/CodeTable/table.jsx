@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect ,useState} from 'react';
 import { Col, Card, CardHeader, Table, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
-import { Pagi_Nations, Previous, Next } from '../../../../Constant';
-
+import {  Previous, Next } from '../../../../Constant';
+import SweetAlert from 'sweetalert2';
 import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Add from "./ModelAdd"
 import axiosClient from "../../../../pages/AxiosClint";
@@ -12,6 +12,8 @@ const table = (props) => {
     const [totalPages, setTotalPages] = useState(1); 
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(true);
+    const [alert, setalert] = useState(false)
+
     const onAddData = (newData) => {
         setdataTable(prevData => [...prevData, newData]);
     };
@@ -104,6 +106,64 @@ const table = (props) => {
 
         return items;
     };
+    const handelDelete = (item) => {
+        SweetAlert.fire({
+            title: 'Are you sure?',
+            text: `You want to delete ( ${item.name} ) !`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!',
+            reverseButtons: true
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const success = await onDelete(item.id);
+                if (success) {
+                    SweetAlert.fire(
+                        'Deleted!',
+                        `${item.name} has been deleted.`,
+                        'success'
+                    );  
+                } else {
+                    SweetAlert.fire(
+                        'Ooops !',
+                        ' An error occurred while deleting. :)',
+                        'error'
+                    ); 
+                }
+              
+            } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
+                SweetAlert.fire(
+                    'Cancelled',
+                    'Your item is safe :)',
+                    'error'
+                );
+            }
+        });
+    }
+    const onDelete = async (id) => {
+            try {
+                const payload = {
+                    id: id,
+                    table: props.dataTable
+                }
+                const { data } = await axiosClient.delete("deleteData", { data: payload });
+                setdataTable(prevData => prevData.filter(item => item.id !== id));
+
+                return data
+            } catch (err) {
+                const response = err.response;
+                if (response && response.data) {
+                    setErrorMessage(response.data.message || "An unexpected error occurred.");
+                } else {
+                    setErrorMessage("An unexpected error occurred.");
+                }
+                return false
+
+                // basictoaster("dangerToast", response.data.message)
+            }
+    };
+
 
     return (
         <Fragment>
@@ -164,7 +224,7 @@ const table = (props) => {
                                                     </button>
                                                 </td>
                                                 <td>
-                                                    <button style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                                    <button onClick={() => handelDelete(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
                                                         <i className="icofont icofont-ui-delete"></i>
                                                     </button>
                                                 </td>
@@ -183,6 +243,7 @@ const table = (props) => {
                     </div>
                 </Card>
             </Col>
+           
         </Fragment>
     );
 };

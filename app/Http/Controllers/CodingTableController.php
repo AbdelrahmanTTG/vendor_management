@@ -13,30 +13,33 @@ use App\Models\MainSubjectMatter;
 use App\Models\TaskType;
 use App\Models\Currency;
 use App\Models\Tools;
-
-
-
-
-
+use App\Models\Dialect;
+use App\Models\Unit;
+use App\Models\UniversityDegree;
+use App\Models\Major;
 use Illuminate\Support\Facades\Validator;
-
+use DB;
 
 
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['regions', 'services', 'languages',"time_zone","countries" ,"messaging_types" ,"fields","task_type","currency" ,"tools"];
+    protected static $validTables = ['regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit","university_degree","major"];
 
     protected static $models = [
-        'regions' =>   Regions::class,
-        'services' =>  Service::class,
+        'regions' => Regions::class,
+        'services' => Service::class,
         'languages' => Language::class,
-        "time_zone"=>  TimeZone::class,
-        "countries"=>  Countries::class,
-        "messaging_types" =>Messaging::class,
-        "fields"=> MainSubjectMatter::class,
-        "task_type"=> TaskType::class,
-        "currency"=> Currency::class,
-        "tools"=> Tools::class
+        "time_zone" => TimeZone::class,
+        "countries" => Countries::class,
+        "messaging_types" => Messaging::class,
+        "fields" => MainSubjectMatter::class,
+        "task_type" => TaskType::class,
+        "currency" => Currency::class,
+        "tools" => Tools::class,
+        "languages_dialect" => Dialect::class,
+        "unit" => Unit::class,
+        "university_degree" => UniversityDegree::class,
+        "major" => Major::class
     ];
     public function SelectDatatTable(Request $request)
     {
@@ -83,13 +86,31 @@ class CodingTableController extends Controller
         }
 
         // try {
-            $inserted = $modelClass::insert($data);
-            return response()->json($inserted, 200);
+        $inserted = $modelClass::insert($data);
+        return response()->json($inserted, 200);
         // } catch (\Exception $e) {
         //     return response()->json([
         //         'message' => 'An error occurred while adding the data. Please try again later.'
         //     ], 500);
         // }
+    }
+    public function destroy(Request $request){
+        $request->validate([
+            'id' => 'required|integer',
+            'table' => 'required|string|in:' . implode(',', self::$validTables),
+        ]);
+        $id = $request->input('id');
+        $table = $request->input('table');
+        if (!in_array($table, self::$validTables)) {
+            return response()->json(['error' => 'Invalid table name'], 400);
+        }
+        $deleted = DB::table($table)->where('id', $id)->delete();
+        if ($deleted) {
+            return response()->json(['message' => 'Resource deleted successfully'],201);
+        } else {
+            return response()->json(['error' => 'Resource not found or already deleted'], 404);
+        }
+
     }
 
     protected function containsScript($request)

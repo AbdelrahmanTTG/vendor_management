@@ -16,7 +16,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('logout', [AuthController::class, 'logout']);
     Route::post('tableDate', [VmCodeTableController::class,'SelectDataTable']);
     Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
-    Route::post('SubmetDatat', [CodingTableController::class, 'store']);
+    Route::post('SubmetData', [CodingTableController::class, 'store']);
+    Route::delete('/deleteData', [CodingTableController::class, 'destroy']);
+
 
     // Route::get('Service', [SelectorController::class, 'Service']);
 

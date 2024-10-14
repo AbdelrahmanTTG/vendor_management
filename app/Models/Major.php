@@ -5,19 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Unit extends Model
+class Major extends Model
 {
     use HasFactory;
-    protected $table = 'unit';
-
-    protected $fillable = ['name', 'le', 'Active'];
     public $timestamps = false;
+    protected $table = 'major';
+
+    protected $fillable = ['name', 'Active'];
     public static function insert($data)
     {
-        $data['le'] = 0;
         $insertedData = self::create($data);
-        unset($insertedData['le']);
+        unset($insertedData['updated_at']);
+        unset($insertedData['created_at']);
         return $insertedData;
     }
-
 }

@@ -14,11 +14,11 @@ class Dialect extends Model
     public static function insert($data)
     {
         $insetData = self::create($data);
-        $relatedRecord = Service::find($insetData->parent);
+        $relatedRecord = Language::find($insetData->language);
         return [
             'id' => $insetData->id,
-            'name' => $insetData->name,
-            'Service' => $relatedRecord->name,
+            'dialect' => $insetData->dialect,
+            'Language' => $relatedRecord->name,
             'Active' => $insetData->Active,
         ];
 
