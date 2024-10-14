@@ -6,3 +6,8 @@ alter table screen add column `use_system` varchar(50);
 update master_user set use_system = 'ERP',use_type = '1'
 update screen set use_system = 'ERP'
 
+ALTER TABLE `job_task_conversation` CHANGE `file` `file` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL; 
+
+ALTER TABLE `job_task_log` CHANGE `comment` `comment` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL; 
+ALTER TABLE `job_task` ADD `invoice_id` INT(10) UNSIGNED NULL ; 
+ALTER TABLE `job_task` ADD FOREIGN KEY (`invoice_id`) REFERENCES `vendor_invoices`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION; 

@@ -32,10 +32,10 @@ const Notifications = () => {
         <Row>
           <Col sm="12">
             <Card>
-              <CardHeader>
-                <H5>List Of Heads Up </H5>
-                <span> {'Use a class'} <code> {'table'} </code> {'to any table.'}</span>
-              </CardHeader>
+              {/* <CardHeader> */}
+                {/* <H5>List Of Heads Up </H5> */}
+                {/* <span> {'Use a class'} <code> {'table'} </code> {'to any table.'}</span> */}
+              {/* </CardHeader> */}
               <CardBody>             
                 <JobsTable pageTasks={pageTasks} tableLinks={tableLinks} />
               </CardBody>

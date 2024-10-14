@@ -12,6 +12,7 @@ import Portal_Jobs_Offers from "./pages/VendorPortal/Jobs/Offers";
 import Portal_Jobs_Notifications from "./pages/VendorPortal/Jobs/Notifications";
 import Portal_Invoices_All from "./pages/VendorPortal/Invoices/AllInvoices";
 import Portal_Invoices_Verified from "./pages/VendorPortal/Invoices/VerifiedInvoices";
+import Portal_Add_Invoice from "./pages/VendorPortal/Invoices/AddInvoice";
 import Portal_ViewOffer from "./pages/VendorPortal/Jobs/ViewOffer";
 import Portal_ViewJob from "./pages/VendorPortal/Jobs/ViewJob";
 import NotFound from "./NotFound";
@@ -44,7 +45,7 @@ const router = createBrowserRouter([
         children: [
             {
                 path: '',
-                element: <Home />
+                element: <Portal_Dashboard />
             },
             {
                 path: 'Jobs',
@@ -88,6 +89,10 @@ const router = createBrowserRouter([
                     {
                         path: 'Verified',
                         element: <Portal_Invoices_Verified />
+                    },
+                    {
+                        path: 'addInvoice',
+                        element: <Portal_Add_Invoice />
                     },
                 ]
             },

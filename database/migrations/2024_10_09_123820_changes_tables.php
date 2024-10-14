@@ -19,6 +19,12 @@ return new class extends Migration
         {
             $table->text('comment')->nullable()->change();
         });
+
+        Schema::table('job_task', function($table)
+        {
+            $table->unsignedInteger('invoice_id')->nullable();
+            $table->foreign('invoice_id')->references('id')->on('vendor_invoices')->noActionOnDelete()->noActionOnUpdate();
+        });
     }
 
     /**

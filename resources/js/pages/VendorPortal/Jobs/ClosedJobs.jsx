@@ -32,10 +32,10 @@ const ClosedJobs = () => {
         <Row>
           <Col sm="12">
             <Card>
-              <CardHeader>
-                <H5>List Of Finished Jobs</H5>               
-              </CardHeader>
-              <CardBody>
+              {/* <CardHeader> */}
+                {/* <H5>List Of Finished Jobs</H5>                */}
+              {/* </CardHeader> */}
+              <CardBody className='b-l-primary'>
                 <JobsTable pageTasks={pageTasks} tableLinks={tableLinks} />
               </CardBody>
             </Card>

@@ -37,11 +37,11 @@ const VerifiedInvoices = () => {
                 <Row>
                     <Col sm="12">
                         <Card>
-                            <CardHeader className=' b-l-primary'>
-                               
-                               
-                            </CardHeader>
-                            <CardBody>
+                            {/* <CardHeader className=' b-l-primary'> */}
+{/*                                 */}
+{/*                                 */}
+                            {/* </CardHeader> */}
+                            <CardBody className='b-l-primary'>
                                 <InvoicesTable pageInvoices={pageInvoices} tableLinks={tableLinks} />
                             </CardBody>
                         </Card>

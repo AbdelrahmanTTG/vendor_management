@@ -18,7 +18,7 @@ const PlanModal = (props) => {
     'status': statusInput,
     'note': noteInput,
   };
-  console.log(statusInput);
+
   const planTaskReply = () => {
     if (!window.confirm("Are you sure?")) {
       return;
@@ -45,23 +45,22 @@ const PlanModal = (props) => {
       <ModalBody className={props.bodyClass}>
         <Row>
           <Col>
-            <FormGroup className='mb-0'>
-              <Label>{'Notes :'}</Label>
-              <Input type='textarea' className='form-control' rows='5' name="note" onChange={e => setNoteInput(e.target.value)} />
+            <FormGroup className="row">
+              <Label className="col-sm-3 col-form-label">{'Select Reply'}</Label>
+              <Col sm="9">
+                <Input type="select" name="status" className="custom-select form-control" onChange={e => setStatusInput(e.target.value)}>
+                  <option value="8">{'Available'}</option>
+                  <option value="9">{'Not Available'}</option>
+                </Input>
+              </Col>
             </FormGroup>
           </Col>
         </Row>
         <Row>
           <Col>
-            <FormGroup className="row">
-              <Label className="col-sm-3 col-form-label">{'Select Reply'}</Label>
-              <Col sm="9">
-                <Input type="select" name="status" className="custom-select form-control" onChange={e => setStatusInput(e.target.value)}>
-
-                  <option value="8">{'Available'}</option>
-                  <option value="9">{'Not Available'}</option>
-                </Input>
-              </Col>
+            <FormGroup className='mb-0'>
+              <Label>{'Notes :'}</Label>
+              <Input type='textarea' className='form-control' rows='5' name="note" onChange={e => setNoteInput(e.target.value)} />
             </FormGroup>
           </Col>
         </Row>

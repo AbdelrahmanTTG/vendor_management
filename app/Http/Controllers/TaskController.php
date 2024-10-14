@@ -235,7 +235,7 @@ class TaskController extends Controller
                 $job_data['code'] = $offer->generateTaskCode();
                 // insert data into job_task   
                 $task = Task::create($job_data);
-                if (Task::create($job_data)) {
+                if ($task) {
                     $insert_id = $task->id;
                     // add to task log
                     $this->addToTaskLogger($insert_id, 1, $request->vendor);

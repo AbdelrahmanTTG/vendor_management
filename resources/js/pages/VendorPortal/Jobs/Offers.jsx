@@ -33,9 +33,9 @@ const Offers = () => {
         <Row>
           <Col sm="12">
             <Card>
-              <CardHeader>
-                <H5>List Of New Jobs</H5>               
-              </CardHeader>
+              {/* <CardHeader> */}
+                {/* <H5>List Of New Jobs</H5>                */}
+              {/* </CardHeader> */}
             <CardBody>
             <JobsTable pageTasks={pageTasks} tableLinks={tableLinks} />
             </CardBody>

@@ -11,7 +11,8 @@ class Task extends Model
     protected $table = 'job_task';
     public $timestamps = false;
     protected $fillable = [
-        'status','vendor_attachment','vendor_notes','plan_comment'
+        'status','vendor_attachment','vendor_notes','plan_comment','verified','vpo_file',
+        'invoice_created_at','invoice_id'
         
     ];
 

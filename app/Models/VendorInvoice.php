@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class VendorInovice extends Model
+class VendorInvoice extends Model
 {
     use HasFactory;
     protected $table = 'vendor_invoices';
@@ -15,7 +15,8 @@ class VendorInovice extends Model
         'vpo_file',
         'invoice_date',
         'verified',
-        'payment_method'
+        'payment_method',
+        'total',
 
     ];
 

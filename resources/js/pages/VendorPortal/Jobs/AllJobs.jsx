@@ -36,11 +36,11 @@ const AllJobs = () => {
                 <Row>
                     <Col sm="12">
                         <Card>
-                            <CardHeader className=' b-l-primary'>
-                                <H5>List Of All Jobs</H5>
+                            {/* <CardHeader className=' b-l-primary'> */}
+                                {/* <H5>List Of All Jobs</H5> */}
                                 {/* <span> {'Use a class'} <code> {'table'} </code> {'to any table.'}</span> */}
-                            </CardHeader>
-                            <CardBody>
+                            {/* </CardHeader> */}
+                            <CardBody className='b-l-primary'>
                                 <JobsTable pageTasks={pageTasks} tableLinks={tableLinks} />
                             </CardBody>
                         </Card>

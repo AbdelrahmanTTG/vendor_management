@@ -33,7 +33,7 @@ const AllInvoices = () => {
   return (
     <Fragment>
       <BreadcrumbsPortal mainTitle="All Invoices" parent="My Invoices" title="All Invoices" >
-        <Link to={`/Vendor/addInvoice`}>
+        <Link to={`/Vendor/Invoices/addInvoice`}>
           <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
             <i className="icofont icofont-pencil-alt-2 me-1"></i>{'Add Invoice'}
           </Btn>
