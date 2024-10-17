@@ -10,6 +10,7 @@ use App\Models\OfferList;
 use App\Models\Task;
 use App\Models\TaskConversation;
 use App\Models\TaskLog;
+use App\Models\VendorInvoice;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -19,7 +20,33 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() {}
+    public function index(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|string',
+        ]);
+        $runningJobs = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status',  0)->orderBy('created_at', 'desc')->take(3)->get();
+        $finishedJobs = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->orderBy('created_at', 'desc')->take(3)->get();
+        $offers1 = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->take(2)->get();
+        $offers2 = OfferList::where('vendor_list', 'Like', "%$request->id,%")->where('status', 4)->orderBy('created_at', 'desc')->take(2)->get();
+        // start count
+        $runningJobsCount = Task::where('vendor',$request->id)->where('job_portal', 1)->where('status', 0)->count();
+        $closedJobsCount = Task::where('vendor',$request->id)->where('job_portal', 1)->where('status',1)->count();
+        $offerJobsCount1 = Task::where('vendor',$request->id)->where('job_portal', 1)->where('status',4)->count();
+        $offerJobsCount2 = OfferList::where('vendor_list', 'Like', "%$request->id,%")->where('job_portal', 1)->where('status',4)->count();
+        $invoiceCount = VendorInvoice::where('vendor_id',  $request->id)->count();
+        return response()->json([
+            "runningJobs" => TaskResource::collection($runningJobs),
+            "finishedJobs" => TaskResource::collection($finishedJobs),
+            "pendingJobs" => TaskResource::collection($offers1->merge($offers2)),
+            "countData"=>([
+                "runningJobsCount"=>$runningJobsCount,
+                "closedJobsCount"=>$closedJobsCount,
+                "offerJobsCount"=>$offerJobsCount1 + $offerJobsCount2,
+                "invoiceCount"=>$invoiceCount,
+            ])
+        ], 200);
+    }
 
     /**
      * List All Jobs 

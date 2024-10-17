@@ -4,7 +4,12 @@ import { Btn } from '../../../AbstractElements';
 import { Link } from 'react-router-dom';
 
 const JobsTable = (props) => {
-
+    let viewStatus = 'true';
+    {
+        props.viewStatus && (
+            viewStatus = props.viewStatus
+        )
+    }
     return (
         <Fragment>
             <div className="table-responsive">
@@ -21,7 +26,9 @@ const JobsTable = (props) => {
                             <th scope="col">{'Currency'}</th>
                             <th scope="col">{'Start Date'}</th>
                             <th scope="col">{'Delivery Date'}</th>
-                            <th scope="col">{'Status'}</th>
+                            {viewStatus == "true" && (
+                                <th scope="col">{'Status'}</th>
+                            )}
                             <th scope="col">{'Actions'}</th>
                         </tr>
                     </thead>
@@ -38,7 +45,9 @@ const JobsTable = (props) => {
                                 <td>{item.currency.name}</td>
                                 <td>{item.start_date}</td>
                                 <td>{item.delivery_date}</td>
-                                <td>{item.statusData}</td>
+                                {viewStatus == "true" && (
+                                    <td>{item.statusData}</td>
+                                )}
                                 <td>
                                     {item.type == 'job_offer' ? (
                                         <Link to={`/Vendor/Jobs/viewOffer/${item.offer_type}/${item.id}`}>
@@ -46,7 +55,7 @@ const JobsTable = (props) => {
                                                 {'View Offer'}
                                             </Btn>
                                         </Link>
-                                        ) :
+                                    ) :
                                         (
                                             <Link to={`/Vendor/Jobs/viewJob/${item.id}`}>
                                                 <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
@@ -60,24 +69,24 @@ const JobsTable = (props) => {
                         }
                     </tbody>
                 </Table>
+                {props.tableLinks && (
+                    <div className="p-5 m-5">
+                        {props.tableLinks.map(link => (
+                            link.url ? (
+                                <Link key={link.label}
+                                    className={`p-1 mx-1 ${link.active ? " text-blue-500 font-bold" : ""}`}
+                                    href={link.url}
+                                    dangerouslySetInnerHTML={{ __html: link.label }} />
 
-                <div className="p-5 m-5">
-                    {props.tableLinks.map(link => (
-                        link.url ? (
-                            <Link key={link.label}
-                                className={`p-1 mx-1 ${link.active ? " text-blue-500 font-bold" : ""}`}
-                                href={link.url}
-                                dangerouslySetInnerHTML={{ __html: link.label }} />
 
+                            ) : (
+                                <span key={link.label}
+                                    className='p-1 mx-1 text-slate-500'
+                                    dangerouslySetInnerHTML={{ __html: link.label }} />
+                            )
+                        ))}
 
-                        ) : (
-                            <span key={link.label}
-                                className='p-1 mx-1 text-slate-500'
-                                dangerouslySetInnerHTML={{ __html: link.label }} />
-                        )
-                    ))}
-
-                </div>
+                    </div>)}
             </div>
         </Fragment>
     );

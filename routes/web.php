@@ -28,5 +28,6 @@ Route::group(['prefix' => 'Portal'], function () {
     Route::post('Vendor/selectCompletedJobs', [InvoiceController::class, 'selectCompletedJobs'])->name('Vendor.selectCompletedJobs');
     Route::post('Vendor/getSelectedJobData', [InvoiceController::class, 'getSelectedJobData'])->name('Vendor.getSelectedJobData');
     Route::post('Vendor/saveInvoice', [InvoiceController::class, 'saveInvoice'])->name('Vendor.saveInvoice');
+    Route::post('Vendor/dashboardData', [TaskController::class, 'index'])->name('Vendor.dashboardData');
 });
 
