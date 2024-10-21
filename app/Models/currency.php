@@ -15,5 +15,18 @@ class Currency extends Model
     {
         return self::create($data);
     }
+    public function updatedata($data)
+    {
+        $item = self::find($data['id']);
+        if (!$item) {
+            return null;
+        }
+        $item->fill($data);
+        $item->save();
+
+        return $item;
+
+    }
+    
 
 }

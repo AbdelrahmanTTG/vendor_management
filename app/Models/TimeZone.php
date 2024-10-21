@@ -18,4 +18,27 @@ class TimeZone extends Model
         unset($insertedData['status']);
         return $insertedData;
     }
+    public function updatedata($data)
+    {
+        $item = self::find($data['id']);
+        if (!$item) {
+            return null;
+        }
+        $item->fill($data);
+        $item->save();
+        unset($item['status']);
+        return $item;
+
+    }
+    public static function SelectData($searchTerm = null)
+    {
+
+        if ($searchTerm) {
+            $query = self::where('gmt', 'like', '%' . $searchTerm . '%');
+        } else {
+            $query = self::select('id', 'gmt')->limit(5);
+
+        }
+        return $query->get();
+    }
 }

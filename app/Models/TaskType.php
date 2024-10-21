@@ -26,9 +26,33 @@ class TaskType extends Model
         return [
             'id' => $insetData->id,
             'name' => $insetData->name,
-            'Service' => $relatedRecord->name,
+            'parent' => (object) [
+                'id' => $relatedRecord->id,
+                'name' => $relatedRecord->name
+            ],
             'Active' => $insetData->Active,
         ];
        
+    }
+    public function updatedata($data)
+    {
+        $item = self::find($data['id']);
+        if (!$item) {
+            return null;
+        }
+        $item->fill($data);
+        $item->save();
+        $relatedRecord = Service::find($item->parent);
+
+        return [
+            'id' => $item->id,
+            'name' => $item->name,
+            'parent' => (object) [
+                'id' => $relatedRecord->id,
+                'name' => $relatedRecord->name
+            ],
+            'Active' => $item->Active,
+        ];
+
     }
 }

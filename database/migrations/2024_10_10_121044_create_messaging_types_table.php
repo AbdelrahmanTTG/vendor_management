@@ -14,19 +14,19 @@ return new class extends Migration {
         Schema::create('messaging_types', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('active')->default(true);
+            $table->boolean('Active')->default(true);
             $table->timestamps();
         });
         Schema::create('University_Degree', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('active')->default(true);
+            $table->boolean('Active')->default(true);
             $table->timestamps();
         });
         Schema::create('Major', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('active')->default(true);
+            $table->boolean('Active')->default(true);
             $table->timestamps();
         });
 

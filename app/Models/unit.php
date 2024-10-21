@@ -19,5 +19,18 @@ class Unit extends Model
         unset($insertedData['le']);
         return $insertedData;
     }
+    public function updatedata($data)
+    {
+        $item = self::find($data['id']);
+        if (!$item) {
+            return null;
+        }
+        $item->fill($data);
+        $item->save();
+        unset($item['le']);
+
+        return $item;
+
+    }
 
 }

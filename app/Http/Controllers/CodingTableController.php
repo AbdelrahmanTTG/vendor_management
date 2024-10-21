@@ -23,7 +23,7 @@ use DB;
 
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit","university_degree","major"];
+    protected static $validTables = ['regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major"];
 
     protected static $models = [
         'regions' => Regions::class,
@@ -60,6 +60,8 @@ class CodingTableController extends Controller
         $data = $modelClass::SelectData($searchTerm);
         return response()->json($data, 200);
     }
+
+
     public function store(Request $request)
     {
         foreach ($request->all() as $key => $value) {
@@ -85,16 +87,17 @@ class CodingTableController extends Controller
             return response()->json(['error' => 'No data provided'], 400);
         }
 
-        // try {
-        $inserted = $modelClass::insert($data);
-        return response()->json($inserted, 200);
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'message' => 'An error occurred while adding the data. Please try again later.'
-        //     ], 500);
-        // }
+        try {
+            $inserted = $modelClass::insert($data);
+            return response()->json($inserted, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while adding the data. Please try again later.'
+            ], 500);
+        }
     }
-    public function destroy(Request $request){
+    public function destroy(Request $request)
+    {
         $request->validate([
             'id' => 'required|integer',
             'table' => 'required|string|in:' . implode(',', self::$validTables),
@@ -106,11 +109,38 @@ class CodingTableController extends Controller
         }
         $deleted = DB::table($table)->where('id', $id)->delete();
         if ($deleted) {
-            return response()->json(['message' => 'Resource deleted successfully'],201);
+            return response()->json(['message' => 'Resource deleted successfully'], 201);
         } else {
             return response()->json(['error' => 'Resource not found or already deleted'], 404);
         }
 
+    }
+    public function update(Request $request)
+    {
+        foreach ($request->all() as $key => $value) {
+            if (is_null($value) || (is_string($value) && trim($value) === '')) {
+                return response()->json(['error' => "The field '$key' cannot be empty"], 400);
+            }
+
+            if ($this->containsScript($request)) {
+                return response()->json(['error' => "The field '$key' contains invalid content"], 400);
+            }
+        }
+        $table = $request->input('table');
+        if (!$table || !in_array($table, self::$validTables)) {
+            return response()->json(['error' => 'Invalid table'], 400);
+        }
+        $modelClass = self::$models[$table] ?? null;
+        if (!$modelClass) {
+            return response()->json(['error' => 'Invalid model'], 400);
+        }
+    
+        $item = (new $modelClass())->updatedata($request->all());
+
+        if (!$item) {
+            return response()->json(['message' => 'Item not found'], 404);
+        }
+        return response()->json($item);
     }
 
     protected function containsScript($request)

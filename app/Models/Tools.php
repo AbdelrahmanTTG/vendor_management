@@ -17,4 +17,17 @@ class Tools extends Model
         unset($insertedData['parent']);
         return $insertedData;
     }
+    public function updatedata($data)
+    {
+        $item = self::find($data['id']);
+        if (!$item) {
+            return null;
+        }
+        $item->fill($data);
+        $item->save();
+        unset($item['parent']);
+
+        return $item;
+
+    }
 }

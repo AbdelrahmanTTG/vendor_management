@@ -25,7 +25,7 @@ const Login = () => {
     }
     axiosClient.post("auth/login", payload).then(({ data }) => {
       setUser(data.user);
-      setToken(data.token);
+      setToken(data.token, data.expires_in);
         if (data.user.user_type) {
           setRedirect("/vendor");
          }else{

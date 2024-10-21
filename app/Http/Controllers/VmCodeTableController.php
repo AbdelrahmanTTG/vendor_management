@@ -38,19 +38,27 @@ class VmCodeTableController extends Controller
         if ($related) {
             if ($related) {
                 $columns = array_map(function ($column) use ($table) {
-                    return $table . '.' . $column; 
+                    return $table . '.' . $column;
                 }, $columns);
+                $relatedJsonColumns = DB::raw('JSON_OBJECT(' . implode(', ', array_map(function ($column) use ($related) {
+                    return "'" . $column . "', " . $related['table'] . '.' . $column;
+                }, $related['columns'])) . ') as ' . $related['foreign_key']);
+
                 $data = DB::table($table)
                     ->join($related['table'], $table . '.' . $related['foreign_key'], '=', $related['table'] . '.' . $related['primary_key'])
                     ->select(
                         array_merge(
-                            $columns,  
-                            array_map(function ($column) use ($related) {
-                                return $related['table'] . '.' . $column . ' as ' . $related['table'] . '_' . $column;
-                            }, $related['columns'])
+                            $columns,
+                            [$relatedJsonColumns] 
                         )
                     )
                     ->paginate($perPage);
+                $data->map(function ($item) use ($related) {
+                    $item->{$related['foreign_key'] } = json_decode($item->{$related['foreign_key']});
+                    return $item;
+                });
+
+
             }
 
         } else {
@@ -58,9 +66,6 @@ class VmCodeTableController extends Controller
                 ->select($columns)
                 ->paginate($perPage);
         }
-
-
-
         return response()->json([
             'data' => $data->items(),
             'current_page' => $data->currentPage(),

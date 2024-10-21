@@ -14,12 +14,36 @@ class Dialect extends Model
     public static function insert($data)
     {
         $insetData = self::create($data);
-        $relatedRecord = Language::find($insetData->language);
+        $relatedRecord = Language::find(id: $insetData->language);
         return [
             'id' => $insetData->id,
             'dialect' => $insetData->dialect,
-            'Language' => $relatedRecord->name,
+            'Language' => (object) [
+                'id' => $relatedRecord->id,
+                'name' => $relatedRecord->name
+            ],
             'Active' => $insetData->Active,
+        ];
+
+    }
+    public function updatedata($data)
+    {
+        $item = self::find($data['id']);
+        if (!$item) {
+            return null;
+        }
+        $item->fill($data);
+        $item->save();
+        $relatedRecord = Language::find($item->language);
+
+        return [
+            'id' => $item->id,
+            'dialect' => $item->dialect,
+            'Language' => (object) [
+                'id' => $relatedRecord->id,
+                'name' => $relatedRecord->name
+            ],
+            'Active' => $item->Active,
         ];
 
     }

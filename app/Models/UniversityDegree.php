@@ -19,4 +19,17 @@ class UniversityDegree extends Model
         unset($insertedData['created_at']);
         return $insertedData;
     }
+    public function updatedata($data)
+    {
+        $item = self::find($data['id']);
+        if (!$item) {
+            return null;
+        }
+        $item->fill($data);
+        $item->save();
+        unset($item['updated_at']);
+        unset($item['created_at']);
+        return $item;
+
+    }
 }

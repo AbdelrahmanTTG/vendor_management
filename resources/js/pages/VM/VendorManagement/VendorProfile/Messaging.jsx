@@ -83,7 +83,7 @@ const Messaging = () => {
                             <td>{row.id}</td>
                             <td>
                                 <Select
-                                    defaultValue={{ isDisabled: true, label: '-- Select Status --' }}
+                                  
                                     options={options}
                                     className="js-example-basic-single col-sm-12"
                                     onChange={(selectedOption) => handleSelectChange(selectedOption, row.id)}

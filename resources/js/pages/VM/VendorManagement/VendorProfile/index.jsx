@@ -16,20 +16,22 @@ import NavBar from './NavBar';
 import History from "./History"
 import Portal_User from "./Portal_User"
 const Vendor = () => {
-    const [isMobile, setIsMobile] = useState(true);
-
+    const [id, setId] = useState('');
+    const handleData = (id) => {
+        setId(id);
+    };
     return (
         <Fragment >
 
-            <div id='nav-componant' class=" position-fixed  " style={{ zIndex: "1", top: "9vh" }} >
-                <div class="position-relative  nav_div" style={{ width: "99%" }}>
+            <div id='nav-componant' className=" position-fixed  " style={{ zIndex: "1", top: "9vh" }} >
+                <div className="position-relative  nav_div" style={{ width: "99%" }}>
                     <NavBar />
                 </div>
             </div>
 
             <div style={{ marginTop: "25vh" }}>
                 <div id="personal-data">
-                    <PersonalData />
+                    <PersonalData sendData={handleData} />
                 </div>
                 <div id="messaging">
                     <Messaging />
@@ -50,7 +52,7 @@ const Vendor = () => {
                     <Test />
                 </div>
                 <div id='Billing'>
-                    <Billing />
+                    <Billing id={id} />
                 </div>
                 <div id='Portal_User'>
                     <Portal_User />

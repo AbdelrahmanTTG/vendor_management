@@ -4,6 +4,7 @@ import {  Previous, Next } from '../../../../Constant';
 import SweetAlert from 'sweetalert2';
 import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Add from "./ModelAdd"
+import Edit from "./ModelEdit"
 import axiosClient from "../../../../pages/AxiosClint";
 
 const table = (props) => {
@@ -16,6 +17,11 @@ const table = (props) => {
 
     const onAddData = (newData) => {
         setdataTable(prevData => [...prevData, newData]);
+    };
+    const onUpdateData = (updatedData) => {
+        setdataTable(prevData =>
+            prevData.map(item => (item.id === updatedData.id ? updatedData : item))
+        );
     };
     useEffect(() => {
       
@@ -136,7 +142,7 @@ const table = (props) => {
                 SweetAlert.fire(
                     'Cancelled',
                     'Your item is safe :)',
-                    'error'
+                    'info'
                 );
             }
         });
@@ -212,16 +218,24 @@ const table = (props) => {
                                                 </td>
                                                 {Object.entries(item).map(([key, value]) =>
                                                     key !== 'id' && key !== 'Active' && (
-                                                        <td key={key}>{value}</td>
+                                                        <td key={key}>  {typeof value === 'object' && value !== null
+                                                            ? value.name 
+                                                            : value
+                                                        }</td>
                                                     )
                                                 )}
                                                 <td key="Active">
                                                     {item.Active == 0 ? <i className="fa fa-circle font-danger f-12" /> : <i className="fa fa-circle font-success f-12" />}
                                                 </td>
                                                 <td>
-                                                    <button style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
-                                                        <i className="icofont icofont-ui-edit"></i>
-                                                    </button>
+                                                   
+                                                    <Edit
+                                                        titelModel={`Edit ${props.table}`}
+                                                        fields={props.fields}
+                                                        dataTable={props.dataTable}
+                                                        selectedRow={item}
+                                                        onUpdateData={onUpdateData}
+                                                    />
                                                 </td>
                                                 <td>
                                                     <button onClick={() => handelDelete(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>

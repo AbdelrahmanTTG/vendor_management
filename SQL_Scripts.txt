@@ -11,3 +11,51 @@ ALTER TABLE `job_task_conversation` CHANGE `file` `file` TEXT CHARACTER SET utf8
 ALTER TABLE `job_task_log` CHANGE `comment` `comment` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL; 
 ALTER TABLE `job_task` ADD `invoice_id` INT(10) UNSIGNED NULL ; 
 ALTER TABLE `job_task` ADD FOREIGN KEY (`invoice_id`) REFERENCES `vendor_invoices`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION; 
+
+ALTER TABLE vendor
+ADD COLUMN nationality VARCHAR(255) NULL,
+ADD COLUMN timezone VARCHAR(255) NULL,
+ADD COLUMN reject_reason TEXT NULL,
+ADD COLUMN prfx_name VARCHAR(255) NULL,
+ADD COLUMN city VARCHAR(255) NULL,
+ADD COLUMN street VARCHAR(255) NULL,
+ADD COLUMN address TEXT NULL,
+ADD COLUMN note TEXT NULL;
+ADD COLUMN contact_name VARCHAR(255) NULL,
+ADD COLUMN legal_Name VARCHAR(255) NULL,
+
+ 
+CREATE TABLE billing_data (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    vendor_id BIGINT UNSIGNED NOT NULL,
+    billing_legal_name VARCHAR(255) NOT NULL,
+    billing_currency VARCHAR(10) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    street VARCHAR(255) NOT NULL,
+    billing_address TEXT NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL
+);
+
+CREATE TABLE bank_details (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    billing_data_id BIGINT UNSIGNED NOT NULL,
+    bank_name VARCHAR(255) NOT NULL,
+    account_holder VARCHAR(255) NOT NULL,
+    swift_bic VARCHAR(50) NOT NULL,
+    iban VARCHAR(50) NOT NULL,
+    payment_terms VARCHAR(255) NOT NULL,
+    bank_address TEXT NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL,
+    CONSTRAINT fk_billing_data FOREIGN KEY (billing_data_id) REFERENCES billing_data(id) ON DELETE CASCADE
+);
+CREATE TABLE wallets_payment_methods (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    bank_details_id BIGINT UNSIGNED NOT NULL,
+    method VARCHAR(255) NOT NULL,
+    account VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL,
+    CONSTRAINT fk_bank_details FOREIGN KEY (bank_details_id) REFERENCES bank_details(id) ON DELETE CASCADE
+);

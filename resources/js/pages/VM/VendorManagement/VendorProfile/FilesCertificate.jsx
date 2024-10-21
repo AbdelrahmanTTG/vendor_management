@@ -76,7 +76,7 @@ const VMnote = () => {
                                     <Label className="col-sm-3 col-form-label" for="validationCustom01">CV </Label>
                                     <Col sm="9">
 
-                                        <Input className="form-control" type="file" placeholder />
+                                        <Input className="form-control" type="file"  />
                                         <span className="form-text text-muted py-2 m-1 ">Note: if exceeds 5MB please zip it.</span>
                                     </Col>
                                 </FormGroup>
@@ -87,7 +87,7 @@ const VMnote = () => {
                                     <Label className="col-sm-3 col-form-label" for="validationCustom01">NDA </Label>
                                     <Col sm="9">
 
-                                        <Input className="form-control" type="file" placeholder />
+                                        <Input className="form-control" type="file"  />
                                         <span className="form-text text-muted py-2 m-1 ">Note: if exceeds 5MB please zip it.</span>
 
                                     </Col>

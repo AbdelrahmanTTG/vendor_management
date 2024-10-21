@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VmCodeTableController;
 use App\Http\Controllers\CodingTableController;
+use App\Http\Controllers\VendorProfileController;
 
 
 Route::group(['prefix' => 'auth'], function () {
@@ -18,6 +19,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
     Route::post('SubmetData', [CodingTableController::class, 'store']);
     Route::delete('/deleteData', [CodingTableController::class, 'destroy']);
+    Route::post('/updateeData', [CodingTableController::class, 'update']);
+    Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
+
 
 
     // Route::get('Service', [SelectorController::class, 'Service']);

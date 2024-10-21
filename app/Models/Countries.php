@@ -19,8 +19,50 @@ class Countries extends Model
          return [
             'id' => $insetData->id,
             'name' => $insetData->name,
-            'region' => $relatedRecord->name,
+            'region' => (object) [
+                'id' => $relatedRecord->id,
+                'name' => $relatedRecord->name
+            ],    
             'Active' => $insetData->Active,
         ];
     }
+    public function updatedata($data)
+    {
+        $item = self::find($data['id']);
+        if (!$item) {
+            return null;
+        }
+        $item->fill($data);
+        $item->save();
+        $relatedRecord = Regions::find($item->region);
+
+        return [
+            'id' => $item->id,
+            'name' => $item->name,
+            'region' => (object) [
+                'id' => $relatedRecord->id,
+                'name' => $relatedRecord->name
+            ],
+            'Active' => $item->Active,
+        ];
+
+    }
+    public static function getColumnValue($id)
+    {
+        return self::where('region', $id)->get();
+    }
+    public static function SelectData($searchTerm = null)
+    {
+
+        if ($searchTerm) {
+            $query = self::where('name', 'like', '%' . $searchTerm . '%');
+        } else {
+            $query = self::select('id', 'name')->limit(5);
+
+        }
+        return $query->get();
+    }
+
+
+
 }

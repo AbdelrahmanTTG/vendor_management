@@ -99,7 +99,7 @@ const Test = () => {
                                             <FormGroup className="row">
                                                 <Label className="col-sm-3 col-form-label" for="validationCustom01">Source</Label>
                                                 <Col sm="9">
-                                                    <Select defaultValue={{ isDisabled: true, label: '-- Select Source Language --' }} className="js-example-basic-single col-sm-12" />
+                                                    <Select className="js-example-basic-single col-sm-12" />
                                                 </Col>
                                             </FormGroup>
                                         </Col>
@@ -111,7 +111,7 @@ const Test = () => {
                                                 <Col sm="9">
 
 
-                                                    <Select defaultValue={{ isDisabled: true, label: '-- Select Source Language --' }} className="js-example-basic-single col-sm-12" />
+                                                    <Select  className="js-example-basic-single col-sm-12" />
                                                 </Col>
                                             </FormGroup>
                                         </Col>
@@ -121,7 +121,7 @@ const Test = () => {
                                                 <Label className="col-sm-3 col-form-label" for="validationCustom01">Main-Subject Matter</Label>
                                                 <Col sm="9">
 
-                                                    <Select defaultValue={{ isDisabled: true, label: '-- Select Main-Subject --' }} className="js-example-basic-single col-sm-12" />
+                                                    <Select className="js-example-basic-single col-sm-12" />
                                                 </Col>
                                             </FormGroup>
                                         </Col>
@@ -131,14 +131,14 @@ const Test = () => {
                                                 <Label className="col-sm-3 col-form-label" for="validationCustom01">Main-Subject Matter</Label>
                                                 <Col sm="9">
 
-                                                    <Select defaultValue={{ isDisabled: true, label: '-- Select Main-Subject --' }} className="js-example-basic-single col-sm-12" />
+                                                    <Select  className="js-example-basic-single col-sm-12" />
                                                 </Col>
                                             </FormGroup></Col>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
                                                 <Label className="col-sm-3 col-form-label" for="validationCustom01">Sub–Subject Matter</Label>
                                                 <Col sm="9">
-                                                <Select defaultValue={{ isDisabled: true, label: '-- Select Sub–Subject --' }} className="js-example-basic-single col-sm-12" />
+                                                <Select  className="js-example-basic-single col-sm-12" />
                                            </Col>
                                             </FormGroup>
                                         </Col>

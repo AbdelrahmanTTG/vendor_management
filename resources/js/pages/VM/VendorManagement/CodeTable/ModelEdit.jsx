@@ -6,13 +6,18 @@ import { useForm, Controller } from 'react-hook-form';
 import Select from 'react-select';
 import axiosClient from "../../../../pages/AxiosClint";
 import { toast } from 'react-toastify';
+import _ from 'lodash';
 
-const AddNewBtn = (props) => {
+const EditBtn = (props) => {
     const [modal, setModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
     const [initialOptions, setInitialOptions] = useState({});
     const [loading, setLoading] = useState(false);
+    const [originalData, setOriginalData] = useState({});
+    const [selectedOption, setSelectedOption] = useState({});
+
     toast.configure();
+
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':
@@ -30,50 +35,96 @@ const AddNewBtn = (props) => {
         }
     };
     const toggle = () => setModal(!modal);
-    const { control, register, handleSubmit, reset , formState: { errors } } = useForm();
+    const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
+    useEffect(() => {
+        if (props.selectedRow) {
+            const { id, ...rest } = props.selectedRow;
+            setOriginalData(rest);
+
+            const finalData = { ...rest };
+
+            props.fields.forEach(fieldObj => {
+                if (fieldObj.static) {
+                    const activeStatus = props.selectedRow.Active == 0
+                        ? { value: 0, label: 'Inactive' }
+                        : { value: 1, label: 'Active' };
+
+                    setValue(fieldObj.name, activeStatus);
+                    setSelectedOption(prev => ({ ...prev, [fieldObj.name]: activeStatus }));
+
+                    finalData[fieldObj.name] = activeStatus;
+                }
+
+                if (fieldObj.tableData) {
+                    const initialValue = {
+                        value: props.selectedRow[fieldObj.name]?.id || '',
+                        label: props.selectedRow[fieldObj.name]?.name || ''
+                    };
+
+                    setValue(fieldObj.name, initialValue);
+                    setSelectedOption(prev => ({ ...prev, [fieldObj.name]: initialValue }));
+
+                    finalData[fieldObj.name] = initialValue;
+                }
+            });
+
+            setOriginalData(finalData)
+
+        }
+    }, [props.selectedRow, setValue]);
+
+
 
     const capitalizeWords = (str) => {
         if (!str) return '';
         return str.replace(/\b\w/g, char => char.toUpperCase());
     };
 
+    const hasDataChanged = (formData) => {
+        return !_.isEqual(originalData, formData);
+    };
     const onSubmit = async (form) => {
-       
+
         if (form !== '') {
-            try {
-                const formData = {
-                    ...form, 
-                    table: props.dataTable
-                };
-                const { data } = await axiosClient.post("SubmetData", formData);
-                console.log(data)
-                props.onAddData(data);
-                toggle();
-                basictoaster("successToast", `Added successfully`)
-                reset()
-                const inputs = document.getElementsByClassName("form-control");
-                for (let i = 0; i < inputs.length; i++) {
-                    inputs[i].value = "";
-                }
-            } catch (err) {
-                const response = err.response;
-                if (response && response.data) {
-                    setErrorMessage(response.data.message || "An unexpected error occurred.");
-                } else {
-                    setErrorMessage("An unexpected error occurred.");
-                }
-                basictoaster("dangerToast", response.data.message)
+            if (hasDataChanged(form)) {
+                try {
+                    const formData = {
+                        ...Object.keys(form).reduce((acc, key) => {
+                            const value = form[key];
+                            if (value && typeof value === 'object' && value.value !== undefined) {
+                                acc[key] = value.value;
+                            } else {
+                                acc[key] = value;
+                            }
 
+                            return acc;
+                        }, {}),
+                        id: props.selectedRow.id,
+                        table: props.dataTable
+                    };
+
+                    const { data } = await axiosClient.post("updateeData", formData);
+                    props.onUpdateData(data);
+                    toggle();
+                    basictoaster("successToast", `Added successfully`);
+                } catch (err) {
+                    const response = err.response;
+                    if (response && response.data) {
+                        setErrorMessage(response.data.message || "An unexpected error occurred.");
+                    } else {
+                        setErrorMessage("An unexpected error occurred.");
+                    }
+                    basictoaster("dangerToast", response.data.message);
+                }
+            } else {
+                basictoaster("dangerToast", "No changes were made.");
             }
-
         } else {
             errors.showMessages();
         }
     };
-
     const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
-        if (!tablename) return
-     
+        if (!tablename) return;
         try {
             setLoading(true);
             const { data } = await axiosClient.get("SelectDatat", {
@@ -103,12 +154,14 @@ const AddNewBtn = (props) => {
         } finally {
             setLoading(false);
         }
-
     };
 
     return (
         <Fragment>
-            <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: toggle }} className="me-2">{props.nameBtm}</Btn>
+            <button onClick={toggle} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                <i className="icofont icofont-ui-edit"></i>
+            </button>
+
             <CommonModal isOpen={modal} title={props.titelModel} toggler={toggle} onSave={handleSubmit(onSubmit)}>
 
                 <Row className="g-0">
@@ -116,7 +169,17 @@ const AddNewBtn = (props) => {
                         {props.fields ? (
                             props.fields.map((fieldObj, index) => {
                                 const [options, setOptions] = useState([]);
-                                const [selectedOption, setSelectedOption] = useState(null);
+                                const initialValue = selectedOption[fieldObj.name] || (() => {
+                                    const value = props.selectedRow[fieldObj.name];
+                                    if (typeof value === 'object' && value !== null) {
+                                        return {
+                                            value: value.id || '',
+                                            label: value.name || ''
+                                        };
+                                    }
+
+                                    return value || '';
+                                })();
 
                                 useEffect(() => {
                                     if (fieldObj.tableData) {
@@ -125,7 +188,6 @@ const AddNewBtn = (props) => {
                                 }, [fieldObj.tableData]);
 
                                 const handleInputChange = (inputValue) => {
-
                                     if (inputValue.length === 0) {
                                         setOptions(initialOptions[fieldObj.name] || []);
                                     } else if (inputValue.length >= 1) {
@@ -135,7 +197,6 @@ const AddNewBtn = (props) => {
                                         if (!existingOption) {
                                             setLoading(true);
                                             handelingSelect(fieldObj.tableData, setOptions, fieldObj.name, inputValue);
-
                                         }
                                     }
                                 };
@@ -155,7 +216,7 @@ const AddNewBtn = (props) => {
                                                         render={({ field }) => (
                                                             <Select
                                                                 {...field}
-                                                                value={selectedOption} 
+                                                                value={initialValue}
                                                                 options={options}
                                                                 onInputChange={handleInputChange}
                                                                 className="js-example-basic-single col-sm-12"
@@ -163,15 +224,15 @@ const AddNewBtn = (props) => {
                                                                 noOptionsMessage={() => loading ? <div className="loader-box">
                                                                     <Spinner attrSpinner={{ className: 'loader-6' }} />
                                                                 </div> : 'No options found'}
-                                                                onChange={(option) => {   
-                                                                    setSelectedOption(option); 
-                                                                    field.onChange(option.value);    
+                                                                onChange={(option) => {
+                                                                    setSelectedOption(prev => ({ ...prev, [fieldObj.name]: option }));
+                                                                    field.onChange(option);
                                                                 }}
                                                             />
                                                         )}
                                                     />
-
                                                 )}
+
                                                 {fieldObj.field === "selec" && fieldObj.static && (
                                                     <Controller
                                                         name={fieldObj.name}
@@ -180,25 +241,26 @@ const AddNewBtn = (props) => {
                                                         render={({ field }) => (
                                                             <Select
                                                                 {...field}
-                                                                value={selectedOption} 
+                                                                value={initialValue}
                                                                 options={fieldObj.static}
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
                                                                 onChange={(option) => {
-                                                                    setSelectedOption(option);     
-                                                                    field.onChange(option.value);
+                                                                    setSelectedOption(prev => ({ ...prev, [fieldObj.name]: option }));
+                                                                    field.onChange(option);
                                                                 }}
                                                             />
                                                         )}
                                                     />
-
                                                 )}
+
                                                 {fieldObj.field === "input" && (
                                                     <input
                                                         className="form-control"
                                                         id={fieldObj.name}
                                                         type={fieldObj.type}
                                                         name={fieldObj.name}
+                                                        defaultValue={initialValue}
                                                         {...register(fieldObj.name, { required: true })}
                                                     />
                                                 )}
@@ -220,4 +282,4 @@ const AddNewBtn = (props) => {
     );
 };
 
-export default AddNewBtn;
+export default EditBtn;

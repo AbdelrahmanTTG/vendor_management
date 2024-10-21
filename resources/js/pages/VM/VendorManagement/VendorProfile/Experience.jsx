@@ -61,7 +61,7 @@ const Experience = () => {
                                     <Col sm="9">
 
                                         <Select
-                                            defaultValue={{ isDisabled: true, label: '-- Select year Started working --' }}
+                                           
                                             options={yearOptions}
                                             className="js-example-basic-single col-sm-12"
                                             onChange={handleYearChange}

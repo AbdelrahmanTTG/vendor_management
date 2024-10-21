@@ -40,7 +40,7 @@ const Education = () => {
                                     <Label className="col-sm-3 col-form-label" for="validationCustom01">Latest Degree</Label>
                                     <Col sm="9">
 
-                                        <Select defaultValue={{ isDisabled: true, label: '-- Select Latest Degree --' }} options={[
+                                        <Select  options={[
                                             { value: 'Associate degree', label: 'Associate degree' },
                                             { value: "Bachelor's degree", label: "Bachelor's degree" },
                                             { value: "Master's degree", label: "Master's degree" },
@@ -64,7 +64,7 @@ const Education = () => {
                                     <Label className="col-sm-3 col-form-label" for="validationCustom01">Status</Label>
                                     <Col sm="9">
 
-                                <Select defaultValue={{ isDisabled: true, label: '-- Select Major --' }} options={[
+                                <Select  options={[
                                     { value: 'Information Technology', label: 'Information Technology' },
                                     { value: "Mechanical Engineering", label: "Mechanical Engineering" },
                                     { value: "Statistics", label: "Statistics" },

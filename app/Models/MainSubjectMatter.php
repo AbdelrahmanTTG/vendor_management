@@ -19,4 +19,17 @@ class MainSubjectMatter extends Model
         unset($insertedData['status']);
         return $insertedData;
     }
+    public function updatedata($data)
+    {
+        $item = self::find($data['id']);
+        if (!$item) {
+            return null;
+        }
+        $item->fill($data);
+        $item->save();
+        unset($item['status']);
+
+        return $item;
+
+    }
 }
