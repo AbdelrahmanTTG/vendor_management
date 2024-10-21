@@ -35,6 +35,28 @@ class TaskController extends Controller
         $offerJobsCount1 = Task::where('vendor',$request->id)->where('job_portal', 1)->where('status',4)->count();
         $offerJobsCount2 = OfferList::where('vendor_list', 'Like', "%$request->id,%")->where('job_portal', 1)->where('status',4)->count();
         $invoiceCount = VendorInvoice::where('vendor_id',  $request->id)->count();
+
+             
+        $pendingInvoicesCount = VendorInvoice::query()->where('vendor_id',  $request->id)->where('verified', 3)->count();
+        $paidInvoicesCount = VendorInvoice::query()->where('vendor_id',  $request->id)->where('verified', 1)->count();
+        $pendingTasksCount = Task::select('id', 'code')->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->where(function ($query) {
+            $query->where('verified', '=', 2)
+                ->orWhereNull('verified');
+        })->count();
+      
+         // get last 12 months data 
+         $allJobsArray = $closedJobsArray = $monthNameArray = array();
+         for ($i = 11; $i >= 0; $i--) {
+             $date = date(strtotime("-$i month"));
+             $monthName = date('M Y',$date);            
+             $allJobs = Task::where('vendor',$request->id)->whereMonth('created_at',date('m',$date))->whereYear('created_at',date('Y',$date))->count();
+             $closedJobs = Task::where('vendor',$request->id)->whereMonth('created_at',date('m',$date))->whereYear('created_at',date('Y',$date))->where('status',1)->count();
+             
+             array_push($allJobsArray, $allJobs);
+             array_push($closedJobsArray, $closedJobs);
+             array_push($monthNameArray, $monthName);            
+         }
+                        
         return response()->json([
             "runningJobs" => TaskResource::collection($runningJobs),
             "finishedJobs" => TaskResource::collection($finishedJobs),
@@ -43,8 +65,16 @@ class TaskController extends Controller
                 "runningJobsCount"=>$runningJobsCount,
                 "closedJobsCount"=>$closedJobsCount,
                 "offerJobsCount"=>$offerJobsCount1 + $offerJobsCount2,
-                "invoiceCount"=>$invoiceCount,
-            ])
+                "invoiceCount"=>$invoiceCount,       
+             ]),
+            "chartData"=>([
+                "pendingInvoicesCount"=>$pendingInvoicesCount,
+                "paidInvoicesCount"=>$paidInvoicesCount,
+                "pendingTasksCount"=>$pendingTasksCount,
+                "allJobsArray"=>$allJobsArray,
+                "closedJobsArray"=>$closedJobsArray,
+                "monthNameArray"=>$monthNameArray,
+            ]),
         ], 200);
     }
 

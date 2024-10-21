@@ -15,6 +15,7 @@ import Portal_Invoices_Verified from "./pages/VendorPortal/Invoices/VerifiedInvo
 import Portal_Add_Invoice from "./pages/VendorPortal/Invoices/AddInvoice";
 import Portal_ViewOffer from "./pages/VendorPortal/Jobs/ViewOffer";
 import Portal_ViewJob from "./pages/VendorPortal/Jobs/ViewJob";
+import Portal_Admin from "./pages/VendorPortal/Admin";
 import NotFound from "./NotFound";
 import { VM } from './VMRoute'
 
@@ -98,7 +99,7 @@ const router = createBrowserRouter([
             },
             {
                 path: 'Admin',
-                element: <About />
+                element: <Portal_Admin />
             },
 
         ]

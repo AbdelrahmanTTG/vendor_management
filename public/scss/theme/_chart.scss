@@ -282,6 +282,16 @@ p {
 .word-tree {
   height: 400px;
 }
+.apexcharts-legend-text {
+  font-family: $font-montserrat!important;
+  font-size: 12px!important;
+}
+.apexcharts-legend-series{
+  margin: 4px 30px 4px 5px!important;
+}
+.apexcharts-text{
+  font-family: $font-montserrat!important;
+}
 /**=====================
   15. Chart CSS End
 ==========================**/

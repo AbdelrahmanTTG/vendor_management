@@ -9,7 +9,7 @@ import Clock from 'react-clock';
 import 'react-clock/dist/Clock.css';
 import JobsTable from './Jobs/JobsTable';
 import configDB from "../../Config/ThemeConfig_P";
-// import Chart from "react-apexcharts";
+import Chart from "react-apexcharts";
 
 const Dashboard = () => {
   const { user } = useStateContext();
@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [pendingJobs, setPendingJobs] = useState([]);
   const [finishedJobs, setFinishedJobs] = useState([]);
   const [countData, setCountData] = useState([]);
+  const [chartData, setChartData] = useState([]);
   const month = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
   var d = new Date();
   let dateshow = month[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
@@ -39,11 +40,12 @@ const Dashboard = () => {
       };
       axios.post(baseURL + "/dashboardData", payload)
         .then(({ data }) => {
-          console.log(data);
+         // console.log(data);
           setRunningJobs(data?.runningJobs);
           setPendingJobs(data?.pendingJobs);
           setFinishedJobs(data?.finishedJobs);
           setCountData(data?.countData);
+          setChartData(data?.chartData);
 
         });
     }
@@ -52,7 +54,7 @@ const Dashboard = () => {
   const primary = localStorage.getItem("default_color") || configDB.data.color.primary_color;
   const secondary = localStorage.getItem("secondary_color") || configDB.data.color.secondary_color;
   const apexDonutCharts = {
-    series: [44, 55, 41],
+    series: [chartData?.paidInvoicesCount, chartData?.pendingInvoicesCount, chartData?.pendingTasksCount],
     options: {
       chart: {
         type: 'donut',
@@ -61,12 +63,12 @@ const Dashboard = () => {
         }
       },
       colors: [primary, secondary, '#242934'],
-      labels: ["Approved Invoices", "Pending Invoices", "Jobs Need To Be Invoiced"],
+      labels: ["Approved Invoices", "Pending Invoices", "Jobs Not Invoiced"],
       responsive: [{
         breakpoint: 480,
         options: {
           chart: {
-            width: 350,
+            width: 250,
 
           },
           legend: {
@@ -77,7 +79,63 @@ const Dashboard = () => {
     },
   };
 
+const apexColumnChartsone = {
 
+    series: [{
+      name: 'Delivered Jobs',
+      data: chartData?.closedJobsArray
+    }, {
+      name: 'All Jobs',
+      data: chartData?.allJobsArray
+    },
+      ],
+    options: {
+      chart: {
+        type: 'bar',
+        height: 350,
+        toolbar: {
+          show: false
+        }
+      },
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '25%',
+          endingShape: 'rounded'
+        },
+      },
+      dataLabels: {
+        enabled: false
+      },
+      colors: [primary, secondary, '#51bb25'],
+      stroke: {
+        show: true,
+        width: 2,
+        colors: ['transparent']
+      },
+      xaxis: {
+        categories:chartData?.monthNameArray,
+      },
+      yaxis: {
+        title: {
+          text: ''
+        }
+      },
+      fill: {
+        opacity: 1
+      },
+      tooltip: {
+        y: {
+          formatter: function (val) {
+            return  val + ' ';
+          }
+        }
+      }
+    },
+  
+  
+  };
+  
   return (
     <Fragment>
       <Row>
@@ -230,17 +288,27 @@ const Dashboard = () => {
                     <H5>{'Invoices Overview'}</H5>
                   </div>
                 </CardHeader>
-                <CardBody className="apex-chart p-0">
+                <CardBody className="apex-chart px-0 pt-0">
                   <div id='donutchart'>
-                    {/* <Chart options={apexDonutCharts.options} series={apexDonutCharts.series} type="donut" width={383} /> */}
+                     <Chart options={apexDonutCharts.options} series={apexDonutCharts.series} type="donut" width={383} /> 
                   </div>
                 </CardBody>
               </Card>
             </Col>
           </Row>
         </Col>
+        <Col sm='12' xl='12'>
+                <Card>
+                    <CardHeader title='Recent Stats' />
+                    <CardBody>
+                        <div id='column-chart'>
+                            <Chart options={apexColumnChartsone.options} series={apexColumnChartsone.series} type="bar" height={350} />
+                        </div>
+                    </CardBody>
+                </Card>
+            </Col>
       </Row>
-
+    
       {/* <Col xl="6" className="xl-100 box-col-12"> */}
       {/* <Card> */}
       {/* <CardBody className="cal-date-widget p-3"> */}
