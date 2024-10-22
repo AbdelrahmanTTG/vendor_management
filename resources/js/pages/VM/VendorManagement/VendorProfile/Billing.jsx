@@ -4,7 +4,7 @@ import { Btn, H5 } from '../../../../AbstractElements';
 import Select from 'react-select';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-const Billing = ({ id }) => {
+const Billing = ({ triggerSubmit, UserID }) => {
     const [isOpen, setIsOpen] = useState(true);
     const [isChecked, setIsChecked] = useState({ Legal_Name: '', City_state: '', Street: '' });
     const handleCheckboxChange = (event) => {
@@ -43,7 +43,6 @@ const Billing = ({ id }) => {
         };
         setRows([...rows, newRow]);
     };
-
     const handleSelectChange = (selectedOption, rowId) => {
         const updatedRows = rows.map(row => {
             if (row.id === rowId) {
@@ -252,6 +251,7 @@ const Billing = ({ id }) => {
                     </CardBody>
                 </Collapse>
             </Card>
+
         </Fragment>
     );
 };

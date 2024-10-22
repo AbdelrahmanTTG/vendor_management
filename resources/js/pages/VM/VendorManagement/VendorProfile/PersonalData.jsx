@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Card, CardBody, CardHeader, Col, Input, InputGroup, FormGroup, Collapse, Row, Label, Form } from 'reactstrap';
 import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
@@ -9,9 +9,15 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import CommonModal from '../../Model';
 import { toast } from 'react-toastify';
 
-const PersonalData = ({ sendData }) => {
+const PersonalData = forwardRef((props, ref) => {
   toast.configure();
- 
+  const submitForm = () => {
+    alert('Form submitted from Component A');
+    return "id"
+  };
+  useImperativeHandle(ref, () => ({
+    submitForm,
+  }));
   const basictoaster = (toastname, status) => {
     switch (toastname) {
       case 'successToast':
@@ -177,11 +183,9 @@ const PersonalData = ({ sendData }) => {
     if (formData.Anothernumber) {
       phoneNumbers.push(formData.Anothernumber);
     }
-    formData.phone_number = phoneNumbers.join(", "); // دمج الأرقام بفاصلة
-
-    // تنظيم بيانات الاتصال
-    const contacts = formData.contact || []; // افترض أن contact هو مصفوفة
-    const organizedContacts = contacts.map(contact => contact.value).join(", "); // دمج القيم بفاصلة
+    formData.phone_number = phoneNumbers.join(", ");
+    const contacts = formData.contact || []; 
+    const organizedContacts = contacts.map(contact => contact.value).join(", ");   
     formData.contact = organizedContacts;
    
     console.log(formData)
@@ -819,6 +823,6 @@ const PersonalData = ({ sendData }) => {
       </CommonModal>
     </Fragment>
   );
-};
+});
 
 export default PersonalData;

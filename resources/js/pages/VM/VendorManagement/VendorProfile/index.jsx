@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState, useRef } from 'react';
 import { Card } from 'reactstrap';
 import PersonalData from './PersonalData'
 import Messaging from './Messaging'
@@ -17,8 +17,14 @@ import History from "./History"
 import Portal_User from "./Portal_User"
 const Vendor = () => {
     const [id, setId] = useState('');
-    const handleData = (id) => {
-        setId(id);
+ 
+    const componentARef = useRef(null);
+
+    const handleSubmitInComponentA = () => {
+        if (componentARef.current) {
+            const id = componentARef.current.submitForm(); 
+            setId(id)
+        }
     };
     return (
         <Fragment >
@@ -31,7 +37,7 @@ const Vendor = () => {
 
             <div style={{ marginTop: "25vh" }}>
                 <div id="personal-data">
-                    <PersonalData sendData={handleData} />
+                    <PersonalData ref={componentARef} />
                 </div>
                 <div id="messaging">
                     <Messaging />
@@ -52,7 +58,7 @@ const Vendor = () => {
                     <Test />
                 </div>
                 <div id='Billing'>
-                    <Billing id={id} />
+                    <Billing triggerSubmit={handleSubmitInComponentA} receivedData={id} />
                 </div>
                 <div id='Portal_User'>
                     <Portal_User />
