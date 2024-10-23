@@ -29,10 +29,7 @@ const Admin = () => {
 
   const handleSubmit = (event) => {
     const formData = new FormData(event.currentTarget);
-    event.preventDefault();
-    for (let [key, defaultValue] of formData.entries()) {
-      console.log(key, defaultValue);
-    }
+    event.preventDefault();  
     axios.post(baseURL + "saveSettings", formData)
       .then(({ data }) => {
         switch (data.type) {

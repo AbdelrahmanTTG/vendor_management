@@ -95,9 +95,7 @@ const AddInvoice = () => {
         } else {
             axios.post(baseURL + "saveInvoice", InvoiceRes, {
                 headers: {
-                    "Content-Type": "multipart/form-data",
-                    "x-rapidapi-host": "file-upload8.p.rapidapi.com",
-                    "x-rapidapi-key": "your-rapidapi-key-here",
+                    "Content-Type": "multipart/form-data",                   
                 },
             })
                 .then(({ data }) => {

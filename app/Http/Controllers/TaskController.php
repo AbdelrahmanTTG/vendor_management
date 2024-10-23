@@ -11,6 +11,7 @@ use App\Models\Task;
 use App\Models\TaskConversation;
 use App\Models\TaskLog;
 use App\Models\VendorInvoice;
+use App\Models\VmSetup;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -156,11 +157,13 @@ class TaskController extends Controller
             'id' => 'required',
             'vendor' => 'required'
         ]);
+        $vmConfig = VmSetup::select('enable_evaluation','v_ev_name1','v_ev_name2','v_ev_name3','v_ev_name4','v_ev_name5','v_ev_name6')->first();
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->first();
         return response()->json([
             "Task" => new TaskResource($task),
             "Notes" => TaskNotesResource::collection($task->conversation),
             "History" => TaskHistoryResource::collection($task->log),
+            "vmConfig" => $vmConfig,
         ], 200);
     }
     /**

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Col, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader, Row } from 'reactstrap';
-import { Btn } from '../../../AbstractElements';
+import { Card, Col, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader, Row, Table } from 'reactstrap';
+import { Btn, P } from '../../../AbstractElements';
 import { Close, SaveChanges } from '../../../Constant';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -11,20 +11,23 @@ const FinishModal = (props) => {
   const navigate = useNavigate();
   const [noteInput, setNoteInput] = useState("");
   const [fileInput, setFileInput] = useState("");
+  const [evSelectInput, setEvSelectInput] = useState("5");
+  const [evNoteInput, setEvNoteInput] = useState("");
+
 
   const vendorRes = {
     'vendor': props.fromInuts.vendor,
     'task_id': props.fromInuts.id,
     'file': fileInput,
     'note': noteInput,
+    'ev_select': evSelectInput,
+    'ev_note': evNoteInput,
   };
-  const finishJob = () => {
 
+  const finishJob = () => {
     axios.post(baseURL + "finishJob", vendorRes, {
       headers: {
         "Content-Type": "multipart/form-data",
-        "x-rapidapi-host": "file-upload8.p.rapidapi.com",
-        "x-rapidapi-key": "your-rapidapi-key-here",
       },
     })
       .then(({ data }) => {
@@ -41,16 +44,18 @@ const FinishModal = (props) => {
   };
 
   return (
-    <Modal isOpen={props.isOpen} toggle={props.toggler} size={props.size} centered>
+    <Modal isOpen={props.isOpen} toggle={props.toggler} size='lg' centered>
       <ModalHeader toggle={props.toggler}>
         {props.title}
       </ModalHeader>
       <ModalBody className={props.bodyClass}>
         <Row>
           <Col>
-            <FormGroup className='mb-0'>
-              <Label>{'Notes :'}</Label>
-              <Input type='textarea' className='form-control' rows='5' name="note" onChange={e => setNoteInput(e.target.value)} />
+            <FormGroup className='mb-0 row'>
+              <Label className="col-sm-3 col-form-label">{'Notes :'}</Label>
+              <Col sm="9">
+                <Input type='textarea' className='form-control' rows='5' name="note" onChange={e => setNoteInput(e.target.value)} />
+              </Col>
             </FormGroup>
           </Col>
         </Row>
@@ -65,6 +70,48 @@ const FinishModal = (props) => {
           </Col>
         </Row>
         {props.children}
+        {props.vmConfig.enable_evaluation == 1 &&
+          <Card className='b-t-primary p-3 mt-2'>
+            <FormGroup className="row">
+              <Label className="col-sm-3 col-form-label">{'Rate P.M.'}</Label>
+              <Col sm="6">
+                <div className="input-group">
+                  <Input className="form-control col-sm-6" type="range" min="0" max="10" name="v_ev_select" defaultValue={evSelectInput} onChange={e => setEvSelectInput(e.target.value)} />
+                  <span className="mx-3 txt-primary">{evSelectInput}</span>
+                </div>
+              </Col>
+            </FormGroup>
+            <FormGroup className='mb-0 row'>
+              <Label className="col-sm-3 col-form-label">{'Notes :'}</Label>
+              <Col sm="9">
+                <Input type='textarea' className='form-control' rows='3' name="v_note" onChange={e => setEvNoteInput(e.target.value)} />
+              </Col>
+            </FormGroup>
+            {evSelectInput < 5 &&
+              <div className="table-responsive">
+                <Table>
+                  <thead className="bg-primary">
+                    <tr>
+                      <th scope="col">{'#'}</th>
+                      <th scope="col">{'Items to be checked'}</th>
+
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.values(props.vmConfig).map((item, i) => (
+                      (i !== 0 && item != null &&
+                        <tr key={i}>
+                          <td><input type='checkbox' value={'1'} name={`v_ev_val${i}`} /></td>
+                          <td><P>{item} </P></td>
+                        </tr>
+                      )
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            }
+          </Card>
+        }
       </ModalBody>
       <ModalFooter>
         <Btn attrBtn={{ color: 'secondary', onClick: props.toggler }} >{Close}</Btn>

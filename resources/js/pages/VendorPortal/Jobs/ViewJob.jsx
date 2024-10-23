@@ -18,6 +18,7 @@ const ViewJob = () => {
     const [pageTask, setPageTask] = useState([]);
     const [notes, setNotes] = useState([]);
     const [history, setHistory] = useState([]);
+    const [vmConfig, setVmConfig] = useState([]);
     const [messageInput, setMessageInput] = useState("");
     const [activeTab, setActiveTab] = useState('1');
     const [modal, setModal] = useState(false);
@@ -41,6 +42,7 @@ const ViewJob = () => {
                     setPageTask(Task);
                     setNotes(Notes);
                     setHistory(History);
+                    setVmConfig(data?.vmConfig);
                 });
         }
     }, [user]);
@@ -83,7 +85,7 @@ const ViewJob = () => {
                     <Col sm="12">
                         <Card>
                             <CardBody className='b-t-primary'>  
-                                <FinishModal isOpen={modal} title={'Finish and Send File'} toggler={toggle} fromInuts ={vendorRes} ></FinishModal>
+                                <FinishModal isOpen={modal} title={'Finish and Send File'} toggler={toggle} fromInuts ={vendorRes} vmConfig ={vmConfig} ></FinishModal>
                                 <PlanModal isOpen={modal2} title={'Send Reply'} toggler={toggle2} fromInuts ={vendorRes} ></PlanModal>
 
                                 <div className="pro-group pb-0" style={{ textAlign: 'right' }}>
