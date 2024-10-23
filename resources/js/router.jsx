@@ -100,6 +100,9 @@ const router = createBrowserRouter([
             {
                 path: 'Admin',
                 element: <Portal_Admin />
+            }, {
+                path: 'Profile',
+                element: <About />
             },
 
         ]
