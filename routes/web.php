@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PortalAdminController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,5 +30,7 @@ Route::group(['prefix' => 'Portal'], function () {
     Route::post('Vendor/getSelectedJobData', [InvoiceController::class, 'getSelectedJobData'])->name('Vendor.getSelectedJobData');
     Route::post('Vendor/saveInvoice', [InvoiceController::class, 'saveInvoice'])->name('Vendor.saveInvoice');
     Route::post('Vendor/dashboardData', [TaskController::class, 'index'])->name('Vendor.dashboardData');
+    Route::post('Admin/settingsData', [PortalAdminController::class, 'getSettingsData'])->name('Admin.getSettingsData');
+    Route::post('Admin/saveSettings', [PortalAdminController::class, 'saveSettings'])->name('Admin.saveSettings');
 });
 
