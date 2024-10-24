@@ -23,6 +23,16 @@ class Vendor extends Authenticatable  implements JWTSubject
         ->first();
         return $vendor; 
     }
+    public function country()
+    {
+        return $this->belongsTo(Countries::class, 'country'); 
+    }
+
+    public function nationality()
+    {
+        return $this->belongsTo(Countries::class, 'nationality'); 
+    }
+
 
     protected $fillable = [
         'name',

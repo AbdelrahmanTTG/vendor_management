@@ -1,9 +1,9 @@
 import Home from './pages/Home'
 import React, { Suspense } from "react";
 const Languages = React.lazy(() => import('./pages/VM/Admin/Languages'));
-const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
+const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/AddProfile'));
+const ProfileIndex = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
 const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/EditProfile'));
-
 const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable'));
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
@@ -14,6 +14,14 @@ export const VM = [
     {
         path: '',
         element: <Home />
+    },
+    {
+        path: 'vendors/profile',
+        element: (
+            <LazyWrapper>
+                <ProfileIndex />
+            </LazyWrapper>
+        )
     },
     {
         path: 'vendors/profiletest',

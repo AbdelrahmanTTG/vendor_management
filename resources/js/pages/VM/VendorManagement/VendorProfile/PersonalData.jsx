@@ -289,21 +289,21 @@ const PersonalData = (props) => {
       Object.keys(props.permission).forEach((field) => {
         // const input = document.querySelector(`[name=${field}]`);
         const inputDiv = document.getElementById(`${field}-wrapper`);;
-        console.log(inputDiv)
+        // console.log(inputDiv)
         if (inputDiv) {
           switch (props.permission[field]) {
-            case 'show':
-              inputDiv.style.display = 'block'; 
-              inputDiv.querySelector('input, select, textarea').disabled = false; 
-              break;
+            // case 'show':
+            //   inputDiv.style.display = 'block'; 
+            //   inputDiv.querySelector('input, select, textarea').disabled = false; 
+            //   break;
             case 'hide':
               inputDiv.style.display = 'none'; 
               break;
             case 'disable':
               inputDiv.style.display = 'block'; 
-              const selectInput = inputDiv.querySelector('input, select, textarea');
-              if (selectInput) {
-                selectInput.disabled = true;
+              const Input = inputDiv.querySelector('input');
+              if (Input) {
+                Input.disabled = true;
               }           
               break;
             default:
@@ -354,7 +354,7 @@ const PersonalData = (props) => {
                               handleVendorTypeChange(option);
                               field.onChange(option);
                             }}
-                            isDisabled={isSubmitting || props.permission.type === 'disable'}
+                            isDisabled={isSubmitting || (props.permission && props.permission.type === "disable")}
                           />
                         )}
                       />
@@ -385,7 +385,7 @@ const PersonalData = (props) => {
                               handleStatusChange(option);
                               field.onChange(option);
                             }}
-                            isDisabled={isSubmitting || props.permission.status === 'disable'}
+                            isDisabled={isSubmitting || (props.permission && props.permission.status === "disable")}
                           />
                         )} />
                     </Col>
@@ -400,7 +400,7 @@ const PersonalData = (props) => {
                         disabled={isSubmitting}
                         defaultValue=""
                         className="form-control"
-                        id="name"
+                        // id="name"
                         type="text"
                         name="name"
                         {...register("name", { required: true })}
@@ -409,12 +409,12 @@ const PersonalData = (props) => {
                     </Col>
                   </FormGroup>
                 </Col>
-                <Col md="6">
+                <Col md="6" id="contact-wrapper">
                   <FormGroup className="row">
                     <Label className="col-sm-3 col-form-label" for="validationCustom01">{ContactLabel}</Label>
                     <Col sm="9">
                       <InputGroup>
-                        <select disabled={isSubmitting} className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: true })} >
+                        <select disabled={isSubmitting || (props.permission && props.permission.contact === "disable") } className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: true })} >
                           <option value="" disabled>Prefix</option>
                           <option value="Mr">Mr</option>
                           <option value="Ms">Ms</option>
@@ -768,7 +768,7 @@ const PersonalData = (props) => {
                           const data = editor.getData();
                           setValue('address', data);
                         }}
-                        disabled={isSubmitting || props.permission.address === "disable"}
+                        disabled={isSubmitting || (props.permission && props.permission.address === "disable")}
                       />
                     </Col>
                   </FormGroup>

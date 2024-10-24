@@ -13,6 +13,22 @@ use Illuminate\Support\Facades\Crypt;
 
 class VendorProfileController extends Controller
 {
+
+        public function Vendors(Request $request){
+        $perPage = $request->input('per_page', 10);
+
+        $vendors = Vendor::select('id', 'name', 'email', 'legal_Name', 'phone_number', 'country', 'nationality')
+            ->with(['country:id,name', 'nationality:id,name'])
+            ->paginate($perPage);
+                    return response()->json($vendors);
+        }
+
+
+
+
+
+
+
     public function findCountry(Request $request){
         $id = $request->input('id');
         $Countries = Countries::getColumnValue($id);

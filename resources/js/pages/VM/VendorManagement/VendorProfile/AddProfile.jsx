@@ -1,7 +1,5 @@
 import React, { Fragment, useEffect, useState, useRef } from 'react';
 import { Card } from 'reactstrap';
-import { useLocation } from 'react-router-dom';
-
 import PersonalData from './PersonalData'
 import Messaging from './Messaging'
 import VMnote from "./VMnote"
@@ -17,37 +15,23 @@ import Billing from "./Billing"
 import NavBar from './NavBar';
 import History from "./History"
 import Portal_User from "./Portal_User"
-
-const EditProfile = () => {
+const AddProfile = () => {
     const [id, setId] = useState('');
-    const location = useLocation();
-    const { vendor } = location.state || {};
-    
     const handleDataSend = (data) => {
         setId(data);
     };
-    const [permissions, setPermissions] = useState({
-        // type: 'hide',
-        // name: 'disable',
-        // email: 'disable',
-        // status: 'disable',
-        // address: "disable",
-        // contact:"disable"
-    });
-
+    
     return (
         <Fragment >
+
             <div id='nav-componant' className=" position-fixed  " style={{ zIndex: "1", top: "9vh" }} >
                 <div className="position-relative  nav_div" style={{ width: "99%" }}>
                     <NavBar />
                 </div>
             </div>
-
             <div style={{ marginTop: "25vh" }}>
                 <div id="personal-data">
-                    <PersonalData  onSubmit="onUpdate"
-                        permission={permissions}
-                    />
+                    <PersonalData onDataSend={handleDataSend} onSubmit="onSubmit" />
                 </div>
                 <div id="messaging">
                     <Messaging />
@@ -96,4 +80,4 @@ const EditProfile = () => {
     );
 };
 
-export default EditProfile;
+export default AddProfile;

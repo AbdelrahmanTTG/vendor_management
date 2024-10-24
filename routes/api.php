@@ -31,3 +31,4 @@ Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () 
         return "data";
     });
 });
+    Route::post('/Vendors', [VendorProfileController::class,'Vendors']);
