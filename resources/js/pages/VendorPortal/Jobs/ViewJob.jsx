@@ -33,9 +33,7 @@ const ViewJob = () => {
                 'id': id,
             };
             axios.post(baseURL + "/viewJob", payload)
-                .then(({ data }) => {
-                    console.log(data);
-                    // const [Tasks] = [(data?.Tasks.data)];
+                .then(({ data }) => {                    
                     const [Task] = [(data?.Task)];
                     const [Notes] = [(data?.Notes)];
                     const [History] = [(data?.History)];

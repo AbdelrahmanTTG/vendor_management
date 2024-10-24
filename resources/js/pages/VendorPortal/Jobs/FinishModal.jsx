@@ -13,7 +13,7 @@ const FinishModal = (props) => {
   const [fileInput, setFileInput] = useState("");
   const [evSelectInput, setEvSelectInput] = useState("5");
   const [evNoteInput, setEvNoteInput] = useState("");
-
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
 
   const vendorRes = {
     'vendor': props.fromInuts.vendor,
@@ -22,7 +22,22 @@ const FinishModal = (props) => {
     'note': noteInput,
     'ev_select': evSelectInput,
     'ev_note': evNoteInput,
+    'ev_checkBox': selectedCheckboxes,
   };
+  const handleEvOnChange = (id) => {
+    const checkBoxArray = selectedCheckboxes;
+    // Find index
+    const findIdx = checkBoxArray.indexOf(id);
+    // Index > -1 means that the item exists and that the checkbox is checked
+    // and in that case we want to remove it from the array and uncheck it
+    if (findIdx > -1) {
+        checkBoxArray.splice(findIdx, 1);
+    } else {
+        checkBoxArray.push(id);
+    }
+    setSelectedCheckboxes(checkBoxArray);   
+    console.log(checkBoxArray) ;
+};
 
   const finishJob = () => {
     axios.post(baseURL + "finishJob", vendorRes, {
@@ -101,7 +116,7 @@ const FinishModal = (props) => {
                     {Object.values(props.vmConfig).map((item, i) => (
                       (i !== 0 && item != null &&
                         <tr key={i}>
-                          <td><input type='checkbox' value={'1'} name={`v_ev_val${i}`} /></td>
+                          <td><input type='checkbox' value={'1'} name={`v_ev_val${i}`} onChange={() => handleEvOnChange(`v_ev_val${i}`)} /></td>
                           <td><P>{item} </P></td>
                         </tr>
                       )

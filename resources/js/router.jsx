@@ -16,6 +16,7 @@ import Portal_Add_Invoice from "./pages/VendorPortal/Invoices/AddInvoice";
 import Portal_ViewOffer from "./pages/VendorPortal/Jobs/ViewOffer";
 import Portal_ViewJob from "./pages/VendorPortal/Jobs/ViewJob";
 import Portal_Admin from "./pages/VendorPortal/Admin";
+import Portal_Profile from "./pages/VendorPortal/Profile";
 import NotFound from "./NotFound";
 import { VM } from './VMRoute'
 
@@ -102,7 +103,7 @@ const router = createBrowserRouter([
                 element: <Portal_Admin />
             }, {
                 path: 'Profile',
-                element: <About />
+                element: <Portal_Profile />
             },
 
         ]

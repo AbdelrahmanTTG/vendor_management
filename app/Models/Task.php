@@ -50,6 +50,11 @@ class Task extends Model
     {
         return  $this->belongsTo(Job::class, 'job_id')->select(['job_file']);
     }
+    
+    public function job()
+    {
+        return  $this->belongsTo(Job::class, 'job_id');
+    }
 
     public function getTaskStatus()
     {

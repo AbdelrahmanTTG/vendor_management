@@ -17,8 +17,7 @@ const Admin = () => {
   const fetchData = async () => {
     try {
       axios.post(baseURL + "settingsData")
-        .then(({ data }) => {
-          console.log(data);
+        .then(({ data }) => {          
           setPageData(data?.vmConfig);
         });
 
@@ -29,7 +28,7 @@ const Admin = () => {
 
   const handleSubmit = (event) => {
     const formData = new FormData(event.currentTarget);
-    event.preventDefault();  
+    event.preventDefault();
     axios.post(baseURL + "saveSettings", formData)
       .then(({ data }) => {
         switch (data.type) {
@@ -53,23 +52,23 @@ const Admin = () => {
               <Card className='mb-0'>
                 <CardBody>
                   <Row>
-                    <Col sm="2" className="tabs-responsive-side">
+                    <Col sm="3" className="tabs-responsive-side">
                       <Nav className="nav flex-column nav-pills">
                         <NavItem>
-                          <NavLink href="#javascript" className={LeftLineTab === '1' ? 'active' : ''} onClick={() => setLeftLineTab('1')}>General</NavLink>
+                          <NavLink href="#javascript" className={LeftLineTab === '1' ? 'active' : ''} onClick={() => setLeftLineTab('1')}><i className="icofont icofont-list me-1"></i>General</NavLink>
                         </NavItem>
                         <NavItem >
-                          <NavLink href="#javascript" className={LeftLineTab === '2' ? 'active' : ''} onClick={() => setLeftLineTab('2')}>Evaluation</NavLink>
+                          <NavLink href="#javascript" className={LeftLineTab === '2' ? 'active' : ''} onClick={() => setLeftLineTab('2')}><i className="icofont icofont-tick-boxed me-1"></i>Evaluation</NavLink>
                         </NavItem>
                         <NavItem>
-                          <NavLink href="#javascript" className={LeftLineTab === '3' ? 'active' : ''} onClick={() => setLeftLineTab('3')}>Invoice Email</NavLink>
+                          <NavLink href="#javascript" className={LeftLineTab === '3' ? 'active' : ''} onClick={() => setLeftLineTab('3')}><i className="icofont icofont-email me-1"></i>Invoice Email</NavLink>
                         </NavItem>
                         <NavItem>
-                          <NavLink href="#javascript" className={LeftLineTab === '4' ? 'active' : ''} onClick={() => setLeftLineTab('4')}>Message Email</NavLink>
+                          <NavLink href="#javascript" className={LeftLineTab === '4' ? 'active' : ''} onClick={() => setLeftLineTab('4')}><i className="icofont icofont-email me-1"></i>Message Email</NavLink>
                         </NavItem>
                       </Nav>
                     </Col>
-                    <Col sm="10">
+                    <Col sm="9">
                       <TabContent activeTab={LeftLineTab}>
                         <TabPane className="fade show" tabId="1">
                           <Card className='mb-0 b-t-primary'>
@@ -124,47 +123,23 @@ const Admin = () => {
                                       <thead className="bg-primary">
                                         <tr>
                                           <th scope="col">{'#'}</th>
-                                          <th scope="col">{'Evatuation Point'}</th>
-                                          <th scope="col" style={{ 'width': '30%' }}>{'Percentage %'}</th>
+                                          <th scope="col">{'Evaluation Point'}</th>
+                                          <th scope="col" style={{ 'width': '20%' }}>{'Percentage %'}</th>
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        <tr>
-                                          <td> 1 </td>
-                                          <td><Input type="text" name="v_ev_name1" className="form-control" defaultValue={pageData.v_ev_name1} /></td>
-                                          <td><Input type="text" name="v_ev_per1" className="form-control" defaultValue={pageData.v_ev_per1} /></td>
-                                        </tr>
-                                        <tr>
-                                          <td> 2 </td>
-                                          <td><Input type="text" name="v_ev_name2" className="form-control" defaultValue={pageData.v_ev_name2} /></td>
-                                          <td><Input type="text" name="v_ev_per2" className="form-control" defaultValue={pageData.v_ev_per2} /></td>
-                                        </tr>
-                                        <tr>
-                                          <td> 3 </td>
-                                          <td><Input type="text" name="v_ev_name3" className="form-control" defaultValue={pageData.v_ev_name3} /></td>
-                                          <td><Input type="text" name="v_ev_per3" className="form-control" defaultValue={pageData.v_ev_per3} /></td>
-                                        </tr>
-                                        <tr>
-                                          <td> 4 </td>
-                                          <td><Input type="text" name="v_ev_name4" className="form-control" defaultValue={pageData.v_ev_name4} /></td>
-                                          <td><Input type="text" name="v_ev_per4" className="form-control" defaultValue={pageData.v_ev_per4} /></td>
-                                        </tr>
-                                        <tr>
-                                          <td> 5 </td>
-                                          <td><Input type="text" name="v_ev_name5" className="form-control" defaultValue={pageData.v_ev_name5} /></td>
-                                          <td><Input type="text" name="v_ev_per5" className="form-control" defaultValue={pageData.v_ev_per5} /></td>
-                                        </tr>
-                                        <tr>
-                                          <td> 5 </td>
-                                          <td><Input type="text" name="v_ev_name5" className="form-control" defaultValue={pageData.v_ev_name5} /></td>
-                                          <td><Input type="text" name="v_ev_per5" className="form-control" defaultValue={pageData.v_ev_per5} /></td>
-                                        </tr>
-                                        <tr>
-                                          <td> 6 </td>
-                                          <td><Input type="text" name="v_ev_name6" className="form-control" defaultValue={pageData.v_ev_name6} /></td>
-                                          <td><Input type="text" name="v_ev_per6" className="form-control" defaultValue={pageData.v_ev_per6} /></td>
-                                        </tr>
-
+                                        {[...Array(6)].map((x, i) => {
+                                          ++i;
+                                          let myName = 'v_ev_name' + i;
+                                          let myPer = 'v_ev_per' + i;
+                                          return (
+                                            <tr key={i}>
+                                              <th scope="col">{i}</th>
+                                              <td><Input type="text" name={`v_ev_name${i}`} className="form-control" defaultValue={pageData[myName]} /></td>
+                                              <td><Input type="text" name={`v_ev_per${i}`} className="form-control" defaultValue={pageData[myPer]} /></td>
+                                            </tr>
+                                          )
+                                        })}
                                       </tbody>
                                     </Table>
                                   </div>

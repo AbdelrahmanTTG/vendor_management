@@ -14,6 +14,7 @@ use App\Models\VendorInvoice;
 use App\Models\VmSetup;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TaskController extends Controller
@@ -31,50 +32,50 @@ class TaskController extends Controller
         $offers1 = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->take(2)->get();
         $offers2 = OfferList::where('vendor_list', 'Like', "%$request->id,%")->where('status', 4)->orderBy('created_at', 'desc')->take(2)->get();
         // start count
-        $runningJobsCount = Task::where('vendor',$request->id)->where('job_portal', 1)->where('status', 0)->count();
-        $closedJobsCount = Task::where('vendor',$request->id)->where('job_portal', 1)->where('status',1)->count();
-        $offerJobsCount1 = Task::where('vendor',$request->id)->where('job_portal', 1)->where('status',4)->count();
-        $offerJobsCount2 = OfferList::where('vendor_list', 'Like', "%$request->id,%")->where('job_portal', 1)->where('status',4)->count();
+        $runningJobsCount = Task::where('vendor', $request->id)->where('job_portal', 1)->where('status', 0)->count();
+        $closedJobsCount = Task::where('vendor', $request->id)->where('job_portal', 1)->where('status', 1)->count();
+        $offerJobsCount1 = Task::where('vendor', $request->id)->where('job_portal', 1)->where('status', 4)->count();
+        $offerJobsCount2 = OfferList::where('vendor_list', 'Like', "%$request->id,%")->where('job_portal', 1)->where('status', 4)->count();
         $invoiceCount = VendorInvoice::where('vendor_id',  $request->id)->count();
 
-             
+
         $pendingInvoicesCount = VendorInvoice::query()->where('vendor_id',  $request->id)->where('verified', 3)->count();
         $paidInvoicesCount = VendorInvoice::query()->where('vendor_id',  $request->id)->where('verified', 1)->count();
         $pendingTasksCount = Task::select('id', 'code')->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->where(function ($query) {
             $query->where('verified', '=', 2)
                 ->orWhereNull('verified');
         })->count();
-      
-         // get last 12 months data 
-         $allJobsArray = $closedJobsArray = $monthNameArray = array();
-         for ($i = 11; $i >= 0; $i--) {
-             $date = date(strtotime("-$i month"));
-             $monthName = date('M Y',$date);            
-             $allJobs = Task::where('vendor',$request->id)->whereMonth('created_at',date('m',$date))->whereYear('created_at',date('Y',$date))->count();
-             $closedJobs = Task::where('vendor',$request->id)->whereMonth('created_at',date('m',$date))->whereYear('created_at',date('Y',$date))->where('status',1)->count();
-             
-             array_push($allJobsArray, $allJobs);
-             array_push($closedJobsArray, $closedJobs);
-             array_push($monthNameArray, $monthName);            
-         }
-                        
+
+        // get last 12 months data 
+        $allJobsArray = $closedJobsArray = $monthNameArray = array();
+        for ($i = 11; $i >= 0; $i--) {
+            $date = date(strtotime("-$i month"));
+            $monthName = date('M Y', $date);
+            $allJobs = Task::where('vendor', $request->id)->whereMonth('created_at', date('m', $date))->whereYear('created_at', date('Y', $date))->count();
+            $closedJobs = Task::where('vendor', $request->id)->whereMonth('created_at', date('m', $date))->whereYear('created_at', date('Y', $date))->where('status', 1)->count();
+
+            array_push($allJobsArray, $allJobs);
+            array_push($closedJobsArray, $closedJobs);
+            array_push($monthNameArray, $monthName);
+        }
+
         return response()->json([
             "runningJobs" => TaskResource::collection($runningJobs),
             "finishedJobs" => TaskResource::collection($finishedJobs),
             "pendingJobs" => TaskResource::collection($offers1->merge($offers2)),
-            "countData"=>([
-                "runningJobsCount"=>$runningJobsCount,
-                "closedJobsCount"=>$closedJobsCount,
-                "offerJobsCount"=>$offerJobsCount1 + $offerJobsCount2,
-                "invoiceCount"=>$invoiceCount,       
-             ]),
-            "chartData"=>([
-                "pendingInvoicesCount"=>$pendingInvoicesCount,
-                "paidInvoicesCount"=>$paidInvoicesCount,
-                "pendingTasksCount"=>$pendingTasksCount,
-                "allJobsArray"=>$allJobsArray,
-                "closedJobsArray"=>$closedJobsArray,
-                "monthNameArray"=>$monthNameArray,
+            "countData" => ([
+                "runningJobsCount" => $runningJobsCount,
+                "closedJobsCount" => $closedJobsCount,
+                "offerJobsCount" => $offerJobsCount1 + $offerJobsCount2,
+                "invoiceCount" => $invoiceCount,
+            ]),
+            "chartData" => ([
+                "pendingInvoicesCount" => $pendingInvoicesCount,
+                "paidInvoicesCount" => $paidInvoicesCount,
+                "pendingTasksCount" => $pendingTasksCount,
+                "allJobsArray" => $allJobsArray,
+                "closedJobsArray" => $closedJobsArray,
+                "monthNameArray" => $monthNameArray,
             ]),
         ], 200);
     }
@@ -157,7 +158,7 @@ class TaskController extends Controller
             'id' => 'required',
             'vendor' => 'required'
         ]);
-        $vmConfig = VmSetup::select('enable_evaluation','v_ev_name1','v_ev_name2','v_ev_name3','v_ev_name4','v_ev_name5','v_ev_name6')->first();
+        $vmConfig = VmSetup::select('enable_evaluation', 'v_ev_name1', 'v_ev_name2', 'v_ev_name3', 'v_ev_name4', 'v_ev_name5', 'v_ev_name6')->first();
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->first();
         return response()->json([
             "Task" => new TaskResource($task),
@@ -351,45 +352,48 @@ class TaskController extends Controller
             }
             //   $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);        
             if ($offer->update($data)) {
-                //    $evaluation = $this->db->get('vm_setup')->row();
-                // $dataEV['vendor_ev_select'] = $_POST['v_ev_select'];
-                // $dataEV['vendor_ev_type'] = ($_POST['v_ev_select'] < 5) ? 2 : 1;
-                // $dataEV['vendor_note'] = $_POST['v_note'];
-                // for ($i = 1; $i <= 6; $i++) {
-                // $v_ev_name = "v_ev_name" . $i;
-                // $v_ev_per = "v_ev_per" . $i;
-                // if ($evaluation->$v_ev_name != null) {
-                // $dataEV["vendor_ev_text$i"] = $evaluation->$v_ev_name;
-                // $dataEV["vendor_ev_per$i"] = $evaluation->$v_ev_per;
-                // $dataEV["vendor_ev_val$i"] = $_POST["v_ev_val$i"] ?? 0;
-                // }
-                //  }
-                /*  $task_ev = $this->db->get_where('task_evaluation', array('task_id' => $data['id']))->row();
-            if (empty($task_ev)) {
-                // get job task info
-                $taskData = $this->admin_model->getData('job_task',['id'=>$data['id'] ,'job_portal' => 1]);
-                $jobData = $this->admin_model->getData('job',['id'=>$taskData->job_id]);
-                $dataEV['task_id'] = $data['id'];
-                $dataEV['project_id'] = $jobData->project_id;
-                $dataEV['job_id'] = $taskData->job_id;
-                $dataEV['vendor_id'] = $this->user;
-                $dataEV['vendor_ev_created_at'] = date("Y-m-d H:i:s");
-
-                $this->db->insert('task_evaluation', $dataEV);
-            } else {
-                // do edit 
-                if ($task_ev->vendor_ev_type == null)
-                    $dataEV['vendor_ev_created_at'] = date("Y-m-d H:i:s");
-                $this->admin_model->addToLoggerUpdate('task_evaluation', 'task_id', $data['id'], $this->user);
-                $this->db->update('task_evaluation', $dataEV, array('task_id' => $data['id']));
-            }*/
+                $evaluation = VmSetup::first();
+                if ($evaluation->enable_evaluation == 1) {
+                    $dataEV['vendor_ev_select'] = $request->ev_select;
+                    $dataEV['vendor_ev_type'] = ($request->ev_select < 5) ? 2 : 1;
+                    $dataEV['vendor_note'] = $request->ev_note;
+                    if ($request->ev_select < 5) {
+                        for ($i = 1; $i <= 6; $i++) {
+                            $v_ev_name = "v_ev_name" . $i;
+                            $v_ev_per = "v_ev_per" . $i;
+                            if ($evaluation->$v_ev_name != null) {
+                                $dataEV["vendor_ev_text$i"] = $evaluation->$v_ev_name;
+                                $dataEV["vendor_ev_per$i"] = $evaluation->$v_ev_per;
+                                $dataEV["vendor_ev_val$i"] = in_array("v_ev_val$i", $request->ev_checkBox) ? 1 : 0;
+                            }
+                        }
+                    }
+                    // start insert data
+                    $task_ev =  DB::table('task_evaluation')->where('task_id', $request->task_id)->first();
+                    if (empty($task_ev)) {
+                        // get job task info                       
+                        $dataEV['task_id'] = $request->task_id;
+                        $dataEV['project_id'] = $offer->job->project_id;
+                        $dataEV['job_id'] = $offer->job_id;
+                        $dataEV['vendor_id'] = $request->vendor;
+                        $dataEV['vendor_ev_created_at'] = date("Y-m-d H:i:s");
+                        DB::table('task_evaluation')->insert($dataEV);
+                    } else {
+                        // do edit 
+                        if ($task_ev->vendor_ev_type == null)
+                            $dataEV['vendor_ev_created_at'] = date("Y-m-d H:i:s");
+                        //$this->admin_model->addToLoggerUpdate('task_evaluation', 'task_id', $data['id'], $this->user);
+                        DB::table('task_evaluation')->where('task_id', $request->task_id)
+                            ->update($dataEV);
+                    }
+                }
                 // add to task log
                 $this->addToTaskLogger($request->task_id, 3, $request->vendor);
 
                 //  $this->admin_model->sendVendorFinishMail($data['id'], $this->user);
                 //  $this->admin_model->sendFinishMailForPm($data['id']);
                 $msg['type'] = "success";
-                $message = "Your Offer Accepted Successfully";
+                $message = "Your data has been successfully transmitted.";
             }
         } else {
             $msg['type'] = "error";
