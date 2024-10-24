@@ -9,15 +9,8 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import CommonModal from '../../Model';
 import { toast } from 'react-toastify';
 
-const PersonalData = forwardRef((props, ref) => {
+const PersonalData = (props) => {
   toast.configure();
-  const submitForm = () => {
-    alert('Form submitted from Component A');
-    return "id"
-  };
-  useImperativeHandle(ref, () => ({
-    submitForm,
-  }));
   const basictoaster = (toastname, status) => {
     switch (toastname) {
       case 'successToast':
@@ -60,6 +53,7 @@ const PersonalData = forwardRef((props, ref) => {
   const [initialOptions, setInitialOptions] = useState({});
 
   const [modal, setModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const toggle = () => setModal(!modal);
 
   const toggleCollapse = () => {
@@ -82,9 +76,6 @@ const PersonalData = forwardRef((props, ref) => {
 
     }
   };
-
-
-
 
   const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
     if (inputValue.length === 0) {
@@ -168,14 +159,10 @@ const PersonalData = forwardRef((props, ref) => {
     handelingSelect("regions", setOptionsR, "region");
     handelingSelect("countries", setOptionsN, "Nationality");
     handelingSelect("time_zone", setOptionsT, "TimeZone");
-
-
   }, []);
 
   const onSubmit = async (data) => {
-    const formData = {
-      ...data
-    };
+    const formData = { ...data };
     const phoneNumbers = [];
     if (formData.phone_number) {
       phoneNumbers.push(formData.phone_number);
@@ -184,17 +171,47 @@ const PersonalData = forwardRef((props, ref) => {
       phoneNumbers.push(formData.Anothernumber);
     }
     formData.phone_number = phoneNumbers.join(", ");
-    const contacts = formData.contact || []; 
-    const organizedContacts = contacts.map(contact => contact.value).join(", ");   
+    const contacts = formData.contact || [];
+    const organizedContacts = contacts.map(contact => contact.value).join(", ");
+    const vendorTypeValue = formData.type.value;
+    const vendorstatusValue = formData.status.value;
     formData.contact = organizedContacts;
-   
-    console.log(formData)
+    formData.type = vendorTypeValue
+    formData.status = vendorstatusValue
+    try {
+      const response = await axiosClient.post("PersonalInformation", formData);
+      basictoaster("successToast", "Added successfully !");
+      setIsSubmitting(true)
+      props.onDataSend(response.data.vendor.id)
+
+    } catch (err) {
+      const response = err.response;
+      if (response && response.data) {
+        const errors = response.data;
+        Object.keys(errors).forEach(key => {
+          const messages = errors[key];
+          messages.forEach(message => {
+            basictoaster("dangerToast", message);
+          });
+        });
+      }
+      setIsSubmitting(false)
+    }
+  }
+  const Update = async (data) => {
+    console.log("data")
   }
   const onError = (errors) => {
     for (const [key, value] of Object.entries(errors)) {
       switch (key) {
         case "name":
           basictoaster("dangerToast", "Name is required");
+          return;
+        case "type":
+          basictoaster("dangerToast", "Type is required");
+          return;
+        case "status":
+          basictoaster("dangerToast", "Status is required");
           return;
         case "legal_Name":
           basictoaster("dangerToast", "Legal name is required");
@@ -224,7 +241,7 @@ const PersonalData = forwardRef((props, ref) => {
         case "prfx_name":
           basictoaster("dangerToast", "Prefix is required");
           return;
-        case "email": 
+        case "email":
           if (errors.email.type === "required") {
             basictoaster("dangerToast", "Email is required");
           } else if (errors.email.type === "pattern") {
@@ -240,11 +257,11 @@ const PersonalData = forwardRef((props, ref) => {
         case "reject_reason":
           basictoaster("dangerToast", "Rejection Reason is required");
           return;
-        case "Street": 
+        case "Street":
           basictoaster("dangerToast", "Street is required");
           return;
         default:
-          break; 
+          break;
       }
     }
   };
@@ -260,7 +277,43 @@ const PersonalData = forwardRef((props, ref) => {
     setValue('contact', options);
     toggle()
   }
-
+  const handleClick = (data) => {
+    if (props.onSubmit === 'onSubmit') {
+      onSubmit(data);
+    } else if (props.onSubmit === 'onUpdate') {
+      Update()
+    }
+  };
+  useEffect(() => {
+    if (props.permission) {
+      Object.keys(props.permission).forEach((field) => {
+        // const input = document.querySelector(`[name=${field}]`);
+        const inputDiv = document.getElementById(`${field}-wrapper`);;
+        console.log(inputDiv)
+        if (inputDiv) {
+          switch (props.permission[field]) {
+            case 'show':
+              inputDiv.style.display = 'block'; 
+              inputDiv.querySelector('input, select, textarea').disabled = false; 
+              break;
+            case 'hide':
+              inputDiv.style.display = 'none'; 
+              break;
+            case 'disable':
+              inputDiv.style.display = 'block'; 
+              const selectInput = inputDiv.querySelector('input, select, textarea');
+              if (selectInput) {
+                selectInput.disabled = true;
+              }           
+              break;
+            default:
+              break;
+          }
+        }
+      });
+    }
+   
+  }, [props.permission]);
   return (
     <Fragment>
       <Card>
@@ -277,18 +330,19 @@ const PersonalData = forwardRef((props, ref) => {
           <CardBody>
             <Form className="needs-validation" noValidate="" autoComplete="off">
               <Row className="g-3 mb-3">
-                <Col md="6">
-                  <FormGroup className="row">
+                <Col md="6" id="type-wrapper">
+                  <FormGroup className="row" >
                     <Label className="col-sm-3 col-form-label" for="validationCustom01">Vendor Type</Label>
                     <Col sm="9">
                       <Controller
-                        name="Vendor_Type"
+                        name="type"
                         control={control}
                         rules={{ required: false }}
                         render={({ field }) => (
                           <Select
+                          id='type'
                             {...field}
-                            defaultValue={{ isDisabled: true, label: '-- Select Type --' }}
+                            value={field.value || { value: '', label: '-- Select Type --' }}
                             options={[
                               { value: 'Freelance', label: 'Freelance' },
                               { value: 'Agency', label: 'Agency' },
@@ -300,6 +354,7 @@ const PersonalData = forwardRef((props, ref) => {
                               handleVendorTypeChange(option);
                               field.onChange(option);
                             }}
+                            isDisabled={isSubmitting || props.permission.type === 'disable'}
                           />
                         )}
                       />
@@ -307,18 +362,19 @@ const PersonalData = forwardRef((props, ref) => {
                     </Col>
                   </FormGroup>
                 </Col>
-                <Col md="6">
+                <Col md="6" id="status-wrapper">
                   <FormGroup className="row">
                     <Label className="col-sm-3 col-form-label" for="validationCustom01">Status</Label>
                     <Col sm="9">
                       <Controller
-                        name="Status"
+                        name="status"
                         control={control}
                         rules={{ required: true }}
                         render={({ field }) => (
                           <Select
+                            id='status'
                             {...field}
-                            defaultValue={{ isDisabled: true, label: '-- Select Status --' }}
+                            value={field.value || { value: '', label: '-- Select Status --' }}
                             options={[
                               { value: 'Active', label: 'Active' },
                               { value: 'Inactive', label: 'Inactive' },
@@ -329,17 +385,19 @@ const PersonalData = forwardRef((props, ref) => {
                               handleStatusChange(option);
                               field.onChange(option);
                             }}
+                            isDisabled={isSubmitting || props.permission.status === 'disable'}
                           />
                         )} />
                     </Col>
                   </FormGroup>
                 </Col>
-                <Col md="6">
+                <Col md="6" id="name-wrapper">
                   <FormGroup className="row">
 
                     <Label className="col-sm-3 col-form-label" for="validationCustom01">{nameLabel}</Label>
                     <Col sm="9">
                       <input
+                        disabled={isSubmitting}
                         defaultValue=""
                         className="form-control"
                         id="name"
@@ -356,16 +414,18 @@ const PersonalData = forwardRef((props, ref) => {
                     <Label className="col-sm-3 col-form-label" for="validationCustom01">{ContactLabel}</Label>
                     <Col sm="9">
                       <InputGroup>
-                        <select className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: true })} >
+                        <select disabled={isSubmitting} className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: true })} >
                           <option value="" disabled>Prefix</option>
                           <option value="Mr">Mr</option>
                           <option value="Ms">Ms</option>
                           <option value="Mss">Mss</option>
                           <option value="Mrs">Mrs</option>
+
                         </select>
                         <input
+                          disabled={isSubmitting}
                           className="form-control"
-                          id="contact_name"
+                          // id="contact_name"
                           defaultValue=""
                           type="text"
                           name="contact_name"
@@ -385,8 +445,10 @@ const PersonalData = forwardRef((props, ref) => {
                         id="Legal_Name"
                         type="text"
                         name="Legal_Name"
-                        {...register("legal_Name", { required: true })}
+                        {...register("legal_name", { required: true })}
                         placeholder="As Mentioned in ID and Passport"
+                        disabled={isSubmitting}
+
                       />
                     </Col>
                   </FormGroup>
@@ -398,7 +460,9 @@ const PersonalData = forwardRef((props, ref) => {
                       {/* <Input className="form-control" type="email" placeholder="email" /> */}
                       <input
                         className="form-control"
-                        id="email"
+                        disabled={isSubmitting}
+
+                        // id="email"
                         type="email"
                         name="email"
                         placeholder="Email"
@@ -421,8 +485,9 @@ const PersonalData = forwardRef((props, ref) => {
 
                       <InputGroup>
                         <input
+                          disabled={isSubmitting}
                           className="form-control"
-                          id="Phone_number"
+                          // id="Phone_number"
                           type="tel"
                           name="Phone_number"
                           placeholder="Phone number"
@@ -437,8 +502,9 @@ const PersonalData = forwardRef((props, ref) => {
                           }}
                         />
                         <input
+                          disabled={isSubmitting}
                           className="form-control "
-                          id="Anothernumber"
+                          // id="Anothernumber"
                           type="number"
                           name="Another-number"
                           pattern="[789][0-9]{9}"
@@ -510,6 +576,8 @@ const PersonalData = forwardRef((props, ref) => {
                               field.onChange(option.value);
                               handelingSelectCountry(option.value)
                             }}
+                            isDisabled={isSubmitting}
+
                           />
                         )}
                       />
@@ -540,6 +608,8 @@ const PersonalData = forwardRef((props, ref) => {
                               setSelectedOptionC(option);
                               field.onChange(option.value);
                             }}
+                            isDisabled={isSubmitting}
+
                           />
                         )}
                       />
@@ -573,9 +643,12 @@ const PersonalData = forwardRef((props, ref) => {
                               setSelectedOptionN(option);
                               field.onChange(option.value);
                             }}
+                            isDisabled={isSubmitting}
+
                           />
                         )}
-                      />                  </Col>
+                      />
+                    </Col>
                   </FormGroup>
                 </Col>
                 <Col md="6">
@@ -623,6 +696,8 @@ const PersonalData = forwardRef((props, ref) => {
                               setSelectedOptionT(option);
                               field.onChange(option.value);
                             }}
+                            isDisabled={isSubmitting}
+
                           />
                         )}
                       />
@@ -636,6 +711,8 @@ const PersonalData = forwardRef((props, ref) => {
                     <Col sm="9">
 
                       <input
+                        disabled={isSubmitting}
+
                         className="form-control"
                         id="Street"
                         type="text"
@@ -652,6 +729,8 @@ const PersonalData = forwardRef((props, ref) => {
                     <Label className="col-sm-3 col-form-label" for="validationCustom01">City / state</Label>
                     <Col sm="9">
                       <input
+                        disabled={isSubmitting}
+
                         className="form-control"
                         id="City_state"
                         type="text"
@@ -664,7 +743,6 @@ const PersonalData = forwardRef((props, ref) => {
                 </Col>
                 <Col md="6">
                   <FormGroup className="row">
-
                     <Label className="col-sm-3 col-form-label" for="validationCustom01">Notes</Label>
                     <Col sm="9">
 
@@ -674,13 +752,13 @@ const PersonalData = forwardRef((props, ref) => {
                           const data = editor.getData();
                           setValue('note', data);
                         }}
+                        disabled={isSubmitting}
                       />
                     </Col>
                   </FormGroup>
                 </Col>
-                <Col md="6">
+                <Col md="6" id="address-wrapper" >
                   <FormGroup className="row">
-
                     <Label className="col-sm-3 col-form-label" for="validationCustom01">Address</Label>
                     <Col sm="9">
 
@@ -690,16 +768,12 @@ const PersonalData = forwardRef((props, ref) => {
                           const data = editor.getData();
                           setValue('address', data);
                         }}
-
-                      />
-                      <input
-                        type="hidden" id='Address'
-                        {...register('address', { required: true })}
+                        disabled={isSubmitting || props.permission.address === "disable"}
                       />
                     </Col>
                   </FormGroup>
                 </Col>
-                {Status && <Col md="6">
+                {Status && <Col md="6" id="reject_reason-wrapper" >
                   <FormGroup className="row">
 
                     <Label className="col-sm-3 col-form-label" for="validationCustom01">Rejection Reason</Label>
@@ -711,6 +785,7 @@ const PersonalData = forwardRef((props, ref) => {
                           const data = editor.getData();
                           setValue('reject_reason', data);
                         }}
+                        disabled={isSubmitting || props.permission.reject_reason === "disable"}
                       />
                       <input
                         hidden disabled
@@ -720,7 +795,14 @@ const PersonalData = forwardRef((props, ref) => {
                   </FormGroup>
                 </Col>}
               </Row>
-              <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit, onError) }}>Submit</Btn>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Btn
+                  attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError) }}
+                  disabled={isSubmitting}
+                >
+                  Submit
+                </Btn>
+              </div>
             </Form>
           </CardBody>
         </Collapse>
@@ -823,6 +905,6 @@ const PersonalData = forwardRef((props, ref) => {
       </CommonModal>
     </Fragment>
   );
-});
+};
 
 export default PersonalData;

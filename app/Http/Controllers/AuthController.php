@@ -20,7 +20,6 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
-        // Verify user
         $user = User::authenticate($request->email, $request->password);
 
         if (!$user) {
@@ -33,27 +32,22 @@ class AuthController extends Controller
                     'user_type' => 'vendor',
                     'loggedin_ttg' => 1,
                 ];
+
                 $token = JWTAuth::fromUser($user, ['exp' => now()->addHour()->timestamp]);
                 return response()->json([
                     'message' => 'Login successful',
                     'user' => $loginData,
                     'token' => $token,
                     'token_type' => 'bearer',
-                    'expires_in' => auth('api')->factory()->getTTL() * 60
+                    'expires_in' => auth('vendor')->factory()->getTTL() * 60
                 ], 200);
-            }else{
+            } else {
                 return response()->json(['message' => 'Invalid credentials'], 400);
             }
         }
-
-        // Get the account data associated with the user
         $userAccount = User::getUserAccount($user);
-
         if ($userAccount) {
-            // Update account information
             User::updateAccountData($userAccount);
-
-            // Set up login data with required fields encrypted
             $loginData = [
                 'id' => Crypt::encrypt($userAccount->id),
                 'username' => $userAccount->user_name,
@@ -66,7 +60,6 @@ class AuthController extends Controller
 
             $token = JWTAuth::fromUser($user, ['exp' => now()->addHour()->timestamp]);
 
-            // Return a JSON response with user data and token
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $loginData,
@@ -77,8 +70,8 @@ class AuthController extends Controller
         } else {
             return response()->json(['message' => 'User account not found'], 404);
         }
-        //
     }
+
     public function logout()
     {
         auth()->logout();

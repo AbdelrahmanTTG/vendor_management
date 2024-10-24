@@ -34,9 +34,8 @@ return [
     | Supported: "session"
     |
     */
-
     'guards' => [
-        'web' => [
+         'web' => [
             'driver' => 'session',
             'provider' => 'users',
         ],
@@ -44,7 +43,14 @@ return [
             'driver' => 'jwt',
             'provider' => 'users',
         ],
+
+        'vendor' => [
+            'driver' => 'jwt',
+            'provider' => 'vendors',
+        ],
     ],
+
+  
 
     /*
     |--------------------------------------------------------------------------
@@ -68,7 +74,10 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
-
+        'vendors' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\Vendor::class),
+        ],
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',

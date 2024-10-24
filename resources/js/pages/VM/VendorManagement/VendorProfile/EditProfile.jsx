@@ -16,11 +16,17 @@ import NavBar from './NavBar';
 import History from "./History"
 import Portal_User from "./Portal_User"
 const Vendor = () => {
-    const [id, setId] = useState('');
+    const [id, setId] = useState('29341');
     const handleDataSend = (data) => {
         setId(data);
     };
-    
+    const [permissions, setPermissions] = useState({
+        type: 'hide',
+        name: 'disable',
+        email: 'disable',
+        status: 'disable',
+        address:"disable"
+    });
     return (
         <Fragment >
 
@@ -29,9 +35,12 @@ const Vendor = () => {
                     <NavBar />
                 </div>
             </div>
+
             <div style={{ marginTop: "25vh" }}>
                 <div id="personal-data">
-                    <PersonalData onDataSend={handleDataSend} onSubmit="onSubmit" />
+                    <PersonalData onDataSend={handleDataSend} route="" onSubmit="onUpdate"
+                        permission={permissions}
+                    />
                 </div>
                 <div id="messaging">
                     <Messaging />

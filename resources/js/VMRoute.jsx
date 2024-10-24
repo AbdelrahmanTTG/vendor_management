@@ -2,6 +2,8 @@ import Home from './pages/Home'
 import React, { Suspense } from "react";
 const Languages = React.lazy(() => import('./pages/VM/Admin/Languages'));
 const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
+const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/EditProfile'));
+
 const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable'));
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
@@ -21,6 +23,15 @@ export const VM = [
             </LazyWrapper>
         )
     },
+    {
+        path: 'vendors/Editprofiletest',
+        element: (
+            <LazyWrapper>
+                <EditVendorProfile />
+            </LazyWrapper>
+        )
+    },
+    
     {
         path: 'Time zone',
         element: (

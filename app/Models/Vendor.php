@@ -9,10 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Vendor extends Model  implements JWTSubject
+class Vendor extends Authenticatable  implements JWTSubject
 {
     use HasFactory, Notifiable ,HasApiTokens;
-    protected $table = 'vendor'; 
+    protected $table = 'vendor';
+    public $timestamps = false;
 
 
     public static function vendor($email , $password){
@@ -27,6 +28,22 @@ class Vendor extends Model  implements JWTSubject
         'name',
         'email',
         'password',
+        'type',
+        'status' ,
+        'prfx_name',
+        'contact_name' ,
+        'legal_name' ,
+        'phone_number',
+        'contact' ,
+        'region',
+        'country',
+        'nationality' ,
+        'timezone',
+        'street' ,
+        'city' ,
+        'note' ,
+        'address' ,
+        'reject_reason'
     ];
 
     /**

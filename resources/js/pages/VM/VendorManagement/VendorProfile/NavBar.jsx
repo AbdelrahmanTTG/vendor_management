@@ -37,7 +37,7 @@ const Simple = () => {
             <NavItem className="fw-bold" style={{ margin: 0 }}>
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#VendorDetails"
                 className={BasicLineTab === 'VendorDetails' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('VendorDetails'); handleScroll('personal-data'); }}
               >
@@ -49,7 +49,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#InstantMessaging"
                 className={BasicLineTab === 'InstantMessaging' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('InstantMessaging'); handleScroll('messaging'); }}
               >
@@ -60,7 +60,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#VM-Notes"
                 className={BasicLineTab === 'VM-Notes' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('VM-Notes'); handleScroll('VM-Notes'); }}
               >
@@ -71,7 +71,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#Files-Certificate"
                 className={BasicLineTab === 'Files-Certificate' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('Files-Certificate'); handleScroll('Files-Certificate'); }}
               >
@@ -82,7 +82,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#Education"
                 className={BasicLineTab === 'Education' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('Education'); handleScroll('Education'); }}
               >
@@ -93,7 +93,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#Experience"
                 className={BasicLineTab === 'Experience' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('Experience'); handleScroll('Experience'); }}
               >
@@ -104,7 +104,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#Test"
                 className={BasicLineTab === 'Test' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('Test'); handleScroll('Test'); }}
               >
@@ -115,7 +115,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#Billing"
                 className={BasicLineTab === 'Billing' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('Billing'); handleScroll('Billing'); }}
               >
@@ -125,7 +125,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#Portal_User"
                 className={BasicLineTab === 'Portal_User' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('Portal_User'); handleScroll('Portal_User'); }}
               >
@@ -135,7 +135,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#Price List"
                 className={BasicLineTab === 'Price List' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('Price List'); handleScroll('Price_List'); }}
               >
@@ -146,7 +146,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#Evaluation"
                 className={BasicLineTab === 'Evaluation' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('Evaluation'); handleScroll('Evaluation'); }}
               >
@@ -157,7 +157,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#Feedback"
                 className={BasicLineTab === 'Feedback' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('Feedback'); handleScroll('Feedback'); }}
               >
@@ -168,7 +168,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#Vacation"
                 className={BasicLineTab === 'Vacation' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('Vacation'); handleScroll('Vacation'); }}
               >
@@ -179,7 +179,7 @@ const Simple = () => {
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
-                href="#javascript"
+                href="#History"
                 className={BasicLineTab === 'History' ? 'active' : ''}
                 onClick={() => { setBasicLineTab('History'); handleScroll('History'); }}
               >

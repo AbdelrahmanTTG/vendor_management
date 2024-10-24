@@ -32,7 +32,7 @@ export const ContextProvider = ({ children }) => {
         _setToken(token);
         if (token) {
             localStorage.setItem('ACCESS_TOKEN', token);
-            const expireTime = Date.now() + expiresIn * 1000; 
+            const expireTime = Date.now() + (expiresIn - 60) * 1000; 
             _setExpiresIn(expireTime);
             localStorage.setItem('EXPIRES_IN', expireTime);
         } else {

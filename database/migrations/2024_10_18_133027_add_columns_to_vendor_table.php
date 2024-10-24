@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('vendor', function (Blueprint $table) {
-            $table->string('nationality')->nullable();
+            $table->integer('nationality')->nullable();
             $table->string('timezone')->nullable();
             $table->text('reject_reason')->nullable();
             $table->string('prfx_name')->nullable();
@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('address')->nullable();
             $table->string('contact_name')->nullable();
             $table->string('legal_Name')->nullable();
+            $table->integer('region')->nullable();
 
             $table->text('note')->nullable();
         });
@@ -31,7 +32,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('vendor', function (Blueprint $table) {
-            $table->dropColumn(['nationality', 'timezone', 'reject_reason', 'prfx_name', 'city', 'street', 'address', 'note','contact_name',"legal_Name"]);
+            $table->dropColumn(['nationality', 'timezone', 'reject_reason', 'prfx_name', 'city', 'street', 'address', 'note','contact_name',"legal_Name" ,'region']);
 
         });
     }
