@@ -14,22 +14,17 @@ use Illuminate\Support\Facades\Crypt;
 class VendorProfileController extends Controller
 {
 
-        public function Vendors(Request $request){
+    public function Vendors(Request $request)
+    {
         $perPage = $request->input('per_page', 10);
 
         $vendors = Vendor::select('id', 'name', 'email', 'legal_Name', 'phone_number', 'country', 'nationality')
             ->with(['country:id,name', 'nationality:id,name'])
             ->paginate($perPage);
-                    return response()->json($vendors);
-        }
-
-
-
-
-
-
-
-    public function findCountry(Request $request){
+        return response()->json($vendors);
+    }
+    public function findCountry(Request $request)
+    {
         $id = $request->input('id');
         $Countries = Countries::getColumnValue($id);
         return response()->json($Countries, 201);
@@ -67,16 +62,16 @@ class VendorProfileController extends Controller
         return response()->json([
             'message' => 'Vendor created successfully!',
             'vendor' => ['id' => $vendor->id,]
-        ], 201);   
-     }
+        ], 201);
+    }
     public function updatePersonalInfo(Request $request)
     {
         if (!$request->has('id')) {
             return response()->json([
                 'message' => 'ID is required'
-            ], 400); 
+            ], 400);
         }
-        $id = $request->input('id');     
+        $id = $request->input('id');
         $vendor = Vendor::findOrFail($id);
         if (!$vendor) {
             return response()->json([
@@ -113,8 +108,8 @@ class VendorProfileController extends Controller
             'vendor' => ['id' => $vendor->id]
         ], 200);
     }
-
-    public function storeBilling(Request $request){
+    public function storeBilling(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required|integer',
             'account_holder' => 'required|string|max:255',
@@ -123,11 +118,11 @@ class VendorProfileController extends Controller
             'billing_address' => 'nullable|string',
             'billing_legal_name' => 'required|string|max:255',
             'city' => 'required|string|max:255',
-            'iban' => ['required', 'string', 'regex:/^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/'], 
+            'iban' => ['required', 'string', 'regex:/^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/'],
             'payment_terms' => 'nullable|string',
             'street' => 'required|string|max:255',
             'swift_bic' => ['required', 'string', 'regex:/^[A-Z]{6}[A-Z2-9][A-NP-Z0-9](XXX)?$/'],
-            'Wallets Payment methods' => 'required|array|min:1', 
+            'Wallets Payment methods' => 'required|array|min:1',
             'Wallets Payment methods.*.method' => 'required|string|max:10',
             'Wallets Payment methods.*.account' => 'required|string|max:255',
         ]);
@@ -142,7 +137,7 @@ class VendorProfileController extends Controller
             'street' => $request['street'],
             'billing_address' => $request['billing_address'],
         ]);
-        $bankDetails =BankDetails::create([
+        $bankDetails = BankDetails::create([
             'billing_data_id' => $billingData->id,
             'bank_name' => $request['bank_name'],
             'account_holder' => $request['account_holder'],
@@ -158,7 +153,29 @@ class VendorProfileController extends Controller
                 'account' => $wallet['account'],
             ]);
         }
-        return response()->json($request, 200);
-     }
+        return response()->json([
+            'message' => 'Added successfully!',
+        ], 200);
+    }
+
+    public function ModificationComplex(Request $request){
+        $id = $request->input('id');
+        if($request->input('PersonalData')){
+            $PersonalData = $this->PersonalData($id);
+        }
+        if ($request->input('BillingData')) {
+            // $BillingData = $this->BillingData($id);
+        }
+        return response()->json(['Data'=> $PersonalData], 200);
+
+    }
+    public function PersonalData($id)
+    {
+        $vendor = Vendor::with(['country:id,name', 'nationality:id,name'])->findOrFail($id);
+        if($vendor){
+            return $vendor;
+        }
+        
+    }
 
 }

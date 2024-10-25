@@ -24,7 +24,7 @@ const AddProfile = () => {
     return (
         <Fragment >
 
-            <div id='nav-componant' className=" position-fixed  " style={{ zIndex: "1", top: "9vh" }} >
+            <div id='nav-componant' className=" position-fixed  " style={{ zIndex: "2", top: "9vh" }} >
                 <div className="position-relative  nav_div" style={{ width: "99%" }}>
                     <NavBar />
                 </div>

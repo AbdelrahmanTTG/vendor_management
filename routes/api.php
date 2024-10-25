@@ -21,14 +21,17 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/PersonalInformation', [VendorProfileController::class, 'store']);
     Route::post('/updatePersonalInformation', [VendorProfileController::class, 'updatePersonalInfo']);
     Route::post('/storeBilling', [VendorProfileController::class, 'storeBilling']);
+    Route::post('/Vendors', [VendorProfileController::class, 'Vendors']);
+
 
 });
 Route::middleware(['auth:vendor'])->group(function () {
 
 });
 Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () {
-    Route::get('/dashboard', function () {
-        return "data";
-    });
+    // Route::get('/dashboard', function () {
+    //     return "data";
+    // });
+    Route::get('/EditVendor', [VendorProfileController::class, 'ModificationComplex']);
+
 });
-    Route::post('/Vendors', [VendorProfileController::class,'Vendors']);

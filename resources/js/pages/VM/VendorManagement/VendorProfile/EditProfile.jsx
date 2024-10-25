@@ -17,15 +17,15 @@ import Billing from "./Billing"
 import NavBar from './NavBar';
 import History from "./History"
 import Portal_User from "./Portal_User"
+import {  Navigate } from 'react-router-dom';
+import axiosClient from "../../../../pages/AxiosClint";
 
 const EditProfile = () => {
     const [id, setId] = useState('');
     const location = useLocation();
     const { vendor } = location.state || {};
-    
-    const handleDataSend = (data) => {
-        setId(data);
-    };
+    const [redirect, setRedirect] = useState(false);
+    const [vendorPersonalData, setPersonalData] = useState([]);
     const [permissions, setPermissions] = useState({
         // type: 'hide',
         // name: 'disable',
@@ -34,7 +34,32 @@ const EditProfile = () => {
         // address: "disable",
         // contact:"disable"
     });
+    useEffect(() => {
+        if (!vendor) { 
+            setRedirect(true);
+        } else {
+            const fetchVendor = async () => {
+                try {
+                    const data = await axiosClient.get("EditVendor", {
+                        params: {
+                            id: vendor,
+                            PersonalData: "Personal Data"
+                        }
+                    });
+                    setPersonalData(data.data);
+                    // console.log(data.data)
+                } catch (error) {
+                    console.error('Error fetching vendor:', error);
+                } finally {
+                }
+            };
 
+            fetchVendor();
+        }
+    }, [vendor]);
+    if (redirect) {
+        return <Navigate to='*' />;
+    }
     return (
         <Fragment >
             <div id='nav-componant' className=" position-fixed  " style={{ zIndex: "1", top: "9vh" }} >
@@ -45,8 +70,8 @@ const EditProfile = () => {
 
             <div style={{ marginTop: "25vh" }}>
                 <div id="personal-data">
-                    <PersonalData  onSubmit="onUpdate"
-                        permission={permissions}
+                    <PersonalData  onSubmit="onUpdate" mode="edit"
+                        permission={permissions} vendorPersonalData={vendorPersonalData}
                     />
                 </div>
                 <div id="messaging">

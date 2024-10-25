@@ -1,16 +1,22 @@
 import React, { Fragment, useEffect, useState, useRef } from 'react';
-import { Card, Table, Col } from 'reactstrap';
+import { Card, Table, Col, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 import axiosClient from "../../../../pages/AxiosClint";
 import { useNavigate } from 'react-router-dom';
+import { Previous, Next } from '../../../../Constant';
 
 const Vendor = () => {
     const [vendors, setVendors] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false); 
 
     const handleEdit = (vendor) => {
-        navigate('/vm/vendors/editprofiletest', { state: { vendor } });
+        setLoading(true); 
+        setTimeout(() => {
+            navigate('/vm/vendors/editprofiletest', { state: { vendor } });
+            setLoading(false);
+        }, 10);
     };
     useEffect(() => {
         const fetchData = async () => {
@@ -28,6 +34,63 @@ const Vendor = () => {
         }
         fetchData();
     }, [currentPage]);
+    const handlePageChange = (newPage) => {
+        if (newPage > 0 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+        }
+    };  
+    const getPaginationItems = () => {
+        const items = [];
+        const displayedPages = 5;
+        const halfDisplayed = Math.floor(displayedPages / 2);
+        let startPage = Math.max(1, currentPage - halfDisplayed);
+        let endPage = Math.min(totalPages, currentPage + halfDisplayed);
+
+        if (endPage - startPage < displayedPages - 1) {
+            if (startPage === 1) {
+                endPage = Math.min(startPage + displayedPages - 1, totalPages);
+            } else if (endPage === totalPages) {
+                startPage = Math.max(endPage - displayedPages + 1, 1);
+            }
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            items.push(
+                <PaginationItem key={i} active={i === currentPage} onClick={() => handlePageChange(i)}>
+                    <PaginationLink>{i}</PaginationLink>
+                </PaginationItem>
+            );
+        }
+        if (startPage > 1) {
+            items.unshift(
+                <PaginationItem disabled key="ellipsis-start">
+                    <PaginationLink disabled>...</PaginationLink>
+                </PaginationItem>
+            );
+        }
+        if (endPage < totalPages) {
+            items.push(
+                <PaginationItem disabled key="ellipsis-end">
+                    <PaginationLink disabled>...</PaginationLink>
+                </PaginationItem>
+            );
+        }
+        if (startPage > 1) {
+            items.unshift(
+                <PaginationItem onClick={() => handlePageChange(1)} key={1}>
+                    <PaginationLink>{1}</PaginationLink>
+                </PaginationItem>
+            );
+        }
+        if (endPage < totalPages) {
+            items.push(
+                <PaginationItem onClick={() => handlePageChange(totalPages)} key={totalPages}>
+                    <PaginationLink>{totalPages}</PaginationLink>
+                </PaginationItem>
+            );
+        }
+
+        return items;
+    };
     return (
         <Fragment >
             <Col sm="12">
@@ -66,6 +129,12 @@ const Vendor = () => {
                                 }
                             </tbody>
                         </Table>
+                        <Pagination aria-label="Page navigation example" className="pagination-primary">
+                            <PaginationItem onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><PaginationLink >{Previous}</PaginationLink></PaginationItem>
+                            {getPaginationItems()}
+
+                            <PaginationItem onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}><PaginationLink >{Next}</PaginationLink></PaginationItem>
+                        </Pagination>
                     </div>
                 </Card>
             </Col>

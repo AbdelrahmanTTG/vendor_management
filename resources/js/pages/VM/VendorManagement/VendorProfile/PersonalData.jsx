@@ -28,7 +28,7 @@ const PersonalData = (props) => {
     }
   };
   const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
-  const { control: controlContact, register: registerContact, handleSubmit: handleSubmitContact, formState: { errors: errorsContact } } = useForm();
+  const { register: registerContact, handleSubmit: handleSubmitContact, formState: { errors: errorsContact } } = useForm();
   const [inputValues, setInputValues] = useState([]);
   const [nameLabel, setNameLabel] = useState('Name');
   const [ContactLabel, setContactLabel] = useState('Contact name');
@@ -297,14 +297,14 @@ const PersonalData = (props) => {
             //   inputDiv.querySelector('input, select, textarea').disabled = false; 
             //   break;
             case 'hide':
-              inputDiv.style.display = 'none'; 
+              inputDiv.style.display = 'none';
               break;
             case 'disable':
-              inputDiv.style.display = 'block'; 
+              inputDiv.style.display = 'block';
               const Input = inputDiv.querySelector('input');
               if (Input) {
                 Input.disabled = true;
-              }           
+              }
               break;
             default:
               break;
@@ -312,8 +312,31 @@ const PersonalData = (props) => {
         }
       });
     }
-   
+
   }, [props.permission]);
+  const [loading2, setLoading2] = useState(false);
+  useEffect(() => {
+    if (props.mode === "edit") {
+      setLoading2(true)
+      if (props.vendorPersonalData) {
+        if (props.vendorPersonalData.Data) {
+          const data = props.vendorPersonalData.Data;
+          if (data.type != 0) { handleVendorTypeChange({ value: data.type, label: data.type }); setValue("type", { value: data.type, label: data.type }); }
+          if (data.status!= 0) { handleStatusChange({ value: data.status, label: data.status }); setValue("status", { value: data.status, label: data.status }); }
+          setValue("name", data.name);
+          setValue("email", data.email);
+          setValue("prfx_name", data.prfx_name);
+          setValue("contact_name", data.contact_name);
+          setValue("legal_name", data.legal_Name); 
+          setSelectedOptionC({ value: data.country.id, label: data.country.name })
+  
+
+          setLoading2(false)
+        }
+      }
+    }
+  }, [props.vendorPersonalData, setValue]);
+
   return (
     <Fragment>
       <Card>
@@ -328,7 +351,11 @@ const PersonalData = (props) => {
         </CardHeader>
         <Collapse isOpen={isOpen}>
           <CardBody>
-            <Form className="needs-validation" noValidate="" autoComplete="off">
+            {loading2 ? (
+              <div className="loader-box">
+                <Spinner attrSpinner={{ className: 'loader-6' }} />
+              </div>
+            ) : <Form className="needs-validation" noValidate="" autoComplete="off">
               <Row className="g-3 mb-3">
                 <Col md="6" id="type-wrapper">
                   <FormGroup className="row" >
@@ -340,7 +367,7 @@ const PersonalData = (props) => {
                         rules={{ required: false }}
                         render={({ field }) => (
                           <Select
-                          id='type'
+                            id='type'
                             {...field}
                             value={field.value || { value: '', label: '-- Select Type --' }}
                             options={[
@@ -414,7 +441,7 @@ const PersonalData = (props) => {
                     <Label className="col-sm-3 col-form-label" for="validationCustom01">{ContactLabel}</Label>
                     <Col sm="9">
                       <InputGroup>
-                        <select disabled={isSubmitting || (props.permission && props.permission.contact === "disable") } className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: true })} >
+                        <select disabled={isSubmitting || (props.permission && props.permission.contact === "disable")} className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: true })} >
                           <option value="" disabled>Prefix</option>
                           <option value="Mr">Mr</option>
                           <option value="Ms">Ms</option>
@@ -603,7 +630,7 @@ const PersonalData = (props) => {
                               <div className="loader-box">
                                 <Spinner attrSpinner={{ className: 'loader-6' }} />
                               </div>
-                            ) : 'No options found'}
+                            ) : 'Select region first '}
                             onChange={(option) => {
                               setSelectedOptionC(option);
                               field.onChange(option.value);
@@ -803,7 +830,8 @@ const PersonalData = (props) => {
                   Submit
                 </Btn>
               </div>
-            </Form>
+            </Form> }
+          
           </CardBody>
         </Collapse>
       </Card>
