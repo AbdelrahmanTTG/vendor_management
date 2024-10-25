@@ -13,9 +13,8 @@ use App\Models\TaskLog;
 use App\Models\VendorInvoice;
 use App\Models\VmSetup;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class TaskController extends Controller
 {

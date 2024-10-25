@@ -5,14 +5,18 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VmCodeTableController;
 use App\Http\Controllers\CodingTableController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PortalAdminController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\VendorProfileController;
+
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
 });
 Route::middleware(['auth:api'])->group(function () {
     Route::post('permission', [AuthController::class, 'userpermission']);
     Route::get('logout', [AuthController::class, 'logout']);
-    Route::post('tableDate', [VmCodeTableController::class,'SelectDataTable']);
+    Route::post('tableDate', [VmCodeTableController::class, 'SelectDataTable']);
     Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
     Route::post('SubmetData', [CodingTableController::class, 'store']);
     Route::delete('/deleteData', [CodingTableController::class, 'destroy']);
@@ -25,13 +29,36 @@ Route::middleware(['auth:api'])->group(function () {
 
 
 });
-Route::middleware(['auth:vendor'])->group(function () {
-
+Route::middleware(['auth:vendor'])->prefix('Portal')->group(function () {
+    Route::group(['prefix' => 'Vendor'], function () {
+        Route::post('allJobs', [TaskController::class, 'allJobs'])->name('Portal.allJobs');
+        Route::post('allJobOffers', [TaskController::class, 'allJobOffers'])->name('Portal.allJobs');
+        Route::post('allClosedJobs', [TaskController::class, 'allClosedJobs'])->name('Portal.allClosedJobs');
+        Route::post('allPlannedJobs', [TaskController::class, 'allPlannedJobs'])->name('Portal.allPlannedJobs');
+        Route::post('viewOffer', [TaskController::class, 'viewOffer'])->name('Portal.viewOffer');
+        Route::post('viewJob', [TaskController::class, 'viewJob'])->name('Portal.viewJob');
+        Route::post('cancelOffer', [TaskController::class, 'cancelOffer'])->name('Portal.cancelOffer');
+        Route::post('acceptOffer', [TaskController::class, 'acceptOffer'])->name('Portal.acceptOffer');
+        Route::post('acceptOfferList', [TaskController::class, 'acceptOfferList'])->name('Portal.acceptOfferList');
+        Route::post('sendMessage', [TaskController::class, 'sendMessage'])->name('Portal.sendMessage');
+        Route::post('finishJob', [TaskController::class, 'finishJob'])->name('Portal.finishJob');
+        Route::post('planTaskReply', [TaskController::class, 'planTaskReply'])->name('Portal.planTaskReply');
+        Route::post('allInvoices', [InvoiceController::class, 'allInvoices'])->name('Portal.allInvoices');
+        Route::post('selectCompletedJobs', [InvoiceController::class, 'selectCompletedJobs'])->name('Portal.selectCompletedJobs');
+        Route::post('getSelectedJobData', [InvoiceController::class, 'getSelectedJobData'])->name('Portal.getSelectedJobData');
+        Route::post('saveInvoice', [InvoiceController::class, 'saveInvoice'])->name('Portal.saveInvoice');
+        Route::post('dashboardData', [TaskController::class, 'index'])->name('Portal.dashboardData');
+    });
+    Route::group(['prefix' => 'Admin'], function () {
+        Route::post('settingsData', [PortalAdminController::class, 'getSettingsData'])->name('Portal.getSettingsData');
+        Route::post('saveSettings', [PortalAdminController::class, 'saveSettings'])->name('Portal.saveSettings');
+    });
 });
 Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () {
     // Route::get('/dashboard', function () {
     //     return "data";
     // });
     Route::get('/EditVendor', [VendorProfileController::class, 'ModificationComplex']);
-
+    Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
+    Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
 });

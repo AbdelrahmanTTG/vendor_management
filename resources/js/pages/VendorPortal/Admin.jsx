@@ -3,11 +3,12 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody, Label, FormGroup, Input, CardFooter, Table, Nav, NavItem, TabContent, TabPane, NavLink, Media } from 'reactstrap';
 import { BreadcrumbsPortal, H5, Btn, H6, P, } from '../../AbstractElements';
 import axios from 'axios';
+import axiosClient from '../AxiosClint';
 import { useStateContext } from '../../pages/context/contextAuth';
 import { toast } from 'react-toastify';
 
 const Admin = () => {
-  const baseURL = window.location.origin + "/Portal/Admin/";
+  const baseURL = "/Portal/Admin/";
   const [pageData, setPageData] = useState([]);
   const { user } = useStateContext();
   const [LeftLineTab, setLeftLineTab] = useState('1');
@@ -16,7 +17,7 @@ const Admin = () => {
   }, []);
   const fetchData = async () => {
     try {
-      axios.post(baseURL + "settingsData")
+      axiosClient.post(baseURL + "settingsData")
         .then(({ data }) => {          
           setPageData(data?.vmConfig);
         });
@@ -29,7 +30,7 @@ const Admin = () => {
   const handleSubmit = (event) => {
     const formData = new FormData(event.currentTarget);
     event.preventDefault();
-    axios.post(baseURL + "saveSettings", formData)
+    axiosClient.post(baseURL + "saveSettings", formData)
       .then(({ data }) => {
         switch (data.type) {
           case 'success':

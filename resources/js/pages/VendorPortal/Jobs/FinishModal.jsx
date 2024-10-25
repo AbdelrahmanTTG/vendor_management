@@ -5,9 +5,10 @@ import { Close, SaveChanges } from '../../../Constant';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import axiosClient from '../../AxiosClint';
 
 const FinishModal = (props) => {
-  const baseURL = window.location.origin + "/Portal/Vendor/";
+  const baseURL = "/Portal/Vendor/";
   const navigate = useNavigate();
   const [noteInput, setNoteInput] = useState("");
   const [fileInput, setFileInput] = useState("");
@@ -36,11 +37,11 @@ const FinishModal = (props) => {
         checkBoxArray.push(id);
     }
     setSelectedCheckboxes(checkBoxArray);   
-    console.log(checkBoxArray) ;
+   
 };
 
   const finishJob = () => {
-    axios.post(baseURL + "finishJob", vendorRes, {
+    axiosClient.post(baseURL + "finishJob", vendorRes, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

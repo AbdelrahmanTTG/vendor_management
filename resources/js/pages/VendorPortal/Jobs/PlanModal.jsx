@@ -5,9 +5,10 @@ import { Close, SaveChanges } from '../../../Constant';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import axiosClient from '../../AxiosClint';
 
 const PlanModal = (props) => {
-  const baseURL = window.location.origin + "/Portal/Vendor/";
+  const baseURL = "/Portal/Vendor/";
   const navigate = useNavigate();
   const [noteInput, setNoteInput] = useState("");
   const [statusInput, setStatusInput] = useState("8");
@@ -23,7 +24,7 @@ const PlanModal = (props) => {
     if (!window.confirm("Are you sure?")) {
       return;
     }
-    axios.post(baseURL + "planTaskReply", vendorRes)
+    axiosClient.post(baseURL + "planTaskReply", vendorRes)
       .then(({ data }) => {
         switch (data.type) {
           case 'success':

@@ -2,12 +2,13 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody, Table } from 'reactstrap';
 import { BreadcrumbsPortal, H5, Btn, LI, P, UL } from '../../../AbstractElements';
 import axios from 'axios';
+import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import { Link } from 'react-router-dom';
 import JobsTable from './JobsTable';
 
 const Notifications = () => {
-  const baseURL = window.location.origin + "/Portal/Vendor";
+  const baseURL = "/Portal/Vendor";
   const [pageTasks, setPageTasks] = useState([]);
   const [tableLinks, setTableLinks] = useState([]);
   const { user } = useStateContext();
@@ -16,7 +17,7 @@ const Notifications = () => {
       const payload = {
         'id': user.id
       };
-      axios.post(baseURL + "/allPlannedJobs", payload)
+      axiosClient.post(baseURL + "/allPlannedJobs", payload)
         .then(({ data }) => {
           console.log(data);
           const [Tasks] = [(data?.Tasks)];

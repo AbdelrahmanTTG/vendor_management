@@ -2,12 +2,13 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody } from 'reactstrap';
 import { BreadcrumbsPortal, H5, Btn } from '../../../AbstractElements';
 import axios from 'axios';
+import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import { Link } from 'react-router-dom';
 import InvoicesTable from './InvoicesTable';
 
 const AllInvoices = () => {
-  const baseURL = window.location.origin + "/Portal/Vendor";
+  const baseURL = "/Portal/Vendor";
   const [pageInvoices, setPageInvoices] = useState([]);
   const [tableLinks, setTableLinks] = useState([]);
   const { user } = useStateContext();
@@ -17,7 +18,7 @@ const AllInvoices = () => {
       const payload = {
         'id': user.id
       };
-      axios.post(baseURL + "/allInvoices", payload)
+      axiosClient.post(baseURL + "/allInvoices", payload)
         .then(({ data }) => {
           console.log(data);
           // const [Invoices] = [(data?.Invoices.data)];

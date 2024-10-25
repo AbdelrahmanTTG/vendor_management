@@ -1,4 +1,5 @@
 import axios from 'axios';
+import axiosClient from '../../AxiosClint';
 import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardBody, Table, TabContent, TabPane, Nav, NavItem, NavLink, InputGroup, Input } from 'reactstrap';
 import { BreadcrumbsPortal, Btn, LI, P, UL, H6, Image } from '../../../AbstractElements';
@@ -12,7 +13,7 @@ import FinishModal from './FinishModal';
 import PlanModal from './PlanModal';
 
 const ViewJob = () => {
-    const baseURL = window.location.origin + "/Portal/Vendor";    
+    const baseURL = "/Portal/Vendor";    
     const { user } = useStateContext();
     const { id } = useParams();
     const [pageTask, setPageTask] = useState([]);
@@ -32,7 +33,7 @@ const ViewJob = () => {
                 'vendor': user.id,
                 'id': id,
             };
-            axios.post(baseURL + "/viewJob", payload)
+            axiosClient.post(baseURL + "/viewJob", payload)
                 .then(({ data }) => {                    
                     const [Task] = [(data?.Task)];
                     const [Notes] = [(data?.Notes)];
@@ -52,7 +53,7 @@ const ViewJob = () => {
     const handleMessagePress = (e) => {
         if (e.key === "Enter" || e === "send") {
             if (messageInput.length > 0) {
-                axios.post(baseURL + "/sendMessage", { 'vendor': user.id, 'task_id': pageTask.id, 'message': messageInput })
+                axiosClient.post(baseURL + "/sendMessage", { 'vendor': user.id, 'task_id': pageTask.id, 'message': messageInput })
                     .then(({ data }) => {
                         switch (data.msg.type) {
                             case 'success':

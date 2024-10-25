@@ -5,6 +5,7 @@ import { Btn, H4, H5 } from '../../AbstractElements';
 import { useStateContext } from '../../pages/context/contextAuth';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import axiosClient from '../AxiosClint';
 import Clock from 'react-clock';
 import 'react-clock/dist/Clock.css';
 import JobsTable from './Jobs/JobsTable';
@@ -13,7 +14,7 @@ import Chart from "react-apexcharts";
 
 const Dashboard = () => {
   const { user } = useStateContext();
-  const baseURL = window.location.origin + "/Portal/Vendor";
+  const baseURL = "/Portal/Vendor";
   const [runningJobs, setRunningJobs] = useState([]);
   const [pendingJobs, setPendingJobs] = useState([]);
   const [finishedJobs, setFinishedJobs] = useState([]);
@@ -38,7 +39,7 @@ const Dashboard = () => {
       const payload = {
         'id': user.id
       };
-      axios.post(baseURL + "/dashboardData", payload)
+      axiosClient.post(baseURL + "/dashboardData", payload)
         .then(({ data }) => {
          // console.log(data);
           setRunningJobs(data?.runningJobs);

@@ -2,13 +2,14 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody, Label, FormGroup, Input, Table, CardFooter } from 'reactstrap';
 import { BreadcrumbsPortal, H5, Btn, H6 } from '../../../AbstractElements';
 import axios from 'axios';
+import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 
 const AddInvoice = () => {
-    const baseURL = window.location.origin + "/Portal/Vendor/";
+    const baseURL = "/Portal/Vendor/";
     const navigate = useNavigate();
     const { user } = useStateContext();
     const [completedJobs, setCompletedJobs] = useState([]);
@@ -25,7 +26,7 @@ const AddInvoice = () => {
             const payload = {
                 'vendor': user.id
             };
-            axios.post(baseURL + "selectCompletedJobs", payload)
+            axiosClient.post(baseURL + "selectCompletedJobs", payload)
                 .then(({ data }) => {
                     const [completedJobs] = [(data?.CompletedJobs)];
                     setCompletedJobs(completedJobs);
@@ -39,7 +40,7 @@ const AddInvoice = () => {
     };
     const getSelectedJobData = () => {
         if (selectedTaskInput != '') {
-            axios.post(baseURL + "getSelectedJobData", TaskRes)
+            axiosClient.post(baseURL + "getSelectedJobData", TaskRes)
                 .then(({ data }) => {
                     if (jobsData.length > 0)
                         setJobsData(jobsData => [...jobsData, data.Task]);
@@ -93,7 +94,7 @@ const AddInvoice = () => {
         else if (fileInput.length == 0) {
             toast.error("Please Upload Invoice File.....");
         } else {
-            axios.post(baseURL + "saveInvoice", InvoiceRes, {
+            axiosClient.post(baseURL + "saveInvoice", InvoiceRes, {
                 headers: {
                     "Content-Type": "multipart/form-data",                   
                 },

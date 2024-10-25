@@ -88,7 +88,7 @@ class InvoiceController extends Controller
                 $data['vpo_file'] = $file->hashName();
             }
         }
-        // invoivce data 
+        // invoice data 
        
         $inv['verified'] = 3;
         $inv['vpo_file'] = $data['vpo_file'];

@@ -1,12 +1,25 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Col, Container, Row,Card, CardBody, CardHeader, Form, FormGroup, Input, Label } from 'reactstrap';
 import { BreadcrumbsPortal, H3, H4, H6, P, Image, Btn  } from '../../AbstractElements';
 import { useStateContext } from '../../pages/context/contextAuth';
 import { MyProfile, Password, Website, Save, EmailAddress } from '../../Constant';
 import userImg from '../../assets/images/user/default.png';
 import { Link } from 'react-router-dom';
+import  EditMyProfile  from '../VM/VendorManagement/VendorProfile/PersonalData';
+
 const Profile = () => {
   const { user } = useStateContext();
+  const [id, setId] = useState(user.id);
+    const handleDataSend = (data) => {
+        setId(data);
+    };
+    const [permissions, setPermissions] = useState({
+      // type: 'hide',
+      //  name: 'disable',
+        email: 'disable',
+        status: 'hide',
+      //  address:"disable"
+    });
   console.log(user);
   return (
     <Fragment>
@@ -14,7 +27,7 @@ const Profile = () => {
       <Container fluid={true}>
         <div className="edit-profile">
           <Row>
-            <Col xl="4">
+            <Col xl="3">
               <Card>
                 <CardHeader className="pb-0">
                   <H4 attrH4={{ className: 'card-title mb-0' }}>{MyProfile}</H4>
@@ -52,10 +65,11 @@ const Profile = () => {
                 </CardBody>
               </Card>
             </Col>
-            <Col xl="8">
+            <Col xl="9">
             <Card>
               </Card>
-              {/* <EditMyProfile /> */}
+              <EditMyProfile onDataSend={handleDataSend} route="" onSubmit="onUpdate"
+                        permission={permissions}/>
             </Col>
           </Row>
         </div>

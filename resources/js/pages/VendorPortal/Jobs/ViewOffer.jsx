@@ -2,13 +2,14 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody, Table, TabContent, TabPane, Nav, NavItem, NavLink } from 'reactstrap';
 import { BreadcrumbsPortal, H5, Btn, LI, P, UL, H4 } from '../../../AbstractElements';
 import axios from 'axios';
+import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../context/contextAuth';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const ViewOffer = () => {
     const navigate = useNavigate();
-    const baseURL = window.location.origin + "/Portal/Vendor/";
+    const baseURL = "/Portal/Vendor/";
     const [pageTask, setPageTask] = useState([]);
     const [activeTab, setActiveTab] = useState('1');
     const { user } = useStateContext();
@@ -25,7 +26,7 @@ const ViewOffer = () => {
                 'type': type,
             };
 
-            axios.post(baseURL + "viewOffer", payload)
+            axiosClient.post(baseURL + "viewOffer", payload)
                 .then(({ data }) => {
                     const [Task] = [(data?.Task)];
                     setPageTask(Task);
@@ -37,7 +38,7 @@ const ViewOffer = () => {
         if (!window.confirm("Are you sure you want to reject the offer?")) {
             return;
         }
-        axios.post(baseURL + "cancelOffer", vendorRes)
+        axiosClient.post(baseURL + "cancelOffer", vendorRes)
             .then(({ data }) => {
                 switch (data.type) {
                     case 'success':
@@ -55,7 +56,7 @@ const ViewOffer = () => {
         if (!window.confirm("Are you sure you want to accept the offer?")) {
             return;
         }
-        axios.post(baseURL + "acceptOffer", vendorRes)
+        axiosClient.post(baseURL + "acceptOffer", vendorRes)
             .then(({ data }) => {
                 switch (data.type) {
                     case 'success':
@@ -72,7 +73,7 @@ const ViewOffer = () => {
         if (!window.confirm("Are you sure you want to accept the offer?")) {
             return;
         }
-        axios.post(baseURL + "acceptOfferList", vendorRes)
+        axiosClient.post(baseURL + "acceptOfferList", vendorRes)
             .then(({ data }) => {
                 switch (data.type) {
                     case 'success':
