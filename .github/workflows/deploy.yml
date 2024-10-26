@@ -48,13 +48,19 @@ jobs:
         run: |
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS << 'EOF'
           cd /var/www/html/lingotalents.com
-          pwd  # Print current directory
-          ls -la  # List files to confirm artisan exists
-          git pull origin main  # Pull the latest changes
+          
+          # Verify the remote repository
+          git remote -v || git remote add origin git@github.com:AbdelrahmanTTG/vendor_management.git
+          
+          # Pull the latest changes
+          git pull origin main
+
+          # Run Laravel commands
           /usr/bin/php artisan migrate --force  # Run migrations
           /usr/bin/php artisan config:cache  # Cache configuration
           /usr/bin/php artisan route:cache  # Cache routes
           /usr/bin/php artisan view:cache  # Cache views
+          
           # Optionally restart your web server or PHP service if needed
           # sudo service php8.2-fpm restart
           EOF
