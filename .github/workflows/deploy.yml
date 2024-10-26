@@ -32,6 +32,14 @@ jobs:
       - name: Build React App
         run: npm run build  # Adjust if your build command is different
 
+      - name: List files in deployment directory (for debugging)
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS "ls -la /var/www/html/lingotalents.com"
+
       - name: Deploy using SSH
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}  # Your SSH password
@@ -39,11 +47,12 @@ jobs:
           SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}  # Your server address
         run: |
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS << 'EOF'
-          cd /var/www/html/lingotalents.com  # Change this to your application path
+          cd /var/www/html/lingotalents.com
+          pwd  # Print current directory
+          ls -la  # List files to confirm artisan exists
           git pull origin main  # Pull the latest changes
-          composer install --no-dev --optimize-autoloader  # Install dependencies
-          php artisan migrate --force  # Run migrations
-          php artisan config:cache  # Cache configuration
-          php artisan route:cache  # Cache routes
-          php artisan view:cache  # Cache views
+          /usr/bin/php artisan migrate --force  # Run migrations
+          /usr/bin/php artisan config:cache  # Cache configuration
+          /usr/bin/php artisan route:cache  # Cache routes
+          /usr/bin/php artisan view:cache  # Cache views
           EOF
