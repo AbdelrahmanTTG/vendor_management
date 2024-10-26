@@ -56,3 +56,4 @@ jobs:
           /usr/bin/php artisan route:cache  # Cache routes
           /usr/bin/php artisan view:cache  # Cache views
           EOF
+          
