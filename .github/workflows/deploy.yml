@@ -1,0 +1,49 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main  # Change this to your main branch if different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'  # Latest stable version
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'  # Latest stable version
+
+      - name: Install NPM dependencies
+        run: npm install --legacy-peer-deps  # Optional
+
+      - name: Build React App
+        run: npm run build  # Adjust if your build command is different
+
+      - name: Deploy using SSH
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}  # Your SSH password
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}  # Your SSH username
+          SERVER_ADDRESS: your-server.com  # Your server address
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS << 'EOF'
+          cd /var/www/html/lingotalents.com  # Change this to your application path
+          git pull origin main  # Pull the latest changes
+          composer install --no-dev --optimize-autoloader  # Install dependencies
+          php artisan migrate --force  # Run migrations
+          php artisan config:cache  # Cache configuration
+          php artisan route:cache  # Cache routes
+          php artisan view:cache  # Cache views
+          EOF
