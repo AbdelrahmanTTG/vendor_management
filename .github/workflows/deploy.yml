@@ -48,10 +48,15 @@ jobs:
         run: |
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS << 'EOF'
           cd /var/www/html/lingotalents.com
-          
-          # Verify the remote repository
-          git remote -v || git remote add origin git@github.com:AbdelrahmanTTG/vendor_management.git
-          
+
+          # Check if 'origin' remote exists
+          if git remote -v | grep -q 'origin'; then
+            echo "Remote 'origin' exists."
+          else
+            echo "Adding remote 'origin'."
+            git remote add origin https://github.com/AbdelrahmanTTG/vendor_management.git
+          fi
+
           # Pull the latest changes
           git pull origin main
 
