@@ -24,7 +24,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'  # Latest stable version
+          node-version: '20'  # Latest stable version
 
       - name: Install NPM dependencies
         run: npm install --legacy-peer-deps  # Optional
