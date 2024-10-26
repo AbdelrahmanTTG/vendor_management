@@ -60,6 +60,9 @@ jobs:
           # Pull the latest changes
           git pull origin main
 
+          # Install Composer dependencies (make sure vendor directory is populated)
+          composer install --no-dev --optimize-autoloader
+
           # Run Laravel commands
           /usr/bin/php artisan migrate --force  # Run migrations
           /usr/bin/php artisan config:cache  # Cache configuration
