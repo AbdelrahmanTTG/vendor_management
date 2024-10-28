@@ -11,7 +11,7 @@ class WalletsPaymentMethods extends Model
     protected $table = 'wallets_payment_methods';
     public $timestamps = false;
     protected $fillable = [
-        'bank_details_id',
+        'billing_data_id',
         'method',
         'account',
     ];

@@ -32,6 +32,14 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->belongsTo(Countries::class, 'nationality'); 
     }
+    public function region()
+    {
+        return $this->belongsTo(Regions::class, 'region');
+    }
+    public function timezone()
+    {
+        return $this->belongsTo(TimeZone::class, 'timezone');
+    }
 
 
     protected $fillable = [
@@ -53,7 +61,14 @@ class Vendor extends Authenticatable  implements JWTSubject
         'city' ,
         'note' ,
         'address' ,
-        'reject_reason'
+        'reject_reason',
+        'contact_ProZ',
+        'contact_linked_in',
+        'contact_other1',
+        'contact_other2',
+        'contact_other3',
+        'Anothernumber',
+
     ];
 
     /**

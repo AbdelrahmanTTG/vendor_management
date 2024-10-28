@@ -17,11 +17,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('permission', [AuthController::class, 'userpermission']);
     Route::get('logout', [AuthController::class, 'logout']);
     Route::post('tableDate', [VmCodeTableController::class, 'SelectDataTable']);
-    Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
+    // Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
     Route::post('SubmetData', [CodingTableController::class, 'store']);
     Route::delete('/deleteData', [CodingTableController::class, 'destroy']);
     Route::post('/updateeData', [CodingTableController::class, 'update']);
-    Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
+    // Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
     Route::post('/PersonalInformation', [VendorProfileController::class, 'store']);
     Route::post('/updatePersonalInformation', [VendorProfileController::class, 'updatePersonalInfo']);
     Route::post('/storeBilling', [VendorProfileController::class, 'storeBilling']);
@@ -61,4 +61,6 @@ Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () 
     Route::get('/EditVendor', [VendorProfileController::class, 'ModificationComplex']);
     Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
     Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
+    Route::post('/refreshToken ', [AuthController::class, 'RegenrateToken']);
+
 });

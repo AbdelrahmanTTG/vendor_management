@@ -41,7 +41,8 @@ class VendorProfileController extends Controller
             'email' => 'required|email|unique:vendor,email',
             'phone_number' => 'required|string',
             // 'another_number' => 'nullable|string',
-            'contact' => 'required|string',
+            'contact_linked_in' => 'required|string',
+            'contact_ProZ' => 'required|string',
             'region' => 'required|int',
             'country' => 'required|int',
             'nationality' => 'required|int',
@@ -148,7 +149,7 @@ class VendorProfileController extends Controller
         ]);
         foreach ($request['Wallets Payment methods'] as $wallet) {
             WalletsPaymentMethods::create([
-                'bank_details_id' => $bankDetails->id,
+                'billing_data_id' => $billingData->id,
                 'method' => $wallet['method'],
                 'account' => $wallet['account'],
             ]);
@@ -171,7 +172,7 @@ class VendorProfileController extends Controller
     }
     public function PersonalData($id)
     {
-        $vendor = Vendor::with(['country:id,name', 'nationality:id,name'])->findOrFail($id);
+        $vendor = Vendor::with(['country:id,name', 'nationality:id,name' , 'region:id,name' , 'timezone:id,gmt'])->findOrFail($id);
         if($vendor){
             return $vendor;
         }

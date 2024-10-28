@@ -102,3 +102,14 @@ ALTER TABLE vendor MODIFY COLUMN address TEXT NOT NULL;
 ALTER TABLE vendor MODIFY COLUMN contact_name VARCHAR(255) NOT NULL;
 ALTER TABLE vendor MODIFY COLUMN legal_name VARCHAR(255) NOT NULL;
 ALTER TABLE vendor MODIFY COLUMN region INT NULL;
+
+ALTER TABLE wallets_payment_methods 
+DROP FOREIGN KEY wallets_payment_methods_bank_details_id_foreign;
+
+ALTER TABLE wallets_payment_methods 
+CHANGE COLUMN bank_details_id billing_data_id BIGINT UNSIGNED;
+
+ALTER TABLE wallets_payment_methods 
+ADD CONSTRAINT wallets_payment_methods_billing_data_id_foreign 
+FOREIGN KEY (billing_data_id) REFERENCES billing_data(id) 
+ON DELETE CASCADE;

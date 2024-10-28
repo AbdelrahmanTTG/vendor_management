@@ -24,11 +24,11 @@ const PersonalData = (props) => {
         });
         break;
       default:
-        break;
     }
   };
   const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
-  const { register: registerContact, handleSubmit: handleSubmitContact, formState: { errors: errorsContact } } = useForm();
+  const { register: registerContact, handleSubmit: handleSubmitContact, setValue: setValueContact, formState: { errors: errorsContact } } = useForm();
+
   const [inputValues, setInputValues] = useState([]);
   const [nameLabel, setNameLabel] = useState('Name');
   const [ContactLabel, setContactLabel] = useState('Contact name');
@@ -160,24 +160,28 @@ const PersonalData = (props) => {
     handelingSelect("countries", setOptionsN, "Nationality");
     handelingSelect("time_zone", setOptionsT, "TimeZone");
   }, []);
-
+  const columnMapping = {
+    "LinkedIn": "contact_linked_in",
+    "ProZ": "contact_ProZ",
+    "other1": "contact_other1",
+    "other2": "contact_other2",
+    "other3": "contact_other3",
+  };
   const onSubmit = async (data) => {
     const formData = { ...data };
-    const phoneNumbers = [];
-    if (formData.phone_number) {
-      phoneNumbers.push(formData.phone_number);
-    }
-    if (formData.Anothernumber) {
-      phoneNumbers.push(formData.Anothernumber);
-    }
-    formData.phone_number = phoneNumbers.join(", ");
     const contacts = formData.contact || [];
-    const organizedContacts = contacts.map(contact => contact.value).join(", ");
+
+    contacts.forEach(contact => {
+      const dbKey = columnMapping[contact.label];
+      if (dbKey) {
+        formData[dbKey] = contact.value;
+      }
+    });
     const vendorTypeValue = formData.type.value;
     const vendorstatusValue = formData.status.value;
-    formData.contact = organizedContacts;
     formData.type = vendorTypeValue
     formData.status = vendorstatusValue
+    delete formData.contact;
     try {
       const response = await axiosClient.post("PersonalInformation", formData);
       basictoaster("successToast", "Added successfully !");
@@ -322,15 +326,57 @@ const PersonalData = (props) => {
         if (props.vendorPersonalData.Data) {
           const data = props.vendorPersonalData.Data;
           if (data.type != 0) { handleVendorTypeChange({ value: data.type, label: data.type }); setValue("type", { value: data.type, label: data.type }); }
-          if (data.status!= 0) { handleStatusChange({ value: data.status, label: data.status }); setValue("status", { value: data.status, label: data.status }); }
+          if (data.status != 0) { handleStatusChange({ value: data.status, label: data.status }); setValue("status", { value: data.status, label: data.status }); }
           setValue("name", data.name);
           setValue("email", data.email);
           setValue("prfx_name", data.prfx_name);
           setValue("contact_name", data.contact_name);
-          setValue("legal_name", data.legal_Name); 
-          setSelectedOptionC({ value: data.country.id, label: data.country.name })
-  
+          setValue("legal_name", data.legal_Name);
+          const country = {
+            value: data.country?.id || "",  
+            label: data.country?.name || "" 
+          };
+          setSelectedOptionC(country);
+          setValue("country", country);
 
+          const extractedNumber = data.phone_number?.match(/(\+?\d+)/g)?.join('') || "";
+          setValue("phone_number", extractedNumber);
+          setValue("Anothernumber", data.Anothernumber);
+          const contact =
+            [
+            { value: data.contact_linked_in, label: "LinkedIn" },
+            { value: data.contact_ProZ, label: "ProZ" },
+            { value: data.contact_other1, label: "other1" },
+            { value: data.contact_other2, label: "other2" },
+            { value: data.contact_other3, label: "other3" }
+            ]
+          const filteredContact = contact.filter(item => item.value !== '' && item.value !== null);
+          setInputValues(filteredContact)
+          setValueContact('LinkedIn', data.contact_linked_in)
+          setValueContact('ProZ', data.contact_ProZ)
+          setValueContact('other1', data.contact_other1)
+          setValueContact('other2', data.contact_other2)
+          setValueContact('other2', data.contact_other3)
+          const region = {
+            value: data.region?.id || "",
+            label: data.region?.name || ""  
+          };
+          setSelectedOptionR(region);
+          setValue("region", region);
+          const nationality = {
+            value: data.nationality?.id || "",
+            label: data.nationality?.name || ""
+          };
+          setSelectedOptionN(nationality);
+          setValue("nationality", nationality);
+          const timezone = {
+            value: data.timezone?.id || "",
+            label: data.timezone?.gmt || ""
+          };
+          setSelectedOptionT(timezone);
+          setValue("timezone", timezone);
+          setValue("street", data.street);
+          setValue("city", data.city);
           setLoading2(false)
         }
       }
@@ -532,7 +578,7 @@ const PersonalData = (props) => {
                           disabled={isSubmitting}
                           className="form-control "
                           // id="Anothernumber"
-                          type="number"
+                          type="tel"
                           name="Another-number"
                           pattern="[789][0-9]{9}"
                           placeholder="Another number"
@@ -774,7 +820,9 @@ const PersonalData = (props) => {
                     <Col sm="9">
 
                       <CKEditor
-                        editor={ClassicEditor}
+                          editor={ClassicEditor}
+                          data={props.vendorPersonalData?.Data?.note || ""}
+
                         onChange={(event, editor) => {
                           const data = editor.getData();
                           setValue('note', data);
@@ -790,13 +838,21 @@ const PersonalData = (props) => {
                     <Col sm="9">
 
                       <CKEditor
-                        editor={ClassicEditor}
+                          editor={ClassicEditor}
+                          data={props.vendorPersonalData?.Data?.address || ""}
+
                         onChange={(event, editor) => {
                           const data = editor.getData();
                           setValue('address', data);
                         }}
                         disabled={isSubmitting || (props.permission && props.permission.address === "disable")}
-                      />
+                        />
+                        <input
+                          id='address'
+                          value={props.vendorPersonalData?.Data?.address || ""}
+                          hidden disabled
+                          {...register('address', { required: false })}
+                        />
                     </Col>
                   </FormGroup>
                 </Col>
@@ -807,12 +863,14 @@ const PersonalData = (props) => {
                     <Col sm="9">
 
                       <CKEditor
-                        editor={ClassicEditor}
+                          editor={ClassicEditor}
+                          data={props.vendorPersonalData?.Data?.reject_reason || ""}
+
                         onChange={(event, editor) => {
                           const data = editor.getData();
                           setValue('reject_reason', data);
                         }}
-                        disabled={isSubmitting || props.permission.reject_reason === "disable"}
+                        disabled={isSubmitting || (props.permission && props.permission.reject_reason === "disable")}
                       />
                       <input
                         hidden disabled
@@ -824,14 +882,13 @@ const PersonalData = (props) => {
               </Row>
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Btn
-                  attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError) }}
-                  disabled={isSubmitting}
+                  attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError), disabled: isSubmitting }}
                 >
                   Submit
                 </Btn>
               </div>
-            </Form> }
-          
+            </Form>}
+
           </CardBody>
         </Collapse>
       </Card>

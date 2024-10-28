@@ -46,7 +46,7 @@ return [
 
         'vendor' => [
             'driver' => 'jwt',
-            'provider' => 'vendors',
+            'provider' => 'vendor',
         ],
     ],
 
@@ -74,7 +74,7 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
-        'vendors' => [
+        'vendor' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\Vendor::class),
         ],
