@@ -25,6 +25,7 @@ class InvoiceResource extends JsonResource
             'id' => $this->id,         
             'total' => $this->total,
             'invoice_date' => $this->invoice_date,
+            'billing_legal_name' => $this->billing_legal_name,
             'statusData' => $this->getVerifiedStatus(),        
                         
             'payment_method'=>($this->payment_method == 0)?'Bank': 'Wallet',

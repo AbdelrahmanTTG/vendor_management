@@ -17,7 +17,18 @@ class VendorInvoice extends Model
         'verified',
         'payment_method',
         'total',
-
+        'billing_legal_name',
+        'billing_legal_name',
+        'billing_address',
+        'billing_currency',
+        'billing_due_date',
+        'bank_name',
+        'bank_account_holder',
+        'bank_swift',
+        'bank_IBAN',
+        'bank_address',
+        'wallet_method',
+        'wallet_account'
     ];
 
     public function tasks()

@@ -12,6 +12,9 @@ const AddInvoice = () => {
     const baseURL = "/Portal/Vendor/";
     const navigate = useNavigate();
     const { user } = useStateContext();
+    const [billingData, setBillingData] = useState([]);
+    const [bankData, setBankData] = useState([]);
+    const [walletData, setWalletData] = useState([]);
     const [completedJobs, setCompletedJobs] = useState([]);
     const [jobsData, setJobsData] = useState([]);
     const [selectedTaskInput, setSelectedTaskInput] = useState([]);
@@ -30,6 +33,13 @@ const AddInvoice = () => {
                 .then(({ data }) => {
                     const [completedJobs] = [(data?.CompletedJobs)];
                     setCompletedJobs(completedJobs);
+                });
+            // get billing data 
+            axiosClient.post(baseURL + "getVendorBillingData", payload)
+                .then(({ data }) => {
+                    setBillingData(data?.billingData);
+                    setBankData(data?.bankData);
+                    setWalletData(data?.walletData);
                 });
         }
     }, [user]);
@@ -80,14 +90,19 @@ const AddInvoice = () => {
         setTotalInput(totalPrice);
     };
 
-    const InvoiceRes = {
-        'vendor': user.id,
-        'jobs': selectedCheckboxes,
-        'file': fileInput,
-        'total': totalInput,
-        'payment_method': paymentMethodInput,
-    };
-    const saveInvoice = () => {
+
+
+    const saveInvoice = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const InvoiceRes = {
+            ...Object.fromEntries(formData),
+            'vendor': user.id,
+            'jobs': selectedCheckboxes,
+            'total': totalInput,
+            'file': fileInput,
+
+        };
         if (selectedCheckboxes.length == 0) {
             toast.error("Please Select Jobs.....");
         }
@@ -96,19 +111,20 @@ const AddInvoice = () => {
         } else {
             axiosClient.post(baseURL + "saveInvoice", InvoiceRes, {
                 headers: {
-                    "Content-Type": "multipart/form-data",                   
+                    "Content-Type": "multipart/form-data",
                 },
             })
                 .then(({ data }) => {
                     switch (data.type) {
                         case 'success':
                             toast.success(data.message);
+                            navigate("/Vendor/Invoices");
                             break;
                         case 'error':
                             toast.error(data.message);
                             break;
                     }
-                    navigate("/Vendor/Invoices");
+
                 });
         }
     };
@@ -117,219 +133,229 @@ const AddInvoice = () => {
             <BreadcrumbsPortal mainTitle="Add New Invoice" parent="My Invoices" title="Add New Invoice" />
             <Container fluid={true}>
                 <Row>
-                    <Col sm="12">
-                        <Card>
-                            <CardHeader className=' b-l-primary pb-3'>
-                                <H6 >1 - Select Jobs To Be Invoiced</H6>
-                            </CardHeader>
-                            <CardBody className='py-2'>
-                                <Row>
-                                    <Col>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-3 col-form-label">{'Select Job '}</Label>
-                                            <Col sm="6">
-                                                <Input type="select" id='task_id' name="task_id" className="custom-select form-control" onChange={e => setSelectedTaskInput(e.target.value)}>
-                                                    <option value=''>{'Select Job'}</option>
-                                                    {completedJobs.map((item) => (
-                                                        <option key={item.id} value={item.id}>{item.code}</option>
-                                                    ))}
-                                                </Input>
-                                            </Col>
-                                            <Col sm="3">
-                                                <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default", onClick: () => getSelectedJobData(), }}>
-                                                    {'Add Job To Invoice'}
-                                                </Btn>
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                </Row>
-                            </CardBody>
-                        </Card>
-                        <Card>
-                            <CardHeader className=' b-l-primary pb-3'>
-                                <H6>List of selected Jobs</H6>
-                                <span>Select Jobs To Be Added To Invoice</span>
-                            </CardHeader>
-                            <CardBody className='py-2'>
-                                <Row>
-                                    <Col>
-                                        <div className="table-responsive">
-                                            <Table>
-                                                <thead className="bg-primary">
-                                                    <tr>
-                                                        <th scope="col">{'#'}</th>
-                                                        <th scope="col">{'Code'}</th>
-                                                        <th scope="col">{'Subject'}</th>
-                                                        <th scope="col">{'Task Type'}</th>
-                                                        <th scope="col">{'Rate'}</th>
-                                                        <th scope="col">{'Volume'}</th>
-                                                        <th scope="col">{'Unit'}</th>
-                                                        <th scope="col">{'Total Cost'}</th>
-                                                        <th scope="col">{'Currency'}</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {jobsData.map((item, index) => (
-                                                        <tr key={item.id}>
-                                                            <td><input type='checkbox' key={item.id} id={`custom-checkbox-${index}`} className='checkPo' name='jobs[]' value={item.id} onChange={() => handlePoOnChange(item.id)} selected={selectedCheckboxes.includes(item.id)} /></td>
-                                                            <td>{item.code}</td>
-                                                            <td>{item.subject}</td>
-                                                            <td>{item.task_type.name}</td>
-                                                            <td>{item.rate}</td>
-                                                            <td>{item.count}</td>
-                                                            <td>{item.unit.name}</td>
-                                                            <td>{item.total_cost}</td>
-                                                            <td>{item.currency.name}</td>
+                    <form onSubmit={saveInvoice}>
+                        <Col sm="12">
+                            <Card className='mb-3'>
+                                <CardHeader className=' b-l-primary pb-3'>
+                                    <H6 >1 - Select Jobs To Be Invoiced</H6>
+                                </CardHeader>
+                                <CardBody className='py-2'>
+                                    <Row>
+                                        <Col>
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-3 col-form-label">{'Select Job '}</Label>
+                                                <Col sm="6">
+                                                    <Input type="select" id='task_id' className="custom-select form-control" onChange={e => setSelectedTaskInput(e.target.value)}>
+                                                        <option value=''>{'Select Job'}</option>
+                                                        {completedJobs.map((item) => (
+                                                            <option key={item.id} value={item.id}>{item.code}</option>
+                                                        ))}
+                                                    </Input>
+                                                </Col>
+                                                <Col sm="3">
+                                                    <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default", onClick: () => getSelectedJobData(), }}>
+                                                        {'Add Job To Invoice'}
+                                                    </Btn>
+                                                </Col>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                </CardBody>
+                            </Card>
+                            <Card className='mb-3'>
+                                <CardHeader className=' b-l-primary pb-3'>
+                                    <H6>List of selected Jobs</H6>
+                                    <span>Select Jobs To Be Added To Invoice</span>
+                                </CardHeader>
+                                <CardBody className='py-2'>
+                                    <Row>
+                                        <Col>
+                                            <div className="table-responsive">
+                                                <Table>
+                                                    <thead className="bg-primary">
+                                                        <tr>
+                                                            <th scope="col">{'#'}</th>
+                                                            <th scope="col">{'Code'}</th>
+                                                            <th scope="col">{'Subject'}</th>
+                                                            <th scope="col">{'Task Type'}</th>
+                                                            <th scope="col">{'Rate'}</th>
+                                                            <th scope="col">{'Volume'}</th>
+                                                            <th scope="col">{'Unit'}</th>
+                                                            <th scope="col">{'Total Cost'}</th>
+                                                            <th scope="col">{'Currency'}</th>
                                                         </tr>
-                                                    ))}
-                                                </tbody>
-                                            </Table>
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </CardBody>
-                        </Card>
-                        <Card>
-                            <CardHeader className=' b-l-primary pb-3'>
-                                <H6 >2 - Upload Invoice File </H6>
-                            </CardHeader>
-                            <CardBody className='py-2'>
-                                <Row>
-                                    <Col>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-3 col-form-label">{'Invoice Total'}</Label>
-                                            <Col sm="9">
-                                                <Input type="text" name="total" className="form-control" readOnly disabled value={totalInput} />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-3 col-form-label">{'UploadFile'}</Label>
-                                            <Col sm="9">
-                                                <Input className="form-control" accept="zip, .rar" type="file" onChange={e => setFileInput(e.target.files[0])} />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                </Row>
-                            </CardBody>
-                        </Card>
-                        <Card>
-                            <CardHeader className=' b-l-primary pb-3'>
-                                <H6 >3 - Invoice Details </H6>
-                            </CardHeader>
-                            <CardBody className='py-2'>
-                                <Row>
-                                    <Col sm="6">
-                                        <H6>Bill To</H6>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-4 col-form-label">{'Billing Legal Name'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="legal_name" className="form-control" readOnly disabled value={'Legal Name'} />
-                                            </Col>
-                                        </FormGroup>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-4 col-form-label">{'Billing Address'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="address" className="form-control" readOnly disabled value={'Address'} />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                    <Col sm="6">
-                                        <H6>Details</H6>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-4 col-form-label">{'Invoice Date'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="legal_name" className="form-control" readOnly disabled value={'Date'} />
-                                            </Col>
-                                        </FormGroup>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-4 col-form-label">{'Due Date'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="address" className="form-control" readOnly disabled value={'Due Date [Date after Payment terms]'} />
-                                            </Col>
-                                        </FormGroup>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-4 col-form-label">{'Billing Currency'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="address" className="form-control" readOnly disabled value={'Currency'} />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                </Row>
-                            </CardBody>
-                        </Card>
-                        <Card className='mb-0'>
-                            <CardHeader className=' b-l-primary pb-3'>
-                                <H6 >4 - Payment Method </H6>
-                            </CardHeader>
-                            <CardBody className='py-2'>
-                                <Row>
-                                    <Col sm="6">
-                                        <div className="radio radio-primary">
-                                            <input id='radioinline1' type="radio" name="payment_method" value="0" onChange={e => setPaymentMethodInput(e.target.value)} />
-                                            <label className="mb-0" htmlFor="radioinline1">Bank</label>
-                                        </div>
+                                                    </thead>
+                                                    <tbody>
+                                                        {jobsData.map((item, index) => (
+                                                            <tr key={item.id}>
+                                                                <td><input type='checkbox' key={item.id} id={`custom-checkbox-${index}`} className='checkPo' value={item.id} onChange={() => handlePoOnChange(item.id)} selected={selectedCheckboxes.includes(item.id)} /></td>
+                                                                <td>{item.code}</td>
+                                                                <td>{item.subject}</td>
+                                                                <td>{item.task_type.name}</td>
+                                                                <td>{item.rate}</td>
+                                                                <td>{item.count}</td>
+                                                                <td>{item.unit.name}</td>
+                                                                <td>{item.total_cost}</td>
+                                                                <td>{item.currency.name}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </Table>
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                </CardBody>
+                            </Card>
+                            <Card className='mb-3'>
+                                <CardHeader className=' b-l-primary pb-3'>
+                                    <H6 >2 - Upload Invoice File </H6>
+                                </CardHeader>
+                                <CardBody className='py-2'>
+                                    <Row>
+                                        <Col>
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-3 col-form-label">{'Invoice Total'}</Label>
+                                                <Col sm="9">
+                                                    <Input type="text" name="total" className="form-control" readOnly disabled value={totalInput} />
+                                                </Col>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col>
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-3 col-form-label">{'Upload File'}</Label>
+                                                <Col sm="9">
+                                                    <Input className="form-control" accept="zip, .rar" type="file" onChange={e => setFileInput(e.target.files[0])} />
+                                                </Col>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                </CardBody>
+                            </Card>
+                            <Card className='mb-3'>
+                                <CardHeader className=' b-l-primary pb-3'>
+                                    <H6 >3 - Invoice Details </H6>
+                                </CardHeader>
+                                <CardBody className='py-2'>
+                                    <Row>
+                                        <Col sm="6">
+                                            <H6>Bill To</H6>
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-4 col-form-label">{'Billing Legal Name'}</Label>
+                                                <Col sm="8">
+                                                    <Input type="text" name="billing_legal_name" className="form-control" readOnly disabled defaultValue={billingData.billing_legal_name} />
+                                                </Col>
+                                            </FormGroup>
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-4 col-form-label">{'Billing Address'}</Label>
+                                                <Col sm="8">
+                                                    <Input type="text" name="billing_address" className="form-control" readOnly disabled defaultValue={billingData.billing_address} />
+                                                </Col>
+                                            </FormGroup>
+                                        </Col>
+                                        <Col sm="6">
+                                            <H6>Details</H6>
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-4 col-form-label">{'Invoice Date'}</Label>
+                                                <Col sm="8">
+                                                    <Input type="text" className="form-control" readOnly disabled defaultValue={new Date().toLocaleDateString()} />
+                                                </Col>
+                                            </FormGroup>
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-4 col-form-label">{'Due Date'}</Label>
+                                                <Col sm="8">
+                                                    <Input type="text" name="billing_due_date" className="form-control" readOnly disabled defaultValue={'Due Date [Date after Payment terms]'} />
+                                                </Col>
+                                            </FormGroup>
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-4 col-form-label">{'Billing Currency'}</Label>
+                                                <Col sm="8">
+                                                    <Input type="text" name="billing_currency" className="form-control" readOnly disabled defaultValue={billingData.billing_currency} />
+                                                </Col>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                </CardBody>
+                            </Card>
+                            <Card className='mb-0'>
+                                <CardHeader className=' b-l-primary pb-3'>
+                                    <H6 >4 - Payment Method </H6>
+                                </CardHeader>
+                                <CardBody className='py-2'>
+                                    <Row>
 
-                                        <FormGroup className="row pt-2">
-                                            <Label className="col-sm-4 col-form-label">{'Bank name'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="bank_name" className="form-control" readOnly disabled value={'Name'} />
-                                            </Col>
-                                        </FormGroup>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-4 col-form-label">{'Account holder'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="account_holder" className="form-control" readOnly disabled value={'Account holder'} />
-                                            </Col>
-                                        </FormGroup>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-4 col-form-label">{'SWIFT/BIC'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="swift" className="form-control" readOnly disabled value={'SWIFT/BIC'} />
-                                            </Col>
-                                        </FormGroup>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-4 col-form-label">{'IBAN'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="IBAN" className="form-control" readOnly disabled value={'IBAN'} />
-                                            </Col>
-                                        </FormGroup>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-4 col-form-label">{'Bank Address'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="bank_address" className="form-control" readOnly disabled value={'Bank Address'} />
-                                            </Col>
-                                        </FormGroup>
+                                        <Col sm="12">
+                                        <FormGroup className="form-group m-checkbox-inline custom-radio-ml p-l-25">
+                                            <div className="radio radio-primary">
+                                                <input id='radioinline1' type="radio" name="payment_method" value="0" required onChange={e => setPaymentMethodInput(e.target.value)} />
+                                                <label className="mb-0" htmlFor="radioinline1">Bank</label>
+                                             </div>
+                                             <div className="radio radio-primary m-l-20">
+                                                   <input id='radioinline2' type="radio" name="payment_method" value="1" required onChange={e => setPaymentMethodInput(e.target.value)} />
+                                                <label className="mb-0" htmlFor="radioinline2">Wallet</label>
+                                            </div>
+                                            </FormGroup>
+                                        </Col>
+                                        <Col sm='9' className='px-5'>
+                                            {paymentMethodInput == "0" && (
+                                                <>
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-4 col-form-label">{'Bank name'}</Label>
+                                                        <Col sm="8">
+                                                            <Input type="text" name="bank_name" className="form-control" defaultValue={bankData.bank_name} />
+                                                        </Col>
+                                                    </FormGroup>
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-4 col-form-label">{'Account holder'}</Label>
+                                                        <Col sm="8">
+                                                            <Input type="text" name="bank_account_holder" className="form-control" defaultValue={bankData.account_holder} />
+                                                        </Col>
+                                                    </FormGroup>
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-4 col-form-label">{'SWIFT/BIC'}</Label>
+                                                        <Col sm="8">
+                                                            <Input type="text" name="bank_swift" className="form-control" defaultValue={bankData.swift_bic} />
+                                                        </Col>
+                                                    </FormGroup>
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-4 col-form-label">{'IBAN'}</Label>
+                                                        <Col sm="8">
+                                                            <Input type="text" name="bank_IBAN" className="form-control" defaultValue={bankData.iban} />
+                                                        </Col>
+                                                    </FormGroup>
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-4 col-form-label">{'Bank Address'}</Label>
+                                                        <Col sm="8">
+                                                            <Input type="text" name="bank_address" className="form-control" defaultValue={bankData.bank_address} />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </>)}                                       
 
-                                    </Col>
-                                    <Col sm="6">
-                                        <div className="radio radio-primary">
-                                            <input id='radioinline2' type="radio" name="payment_method" value="1" onChange={e => setPaymentMethodInput(e.target.value)} />
-                                            <label className="mb-0" htmlFor="radioinline2">Wallets</label>
-                                        </div>
-                                        <FormGroup className="row pt-2">
-                                            <Label className="col-sm-4 col-form-label">{'Method'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="method" className="form-control" readOnly disabled value={'Method'} />
-                                            </Col>
-                                        </FormGroup>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-4 col-form-label">{'Account'}</Label>
-                                            <Col sm="8">
-                                                <Input type="text" name="account" className="form-control" readOnly disabled value={'Account '} />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                </Row>
-                            </CardBody>
-                        </Card>
-                        <Card className='mt-0 text-end'>
-                            <CardFooter className='py-3'> <Btn attrBtn={{ color: 'primary', onClick: () => saveInvoice() }}>{'Save Changes'}</Btn></CardFooter>
-                        </Card>
-                    </Col>
+                                            {paymentMethodInput == "1" && (
+                                                <>
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-4 col-form-label">{'Method'}</Label>
+                                                        <Col sm="8">
+                                                            <Input type="text" name="wallet_method" className="form-control" defaultValue={walletData.method} />
+                                                        </Col>
+                                                    </FormGroup>
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-4 col-form-label">{'Account'}</Label>
+                                                        <Col sm="8">
+                                                            <Input type="text" name="wallet_account" className="form-control" defaultValue={walletData.account} />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </>)}
+                                        </Col>
+                                    </Row>
+                                </CardBody>
+                            </Card>
+                            <Card className='mt-0 text-end'>
+                                <CardFooter className='py-3'> <Btn attrBtn={{ color: 'primary', type: 'submit' }}>{'Save Changes'}</Btn></CardFooter>
+                            </Card>
+                        </Col>
+                    </form>
                 </Row>
             </Container>
         </Fragment>

@@ -90,7 +90,7 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+          //  'password' => 'hashed',
         ];
     }
     public function getJWTIdentifier()

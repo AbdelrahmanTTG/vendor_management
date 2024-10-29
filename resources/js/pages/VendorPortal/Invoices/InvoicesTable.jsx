@@ -10,6 +10,7 @@ const InvoicesTable = (props) => {
                     <thead className="bg-primary">
                         <tr>
                             <th scope="col">{'#'}</th>
+                            <th scope="col">{'Billing Legal Name'}</th>
                             <th scope="col">{'Invoice Date'}</th>
                             <th scope="col">{'Total'}</th>
                             <th scope="col">{'Payment Method'}</th>
@@ -21,6 +22,7 @@ const InvoicesTable = (props) => {
                         {props.pageInvoices.map((item, i) => (
                             <tr key={item.id}>
                                 <td>{item.id}</td>
+                                <td>{item.billing_legal_name}</td>
                                 <td>{item.invoice_date}</td>
                                 <td>{item.total}</td>
                                 <td>{item.payment_method}</td>

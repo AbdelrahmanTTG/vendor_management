@@ -32,6 +32,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('job_task', function (Blueprint $table) {
+            $table->dropForeign(['invoice_id']);
+            $table->dropColumn('invoice_id');
+
+        });
     }
 };

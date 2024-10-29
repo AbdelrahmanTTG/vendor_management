@@ -47,11 +47,14 @@ Route::middleware(['auth:vendor'])->prefix('Portal')->group(function () {
         Route::post('selectCompletedJobs', [InvoiceController::class, 'selectCompletedJobs'])->name('Portal.selectCompletedJobs');
         Route::post('getSelectedJobData', [InvoiceController::class, 'getSelectedJobData'])->name('Portal.getSelectedJobData');
         Route::post('saveInvoice', [InvoiceController::class, 'saveInvoice'])->name('Portal.saveInvoice');
+        Route::post('getVendorBillingData', [InvoiceController::class, 'getVendorBillingData'])->name('Portal.getVendorBillingData');
         Route::post('dashboardData', [TaskController::class, 'index'])->name('Portal.dashboardData');
     });
     Route::group(['prefix' => 'Admin'], function () {
         Route::post('settingsData', [PortalAdminController::class, 'getSettingsData'])->name('Portal.getSettingsData');
         Route::post('saveSettings', [PortalAdminController::class, 'saveSettings'])->name('Portal.saveSettings');
+        Route::post('getVendorData', [PortalAdminController::class, 'getVendorData'])->name('Portal.getVendorData');
+        Route::post('savePassword', [PortalAdminController::class, 'savePassword'])->name('Portal.savePassword');
     });
 });
 Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () {

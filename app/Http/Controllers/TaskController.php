@@ -22,10 +22,7 @@ class TaskController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|string',
-        ]);
+    {       
         $runningJobs = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status',  0)->orderBy('created_at', 'desc')->take(3)->get();
         $finishedJobs = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->orderBy('created_at', 'desc')->take(3)->get();
         $offers1 = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->take(2)->get();
@@ -83,10 +80,7 @@ class TaskController extends Controller
      * List All Jobs 
      */
     public function allJobs(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|string',
-        ]);
+    {        
         $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', '!=', 6);
         $tasks = $query->orderBy('created_at', 'desc')->get();
         // ->paginate(10);
@@ -97,10 +91,7 @@ class TaskController extends Controller
      * List All Offers 
      */
     public function allJobOffers(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|string',
-        ]);
+    {       
         $tasks = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->get();
         $tasks2  = OfferList::query()->where('vendor_list', 'Like', "%$request->id,%")->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->get();
 
@@ -110,10 +101,7 @@ class TaskController extends Controller
      * List All Finished 
      */
     public function allClosedJobs(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|string',
-        ]);
+    {        
         $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1);
         $tasks = $query->orderBy('created_at', 'desc')->get();
         return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
@@ -122,10 +110,7 @@ class TaskController extends Controller
      * List All Scheduled Jobs  
      */
     public function allPlannedJobs(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|string',
-        ]);
+    {       
         $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 7);
         $tasks = $query->orderBy('created_at', 'desc')->get();
         return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
@@ -134,12 +119,7 @@ class TaskController extends Controller
      * View Job Task Offer & Job Offer List Details
      */
     public function viewOffer(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-            'vendor' => 'required',
-            'type' => 'required|string',
-        ]);
+    {        
         $type = $request->type;
         if ($type == 'task') {
             $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
@@ -152,11 +132,7 @@ class TaskController extends Controller
      * Display the specified Job Task.
      */
     public function viewJob(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-            'vendor' => 'required'
-        ]);
+    {       
         $vmConfig = VmSetup::select('enable_evaluation', 'v_ev_name1', 'v_ev_name2', 'v_ev_name3', 'v_ev_name4', 'v_ev_name5', 'v_ev_name6')->first();
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->first();
         return response()->json([
@@ -170,12 +146,7 @@ class TaskController extends Controller
      * Task conversation
      */
     public function sendMessage(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'task_id' => 'required',
-            'vendor' => 'required',
-            'message' => 'required'
-        ]);
+    {       
         $data['message'] = $request->message;
         $data['task'] =  $request->task_id;
         $data['from'] = 2;
@@ -198,12 +169,7 @@ class TaskController extends Controller
      * Cancel Task Offer
      */
     public function cancelOffer(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-            'vendor' => 'required'
-        ]);
-
+    {       
         $data['status'] = 3;
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($task) {
@@ -231,10 +197,6 @@ class TaskController extends Controller
      */
     public function acceptOffer(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-            'vendor' => 'required'
-        ]);
         $data['status'] = 4;
         //     $data['status'] = 0;
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
@@ -262,11 +224,7 @@ class TaskController extends Controller
      * accept Task Offer List & send to job task table
      */
     public function acceptOfferList(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-            'vendor' => 'required'
-        ]);
+    {       
         $offer = OfferList::where('vendor_list', 'Like', "%$request->vendor,%")->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($offer) {
             $data['status'] = 0;
@@ -327,16 +285,9 @@ class TaskController extends Controller
      * Finish JOB and Send File .
      */
     public function finishJob(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'task_id' => 'required',
-            'vendor' => 'required',
-            'file' => 'mimes:zip,rar|max:2048',
-        ]);
-
+    {        
         $data['vendor_notes'] = $request->note ?? '';
         $data['status'] = 5;
-
         $offer = Task::where('vendor', $request->vendor)->where('id', $request->task_id)->where('job_portal', 1)->where('status', 0)->first();
         if ($offer) {
             if ($request->file('file') != null) {
@@ -405,13 +356,7 @@ class TaskController extends Controller
      * Store Scheduled Jobs relpy.
      */
     public function planTaskReply(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'task_id' => 'required',
-            'vendor' => 'required',
-            'status' => 'required',
-        ]);
-
+    {       
         $offer = Task::where('vendor', $request->vendor)->where('id', $request->task_id)->where('job_portal', 1)->where('status', 7)->first();
         if ($offer) {
             $status = $data['status'] = $request->status;
