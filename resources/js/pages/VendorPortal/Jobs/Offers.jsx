@@ -8,16 +8,16 @@ import { Link } from 'react-router-dom';
 import JobsTable from './JobsTable';
 
 const Offers = () => {
-  const baseURL = window.location.origin+ "/api/Portal/Vendor";
+  const baseURL = window.location.origin + "/api/Portal/Vendor";
   const [pageTasks, setPageTasks] = useState([]);
-  const [tableLinks, setTableLinks] = useState([]);
+  const [pageLinks, setPageLinks] = useState([]);
   const { user } = useStateContext();
   useEffect(() => {
     if (user) {
       const payload = {
         'id': user.id
       };
-      axiosClient.post(baseURL +"/allJobOffers", payload)
+      axiosClient.post(baseURL + "/allJobOffers", payload)
         .then(({ data }) => {
           console.log(data);
           const [Tasks] = [(data?.Tasks)];
@@ -34,15 +34,15 @@ const Offers = () => {
           <Col sm="12">
             <Card>
               {/* <CardHeader> */}
-                {/* <H5>List Of New Jobs</H5>                */}
+              {/* <H5>List Of New Jobs</H5>                */}
               {/* </CardHeader> */}
-            <CardBody>
-            <JobsTable pageTasks={pageTasks} tableLinks={tableLinks} />
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+              <CardBody>
+                <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} />
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
     </Fragment >
   );
 };

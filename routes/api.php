@@ -44,6 +44,7 @@ Route::middleware(['auth:vendor'])->prefix('Portal')->group(function () {
         Route::post('finishJob', [TaskController::class, 'finishJob'])->name('Portal.finishJob');
         Route::post('planTaskReply', [TaskController::class, 'planTaskReply'])->name('Portal.planTaskReply');
         Route::post('allInvoices', [InvoiceController::class, 'allInvoices'])->name('Portal.allInvoices');
+        Route::post('paidInvoices', [InvoiceController::class, 'paidInvoices'])->name('Portal.paidInvoices');
         Route::post('selectCompletedJobs', [InvoiceController::class, 'selectCompletedJobs'])->name('Portal.selectCompletedJobs');
         Route::post('getSelectedJobData', [InvoiceController::class, 'getSelectedJobData'])->name('Portal.getSelectedJobData');
         Route::post('saveInvoice', [InvoiceController::class, 'saveInvoice'])->name('Portal.saveInvoice');

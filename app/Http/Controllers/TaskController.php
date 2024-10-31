@@ -12,17 +12,23 @@ use App\Models\TaskConversation;
 use App\Models\TaskLog;
 use App\Models\VendorInvoice;
 use App\Models\VmSetup;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
 
 class TaskController extends Controller
 {
+    protected $per_page;
+
+    public function __construct()
+    {
+        $this->per_page = 10;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {       
+    {
         $runningJobs = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status',  0)->orderBy('created_at', 'desc')->take(3)->get();
         $finishedJobs = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->orderBy('created_at', 'desc')->take(3)->get();
         $offers1 = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->take(2)->get();
@@ -80,18 +86,20 @@ class TaskController extends Controller
      * List All Jobs 
      */
     public function allJobs(Request $request)
-    {        
+    {       
         $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', '!=', 6);
-        $tasks = $query->orderBy('created_at', 'desc')->get();
-        // ->paginate(10);
-
-        return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
+        $tasks = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
+        $links = $tasks->linkCollection();
+        return response()->json([
+            "Tasks" => TaskResource::collection($tasks),
+            "Links" => $links,
+        ], 200);
     }
     /**
      * List All Offers 
      */
     public function allJobOffers(Request $request)
-    {       
+    {
         $tasks = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->get();
         $tasks2  = OfferList::query()->where('vendor_list', 'Like', "%$request->id,%")->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->get();
 
@@ -101,25 +109,33 @@ class TaskController extends Controller
      * List All Finished 
      */
     public function allClosedJobs(Request $request)
-    {        
+    {
         $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1);
-        $tasks = $query->orderBy('created_at', 'desc')->get();
-        return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
+        $tasks = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
+        $links = $tasks->linkCollection();
+        return response()->json([
+            "Tasks" => TaskResource::collection($tasks),
+            "Links" => $links,
+        ], 200);
     }
     /**
      * List All Scheduled Jobs  
      */
     public function allPlannedJobs(Request $request)
-    {       
+    {
         $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 7);
-        $tasks = $query->orderBy('created_at', 'desc')->get();
-        return response()->json(["Tasks" => TaskResource::collection($tasks)], 200);
+        $tasks = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
+        $links = $tasks->linkCollection();
+        return response()->json([
+            "Tasks" => TaskResource::collection($tasks),
+            "Links" => $links,
+        ], 200);
     }
     /**
      * View Job Task Offer & Job Offer List Details
      */
     public function viewOffer(Request $request)
-    {        
+    {
         $type = $request->type;
         if ($type == 'task') {
             $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
@@ -132,7 +148,7 @@ class TaskController extends Controller
      * Display the specified Job Task.
      */
     public function viewJob(Request $request)
-    {       
+    {
         $vmConfig = VmSetup::select('enable_evaluation', 'v_ev_name1', 'v_ev_name2', 'v_ev_name3', 'v_ev_name4', 'v_ev_name5', 'v_ev_name6')->first();
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->first();
         return response()->json([
@@ -146,7 +162,7 @@ class TaskController extends Controller
      * Task conversation
      */
     public function sendMessage(Request $request)
-    {       
+    {
         $data['message'] = $request->message;
         $data['task'] =  $request->task_id;
         $data['from'] = 2;
@@ -169,7 +185,7 @@ class TaskController extends Controller
      * Cancel Task Offer
      */
     public function cancelOffer(Request $request)
-    {       
+    {
         $data['status'] = 3;
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($task) {
@@ -224,7 +240,7 @@ class TaskController extends Controller
      * accept Task Offer List & send to job task table
      */
     public function acceptOfferList(Request $request)
-    {       
+    {
         $offer = OfferList::where('vendor_list', 'Like', "%$request->vendor,%")->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($offer) {
             $data['status'] = 0;
@@ -285,7 +301,7 @@ class TaskController extends Controller
      * Finish JOB and Send File .
      */
     public function finishJob(Request $request)
-    {        
+    {
         $data['vendor_notes'] = $request->note ?? '';
         $data['status'] = 5;
         $offer = Task::where('vendor', $request->vendor)->where('id', $request->task_id)->where('job_portal', 1)->where('status', 0)->first();
@@ -356,7 +372,7 @@ class TaskController extends Controller
      * Store Scheduled Jobs relpy.
      */
     public function planTaskReply(Request $request)
-    {       
+    {
         $offer = Task::where('vendor', $request->vendor)->where('id', $request->task_id)->where('job_portal', 1)->where('status', 7)->first();
         if ($offer) {
             $status = $data['status'] = $request->status;

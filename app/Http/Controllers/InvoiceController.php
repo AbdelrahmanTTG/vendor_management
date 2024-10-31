@@ -12,29 +12,40 @@ use App\Models\WalletsPaymentMethods;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-use function PHPUnit\Framework\isEmpty;
 
 class InvoiceController extends Controller
 {
+    protected $per_page;
+
+    public function __construct()
+    {
+        $this->per_page = 10;
+    }
 
     public function allInvoices(Request $request)
     {
         //   $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->where('verified', '!=', 0);
         $query = VendorInvoice::query()->where('vendor_id',  $request->id);
-        $Invoices = $query->orderBy('created_at', 'desc')->get();
+        $Invoices = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
+        $links = $Invoices->linkCollection();
 
-        //return response()->json(["Invoices" => TaskResource::collection($Invoices)], 200);
-        return response()->json(["Invoices" => InvoiceResource::collection($Invoices)], 200);
+        return response()->json([
+            "Invoices" => InvoiceResource::collection($Invoices),
+            "Links" => $links,
+        ], 200);
     }
 
     public function paidInvoices(Request $request)
     {
         //  $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->where('verified', 1);
         $query = VendorInvoice::query()->where('vendor_id',  $request->id)->where('verified', 1);
-        $Invoices = $query->orderBy('created_at', 'desc')->get();
-
-        // return response()->json(["Invoices" => TaskResource::collection($Invoices)], 200);
-        return response()->json(["Invoices" => InvoiceResource::collection($Invoices)], 200);
+        $Invoices = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
+        $links = $Invoices->linkCollection();
+        
+        return response()->json([
+            "Invoices" => InvoiceResource::collection($Invoices),
+            "Links" => $links,
+        ], 200);
     }
 
     public function selectCompletedJobs(Request $request)

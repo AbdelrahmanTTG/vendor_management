@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Table } from 'reactstrap';
+import { Pagination, PaginationItem, PaginationLink, Table } from 'reactstrap';
 import { Btn } from '../../../AbstractElements';
 import { Link } from 'react-router-dom';
 
@@ -10,6 +10,18 @@ const JobsTable = (props) => {
             viewStatus = props.viewStatus
         )
     }
+    let currentPage = props.currentPage;
+    const handlePageChange = (newPage) => {
+        if (newPage > 0 && newPage <= props.pageLinks.length - 2) {
+            currentPage = newPage;
+        } else if (newPage == 0 && currentPage != 1) {
+            currentPage = currentPage - 1;
+        } else if (newPage == props.pageLinks.length - 1 && currentPage != props.pageLinks.length - 2) {
+            currentPage = currentPage + 1;
+        }
+        props.sendDataToParent(currentPage);
+    };
+
     return (
         <Fragment>
             <div className="table-responsive">
@@ -33,61 +45,63 @@ const JobsTable = (props) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {props.pageTasks.map((item, i) => (
-                            <tr key={item.id}>
-                                <th scope="row">{item.id}</th>
-                                <td>{item.code}</td>
-                                <td>{item.subject}</td>
-                                <td>{item.task_type.name}</td>
-                                <td>{item.rate}</td>
-                                <td>{item.count}</td>
-                                <td>{item.total_cost}</td>
-                                <td>{item.currency.name}</td>
-                                <td>{item.start_date}</td>
-                                <td>{item.delivery_date}</td>
-                                {viewStatus == "true" && (
-                                    <td>{item.statusData}</td>
-                                )}
-                                <td>
-                                    {item.type == 'job_offer' ? (
-                                        <Link to={`/Vendor/Jobs/viewOffer/${item.offer_type}/${item.id}`}>
-                                            <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
-                                                {'View Offer'}
-                                            </Btn>
-                                        </Link>
-                                    ) :
-                                        (
-                                            <Link to={`/Vendor/Jobs/viewJob/${item.id}`}>
-                                                <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
-                                                    {'View Job'}
-                                                </Btn>
-                                            </Link>
+                        {props.pageTasks.length > 0 ? (
+                            <>
+                                {props.pageTasks.map((item, i) => (
+                                    <tr key={item.id}>
+                                        <th scope="row">{item.id}</th>
+                                        <td>{item.code}</td>
+                                        <td>{item.subject}</td>
+                                        <td>{item.task_type.name}</td>
+                                        <td>{item.rate}</td>
+                                        <td>{item.count}</td>
+                                        <td>{item.total_cost}</td>
+                                        <td>{item.currency.name}</td>
+                                        <td>{item.start_date}</td>
+                                        <td>{item.delivery_date}</td>
+                                        {viewStatus == "true" && (
+                                            <td>{item.statusData}</td>
                                         )}
-                                </td>
+                                        <td>
+                                            {item.type == 'job_offer' ? (
+                                                <Link to={`/Vendor/Jobs/viewOffer/${item.offer_type}/${item.id}`}>
+                                                    <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
+                                                        {'View Offer'}
+                                                    </Btn>
+                                                </Link>
+                                            ) :
+                                                (
+                                                    <Link to={`/Vendor/Jobs/viewJob/${item.id}`}>
+                                                        <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
+                                                            {'View Job'}
+                                                        </Btn>
+                                                    </Link>
+                                                )}
+                                        </td>
+                                    </tr>
+                                ))
+                                }
+                            </>
+                        ) : (
+                            <tr >
+                                <td scope="row" colSpan={12} className='text-center bg-light f-14' >{'No Data Available'}</td>
                             </tr>
-                        ))
+                        )
                         }
                     </tbody>
                 </Table>
-                {props.tableLinks && (
-                    <div className="p-5 m-5">
-                        {props.tableLinks.map(link => (
-                            link.url ? (
-                                <Link key={link.label}
-                                    className={`p-1 mx-1 ${link.active ? " text-blue-500 font-bold" : ""}`}
-                                    href={link.url}
-                                    dangerouslySetInnerHTML={{ __html: link.label }} />
-
-
-                            ) : (
-                                <span key={link.label}
-                                    className='p-1 mx-1 text-slate-500'
-                                    dangerouslySetInnerHTML={{ __html: link.label }} />
-                            )
-                        ))}
-
-                    </div>)}
             </div>
+            {props.pageLinks && props.pageLinks.length > 3 && (
+                <div className="mt-5 ">
+                    <Pagination aria-label="Page navigation example" className="pagination justify-content-end pagination-primary">
+                        {props.pageLinks.map((link, i) => (
+                            <PaginationItem key={i} active={link.active} className={`${link.url ? "" : "disabled"}`} onClick={() => handlePageChange(i)}>
+                                <PaginationLink dangerouslySetInnerHTML={{ __html: link.label }} ></PaginationLink>
+                            </PaginationItem>
+
+                        ))}
+                    </Pagination>
+                </div>)}
         </Fragment>
     );
 };

@@ -1,8 +1,18 @@
 import React, { Fragment } from 'react';
-import { Table } from 'reactstrap';
+import { Pagination, PaginationItem, PaginationLink, Table } from 'reactstrap';
 
 const InvoicesTable = (props) => {
-
+    let currentPage = props.currentPage;
+    const handlePageChange = (newPage) => {
+        if (newPage > 0 && newPage <= props.pageLinks.length - 2) {
+            currentPage = newPage;
+        } else if (newPage == 0 && currentPage != 1) {
+            currentPage = currentPage - 1;
+        } else if (newPage == props.pageLinks.length - 1 && currentPage != props.pageLinks.length - 2) {
+            currentPage = currentPage + 1;
+        }
+        props.sendDataToParent(currentPage);
+    };
     return (
         <Fragment>
             <div className="table-responsive">
@@ -19,21 +29,40 @@ const InvoicesTable = (props) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {props.pageInvoices.map((item, i) => (
-                            <tr key={item.id}>
-                                <td>{item.id}</td>
-                                <td>{item.billing_legal_name}</td>
-                                <td>{item.invoice_date}</td>
-                                <td>{item.total}</td>
-                                <td>{item.payment_method}</td>
-                                <td>{item.statusData}</td>
+                        {props.pageInvoices.length > 0 ? (
+                            <>
+                                {props.pageInvoices.map((item, i) => (
+                                    <tr key={item.id}>
+                                        <td>{item.id}</td>
+                                        <td>{item.billing_legal_name}</td>
+                                        <td>{item.invoice_date}</td>
+                                        <td>{item.total}</td>
+                                        <td>{item.payment_method}</td>
+                                        <td>{item.statusData}</td>
+                                    </tr>
+                                ))
+                                }
+                            </>
+                        ) : (
+                            <tr >
+                                <td scope="row" colSpan={6} className='text-center bg-light f-14' >{'No Data Available'}</td>
                             </tr>
-                        ))
+                        )
                         }
                     </tbody>
                 </Table>
-
             </div>
+            {props.pageLinks && props.pageLinks.length > 3 && (
+                <div className="mt-5 ">
+                    <Pagination aria-label="Page navigation example" className="pagination justify-content-end pagination-primary">
+                        {props.pageLinks.map((link, i) => (
+                            <PaginationItem key={i} active={link.active} className={`${link.url ? "" : "disabled"}`} onClick={() => handlePageChange(i)}>
+                                <PaginationLink dangerouslySetInnerHTML={{ __html: link.label }} ></PaginationLink>
+                            </PaginationItem>
+
+                        ))}
+                    </Pagination>
+                </div>)}
         </Fragment>
     );
 };

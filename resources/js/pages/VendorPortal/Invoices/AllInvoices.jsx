@@ -1,7 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody } from 'reactstrap';
 import { BreadcrumbsPortal, H5, Btn } from '../../../AbstractElements';
-import axios from 'axios';
 import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import { Link } from 'react-router-dom';
@@ -10,26 +9,29 @@ import InvoicesTable from './InvoicesTable';
 const AllInvoices = () => {
   const baseURL = "/Portal/Vendor";
   const [pageInvoices, setPageInvoices] = useState([]);
-  const [tableLinks, setTableLinks] = useState([]);
+  const [pageLinks, setPageLinks] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const { user } = useStateContext();
 
   useEffect(() => {
     if (user) {
       const payload = {
-        'id': user.id
+        'id': user.id,
+        'page': currentPage,
       };
       axiosClient.post(baseURL + "/allInvoices", payload)
-        .then(({ data }) => {
-          console.log(data);
-          // const [Invoices] = [(data?.Invoices.data)];
+        .then(({ data }) => {         
           const [Invoices] = [(data?.Invoices)];
-          // const [Links] = [(data?.Invoices.links)];
+          const [Links] = [(data?.Links)];
           setPageInvoices(Invoices);
-          // setTableLinks(Links);
+          setPageLinks(Links);
         });
     }
-  }, [user]);
+  }, [user, currentPage]);
 
+  function handleDataFromChild(data) {
+      setCurrentPage(data);
+  }
 
   return (
     <Fragment>
@@ -45,7 +47,7 @@ const AllInvoices = () => {
           <Col sm="12">
             <Card>
               <CardBody>
-                <InvoicesTable pageInvoices={pageInvoices} tableLinks={tableLinks} />
+                <InvoicesTable pageInvoices={pageInvoices} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
               </CardBody>
             </Card>
           </Col>

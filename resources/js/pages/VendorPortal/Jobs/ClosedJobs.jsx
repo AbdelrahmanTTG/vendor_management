@@ -1,31 +1,36 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Container, Row, Col, Card, CardHeader, CardBody, Table } from 'reactstrap';
-import { BreadcrumbsPortal, H5, Btn, LI, P, UL } from '../../../AbstractElements';
+import React, { Fragment, useEffect, useState } from 'react';
+import { Container, Row, Col, Card, CardHeader, CardBody } from 'reactstrap';
+import { BreadcrumbsPortal } from '../../../AbstractElements';
 import axios from 'axios';
 import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
-import { Link } from 'react-router-dom';
 import JobsTable from './JobsTable';
 
 const ClosedJobs = () => {
   const baseURL = "/Portal/Vendor";
   const [pageTasks, setPageTasks] = useState([]);
-  const [tableLinks, setTableLinks] = useState([]);
+  const [pageLinks, setPageLinks] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const { user } = useStateContext();
   useEffect(() => {
     if (user) {
       const payload = {
-        'id': user.id
+        'id': user.id,
+        'page': currentPage,
       };
       axiosClient.post(baseURL + "/allClosedJobs", payload)
         .then(({ data }) => {
-          console.log(data);
           const [Tasks] = [(data?.Tasks)];
+          const [Links] = [(data?.Links)];
           setPageTasks(Tasks);
+          setPageLinks(Links);
         });
     }
-  }, [user]);
+  }, [user, currentPage]);
 
+  function handleDataFromChild(data) {
+    setCurrentPage(data);
+  }
   return (
     <Fragment>
       <BreadcrumbsPortal mainTitle="Closed Jobs" parent="My Jobs" title="Closed Jobs" />
@@ -34,10 +39,10 @@ const ClosedJobs = () => {
           <Col sm="12">
             <Card>
               {/* <CardHeader> */}
-                {/* <H5>List Of Finished Jobs</H5>                */}
+              {/* <H5>List Of Finished Jobs</H5>                */}
               {/* </CardHeader> */}
               <CardBody className='b-l-primary'>
-                <JobsTable pageTasks={pageTasks} tableLinks={tableLinks} />
+                <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
               </CardBody>
             </Card>
           </Col>
