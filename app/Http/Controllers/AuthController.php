@@ -27,7 +27,7 @@ class AuthController extends Controller
             $Vendor = Vendor::vendor($request->email, $request->password);
             if ($Vendor) {
                 $loginData = [
-                    'id' => $Vendor->id,
+                    'id' => Crypt::encrypt($Vendor->id),
                     'first_login' => $Vendor->first_login,
                     'user_name' => $Vendor->name,
                     'user_type' => 'vendor',

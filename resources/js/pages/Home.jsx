@@ -1,11 +1,25 @@
-// resources/js/pages/Home.jsx
 import React from 'react';
+import axios from "./AxiosClint";
 
 const Home = () => {
+  const handleSendMessage = async () => {
+    const userId = JSON.parse(localStorage.getItem('USER'));
+
+    try {
+      const response = await axios.post('/SendMessage', {
+        data:{name:"abdelrahman" , },
+        id: userId.master_user, 
+      });
+
+      console.log('Message sent successfully:', response.data);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
+  };
+
   return (
     <div>
-      <h1>Welcome to the Home Page</h1>
-
+      <button onClick={handleSendMessage}>Send Message</button>
     </div>
   );
 };

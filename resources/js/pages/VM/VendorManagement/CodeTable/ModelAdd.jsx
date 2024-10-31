@@ -46,7 +46,6 @@ const AddNewBtn = (props) => {
                     table: props.dataTable
                 };
                 const { data } = await axiosClient.post("SubmetData", formData);
-                console.log(data)
                 props.onAddData(data);
                 toggle();
                 basictoaster("successToast", `Added successfully`)

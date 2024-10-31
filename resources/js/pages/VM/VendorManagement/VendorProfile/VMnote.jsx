@@ -25,11 +25,12 @@ const VMnote = () => {
                 <Collapse isOpen={isOpen}>
                     <CardBody>
                         <Row className="g-3 mb-3">
-                            <Col md="12" className="mb-3">
+                            <Col md="11" className="mb-3">
                                 <Label className="form-label" for="validationCustom01">VM/Vendor</Label>
-                                <CKEditor editor={ClassicEditor} />
+                                <CKEditor editor={ClassicEditor} className="flex-grow-1" />
                             </Col>
-
+                            <Col md="1" className="mb-3 d-flex align-items-center justify-content-center">
+                                <button className="btn btn-primary" style={{ width: '100%' }}><i className="fa fa-send"></i></button>                            </Col>
                             <Col md="12" className="mb-3">
                                 <Label className="form-label" for="validationCustom01">VM/PM</Label>
                                 <CKEditor editor={ClassicEditor} />

@@ -10,6 +10,7 @@ use App\Models\WalletsPaymentMethods;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Vendor;
 use Illuminate\Support\Facades\Crypt;
+use App\Events\Message;
 
 class VendorProfileController extends Controller
 {
@@ -159,6 +160,7 @@ class VendorProfileController extends Controller
         ], 200);
     }
 
+
     public function ModificationComplex(Request $request){
         $id = $request->input('id');
         if($request->input('PersonalData')){
@@ -177,6 +179,12 @@ class VendorProfileController extends Controller
             return $vendor;
         }
         
+    }
+
+    public function Message_VM_to_Vendor(Request $request)
+    {
+        $id = $request->input('id');
+        event(new Message("Hello User", $id));
     }
 
 }

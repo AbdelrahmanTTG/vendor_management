@@ -9,15 +9,18 @@
     "devDependencies": {
         "@vitejs/plugin-react": "^4.3.1",
         "axios": "^1.7.7",
+        "laravel-echo": "^1.16.1",
         "laravel-vite-plugin": "^1.0",
+        "pusher-js": "^8.4.0-rc2",
         "sass-embedded": "^1.79.3",
         "vite": "^5.4.6"
     },
     "dependencies": {
         "@auth0/auth0-react": "^2.0.1",
         "@babel/eslint-parser": "^7.21.3",
-        "@ckeditor/ckeditor5-build-classic": "^41.3.0",
-        "@ckeditor/ckeditor5-react": "^6.2.0",
+        "@ckeditor/ckeditor5-build-classic": "^43.3.0",
+        "@ckeditor/ckeditor5-core": "^43.3.0",
+        "@ckeditor/ckeditor5-react": "^9.3.1",
         "@dropzone-ui/react": "^7.0.4",
         "@emoji-mart/data": "^1.2.1",
         "@emoji-mart/react": "^1.1.1",
@@ -86,6 +89,7 @@
         "redux-saga": "^1.2.3",
         "sass": "^1.59.3",
         "sass-migrator": "^1.7.3",
+        "socket.io-client": "^4.8.1",
         "styled-components": "^5.3.9",
         "sweetalert2": "^11.7.3",
         "web-vitals": "^3.3.0",

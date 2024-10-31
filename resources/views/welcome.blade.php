@@ -88,6 +88,6 @@ input.leg::placeholder {
 <body>
   <div id="root"></div>
   @vite('resources/js/main.jsx')
-</body>
 
+</body>
 </html>

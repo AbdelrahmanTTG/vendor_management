@@ -65,5 +65,5 @@ Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () 
     Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
     Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
     Route::post('/refreshToken ', [AuthController::class, 'RegenrateToken']);
-
+    Route::post('/SendMessage ', [VendorProfileController::class, 'Message_VM_to_Vendor']);
 });

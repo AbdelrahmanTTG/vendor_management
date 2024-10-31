@@ -51,14 +51,14 @@ const Profile = () => {
             >
                 <User />
             </div>
-            <Tooltip
+            {/* <Tooltip
                 placement="bottom"
                 isOpen={tooltipOpen}
                 target="userProfileButton"
                 toggle={toggleTooltip}
             >
                 Open User Profile
-            </Tooltip>
+            </Tooltip> */}
             {isSidebarOpen && (
                 <div
                     ref={sidebarRef}

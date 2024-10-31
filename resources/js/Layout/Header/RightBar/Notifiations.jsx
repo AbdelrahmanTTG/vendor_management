@@ -1,15 +1,33 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState, Suspense } from 'react';
 import { Activity, Bell, CheckCircle, FileText, UserCheck  } from 'react-feather';
 import { Link } from 'react-router-dom';
 import { LI, P, UL } from '../../../AbstractElements';
-
+const { echo } = React.lazy(() => import('../../../real-time'));
 const Notifications = () => {
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        const loadEcho = async () => {
+            const { echo } = await import('../../../real-time'); 
+            const userId = JSON.parse(localStorage.getItem('USER'));
+            if (userId) {
+                echo.private(`newMessage-private-channel.User.${userId.master_user}`)
+                    .listen('.newMessage', (e) => {
+                        console.log(e);
+                        // setNotifications((prev) => [...prev, e]);
+                    });
+            }
+            setLoading(false);
+        };
+        loadEcho();
+    }, []);
     return (
         <Fragment>
             <LI attrLI={{ className: 'onhover-dropdown' }} >
                 <div className="notification-box">
                     <Bell />
-                    <span className="dot-animated"></span></div>
+                    {/* <span className="dot-animated"></span> */}
+                </div>
                 <UL attrUL={{ className: 'notification-dropdown onhover-show-div' }} >
                     <LI>
                         <P attrPara={{ className: 'f-w-700 m-0' }} >You have 3 Notifications<span className="pull-right badge badge-primary badge-pill">4</span></P>
@@ -25,7 +43,7 @@ const Notifications = () => {
                             </div>
                         </Link>
                     </LI>
-                    <LI attrLI={{ className: 'noti-secondary' }} >
+                    {/* <LI attrLI={{ className: 'noti-secondary' }} >
                         <Link to={`http://127.0.0.1:8000/app/email/mailbox`}>
                             <div className="media"><span className="notification-bg bg-light-secondary">
                                 <CheckCircle />
@@ -57,7 +75,7 @@ const Notifications = () => {
                                 </div>
                             </div>
                         </Link>
-                    </LI>
+                    </LI> */}
                 </UL>
             </LI>
         </Fragment>
