@@ -6,10 +6,12 @@ use App\Http\Resources\InvoiceResource;
 use App\Http\Resources\TaskResource;
 use App\Models\BankDetails;
 use App\Models\BillingData;
+use App\Models\Logger;
 use App\Models\Task;
 use App\Models\VendorInvoice;
 use App\Models\WalletsPaymentMethods;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -24,6 +26,7 @@ class InvoiceController extends Controller
 
     public function allInvoices(Request $request)
     {
+        $request['id'] = Crypt::decrypt($request->id);
         //   $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->where('verified', '!=', 0);
         $query = VendorInvoice::query()->where('vendor_id',  $request->id);
         $Invoices = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
@@ -37,6 +40,7 @@ class InvoiceController extends Controller
 
     public function paidInvoices(Request $request)
     {
+        $request['id'] = Crypt::decrypt($request->id);
         //  $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->where('verified', 1);
         $query = VendorInvoice::query()->where('vendor_id',  $request->id)->where('verified', 1);
         $Invoices = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
@@ -50,6 +54,7 @@ class InvoiceController extends Controller
 
     public function selectCompletedJobs(Request $request)
     {
+        $request['vendor'] = Crypt::decrypt($request->vendor);
         $jobs = Task::select('id', 'code')->where('vendor',  $request->vendor)->where('job_portal', 1)->where('status', 1)->where(function ($query) {
             $query->where('verified', '=', 2)
                 ->orWhereNull('verified');
@@ -59,6 +64,7 @@ class InvoiceController extends Controller
 
     public function getSelectedJobData(Request $request)
     {
+        $request['vendor'] = Crypt::decrypt($request->vendor);
         $task = Task::where('vendor', $request->vendor)->where('status', 1)->where('id', $request->task_id)->first();
         return response()->json([
             "Task" => new TaskResource($task)
@@ -106,6 +112,7 @@ class InvoiceController extends Controller
                     }
                 }
                 // invoice data 
+                $request['vendor'] = Crypt::decrypt($request->vendor);
                 $billingData = BillingData::where('vendor_id', $request->vendor)->first();
                 $inv['verified'] = 3;
                 $inv['vpo_file'] = $data['vpo_file'];
@@ -132,7 +139,7 @@ class InvoiceController extends Controller
                     $id = $jobs[$i];
                     $offer = Task::where('vendor', $request->vendor)->where('id', $id)->where('status', 1)->first();
                     if ($offer->update($data)) {
-                        //  $this->admin_model->addToLoggerUpdate('job_task', 'id', $id, $this->user);
+                        Logger::addToLoggerUpdate('job_task', 'id', $id, $request->vendor);                        
                         $msg['type'] = "success";
                         $message = "Selected Jobs Added To Invoice Successfully ...";
                     } else {
@@ -153,6 +160,7 @@ class InvoiceController extends Controller
 
     public function getVendorBillingData(Request $request)
     {
+        $request['vendor'] = Crypt::decrypt($request->vendoryes);
         $billingData = BillingData::where('vendor_id', $request->vendor)->first();
         if ($billingData) {
             $bankData = BankDetails::where('billing_data_id', $billingData->id)->first();

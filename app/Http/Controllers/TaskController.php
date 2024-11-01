@@ -6,12 +6,14 @@ use App\Http\Resources\TaskHistoryResource;
 use App\Http\Resources\TaskNotesResource;
 use Illuminate\Http\Request;
 use App\Http\Resources\TaskResource;
+use App\Models\Logger;
 use App\Models\OfferList;
 use App\Models\Task;
 use App\Models\TaskConversation;
 use App\Models\TaskLog;
 use App\Models\VendorInvoice;
 use App\Models\VmSetup;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 
@@ -29,6 +31,8 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
+        Logger::addToLoggerUpdate('job_task', 'id', 57162, 882);
+        $request['id'] = Crypt::decrypt($request->id);
         $runningJobs = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status',  0)->orderBy('created_at', 'desc')->take(3)->get();
         $finishedJobs = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->orderBy('created_at', 'desc')->take(3)->get();
         $offers1 = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->take(2)->get();
@@ -87,6 +91,7 @@ class TaskController extends Controller
      */
     public function allJobs(Request $request)
     {       
+        $request['id'] = Crypt::decrypt($request->id);
         $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', '!=', 6);
         $tasks = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
         $links = $tasks->linkCollection();
@@ -100,6 +105,7 @@ class TaskController extends Controller
      */
     public function allJobOffers(Request $request)
     {
+        $request['id'] = Crypt::decrypt($request->id);
         $tasks = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->get();
         $tasks2  = OfferList::query()->where('vendor_list', 'Like', "%$request->id,%")->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->get();
 
@@ -110,6 +116,7 @@ class TaskController extends Controller
      */
     public function allClosedJobs(Request $request)
     {
+        $request['id'] = Crypt::decrypt($request->id);
         $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1);
         $tasks = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
         $links = $tasks->linkCollection();
@@ -123,6 +130,7 @@ class TaskController extends Controller
      */
     public function allPlannedJobs(Request $request)
     {
+        $request['id'] = Crypt::decrypt($request->id);
         $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 7);
         $tasks = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
         $links = $tasks->linkCollection();
@@ -136,6 +144,7 @@ class TaskController extends Controller
      */
     public function viewOffer(Request $request)
     {
+        $request['vendor'] = Crypt::decrypt($request->vendor);
         $type = $request->type;
         if ($type == 'task') {
             $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
@@ -149,6 +158,7 @@ class TaskController extends Controller
      */
     public function viewJob(Request $request)
     {
+        $request['vendor'] = Crypt::decrypt($request->vendor);
         $vmConfig = VmSetup::select('enable_evaluation', 'v_ev_name1', 'v_ev_name2', 'v_ev_name3', 'v_ev_name4', 'v_ev_name5', 'v_ev_name6')->first();
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->first();
         return response()->json([
@@ -163,6 +173,7 @@ class TaskController extends Controller
      */
     public function sendMessage(Request $request)
     {
+        $request['vendor'] = Crypt::decrypt($request->vendor);
         $data['message'] = $request->message;
         $data['task'] =  $request->task_id;
         $data['from'] = 2;
@@ -186,10 +197,11 @@ class TaskController extends Controller
      */
     public function cancelOffer(Request $request)
     {
+        $request['vendor'] = Crypt::decrypt($request->vendor);
         $data['status'] = 3;
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($task) {
-            // $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);
+             Logger::addToLoggerUpdate('job_task', 'id', $request->id, $request->vendor);
             if ($task->update($data)) {
                 //  add to task log
                 $this->addToTaskLogger($request->id, 2, $request->vendor);
@@ -213,11 +225,11 @@ class TaskController extends Controller
      */
     public function acceptOffer(Request $request)
     {
-        $data['status'] = 4;
-        //     $data['status'] = 0;
+        $request['vendor'] = Crypt::decrypt($request->vendor);
+        $data['status'] = 0;
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($task) {
-            // $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);
+            Logger::addToLoggerUpdate('job_task', 'id', $request->id, $request->vendor);            
             if ($task->update($data)) {
                 // add to task log
                 $this->addToTaskLogger($request->id, 1, $request->vendor);
@@ -241,10 +253,11 @@ class TaskController extends Controller
      */
     public function acceptOfferList(Request $request)
     {
+        $request['vendor'] = Crypt::decrypt($request->vendor);
         $offer = OfferList::where('vendor_list', 'Like', "%$request->vendor,%")->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($offer) {
             $data['status'] = 0;
-            // $this->admin_model->addToLoggerUpdate('job_offer_list', 'id', $request->id, $request->vendor);
+            Logger::addToLoggerUpdate('job_offer_list', 'id', $request->id, $request->vendor);            
             if ($offer->update($data)) {
                 $job_data['job_id'] = $offer->job_id;
                 $job_data['subject'] = $offer->subject;
@@ -274,7 +287,7 @@ class TaskController extends Controller
                     // add to task log
                     $this->addToTaskLogger($insert_id, 1, $request->vendor);
                     $data['task_id'] = $insert_id;
-                    //  $this->admin_model->addToLoggerUpdate('job_offer_list', 'id', $data['id'], $this->user);
+                    Logger::addToLoggerUpdate('job_offer_list', 'id', $request->id, $request->vendor);                    
                     $offer->update($data);
                     //    $this->admin_model->sendVendorAcceptanceMail($insert_id, $this->user);
                     // send to other vendors emails --
@@ -302,6 +315,7 @@ class TaskController extends Controller
      */
     public function finishJob(Request $request)
     {
+        $request['vendor'] = Crypt::decrypt($request->vendor);
         $data['vendor_notes'] = $request->note ?? '';
         $data['status'] = 5;
         $offer = Task::where('vendor', $request->vendor)->where('id', $request->task_id)->where('job_portal', 1)->where('status', 0)->first();
@@ -316,7 +330,7 @@ class TaskController extends Controller
                     $data['vendor_attachment'] = $file->hashName();
                 }
             }
-            //   $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);        
+            Logger::addToLoggerUpdate('job_task', 'id', $request->task_id, $request->vendor);               
             if ($offer->update($data)) {
                 $evaluation = VmSetup::first();
                 if ($evaluation->enable_evaluation == 1) {
@@ -348,7 +362,8 @@ class TaskController extends Controller
                         // do edit 
                         if ($task_ev->vendor_ev_type == null)
                             $dataEV['vendor_ev_created_at'] = date("Y-m-d H:i:s");
-                        //$this->admin_model->addToLoggerUpdate('task_evaluation', 'task_id', $data['id'], $this->user);
+                            Logger::addToLoggerUpdate('task_evaluation', 'task_id', $request->task_id, $request->vendor);
+                        
                         DB::table('task_evaluation')->where('task_id', $request->task_id)
                             ->update($dataEV);
                     }
@@ -373,12 +388,12 @@ class TaskController extends Controller
      */
     public function planTaskReply(Request $request)
     {
+        $request['vendor'] = Crypt::decrypt($request->vendor);
         $offer = Task::where('vendor', $request->vendor)->where('id', $request->task_id)->where('job_portal', 1)->where('status', 7)->first();
         if ($offer) {
             $status = $data['status'] = $request->status;
             $data['plan_comment'] = $request->note ?? '';
-
-            //  $this->admin_model->addToLoggerUpdate('job_task', 'id', $data['id'], $this->user);
+            Logger::addToLoggerUpdate('job_task', 'id', $request->task_id, $request->vendor);           
 
             if ($offer->update($data)) {
                 // add to task log

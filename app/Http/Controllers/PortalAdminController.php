@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Vendor;
 use App\Models\VmSetup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 
 class PortalAdminController extends Controller
@@ -54,6 +55,7 @@ class PortalAdminController extends Controller
                 $message .= $err;
             }
         } else {
+            $request['id'] = Crypt::decrypt($request->id);
             $vendor = Vendor::findOrFail($request->id);
             if ($vendor->password == base64_encode($request->old_pass)) {
                 $vendor_data['password'] = base64_encode($request->new_pass);
@@ -75,7 +77,7 @@ class PortalAdminController extends Controller
 
     public function getVendorData(Request $request)
     {
-
+        $request['id'] = Crypt::decrypt($request->id);
         $vendor = Vendor::findOrFail($request->id);
         $PersonalData = Vendor::with(['country:id,name', 'nationality:id,name'])->findOrFail($request->id);
         if (!$vendor) {
