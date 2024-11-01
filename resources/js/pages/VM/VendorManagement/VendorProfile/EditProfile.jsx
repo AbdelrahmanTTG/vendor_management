@@ -42,7 +42,7 @@ const EditProfile = () => {
                 try {
                     const data = await axiosClient.get("EditVendor", {
                         params: {
-                            id: vendor,
+                            id: vendor.id,
                             PersonalData: "Personal Data"
                         }
                     });
@@ -78,7 +78,7 @@ const EditProfile = () => {
                     <Messaging />
                 </div>
                 <div id='VM-Notes'>
-                    <VMnote />
+                    <VMnote email={vendor.email} />
                 </div>
                 <div id='Files-Certificate'>
                     <FilesCertificate />

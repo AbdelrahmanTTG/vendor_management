@@ -182,7 +182,7 @@ const PersonalData = (props) => {
       const response = await axiosClient.post("PersonalInformation", formData);
       basictoaster("successToast", "Added successfully !");
       setIsSubmitting(true)
-      props.onDataSend(response.data.vendor.id)
+      props.onDataSend(response.data.vendor)
 
     } catch (err) {
       const response = err.response;
@@ -796,7 +796,11 @@ const PersonalData = (props) => {
                           setValue('address', data);
                         }}
                         disabled={isSubmitting || (props.permission && props.permission.address === "disable")}
-                      />
+                        />
+                        <input
+                          hidden disabled id='address'
+                          {...register('address', { required: true })}
+                        />
                     </Col>
                   </FormGroup>
                 </Col>

@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Crypt;
 
-Broadcast::channel('newMessage-private-channel.User.{id}', function ($user, $id) {
-    $decID = (int) Crypt::decrypt($id); 
-    return (int) $user->id === $decID ;
+Broadcast::channel('newMessage-private-channel.User.{email}', function ($user, $email) {
+    $decEmail = app('decrypt')(base64_decode($email));
+    return  $user->email === $decEmail ;
 }, ['guards' => ['api', 'vendor']]);
 
 

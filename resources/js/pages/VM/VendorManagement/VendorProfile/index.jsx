@@ -1,8 +1,9 @@
 import React, { Fragment, useEffect, useState, useRef } from 'react';
-import { Card, Table, Col, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
+import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader } from 'reactstrap';
 import axiosClient from "../../../../pages/AxiosClint";
 import { useNavigate } from 'react-router-dom';
 import { Previous, Next } from '../../../../Constant';
+import { Btn, H5, Spinner } from '../../../../AbstractElements';
 
 const Vendor = () => {
     const [vendors, setVendors] = useState([]);
@@ -91,10 +92,19 @@ const Vendor = () => {
 
         return items;
     };
+    const Add = () => {
+        navigate('/vm/vendors/profiletest');
+    }
     return (
         <Fragment >
             <Col sm="12">
                 <Card>
+                    <CardHeader className="d-flex justify-content-between align-items-center">
+                        <H5>Vendors</H5>
+                        <div className="ml-auto">
+                            <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: Add }} className="me-2">Add New vendor</Btn>
+                        </div>
+                    </CardHeader>
                     <div className="table-responsive">
                         <Table hover>
                             <thead>
@@ -112,21 +122,27 @@ const Vendor = () => {
                             </thead>
                             <tbody>
                                 {
-                                    vendors.map((item) =>
+                                    vendors.map((item) => (
                                         <tr key={item.id}>
-                                            <td scope="row">{item.id}</td>
-                                            <td scope="row">{item.name}</td>
-                                            <td scope="row">{item.email}</td>
-                                            <td scope="row">{item.legal_Name}</td>
-                                            <td scope="row">{item.phone_number}</td>
-                                            <td scope="row">{item.country.name}</td>
-                                            <td>{item.nationality && item.nationality.name ? item.nationality.name : ''}</td>
+                                            <td scope="row">{item.id || ''}</td>
+                                            <td scope="row">{item.name || ''}</td>
+                                            <td scope="row">{item.email || ''}</td>
+                                            <td scope="row">{item.legal_Name || ''}</td>
+                                            <td scope="row">{item.phone_number || ''}</td>
+                                            <td scope="row">{item.country?.name || ''}</td>
+                                            <td>{item.nationality?.name || ''}</td>
                                             <td>
-                                                <button onClick={() => handleEdit(item.id)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}><i className="icofont icofont-ui-edit"></i></button></td>
-                                            <td>  <i className="icofont icofont-ui-delete"></i></td>
+                                                <button onClick={() => handleEdit(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                                    <i className="icofont icofont-ui-edit"></i>
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <i className="icofont icofont-ui-delete"></i>
+                                            </td>
                                         </tr>
-                                    )
+                                    ))
                                 }
+
                             </tbody>
                         </Table>
                         <Pagination aria-label="Page navigation example" className="pagination-primary">

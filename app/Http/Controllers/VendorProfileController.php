@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Vendor;
 use Illuminate\Support\Facades\Crypt;
 use App\Events\Message;
+use App\Models\Messages;
 
 class VendorProfileController extends Controller
 {
@@ -63,7 +64,7 @@ class VendorProfileController extends Controller
 
         return response()->json([
             'message' => 'Vendor created successfully!',
-            'vendor' => ['id' => $vendor->id,]
+            'vendor' => ['id' => $vendor->id,"email"=> $vendor->email]
         ], 201);
     }
     public function updatePersonalInfo(Request $request)
@@ -183,8 +184,25 @@ class VendorProfileController extends Controller
 
     public function Message_VM_to_Vendor(Request $request)
     {
-        $id = $request->input('id');
-        event(new Message("Hello User", $id));
+        $validator = Validator::make($request->all(), [
+            'sender_id' => 'required|string|max:255',
+            'receiver_id' => 'required|string|max:255',
+            'content' => 'required|string',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+        $senderId = app('decrypt')(base64_decode($request->input('sender_id'))) ;
+        $receiverId = $request->input('receiver_id');
+        $content = $request->input('content');
+        Messages::createMessage(
+            $senderId,
+            $receiverId,
+            $content
+        );
+        event(new Message($content, base64_encode(app('encrypt')($receiverId) )));
+        return response()->json(['Message'=> "The message has been sent."],200);
+       
     }
-
+ 
 }

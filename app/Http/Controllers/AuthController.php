@@ -31,6 +31,7 @@ class AuthController extends Controller
                     'first_login' => $Vendor->first_login,
                     'user_name' => $Vendor->name,
                     'user_type' => 'vendor',
+                    "email"=> urlencode(app('encrypt')($Vendor->email)) ,
                     'loggedin_ttg' => 1,
                 ];
 
@@ -51,6 +52,7 @@ class AuthController extends Controller
             User::updateAccountData($userAccount);
             $loginData = [
                 'id' => Crypt::encrypt($userAccount->id),
+                'email' => base64_encode(app('encrypt')($userAccount->email) ),
                 'username' => $userAccount->user_name,
                 'role' => Crypt::encrypt($userAccount->role),
                 'brand' => Crypt::encrypt($userAccount->brand),
@@ -150,9 +152,7 @@ class AuthController extends Controller
                     'expires_in' => auth($authChannel)->factory()->getTTL() * 60
                 ], 200);
             }
-
             $vendor = auth('vendor')->user();
-
             if ($vendor) {
                 $authChannel = 'vendor'; 
 

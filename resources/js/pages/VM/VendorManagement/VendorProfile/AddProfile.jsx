@@ -16,9 +16,9 @@ import NavBar from './NavBar';
 import History from "./History"
 import Portal_User from "./Portal_User"
 const AddProfile = () => {
-    const [id, setId] = useState('');
+    const [data, setdata] = useState([]);
     const handleDataSend = (data) => {
-        setId(data);
+        setdata(data);
     };
     
     return (
@@ -37,7 +37,7 @@ const AddProfile = () => {
                     <Messaging />
                 </div>
                 <div id='VM-Notes'>
-                    <VMnote />
+                    <VMnote email={data.email} />
                 </div>
                 <div id='Files-Certificate'>
                     <FilesCertificate />
@@ -52,7 +52,7 @@ const AddProfile = () => {
                     <Test />
                 </div>
                 <div id='Billing'>
-                    <Billing ID={id} />
+                    <Billing ID={data.id} />
                 </div>
                 <div id='Portal_User'>
                     <Portal_User />

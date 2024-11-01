@@ -7,7 +7,7 @@ const Home = () => {
 
     try {
       const response = await axios.post('/SendMessage', {
-        data:{name:"abdelrahman" , },
+        data:{name:"abdelrahman" ,id:"241",message:"hallw" },
         id: userId.master_user, 
       });
 
