@@ -170,7 +170,12 @@ class VendorProfileController extends Controller
         if ($request->input('BillingData')) {
             // $BillingData = $this->BillingData($id);
         }
-        return response()->json(['Data'=> $PersonalData], 200);
+        if($request->input('VMNotes')){
+            $sender_email =  app('decrypt')(base64_decode( $request->input('VMNotes')['sender_email']));
+            $receiver_email = $request->input('VMNotes')['receiver_email'];
+            $VMNotes = $this->VMNotes($sender_email ,$receiver_email);
+        }
+        return response()->json(['Data'=> $PersonalData,"VMNotes"=>$VMNotes  ], 200);
 
     }
     public function PersonalData($id)
@@ -180,6 +185,14 @@ class VendorProfileController extends Controller
             return $vendor;
         }
         
+    }
+    public function VMNotes( $sender_email , $receiver_email)
+    {
+        $lastMessage = Messages::getLastMessageBetween($sender_email, $receiver_email);
+        if($lastMessage){
+            return $lastMessage;
+        }
+            
     }
 
     public function Message_VM_to_Vendor(Request $request)
@@ -192,16 +205,16 @@ class VendorProfileController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-        $senderId = app('decrypt')(base64_decode($request->input('sender_id'))) ;
-        $receiverId = $request->input('receiver_id');
+        $sender_email = app('decrypt')(base64_decode($request->input('sender_id'))) ;
+        $receiver_email = $request->input('receiver_id');
         $content = $request->input('content');
-        Messages::createMessage(
-            $senderId,
-            $receiverId,
+        $data =  Messages::createMessage(
+            $sender_email,
+            $receiver_email,
             $content
         );
-        event(new Message($content, base64_encode(app('encrypt')($receiverId) )));
-        return response()->json(['Message'=> "The message has been sent."],200);
+        event(new Message($content, base64_encode(app('encrypt')($receiver_email) )));
+        return response()->json(['Message'=> "The message has been sent." , "data"=> ["id"=> $data->id ,"content"=>$content , "is_read"=>0]],200);
        
     }
  

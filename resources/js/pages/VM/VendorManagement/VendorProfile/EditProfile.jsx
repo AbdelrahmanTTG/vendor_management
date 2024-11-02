@@ -26,6 +26,8 @@ const EditProfile = () => {
     const { vendor } = location.state || {};
     const [redirect, setRedirect] = useState(false);
     const [vendorPersonalData, setPersonalData] = useState([]);
+    const [lastMessage, setlastMessage] = useState([]);
+
     const [permissions, setPermissions] = useState({
         // type: 'hide',
         // name: 'disable',
@@ -40,14 +42,16 @@ const EditProfile = () => {
         } else {
             const fetchVendor = async () => {
                 try {
+                    const user = JSON.parse(localStorage.getItem('USER'));
                     const data = await axiosClient.get("EditVendor", {
                         params: {
                             id: vendor.id,
-                            PersonalData: "Personal Data"
+                            PersonalData: "Personal Data",
+                            VMNotes: {sender_email: user.email, receiver_email: vendor.email },
                         }
                     });
-                    setPersonalData(data.data);
-                    // console.log(data.data)
+                    setPersonalData({ PersonalData: data.data.Data });
+                    setlastMessage({ VMNotes: data.data.VMNotes })
                 } catch (error) {
                     console.error('Error fetching vendor:', error);
                 } finally {
@@ -78,7 +82,7 @@ const EditProfile = () => {
                     <Messaging />
                 </div>
                 <div id='VM-Notes'>
-                    <VMnote email={vendor.email} />
+                    <VMnote email={vendor.email} lastMessage={lastMessage} />
                 </div>
                 <div id='Files-Certificate'>
                     <FilesCertificate />
