@@ -17,6 +17,7 @@ import Portal_ViewOffer from "./pages/VendorPortal/Jobs/ViewOffer";
 import Portal_ViewJob from "./pages/VendorPortal/Jobs/ViewJob";
 import Portal_Admin from "./pages/VendorPortal/Admin";
 import Portal_Profile from "./pages/VendorPortal/Profile";
+import Portal_Notes from "./pages/VendorPortal/Notes";
 import NotFound from "./NotFound";
 import { VM } from './VMRoute'
 
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
             {
                 path: '',
                 element: <Portal_Dashboard />
+            },
+            {
+                path: 'Notes',
+                element: <Portal_Notes />
             },
             {
                 path: 'Jobs',

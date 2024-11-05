@@ -41,7 +41,6 @@ class InvoiceController extends Controller
     public function paidInvoices(Request $request)
     {
         $request['id'] = Crypt::decrypt($request->id);
-        //  $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->where('verified', 1);
         $query = VendorInvoice::query()->where('vendor_id',  $request->id)->where('verified', 1);
         $Invoices = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
         $links = $Invoices->linkCollection();
@@ -160,7 +159,7 @@ class InvoiceController extends Controller
 
     public function getVendorBillingData(Request $request)
     {
-        $request['vendor'] = Crypt::decrypt($request->vendoryes);
+        $request['vendor'] = Crypt::decrypt($request->vendor);
         $billingData = BillingData::where('vendor_id', $request->vendor)->first();
         if ($billingData) {
             $bankData = BankDetails::where('billing_data_id', $billingData->id)->first();

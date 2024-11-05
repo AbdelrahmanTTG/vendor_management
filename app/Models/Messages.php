@@ -10,6 +10,7 @@ class Messages extends Model
         'sender_email',
         'receiver_email',
         'content',
+        'is_read',
     ];
     public static function createMessage($senderId, $receiverId, $content)
     {
@@ -28,6 +29,17 @@ class Messages extends Model
             ->latest('created_at')
             ->select('id', 'content', 'is_read', 'created_at') 
             ->first();
+
+    }
+    public static function getUnReadMessages($receiver_email,$limit)
+    {
+        return self::where(function ($query) use ($receiver_email) {
+            $query->where('is_read', 0)
+                ->where('receiver_email', $receiver_email);
+        })
+            ->latest('created_at')
+            ->select('content') 
+            ->limit($limit)->get();
 
     }
 }

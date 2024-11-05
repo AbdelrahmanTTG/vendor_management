@@ -32,7 +32,7 @@ Route::middleware(['auth:api'])->group(function () {
 Route::middleware(['auth:vendor'])->prefix('Portal')->group(function () {
     Route::group(['prefix' => 'Vendor'], function () {
         Route::post('allJobs', [TaskController::class, 'allJobs'])->name('Portal.allJobs');
-        Route::post('allJobOffers', [TaskController::class, 'allJobOffers'])->name('Portal.allJobs');
+        Route::post('allJobOffers', [TaskController::class, 'allJobOffers'])->name('Portal.allJobOffers');
         Route::post('allClosedJobs', [TaskController::class, 'allClosedJobs'])->name('Portal.allClosedJobs');
         Route::post('allPlannedJobs', [TaskController::class, 'allPlannedJobs'])->name('Portal.allPlannedJobs');
         Route::post('viewOffer', [TaskController::class, 'viewOffer'])->name('Portal.viewOffer');
@@ -56,6 +56,9 @@ Route::middleware(['auth:vendor'])->prefix('Portal')->group(function () {
         Route::post('saveSettings', [PortalAdminController::class, 'saveSettings'])->name('Portal.saveSettings');
         Route::post('getVendorData', [PortalAdminController::class, 'getVendorData'])->name('Portal.getVendorData');
         Route::post('savePassword', [PortalAdminController::class, 'savePassword'])->name('Portal.savePassword');
+        Route::post('getVmNotes', [PortalAdminController::class, 'getVmNotes'])->name('Portal.getVmNotes');
+        Route::post('readVmNotes', [PortalAdminController::class, 'readVmNotes'])->name('Portal.readVmNotes');
+        Route::post('getUnReadVMNotes', [PortalAdminController::class, 'getUnReadVMNotes'])->name('Portal.getUnReadVMNotes');
     });
 });
 Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () {

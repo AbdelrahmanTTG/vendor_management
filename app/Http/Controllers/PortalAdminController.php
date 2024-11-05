@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Messages;
 use App\Models\Vendor;
 use App\Models\VmSetup;
 use Illuminate\Http\Request;
@@ -86,5 +87,33 @@ class PortalAdminController extends Controller
             ], 404);
         }
         return response()->json(['vendor' => $vendor,'Data'=> $PersonalData], 200);
+    }
+
+    public function getUnReadVMNotes(Request $request)
+    {
+        $limit = $request->limit;
+        $messages = Messages::getUnReadMessages(app('decrypt')(base64_decode($request->email)),$limit);
+        return response()->json($messages, 200);
+            
+    }
+    public function getVmNotes(Request $request)
+    {       
+        $messages = Messages::where('receiver_email',app('decrypt')(base64_decode($request->email)))->get();
+        return response()->json(['Notes' =>$messages], 200);
+            
+    }
+    public function readVmNotes(Request $request)
+    {       
+        $message = Messages::find($request->message_id);
+        if($message->update(['is_read'=>'1'])){
+            $msg['type'] = "success";
+            $msg['message'] = "Note Marked Read Successfully";
+        }else{
+            $msg['type'] = "error";
+            $msg['message'] = "Failed To Update,Please Try Again ...";
+        }
+       
+        return response()->json($msg);
+            
     }
 }
