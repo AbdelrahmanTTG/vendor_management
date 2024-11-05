@@ -41,7 +41,6 @@ const Dashboard = () => {
       };
       axiosClient.post(baseURL + "/dashboardData", payload)
         .then(({ data }) => {
-         // console.log(data);
           setRunningJobs(data?.runningJobs);
           setPendingJobs(data?.pendingJobs);
           setFinishedJobs(data?.finishedJobs);
@@ -80,7 +79,7 @@ const Dashboard = () => {
     },
   };
 
-const apexColumnChartsone = {
+  const apexColumnChartsone = {
 
     series: [{
       name: 'Delivered Jobs',
@@ -88,8 +87,8 @@ const apexColumnChartsone = {
     }, {
       name: 'All Jobs',
       data: chartData?.allJobsArray
-    },
-      ],
+    }
+    ],
     options: {
       chart: {
         type: 'bar',
@@ -108,14 +107,14 @@ const apexColumnChartsone = {
       dataLabels: {
         enabled: false
       },
-      colors: [primary, secondary, '#51bb25'],
+      colors: [primary, secondary],
       stroke: {
         show: true,
         width: 2,
         colors: ['transparent']
       },
       xaxis: {
-        categories:chartData?.monthNameArray,
+        categories: chartData?.monthNameArray,
       },
       yaxis: {
         title: {
@@ -128,82 +127,101 @@ const apexColumnChartsone = {
       tooltip: {
         y: {
           formatter: function (val) {
-            return  val + ' ';
+            return val + ' ';
           }
         }
       }
     },
-  
-  
+
+
   };
-  
+
   return (
     <Fragment>
       <Row>
-        <Col sm="6" lg="6" xl="3">
-          <Card className="o-hidden border-0">
-            <CardBody className='bg-primary'>
-              <div className="media static-top-widget">
-                <div className="align-self-center text-center">
-                  <Database />
-                </div>
-                <div className="media-body">
-                  <span className="m-0">{'Running Jobs'}</span>
-                  <H4 attrH4={{ className: 'mb-0 counter' }} >{countData?.runningJobsCount}</H4>
-                  <Database className="icon-bg" />
-                </div>
+        <Col xl="6">
+          <Row>
+            <Col sm="6" lg="6" xl="6">
+              <Card className="o-hidden border-0">
+                <CardBody className='bg-primary'>
+                  <div className="media static-top-widget">
+                    <div className="align-self-center text-center">
+                      <Database />
+                    </div>
+                    <div className="media-body">
+                      <span className="m-0">{'Running Jobs'}</span>
+                      <H4 attrH4={{ className: 'mb-0 counter' }} >{countData?.runningJobsCount}</H4>
+                      <Database className="icon-bg" />
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </Col>
+            <Col sm="6" lg="6" xl="6">
+              <Card className="o-hidden border-0">
+                <CardBody className='bg-secondary'>
+                  <div className="media static-top-widget">
+                    <div className="align-self-center text-center">
+                      <MessageCircle />
+                    </div>
+                    <div className="media-body">
+                      <span className="m-0">{'New Job Offer'}</span>
+                      <H4 attrH4={{ className: 'mb-0 counter' }} >{countData?.offerJobsCount}</H4>
+                      <MessageCircle className="icon-bg" />
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </Col>
+            <Col sm="6" lg="6" xl="6">
+              <Card className="o-hidden border-0">
+                <CardBody className='bg-secondary'>
+                  <div className="media static-top-widget">
+                    <div className="align-self-center text-center">
+                      <Archive />
+                    </div>
+                    <div className="media-body">
+                      <span className="m-0">{'Delivered Jobs'}</span>
+                      <H4 attrH4={{ className: 'mb-0 counter' }} >{countData?.closedJobsCount}</H4>
+                      <Archive className="icon-bg" />
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </Col>
+            <Col sm="6" lg="6" xl="6">
+              <Card className="o-hidden border-0">
+                <CardBody className='bg-primary'>
+                  <div className="media static-top-widget">
+                    <div className="align-self-center text-center">
+                      <CreditCard />
+                    </div>
+                    <div className="media-body">
+                      <span className="m-0">{'Total Invoices'}</span>
+                      <H4 attrH4={{ className: 'mb-0 counter' }} >{countData?.invoiceCount}</H4>
+                      <CreditCard className="icon-bg" />
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+        </Col>
+        <Col xl="6">
+          <Card>
+            <CardHeader className='p-3'>
+              <div className="header-top d-sm-flex align-items-center">
+                <H5>{'Invoices Overview'}</H5>
               </div>
+            </CardHeader>
+            <CardBody className="apex-chart pt-2 pb-3">
+              <div id='donutchart'>
+                {chartData.length != 0 &&
+                  <Chart options={apexDonutCharts.options} series={apexDonutCharts.series} type="donut" width={383} />
+                } </div>
             </CardBody>
           </Card>
-        </Col>
-        <Col sm="6" lg="6" xl="3">
-          <Card className="o-hidden border-0">
-            <CardBody className='bg-secondary'>
-              <div className="media static-top-widget">
-                <div className="align-self-center text-center">
-                  <MessageCircle />
-                </div>
-                <div className="media-body">
-                  <span className="m-0">{'New Job Offer'}</span>
-                  <H4 attrH4={{ className: 'mb-0 counter' }} >{countData?.offerJobsCount}</H4>
-                  <MessageCircle className="icon-bg" />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        </Col>
-        <Col sm="6" lg="6" xl="3">
-          <Card className="o-hidden border-0">
-            <CardBody className='bg-primary'>
-              <div className="media static-top-widget">
-                <div className="align-self-center text-center">
-                  <Archive />
-                </div>
-                <div className="media-body">
-                  <span className="m-0">{'Delivered Jobs'}</span>
-                  <H4 attrH4={{ className: 'mb-0 counter' }} >{countData?.closedJobsCount}</H4>
-                  <Archive className="icon-bg" />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        </Col>
-        <Col sm="6" lg="6" xl="3">
-          <Card className="o-hidden border-0">
-            <CardBody className='bg-secondary'>
-              <div className="media static-top-widget">
-                <div className="align-self-center text-center">
-                  <CreditCard />
-                </div>
-                <div className="media-body">
-                  <span className="m-0">{'Total Invoices'}</span>
-                  <H4 attrH4={{ className: 'mb-0 counter' }} >{countData?.invoiceCount}</H4>
-                  <CreditCard className="icon-bg" />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        </Col>
+        </Col>      
       </Row>
       <Row>
         <Col sm="8" lg="8" xl="9">
@@ -281,35 +299,23 @@ const apexColumnChartsone = {
                   </div>
                 </div>
               </Card>
-            </Col>
-            <Col xs="12">
-              <Card>
-                <CardHeader>
-                  <div className="header-top d-sm-flex align-items-center">
-                    <H5>{'Invoices Overview'}</H5>
-                  </div>
-                </CardHeader>
-                <CardBody className="apex-chart px-0 pt-0">
-                  <div id='donutchart'>
-                     <Chart options={apexDonutCharts.options} series={apexDonutCharts.series} type="donut" width={383} /> 
-                  </div>
-                </CardBody>
-              </Card>
-            </Col>
+            </Col>          
           </Row>
         </Col>
         <Col sm='12' xl='12'>
-                <Card>
-                    <CardHeader title='Recent Stats' />
-                    <CardBody>
-                        <div id='column-chart'>
-                            <Chart options={apexColumnChartsone.options} series={apexColumnChartsone.series} type="bar" height={350} />
-                        </div>
-                    </CardBody>
-                </Card>
-            </Col>
+          <Card>
+            <CardHeader title='Recent Stats' />
+            <CardBody>
+              {chartData.length != 0 &&
+                <div id='column-chart'>
+                  <Chart options={apexColumnChartsone.options} series={apexColumnChartsone.series} type="bar" height={350} />
+                </div>
+              }
+            </CardBody>
+          </Card>
+        </Col>
       </Row>
-    
+
       {/* <Col xl="6" className="xl-100 box-col-12"> */}
       {/* <Card> */}
       {/* <CardBody className="cal-date-widget p-3"> */}
