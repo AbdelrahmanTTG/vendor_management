@@ -17,6 +17,7 @@ const Profile = () => {
   const [id, setId] = useState(user.id);
   const [vendorData, setVendorData] = useState([]);
   const [personalData, setPersonalData] = useState([]);
+  const [billingData, setBillingData] = useState([]);
   const handleDataSend = (data) => {
     setId(data);
   };
@@ -25,11 +26,24 @@ const Profile = () => {
         const payload = {
             'id': user.id,           
         };
-        axiosClient.post(baseURL + "getVendorData", payload)
-            .then(({ data }) => {                
-              setVendorData(data?.vendor);               
-              setPersonalData(data);               
-            });
+        const fetchVendor = async () => {
+          try {
+              const user = JSON.parse(localStorage.getItem('USER'));
+              const data = await axiosClient.get("EditVendor", {
+                  params: {
+                      id: user.id,
+                      PersonalData: "Personal Data",
+                      BillingData: "Billing Data",
+                  }
+              });
+              setPersonalData({ PersonalData: data.data.Data });
+              setBillingData({ BillingData: data.data.BillingData })
+          } catch (error) {
+              console.error('Error fetching vendor:', error);
+          } finally {
+          }
+      };
+      fetchVendor();  
     }
 }, [user]);
 

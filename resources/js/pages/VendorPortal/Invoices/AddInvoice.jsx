@@ -35,7 +35,12 @@ const AddInvoice = () => {
                     setCompletedJobs(completedJobs);
                 });
             // get billing data 
-            axiosClient.post(baseURL + "getVendorBillingData", payload)
+            axiosClient.post(baseURL + "EditVendor", {
+                params: {
+                    id: user.id,
+                    BillingData: "Billing Data",
+                }
+            })
                 .then(({ data }) => {
                     setBillingData(data?.billingData);
                     setBankData(data?.bankData);
@@ -286,15 +291,15 @@ const AddInvoice = () => {
                                     <Row>
 
                                         <Col sm="12">
-                                        <FormGroup className="form-group m-checkbox-inline custom-radio-ml p-l-25">
-                                            <div className="radio radio-primary">
-                                                <input id='radioinline1' type="radio" name="payment_method" value="0" required onChange={e => setPaymentMethodInput(e.target.value)} />
-                                                <label className="mb-0" htmlFor="radioinline1">Bank</label>
-                                             </div>
-                                             <div className="radio radio-primary m-l-20">
-                                                   <input id='radioinline2' type="radio" name="payment_method" value="1" required onChange={e => setPaymentMethodInput(e.target.value)} />
-                                                <label className="mb-0" htmlFor="radioinline2">Wallet</label>
-                                            </div>
+                                            <FormGroup className="form-group m-checkbox-inline custom-radio-ml p-l-25">
+                                                <div className="radio radio-primary">
+                                                    <input id='radioinline1' type="radio" name="payment_method" value="0" required onChange={e => setPaymentMethodInput(e.target.value)} />
+                                                    <label className="mb-0" htmlFor="radioinline1">Bank</label>
+                                                </div>
+                                                <div className="radio radio-primary m-l-20">
+                                                    <input id='radioinline2' type="radio" name="payment_method" value="1" required onChange={e => setPaymentMethodInput(e.target.value)} />
+                                                    <label className="mb-0" htmlFor="radioinline2">Wallet</label>
+                                                </div>
                                             </FormGroup>
                                         </Col>
                                         <Col sm='9' className='px-5'>
@@ -330,7 +335,7 @@ const AddInvoice = () => {
                                                             <Input type="text" name="bank_address" className="form-control" defaultValue={bankData.bank_address} />
                                                         </Col>
                                                     </FormGroup>
-                                                </>)}                                       
+                                                </>)}
 
                                             {paymentMethodInput == "1" && (
                                                 <>
