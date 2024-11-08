@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('contact_other2')->nullable();    
             $table->string('contact_other3')->nullable();      
             $table->string('Anothernumber')->nullable();
-            $table->string('contact')->nullable()->change();
+            // $table->string('contact')->nullable()->change();
 
         });
     }

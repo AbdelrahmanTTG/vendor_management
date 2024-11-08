@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('wallets_payment_methods', function (Blueprint $table) {
-            $table->dropForeign(['bank_details_id']);
+            // $table->dropForeign(['bank_details_id']);
             $table->dropColumn('bank_details_id');
             $table->unsignedBigInteger('billing_data_id')->nullable();
-            $table->foreign('billing_data_id')->references('id')->on('billing_data')->onDelete('cascade');
+            // $table->foreign('billing_data_id')->references('id')->on('billing_data')->onDelete('cascade');
         });
     }
 
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->dropForeign(['billing_data_id']);
             $table->dropColumn('billing_data_id'); 
             $table->unsignedBigInteger('bank_details_id')->nullable();
-            $table->foreign('bank_details_id')->references('id')->on('bank_details')->onDelete('cascade');
+            // $table->foreign('bank_details_id')->references('id')->on('bank_details')->onDelete('cascade');
         });
     }
 };

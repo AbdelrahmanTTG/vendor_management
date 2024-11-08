@@ -34,28 +34,28 @@ const AddProfile = () => {
                     <PersonalData onDataSend={handleDataSend} onSubmit="onSubmit" />
                 </div>
                 <div id="messaging">
-                    <Messaging />
+                    <Messaging onSubmit="onSubmit"  />
                 </div>
                 <div id='VM-Notes'>
-                    <VMnote email={data.email} />
+                    <VMnote id={data.id} email={data.email} onSubmit="onSubmit" />
                 </div>
                 <div id='Files-Certificate'>
-                    <FilesCertificate />
+                    <FilesCertificate onSubmit="onSubmit" id={data.id} />
                 </div>
                 <div id='Education'>
                     <Education />
                 </div>
                 <div id='Experience'>
-                    <Experience />
+                    <Experience onSubmit="onSubmit" id={data.id} />
                 </div>
                 <div id='Test'>
                     <Test />
                 </div>
                 <div id='Billing'>
-                    <Billing ID={data.id} />
+                    <Billing id={data.id} onSubmit="onSubmit" />
                 </div>
                 <div id='Portal_User'>
-                    <Portal_User />
+                    <Portal_User email={data.email} onSubmit="onSubmit" />
                 </div>
                 <div id='Price_List'>
                     <Price_List />

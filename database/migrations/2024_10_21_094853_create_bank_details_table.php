@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('payment_terms');  
             $table->text('bank_address');
             $table->timestamps(); 
-            $table->foreign('billing_data_id')->references('id')->on('billing_data')->onDelete('cascade');
+            // $table->foreign('billing_data_id')->references('id')->on('billing_data')->onDelete('cascade');
         });
     }
 

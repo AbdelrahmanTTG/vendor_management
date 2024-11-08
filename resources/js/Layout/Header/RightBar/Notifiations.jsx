@@ -5,23 +5,23 @@ import { LI, P, UL } from '../../../AbstractElements';
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
-            const userId = JSON.parse(localStorage.getItem('USER'));
-        // console.log(userId.email)
-        const loadEcho = async () => {
-            const { echo } = await import('../../../real-time'); 
-            const userId = JSON.parse(localStorage.getItem('USER'));
-            if (userId) {
-                echo.private(`newMessage-private-channel.User.${userId.email}`)
-                    .listen('.newMessage', (e) => {
-                        console.log(e);
-                        // setNotifications((prev) => [...prev, e]);
-                    });
-            }
-            setLoading(false);
-        };
-        loadEcho();
-    }, []);
+    // useEffect(() => {
+    //         const userId = JSON.parse(localStorage.getItem('USER'));
+    //     // console.log(userId.email)
+    //     const loadEcho = async () => {
+    //         const { echo } = await import('../../../real-time'); 
+    //         const userId = JSON.parse(localStorage.getItem('USER'));
+    //         if (userId) {
+    //             echo.private(`newMessage-private-channel.User.${userId.email}`)
+    //                 .listen('.newMessage', (e) => {
+    //                     console.log(e);
+    //                     // setNotifications((prev) => [...prev, e]);
+    //                 });
+    //         }
+    //         setLoading(false);
+    //     };
+    //     loadEcho();
+    // }, []);
     return (
         <Fragment>
             <LI attrLI={{ className: 'onhover-dropdown' }} >

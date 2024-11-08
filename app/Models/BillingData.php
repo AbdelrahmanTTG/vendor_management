@@ -19,4 +19,18 @@ class BillingData extends Model
         'street',
         'billing_address'
     ];
+    public function bankDetail()
+    {
+        return $this->hasOne(BankDetails::class, 'billing_data_id');
+    }
+    public function walletPaymentMethod()
+    {
+        return $this->hasMany(WalletsPaymentMethods::class, 'billing_data_id');
+
+    }
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class, 'billing_currency', 'id');
+    }
+  
 }

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('vendor_invoices', function (Blueprint $table) {
             $table->integerIncrements('id');
             $table->Integer('vendor_id');
-            $table->foreign('vendor_id')->references('id')->on('vendor')->noActionOnDelete()->noActionOnUpdate();
+            // $table->foreign('vendor_id')->references('id')->on('vendor')->noActionOnDelete()->noActionOnUpdate();
             $table->string('invoice_date');
             $table->text('vpo_file');
             $table->tinyInteger('verified');
