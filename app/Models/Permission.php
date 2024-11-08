@@ -28,7 +28,7 @@ class Permission extends Model
             ->where('groups', $groups)
             ->where('role', $role)
             ->whereHas('screen', function ($query) {
-                $query->where('menu', '1')->where('use_system', 'ERP/VM');
+                $query->where('menu', '1')->where('use_system', 'VM');
             })
             ->orderBy('menu_order')
             ->get();

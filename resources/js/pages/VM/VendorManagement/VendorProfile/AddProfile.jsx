@@ -33,8 +33,8 @@ const AddProfile = () => {
                 <div id="personal-data">
                     <PersonalData onDataSend={handleDataSend} onSubmit="onSubmit" />
                 </div>
-                <div id="messaging">
-                    <Messaging onSubmit="onSubmit"  />
+                <div  id="messaging">
+                    <Messaging onSubmit="onSubmit" id={data.id} />
                 </div>
                 <div id='VM-Notes'>
                     <VMnote id={data.id} email={data.email} onSubmit="onSubmit" />

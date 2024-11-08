@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('vendor', function (Blueprint $table) {
             $table->text('name')->nullable(false)->change();
             $table->string('email')->nullable(false)->change();
-            $table->string('password', 255)->nullable(false)->change();
+            $table->string('password', 255)->nullable(true)->change();
             $table->integer('first_login')->nullable()->change();
             $table->string('account_status', 255)->nullable()->change();
             $table->text('contact')->nullable()->change();

@@ -696,7 +696,7 @@ const PersonalData = (props) => {
                           render={({ field }) => (
                             <Select
                               {...field}
-                              value={field.value}
+                              value={selectedOptionR}
 
                               options={optionsR}
                               onInputChange={(inputValue) =>
