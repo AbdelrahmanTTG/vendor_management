@@ -62,7 +62,6 @@ const Portal_User = (props) => {
             try {
                 const response = await axiosClient.post("GeneratePassword", formData);
                 basictoaster("successToast", "Password created successfully !");
-                setIsSubmitting(true)
             } catch (err) {
                 const response = err.response;
                 if (response && response.data) {
@@ -76,10 +75,8 @@ const Portal_User = (props) => {
                         }
                     });
                 }
-                setIsSubmitting(false)
             }
         }
-        console.log(data)
     };
  
     useEffect(() => {
