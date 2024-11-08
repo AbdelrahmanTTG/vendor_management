@@ -1,27 +1,47 @@
-import React from 'react';
-import axios from "./AxiosClint";
+import React, { Fragment } from 'react';
+import { Container, Row } from 'reactstrap';
+import { Breadcrumbs } from '../AbstractElements';
+// import BarChartsWidgets from './BarChartsWidgets';
+// import BrowserChartWidgets from './BrowserChartWidgets';
+// import ChartWidgets from './ChartWidgets';
+// import LiveChart from './LiveChart';
+import MonthlySaleChart from './MonthlySaleChart';
+import TurnoverChart from './TurnoverChart';
+import UsesChart from './UsesChart';
+import BrowserUses from './BrowserUses';
+import Charts from './Charts';
+import LiveChart from './LiveChart';
+import BarChartsWidgets from './BarChartsWidgets';
 
-const Home = () => {
-  const handleSendMessage = async () => {
-    const userId = JSON.parse(localStorage.getItem('USER'));
 
-    try {
-      const response = await axios.post('/SendMessage', {
-        data:{name:"abdelrahman" ,id:"241",message:"hallw" },
-        id: userId.master_user, 
-      });
 
-      console.log('Message sent successfully:', response.data);
-    } catch (error) {
-      console.error('Failed to send message:', error);
-    }
-  };
 
+const ChartComponent = () => {
   return (
-    <div>
-      <button onClick={handleSendMessage}>Send Message</button>
-    </div>
+    <Fragment>
+      {/* <Breadcrumbs mainTitle="Chart" parent="Widgets" title="Chart" /> */}
+      <Container fluid={true} className="chart-widget">
+        <Charts />
+        {/* <BarChartsWidgets />  */}
+        <Row>
+          <LiveChart />
+          <TurnoverChart />
+          <MonthlySaleChart />
+          <UsesChart />
+        </Row> 
+        <BrowserUses />
+        {/* <ChartWidgets />
+        <BarChartsWidgets />
+        <Row>
+          <LiveChart />
+          <TurnoverChart />
+          <MonthlySaleChart />
+          <UsesChart />
+        </Row>
+        <BrowserChartWidgets /> */}
+      </Container>
+    </Fragment>
   );
 };
 
-export default Home;
+export default ChartComponent;
