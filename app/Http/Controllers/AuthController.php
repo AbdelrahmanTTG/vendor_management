@@ -31,7 +31,7 @@ class AuthController extends Controller
                     'first_login' => $Vendor->first_login,
                     'user_name' => $Vendor->name,
                     'user_type' => 'vendor',
-                    "email"=> urlencode(app('encrypt')($Vendor->email)) ,
+                    "email"=> base64_encode(app('encrypt')($Vendor->email)) ,
                     'loggedin_ttg' => 1,
                 ];
 

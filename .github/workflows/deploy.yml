@@ -1,0 +1,74 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main  # Change this to your main branch if different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'  # Latest stable version
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'  # Latest stable version
+
+      - name: Install NPM dependencies
+        run: npm install --legacy-peer-deps  # Optional
+
+      - name: Build React App with Vite
+        run: npm run build  # Adjust if your build command is different
+
+      - name: List files in deployment directory (for debugging)
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS "ls -la /var/www/html/lingotalents.com"
+
+      - name: Deploy using SSH
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}  # Your SSH password
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}  # Your SSH username
+          SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}  # Your server address
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS << 'EOF'
+          cd /var/www/html/lingotalents.com
+
+          # Check if 'origin' remote exists
+          if git remote -v | grep -q 'origin'; then
+            echo "Remote 'origin' exists."
+          else
+            echo "Adding remote 'origin'."
+            git remote add origin https://github.com/AbdelrahmanTTG/vendor_management.git
+          fi
+
+          # Pull the latest changes
+          git pull origin main
+
+          # Install Composer dependencies (make sure vendor directory is populated)
+          composer install --no-dev --optimize-autoloader
+
+          # Run Laravel commands
+          /usr/bin/php artisan migrate --force  # Run migrations
+          /usr/bin/php artisan config:cache  # Cache configuration
+          /usr/bin/php artisan route:cache  # Cache routes
+          /usr/bin/php artisan view:cache  # Cache views
+          
+          # Optionally restart your web server or PHP service if needed
+          # sudo service php8.2-fpm restart
+          EOF

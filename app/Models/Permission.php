@@ -24,11 +24,16 @@ class Permission extends Model
     }
     public static function getScreenByGroupAndRole($groups, $role)
     {
+        if (empty($groups)) {
+            return collect();
+        }
+
         return self::with('screen')
             ->where('groups', $groups)
             ->where('role', $role)
             ->whereHas('screen', function ($query) {
-                $query->where('menu', '1');
+                $query->where('menu', '1')
+                                ->where('use_system', 'VM');
             })
             ->orderBy('menu_order')
             ->get();

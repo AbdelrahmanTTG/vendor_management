@@ -106,7 +106,7 @@ const EditBtn = (props) => {
                     const { data } = await axiosClient.post("updateeData", formData);
                     props.onUpdateData(data);
                     toggle();
-                    basictoaster("successToast", `Added successfully`);
+                    basictoaster("successToast", `Updated successfully`);
                 } catch (err) {
                     const response = err.response;
                     if (response && response.data) {

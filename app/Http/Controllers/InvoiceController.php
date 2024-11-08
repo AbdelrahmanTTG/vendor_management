@@ -157,18 +157,33 @@ class InvoiceController extends Controller
         return response()->json($msg);
     }
 
-    public function getVendorBillingData(Request $request)
+    public function getVendorBillingData($id)
     {
-        $request['vendor'] = Crypt::decrypt($request->vendor);
-        $billingData = BillingData::where('vendor_id', $request->vendor)->first();
+
+        $id = Crypt::decrypt($id);
+
+        $billingData = BillingData::where('vendor_id', $id)
+            ->with(['bankDetail', 'walletPaymentMethod', 'currency:id,name'])
+            ->first();
+
         if ($billingData) {
-            $bankData = BankDetails::where('billing_data_id', $billingData->id)->first();
-            $walletData = WalletsPaymentMethods::where('billing_data_id', $billingData->id)->first();
+            $billingData->billing_currency = $billingData->currency ?? null;
+
+            unset($billingData->currency);
+
+            $bankData = $billingData->bankDetail ?? '';
+            $walletData = $billingData->walletPaymentMethod ?? '';
+        } else {
+            $bankData = '';
+            $walletData = '';
         }
-        return response()->json([
-            "billingData" => ($billingData),
-            "bankData" => ($bankData ?? ''),
-            "walletData" => ($walletData ?? ''),
-        ]);
+
+        return [
+            "billingData" => $billingData ?? '',
+            "bankData" => $bankData,
+            "walletData" => $walletData,
+        ];
+
+
     }
 }

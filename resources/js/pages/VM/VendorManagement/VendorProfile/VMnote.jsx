@@ -1,49 +1,65 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader, Col, Collapse, Label, Row } from 'reactstrap';
-import { H5, Btn } from '../../../../AbstractElements';
+import { H5, Btn, Spinner } from '../../../../AbstractElements';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import axios from "../../../../pages/AxiosClint";
 
-const VMnote = ({ lastMessage, email }) => {
+const VMnote = (props) => {
     toast.configure();
-
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isOpen, setIsOpen] = useState(true);
     const { control, register, handleSubmit, setValue, formState: { errors } } = useForm();
     const [messages, setMessages] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const toggleCollapse = () => setIsOpen(!isOpen);
 
     useEffect(() => {
-        if (lastMessage?.VMNotes) {
-            const { content } = lastMessage.VMNotes;
-            lastMessage.VMNotes.content = content.replace(/<[^>]*>/g, '');
-            setMessages([lastMessage.VMNotes]);
-        }
-    }, [lastMessage]);
+        if (props.lastMessage) {
+            setLoading(true);
+            if (props.lastMessage.VMNotes === null) {setLoading(false);}
+            if (props.lastMessage.VMNotes) {
+            try {
+                const { content } = props.lastMessage.VMNotes;
+                props.lastMessage.VMNotes.content = content.replace(/<[^>]*>/g, '');
+                setMessages([props.lastMessage.VMNotes]);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false); 
+            }
+          } 
+        } 
+
+    }, [props.lastMessage]);
+
 
     const showToast = (type, message) => {
         toast[type](message, { position: toast.POSITION.TOP_RIGHT });
     };
 
     const onSubmit = async (data) => {
-        if (!email) {
+        if (!props.email) {
             showToast('error', "Make sure to send your personal information first.");
             document.getElementById("personal-data")?.scrollIntoView({ behavior: 'smooth' });
             return;
         }
 
         try {
+            setIsSubmitting(true);
             const user = JSON.parse(localStorage.getItem('USER'));
-            const formData = { ...data, sender_id: user.email, receiver_id: email };
+            const formData = { ...data, sender_id: user.email, receiver_id: props.email };
             const response = await axios.post('/SendMessage', formData);
             response.data.data.content = response.data.data.content.replace(/<[^>]*>/g, '');
             setMessages([response.data.data]);
         } catch (error) {
             console.error('Failed to send message:', error);
             showToast('error', "Failed to send message. Please try again.");
+        } finally {
+            setIsSubmitting(false)
         }
     };
 
@@ -53,7 +69,6 @@ const VMnote = ({ lastMessage, email }) => {
         }
     };
     const styles = {
-
         messages: {
             flex: 1,
             padding: '10px',
@@ -83,6 +98,12 @@ const VMnote = ({ lastMessage, email }) => {
         statusSent: {
             color: 'blue'
         },
+        timestamp: {
+            fontSize: '10px',
+            color: 'gray',
+            marginTop: '5px',
+            display: 'block'
+        },
         inputContainer: {
             borderTop: '1px solid #ddd',
             padding: '5px',
@@ -95,8 +116,14 @@ const VMnote = ({ lastMessage, email }) => {
             padding: '8px',
             borderRadius: '4px',
             outline: 'none'
-        }
+        },
+        noNotesMessage: {
+        color: 'gray',
+        textAlign: 'center',
+        marginTop: '20px'
+    }
     };
+
     return (
         <Fragment>
             <Card>
@@ -110,7 +137,7 @@ const VMnote = ({ lastMessage, email }) => {
                             <Col md="12" className="border border-default p-3 mb-3" style={{ borderStyle: "dashed" }}>
                                 <div className="d-flex justify-content-between align-items-center mb-3">
                                     <Label className="form-label">VM/Vendor</Label>
-                                    <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit, onError) }}>
+                                    <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit, onError), disabled: isSubmitting }}>
                                         <i className="fa fa-send"></i>
                                     </Btn>
                                 </div>
@@ -128,21 +155,38 @@ const VMnote = ({ lastMessage, email }) => {
                                 <input hidden disabled {...register('content', { required: true })} />
 
                                 <div className="border border-default p-3 mb-3" style={{ borderStyle: "dashed" }}>
-                                    <div style={styles.chatBox}>
-                                        <div style={styles.messages}>
-                                            {messages.map((msg) => (
-                                                <div key={msg.id} style={styles.message}>
-                                                    <p style={styles.messageText}>{msg.content}</p>
-                                                    <span style={{
-                                                        ...styles.status,
-                                                        ...(msg.is_read === 0 ? styles.statusRead : styles.statusSent)
-                                                    }}>
-                                                        {msg.is_read === 1 ? "✓✓ Read" : "✓ Sent"}
-                                                    </span>
+                                    {
+                                        loading ? (
+                                            <div className="loader-box" >
+                                                <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                            </div>
+                                        ) :
+                                            <div style={styles.chatBox}>
+                                                <div style={styles.messages}>
+                                                    {messages.length > 0 ? (
+                                                        messages.map((msg) => (
+                                                            <div key={msg.id} style={styles.message}>
+                                                                <p style={styles.messageText}>{msg.content}</p>
+
+                                                                <span style={styles.timestamp}>
+                                                                    {new Date(msg.created_at).toLocaleString()}
+                                                                </span>
+
+                                                                <span style={{
+                                                                    ...styles.status,
+                                                                    ...(msg.is_read === 0 ? styles.statusRead : styles.statusSent)
+                                                                }}>
+                                                                    {msg.is_read === 1 ? "✓✓ Read" : "✓ Sent"}
+                                                                </span>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                            <p style={styles.noNotesMessage}>There are no Notes yet.</p>
+                                                    )}
+
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </div>
+                                            </div>
+                                    }
                                 </div>
                             </Col>
 

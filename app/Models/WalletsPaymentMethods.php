@@ -15,4 +15,8 @@ class WalletsPaymentMethods extends Model
         'method',
         'account',
     ];
+    public function remove()
+    {
+        return $this->delete();
+    }
 }

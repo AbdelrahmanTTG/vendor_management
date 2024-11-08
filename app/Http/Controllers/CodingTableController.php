@@ -17,13 +17,15 @@ use App\Models\Dialect;
 use App\Models\Unit;
 use App\Models\UniversityDegree;
 use App\Models\Major;
+use App\Models\Skill;
+
 use Illuminate\Support\Facades\Validator;
 use DB;
 
 
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major"];
+    protected static $validTables = ['regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major" , "skills"];
 
     protected static $models = [
         'regions' => Regions::class,
@@ -39,7 +41,8 @@ class CodingTableController extends Controller
         "languages_dialect" => Dialect::class,
         "unit" => Unit::class,
         "university_degree" => UniversityDegree::class,
-        "major" => Major::class
+        "major" => Major::class,
+        "skills"=> Skill::class,
     ];
     public function SelectDatatTable(Request $request)
     {

@@ -73,6 +73,7 @@ const PersonalData = (props) => {
       setStatus(true)
     } else {
       setStatus(false)
+      setValue('reject_reason', null);
 
     }
   };
@@ -169,7 +170,7 @@ const PersonalData = (props) => {
   };
   const onSubmit = async (data) => {
     const formData = { ...data };
-    const contacts = formData.contact || [];
+    const contacts = formData.contacts || [];
 
     contacts.forEach(contact => {
       const dbKey = columnMapping[contact.label];
@@ -181,7 +182,7 @@ const PersonalData = (props) => {
     const vendorstatusValue = formData.status.value;
     formData.type = vendorTypeValue
     formData.status = vendorstatusValue
-    delete formData.contact;
+    delete formData.contacts;
     try {
       const response = await axiosClient.post("PersonalInformation", formData);
       basictoaster("successToast", "Added successfully !");
@@ -202,9 +203,48 @@ const PersonalData = (props) => {
       setIsSubmitting(false)
     }
   }
-  const Update = async (data) => {
-    console.log("data")
-  }
+  const Update = async (formData) => {
+    const contacts = formData.contacts || [];
+    contacts.forEach(({ label, value }) => {
+      const dbKey = columnMapping[label];
+      if (dbKey) {
+        formData[dbKey] = value;
+      }
+    });
+    formData.type = formData.type.value;
+    formData.status = formData.status.value;
+    delete formData.contacts;
+    const keys = Object.keys(formData);
+    const extractedValues = keys.map(key => {
+      const value = props.vendorPersonalData.PersonalData[key];
+      return value && typeof value === 'object' ? value.id : value;
+    });
+    const extractedValues2 = keys.map(key => formData[key]);
+    const areEqual = extractedValues2.every((val, index) => val === extractedValues[index]);
+    if (!areEqual) {
+      try {
+        formData.id = props.vendorPersonalData.PersonalData.id
+        const response = await axiosClient.post("updatePersonalInformation", formData);
+        basictoaster("successToast", "Modified successfully");
+      } catch (err) {
+        const response = err.response;
+        if (response && response.data) {
+          const errors = response.data;
+          Object.keys(errors).forEach(key => {
+            const messages = errors[key];
+            messages.forEach(message => {
+              basictoaster("dangerToast", message);
+            });
+          });
+        }
+        setIsSubmitting(false)
+      }
+    } else {
+      basictoaster("dangerToast", "You have not modified the data !");
+
+    }
+  };
+
   const onError = (errors) => {
     for (const [key, value] of Object.entries(errors)) {
       switch (key) {
@@ -240,7 +280,7 @@ const PersonalData = (props) => {
           basictoaster("dangerToast", "City or state is required");
           return;
         case "contact_name":
-          basictoaster("dangerToast", "Contact name is required");
+          basictoaster("dangerToast", "Contacts name is required");
           return;
         case "prfx_name":
           basictoaster("dangerToast", "Prefix is required");
@@ -252,7 +292,7 @@ const PersonalData = (props) => {
             basictoaster("dangerToast", "Invalid email address");
           }
           return;
-        case "contact":
+        case "contacts":
           basictoaster("dangerToast", "Contact is required");
           return;
         case "address":
@@ -278,14 +318,14 @@ const PersonalData = (props) => {
         label: key
       }));
     setInputValues(options);
-    setValue('contact', options);
+    setValue('contacts', options);
     toggle()
   }
   const handleClick = (data) => {
     if (props.onSubmit === 'onSubmit') {
       onSubmit(data);
     } else if (props.onSubmit === 'onUpdate') {
-      Update()
+      Update(data)
     }
   };
   useEffect(() => {
@@ -320,7 +360,6 @@ const PersonalData = (props) => {
   }, [props.permission]);
   const [loading2, setLoading2] = useState(false);
   useEffect(() => {
-    setLoading2(true)
 
     if (props.mode === "edit") {
       setLoading2(true);
@@ -342,14 +381,13 @@ const PersonalData = (props) => {
           setValue("email", data.email);
           setValue("prfx_name", data.prfx_name);
           setValue("contact_name", data.contact_name);
-          setValue("legal_name", data.legal_Name);
-          const country = {
-            value: data.country?.id || "",
-            label: data.country?.name || ""
-          };
+          setValue("legal_Name", data.legal_Name);
+          const country = data.country ? {
+            value: data.country.id,
+            label: data.country.name
+          } : null;
           setSelectedOptionC(country);
-          setValue("country", country);
-
+          setValue("country", country.value);
           const extractedNumber = data.phone_number?.match(/(\+?\d+)/g)?.join('') || "";
           setValue("phone_number", extractedNumber);
           setValue("Anothernumber", data.Anothernumber);
@@ -363,38 +401,44 @@ const PersonalData = (props) => {
             ]
           const filteredContact = contact.filter(item => item.value !== '' && item.value !== null);
           setInputValues(filteredContact)
+          setValue('contacts', filteredContact);
           setValueContact('LinkedIn', data.contact_linked_in)
           setValueContact('ProZ', data.contact_ProZ)
           setValueContact('other1', data.contact_other1)
           setValueContact('other2', data.contact_other2)
           setValueContact('other2', data.contact_other3)
-          const region = {
-            value: data.region?.id || "",
-            label: data.region?.name || ""
-          };
+          const region = data.region ? {
+            value: data.region.id,
+            label: data.region.name
+          } : null;
           setSelectedOptionR(region);
-          setValue("region", region);
-          const nationality = {
-            value: data.nationality?.id || "",
-            label: data.nationality?.name || ""
-          };
+          setValue("region", region?.value);
+          const nationality = data.nationality ? {
+            value: data.nationality.id,
+            label: data.nationality.name
+          } : null;
           setSelectedOptionN(nationality);
-          setValue("nationality", nationality);
-          const timezone = {
-            value: data.timezone?.id || "",
-            label: data.timezone?.gmt || ""
-          };
+          setValue("nationality", nationality?.value);
+          const timezone = data.timezone ? {
+            value: data.timezone.id,
+            label: data.timezone.gmt
+          } : null;
           setSelectedOptionT(timezone);
-          setValue("timezone", timezone);
+          setValue("timezone", timezone?.value);
+          
           setValue("street", data.street);
           setValue("city", data.city);
+          setValue("address", data.address)
+          setValue('reject_reason', data.reject_reason);
+          setValue('note', data.note);
           setLoading2(false);
 
         }
       }
     }
+
   }, [props.vendorPersonalData, setValue]);
-  
+
 
 
   return (
@@ -535,8 +579,8 @@ const PersonalData = (props) => {
                           className="form-control leg"
                           id="Legal_Name"
                           type="text"
-                          name="Legal_Name"
-                          {...register("legal_name", { required: true })}
+                            name="legal_Name"
+                            {...register("legal_Name", { required: true })}
                           placeholder="As Mentioned in ID and Passport"
                           disabled={isSubmitting}
 
@@ -624,7 +668,7 @@ const PersonalData = (props) => {
 
                           </div>
                           < Controller
-                            name="contact"
+                            name="contacts"
                             control={control}
                             rules={{ required: true }}
                             render={({ field }) => (
@@ -653,6 +697,7 @@ const PersonalData = (props) => {
                             <Select
                               {...field}
                               value={selectedOptionR}
+
                               options={optionsR}
                               onInputChange={(inputValue) =>
                                 handleInputChange(inputValue, "regions", "region", setOptionsR, optionsR)
@@ -841,12 +886,18 @@ const PersonalData = (props) => {
 
                         <CKEditor
                           editor={ClassicEditor}
-                            data={props.vendorPersonalData?.PersonalData?.note || ""}
+                          data={props.vendorPersonalData?.PersonalData?.note || ""}
                           onChange={(event, editor) => {
                             const data = editor.getData();
                             setValue('note', data);
                           }}
                           disabled={isSubmitting}
+                        />
+                        < input
+
+                          value={props.vendorPersonalData?.PersonalData?.address || ""}
+                          hidden disabled
+                          {...register('note', { required: false })}
                         />
                       </Col>
                     </FormGroup>
@@ -868,9 +919,8 @@ const PersonalData = (props) => {
                         />
                         < input
                           id='address'
-                            value={props.vendorPersonalData?.PersonalData?.address || ""}
                           hidden disabled
-                          {...register('address', { required: false })}
+                          {...register('address', { required: true })}
                         />
                       </Col>
                     </FormGroup>
@@ -884,7 +934,7 @@ const PersonalData = (props) => {
 
                           <CKEditor
                             editor={ClassicEditor}
-                              data={props.vendorPersonalData?.PersonalData?.reject_reason || ""}
+                            data={props.vendorPersonalData?.PersonalData?.reject_reason || ""}
 
                             onChange={(event, editor) => {
                               const data = editor.getData();
@@ -894,12 +944,31 @@ const PersonalData = (props) => {
                             disabled={isSubmitting || (props.permission && props.permission.reject_reason === "disable")}
                           />
                           < input
-                            hidden disabled
+                              disabled hidden
                             {...register('reject_reason', { required: true })}
                           />
                         </Col>
                       </FormGroup>
-                    </Col>}
+                      </Col>}
+                    
+                    {props.vendorPersonalData?.PersonalData?.contact && (
+                      < Col md="6" id="name-wrapper" >
+                    <FormGroup className="row" >
+
+                          <Label className="col-sm-3 col-form-label" for="validationCustom01" > Old Contact </Label>
+                      < Col sm="9" >
+                        <input
+                          disabled={isSubmitting}
+                          className="form-control"
+                              defaultValue={props.vendorPersonalData.PersonalData.contact}
+                              onChange={(e) => console.log(e.target.value)}
+                              placeholder="Old Contact Info"
+                        />
+                      </Col>
+                    </FormGroup>
+                  </Col>
+                      
+                    )}
                 </Row>
                 < div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Btn

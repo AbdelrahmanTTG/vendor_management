@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('method');    
             $table->string('account'); 
             $table->timestamps();
-            $table->foreign('bank_details_id')->references('id')->on('bank_details')->onDelete('cascade');
+            // $table->foreign('bank_details_id')->references('id')->on('bank_details')->onDelete('cascade');
 
         });
     }

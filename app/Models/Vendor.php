@@ -13,7 +13,7 @@ class Vendor extends Authenticatable  implements JWTSubject
 {
     use HasFactory, Notifiable ,HasApiTokens;
     protected $table = 'vendor';
-    public $timestamps = false;
+        public $timestamps = false;
 
 
     public static function vendor($email , $password){
@@ -40,7 +40,10 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->belongsTo(TimeZone::class, 'timezone');
     }
-
+    public function vendorFiles()
+    {
+        return $this->hasMany(VendorFile::class, 'vendor_id');
+    }
 
     protected $fillable = [
         'name',
@@ -50,7 +53,7 @@ class Vendor extends Authenticatable  implements JWTSubject
         'status' ,
         'prfx_name',
         'contact_name' ,
-        'legal_name' ,
+        'legal_Name' ,
         'phone_number',
         'contact' ,
         'region',

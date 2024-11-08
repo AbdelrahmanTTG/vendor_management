@@ -1,19 +1,51 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table, FormGroup } from 'reactstrap';
-import { Btn, H5 } from '../../../../AbstractElements';
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Form, Table, FormGroup } from 'reactstrap';
+import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-const Experience = () => {
+import axiosClient from "../../../../pages/AxiosClint";
+import { useForm, Controller } from 'react-hook-form';
+import CreatableSelect from 'react-select/creatable';
+import { toast } from 'react-toastify';
+import SweetAlert from 'sweetalert2';
+
+const Experience = (props) => {
+    const basictoaster = (toastname, status) => {
+        switch (toastname) {
+            case 'successToast':
+                toast.success(status, {
+                    position: toast.POSITION.TOP_RIGHT
+                });
+                break;
+            case 'dangerToast':
+                toast.error(status, {
+                    position: toast.POSITION.TOP_RIGHT
+                });
+                break;
+            default:
+                break;
+        }
+    };
     const [isOpen, setIsOpen] = useState(true);
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
+    const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(false);
     const currentYear = new Date().getFullYear();
     const [selectedYear, setSelectedYear] = useState(null);
     const [yearOptions, setYearOptions] = useState([]);
     const [experienceYears, setExperienceYears] = useState('');
     const [rows, setRows] = useState([]);
+    const { control, register, handleSubmit, unregister, reset, setValue, formState: { errors } } = useForm();
+    const [errorMessage, setErrorMessage] = useState(null);
+    const [optionsN, setOptionsN] = useState([]);
+    const [initialOptions, setInitialOptions] = useState({});
+    const [selectedOptions, setSelectedOptions] = useState({});
+    const [rowIdToDelete, setRowIdToDelete] = useState(null)
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [expID, setexpID] = useState('');
 
     useEffect(() => {
         const generatedYears = [];
@@ -26,23 +58,321 @@ const Experience = () => {
     const handleYearChange = (selectedOption) => {
         if (selectedOption) {
             const selected = selectedOption.value;
-            setSelectedYear(selected);
+            setSelectedYear(selectedOption);
             const yearsOfExperience = currentYear - selected;
             setExperienceYears(yearsOfExperience);
         }
     };
     const addRow = () => {
+        const maxId = rows.length > 0 ? Math.max(...rows.map(row => row.id)) : 0;
         const newRow = {
-            id: rows.length + 1,
+            id: maxId + 1,
             skill: null,
+            type: null,
         };
         setRows([...rows, newRow]);
     };
+    // const editRow = (id,idUpdate, selec) => {
+    //     setRows(prevRows => [
+    //         ...prevRows,
+    //         {
+    //             id: id,
+    //             idUpdate: idUpdate,
+    //             type: selec,
+    //         },
+    //     ]);
+    // };
+    const handleSelectChange = (selectedOption, rowId) => {
+        setSelectedOptions((prevSelectedOptions) => ({
+            ...prevSelectedOptions,
+            [rowId]: selectedOption,
+        }));
+    };
+    useEffect(() => {
+        setValue("experience_year", experienceYears)
+    }, [experienceYears]);
+    // useEffect(() => {
+    //     handelingSelect("skills", setOptionsN, "skill");
+    // }, []);
+    useEffect(() => {
+        if (props.mode === "edit") {
+            setLoading2(true);
+            if (props.Experience) {
+                if (props.Experience.Experience) {
+                    const data = props.Experience.Experience;
+                    setValue("started_working", { value: data.started_working, label: data.started_working })
+                    setSelectedYear({ value: data.started_working, label: data.started_working })
+                    setValue("experience_year", data.experience_year)
+                    setValue("summary", data.summary)
+                    setexpID(data.id)
+
+                    if (data.skills) {
+                        // data.skills.forEach(element => {
+                        //     editRow(element.skill_id, element.id,{ value: element.skill_id, label: element.name })
+                        //     setValue(`skill-${element.skill_id}`, element.skill_id)
+                        //     handleSelectChange({ value: element.skill_id, label: element.name }, element.skill_id)
+                        // });
+                        setRows(data.skills.map((element, index) => {
+                            setValue(`skill-${index + 1}`, element.skill_id);
+                            handleSelectChange({ value: element.skill_id, label: element.name }, index + 1)
+                            return {
+                                id: index + 1,
+                                idUpdate: element.id,
+                                skill: { value: element.skill_id, label: element.name },
+                            };
+                        }));
+
+                    }
+                    setLoading2(false);
+                }
+            }
+        }
+    }, [props.Experience, setValue]);
+    const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
+        if (inputValue.length === 0) {
+            setOptions(initialOptions[fieldName] || []);
+        } else if (inputValue.length >= 1) {
+            const existingOption = options.some(option =>
+                option.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+            if (!existingOption) {
+                setLoading(true);
+                handelingSelect(tableName, setOptions, fieldName, inputValue);
+            }
+        }
+    };
+    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
+        if (!tablename) return
+        try {
+            setLoading(true);
+            const { data } = await axiosClient.get("SelectDatat", {
+                params: {
+                    search: searchTerm,
+                    table: tablename
+                }
+            });
+            const formattedOptions = data.map(item => ({
+                value: item.id,
+                label: item.name || item.gmt,
+            }));
+
+            setOptions(formattedOptions);
+            if (!searchTerm) {
+                setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
+            }
+        } catch (err) {
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+        } finally {
+            setLoading(false);
+        }
+
+    };
+    const deleteRow = useCallback((rowId, idUpdate) => {
+        if (idUpdate) {
+            SweetAlert.fire({
+                title: 'Are you sure?',
+                text: `Do you want to delete that skill ?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const success = await onDelete(idUpdate);
+                    if (success) {
+                        SweetAlert.fire(
+                            'Deleted!',
+                            `This skill has been deleted..`,
+                            'success'
+                        );
+                        setRowIdToDelete(rowId);
+                    } else {
+                        SweetAlert.fire(
+                            'Ooops !',
+                            ' An error occurred while deleting. :)',
+                            'error'
+                        );
+                    }
+
+                } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
+                    SweetAlert.fire(
+                        'Cancelled',
+                        'Your item is safe :)',
+                        'info'
+                    );
+                }
+            });
+        } else {
+            if (window.confirm("Are you sure you want to delete this row?")) {
+                setRowIdToDelete(rowId);
+            }
+        }
+
+    }, []);
+    const onDelete = async (id) => {
+        try {
+            const payload = {
+                id: id,
+            }
+            const { data } = await axiosClient.delete("deleteSkill", { data: payload });
+            return data
+        } catch (err) {
+            const response = err.response;
+            if (response && response.data) {
+                setErrorMessage(response.data.message || "An unexpected error occurred.");
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+            return false
+        }
+    };
+    const handleClick = (data) => {
+        if (props.onSubmit === 'onSubmit') {
+            onSubmit(data);
+        } else if (props.onSubmit === 'onUpdate') {
+            Update(data)
+        }
+    };
+    const onSubmit = async (data) => {
+
+        if (!props.id) {
+            basictoaster("dangerToast", "Make sure to send your personal information first.");
+            const section = document.getElementById("personal-data");
+            section.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            const formData = { ...data };
+            const result = rows?.map((row, index) => {
+                const skill = formData[`skill-${index + 1}`];
+                delete formData[`skill-${row.id}`];
+                return { skill };
+            });
+            const newFormData = {
+                ...formData,
+                vendor_id: props.id,
+            };
+            if (result && result.length > 0) {
+                newFormData['skills'] = result;
+            }
+            newFormData.started_working = newFormData.started_working.value
+            // console.log(newFormData)
+            try {
+                const response = await axiosClient.post("AddExperience", newFormData);
+                basictoaster("successToast", "Added successfully !");
+                setIsSubmitting(true)
+            } catch (err) {
+                const response = err.response;
+                if (response && response.data) {
+                    const errors = response.data;
+                    Object.keys(errors).forEach(key => {
+                        const messages = errors[key];
+                        if (messages.length > 0) {
+                            messages.forEach(message => {
+                                basictoaster("dangerToast", message);
+                            });
+                        }
+                    });
+                }
+                setIsSubmitting(false)
+            }
+        }
+
+    }
+    const Update = async (data) => { 
+        if (!props.id) {
+            basictoaster("dangerToast", "Make sure to send your personal information first.");
+            const section = document.getElementById("personal-data");
+            section.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            const formData = { ...data };
+            const result = rows?.map((row, index) => {
+                const skill = formData[`skill-${row.id}`];
+                delete formData[`skill-${row.id}`];
+                return { skill, id: row.idUpdate };
+            });
+            const newFormData = {
+                ...formData,
+                vendor_id: props.id,
+                experience:expID
+            };
+            if (result && result.length > 0) {
+                newFormData['skills'] = result;
+            }
+            newFormData.started_working = newFormData.started_working.value
+            // console.log(newFormData)
+            try {
+                const response = await axiosClient.post("UpdateExperience", newFormData);
+                basictoaster("successToast", "Updated successfully !");
+                // setIsSubmitting(true)
+                setRows([])
+                setRows(response.data.skills.map((element, index) => {
+                    setValue(`skill-${index + 1}`, element.skill_id);
+                    handleSelectChange({ value: element.skill_id, label: element.name }, index + 1)
+                    return {
+                        id: index + 1,
+                        idUpdate: element.id,
+                        skill: { value: element.skill_id, label: element.name },
+                    };
+                }));
+
+            } catch (err) {
+                const response = err.response;
+                if (response && response.data) {
+                    const errors = response.data;
+                    Object.keys(errors).forEach(key => {
+                        const messages = errors[key];
+                        if (messages.length > 0) {
+                            messages.forEach(message => {
+                                basictoaster("dangerToast", message);
+                            });
+                        }
+                    });
+                }
+                setIsSubmitting(false)
+            }
+        }
+    }
+
+    const onError = (errors) => {
+        for (const [key, value] of Object.entries(errors)) {
+            if (key.startsWith("skill-")) {
+                const skillId = key.split("-")[1];
+                basictoaster("dangerToast", `Skill number ${skillId} is required`);
+                return
+            }
+            switch (key) {
+                case "started_working":
+                    basictoaster("dangerToast", "Started working from year is required");
+                    return;
+                case "summary":
+                    basictoaster("dangerToast", "Summary of Experience is required");
+                    return;
+                case "summary":
+                    basictoaster("dangerToast", "Summary of Experience is required");
+                    return;
+                default:
+                    break;
+            }
+        }
+    }
+    useEffect(() => {
+        if (rowIdToDelete !== null) {
+            unregister(`skill${rowIdToDelete}`);
+            setRows((prevRows) => prevRows.filter(row => row.id !== rowIdToDelete));
+            setRowIdToDelete(null);
+        }
+    }, [rowIdToDelete]);
 
     return (
         <Fragment>
             <Card>
-
                 <CardHeader
                     className="pb-3 d-flex justify-content-between align-items-center"
                     onClick={toggleCollapse}
@@ -53,64 +383,152 @@ const Experience = () => {
                 </CardHeader>
                 <Collapse isOpen={isOpen}>
                     <CardBody>
-                        <Row className="g-3 mb-3">
-                            <Col md="6" className="mb-3">
-                                <FormGroup className="row">
+                        {
+                            loading2 ? (
+                                <div className="loader-box" >
+                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                </div>
+                            ) :
+                                <div>
+                                    <Row className="g-3 mb-3">
+                                        <Col md="6" className="mb-3">
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Started working from year</Label>
+                                                <Col sm="9">
+                                                    <Controller
+                                                        name="started_working"
+                                                        control={control}
+                                                        rules={{ required: true }}
+                                                        render={({ field }) => (
+                                                            <Select
+                                                                isDisabled={isSubmitting}
+                                                                {...field}
+                                                                options={yearOptions}
+                                                                value={selectedYear}
+                                                                className="js-example-basic-single col-sm-12"
+                                                                onChange={(option) => {
+                                                                    handleYearChange(option);
+                                                                    field.onChange(option);
+                                                                }}
+                                                            />
+                                                        )}
+                                                    />
 
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Started working from year</Label>
-                                    <Col sm="9">
-
-                                        <Select
-                                           
-                                            options={yearOptions}
-                                            className="js-example-basic-single col-sm-12"
-                                            onChange={handleYearChange}
-                                            value={yearOptions.find(option => option.value === selectedYear)}
-                                        />
-                                    </Col>
-                                </FormGroup>
-
-                            </Col>
-                            <Col md="6" className="mb-3">
-                                <FormGroup className="row">
-
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Experience year</Label>
-                                    <Col sm="9">
-
-                                        <Input disabled value={experienceYears} className="form-control" type="text" placeholder="Experience year" />
-                                    </Col>
-                                </FormGroup>
-                            </Col>
-
-                            <Col md="12" className="mb-3">
-                                <FormGroup className="row">
-
-                                <Label className="col-sm-2 col-form-label" for="validationCustom01">Summary of Experience</Label>
-                                    <Col sm="10">
-                                        <CKEditor editor={ClassicEditor} />
+                                                </Col>
+                                            </FormGroup>
                                         </Col>
-                                    </FormGroup>
-                            </Col>
-                        </Row>
-                        <Label className="form-label" for="validationCustom01">Skill</Label>
-                        <Table hover>
-                            <thead>
-                                <tr>
-                                    <th scope="col">{'#'}</th>
-                                    <th scope="col">{'Skill'}</th>
-                                    <th scope="col"></th>
-                                    <th
-                                        style={{ width: "10%" }} scope="col" onClick={addRow}>
-                                        <Btn attrBtn={{ color: 'btn btn-light' }} >
-                                            <i className="fa fa-plus-circle"></i>
-                                        </Btn>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                                        <Col md="6" className="mb-3">
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Experience year</Label>
+                                                <Col sm="9">
+                                                    <input
+                                                        readOnly
+                                                        defaultValue={experienceYears}
+                                                        className="form-control"
+                                                        type="text"
+                                                        name="experience_year"
+                                                        onChange={() => { return false }}
 
-                            </tbody>
-                        </Table>
+                                                        {...register("experience_year", { required: true })}
+                                                        placeholder="experience year"
+                                                    />
+                                                </Col>
+                                            </FormGroup>
+                                        </Col>
+
+                                        <Col md="12" className="mb-3">
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-2 col-form-label" for="validationCustom01">Summary of Experience</Label>
+                                                <Col sm="10">
+                                                    <CKEditor
+                                                        editor={ClassicEditor}
+                                                        data={props.Experience?.Experience?.summary}
+                                                        onChange={(event, editor) => {
+                                                            const data = editor.getData();
+                                                            setValue('summary', data);
+                                                        }}
+                                                        disabled={isSubmitting}
+                                                    />
+                                                    <input
+                                                        type="hidden" disabled
+                                                        {...register('summary', { required: true })}
+                                                    />
+                                                </Col>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                    <Label className="form-label" for="validationCustom01">Skill</Label>
+                                    <Table hover>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">{'#'}</th>
+                                                <th scope="col">{'Skill'}</th>
+                                                <th
+                                                    style={{ width: "10%" }} scope="col" onClick={addRow}>
+                                                    <Btn attrBtn={{ color: 'btn btn-light', disabled: isSubmitting }} >
+                                                        <i className="fa fa-plus-circle"></i>
+                                                    </Btn>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {rows.map((row, index) => (
+                                                <tr key={row.id}>
+                                                    <td>{index + 1}</td>
+                                                    <td >
+                                                        <Controller
+                                                            name={`skill-${row.id}`}
+                                                            control={control}
+                                                            rules={{ required: true }}
+                                                            render={({ field }) => (
+                                                                <CreatableSelect
+                                                                    {...field}
+                                                                    isDisabled={isSubmitting}
+                                                                    value={selectedOptions[row.id] || null}
+                                                                    options={optionsN}
+                                                                    onInputChange={(inputValue) =>
+                                                                        handleInputChange(inputValue, "skills", `skill`, setOptionsN, optionsN)
+                                                                    }
+                                                                    isSearchable
+                                                                    noOptionsMessage={() => loading ? (
+                                                                        <div className="loader-box">
+                                                                            <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                        </div>
+                                                                    ) : 'No options found'}
+                                                                    onChange={(option) => {
+                                                                        handleSelectChange(option, row.id);
+                                                                        field.onChange(option.value);
+                                                                    }}
+                                                                    isValidNewOption={(inputValue) => inputValue.trim() !== ''}
+                                                                    formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
+                                                                    onCreateOption={(inputValue) => {
+                                                                        const newOption = { value: inputValue, label: inputValue };
+                                                                        setOptionsN([...optionsN, newOption]);
+                                                                        handleSelectChange(newOption, row.id);
+                                                                        field.onChange(inputValue);
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        />
+                                                    </td>
+                                                    <td onClick={(event) => {
+                                                        event.preventDefault();
+                                                        deleteRow(row.id, row.idUpdate)
+                                                    }}  >
+                                                        <Btn attrBtn={{ color: 'btn btn-danger', disabled: isSubmitting }}>
+                                                            <i className="fa fa-trash"></i>
+                                                        </Btn>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </Table>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: "2%" }}>
+                                        <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError), disabled: isSubmitting }}>Submit</Btn>
+                                    </div>
+                                </div>
+                        }
+
                     </CardBody>
                 </Collapse>
             </Card>

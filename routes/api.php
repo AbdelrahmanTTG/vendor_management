@@ -26,6 +26,24 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/updatePersonalInformation', [VendorProfileController::class, 'updatePersonalInfo']);
     Route::post('/storeBilling', [VendorProfileController::class, 'storeBilling']);
     Route::post('/Vendors', [VendorProfileController::class, 'Vendors']);
+    Route::delete('/deleteWallet', [VendorProfileController::class, 'deleteWalletsPayment']);
+    Route::delete('/deleteSkill', [VendorProfileController::class, 'deleteSkill']);
+    Route::post('/UpdateBillingData', [VendorProfileController::class, 'updateBillingData']);
+    Route::post('/GeneratePassword', [VendorProfileController::class, 'setPassword']);
+    Route::post('/AddExperience', [VendorProfileController::class, 'AddExperience']);
+    Route::post('/UpdateExperience', [VendorProfileController::class, 'UpdateExperience']);
+    Route::post('/uploadFiles', [VendorProfileController::class, 'uploadFiles']);
+    Route::post('/download', [VendorProfileController::class, 'download']);
+    Route::delete('/delete', [VendorProfileController::class, 'deleteFile']);
+    Route::post('/updateFiles', [VendorProfileController::class, 'updateFiles']);
+    Route::post('/instantMessaging', [VendorProfileController::class, 'AddinstantMessaging']);
+    Route::post('/updateinstantMessaging', [VendorProfileController::class, 'updateMessagesByVendorId']);
+    Route::delete('/deleteMessage', [VendorProfileController::class, 'deleteMessagesByVendorId']);
+
+
+
+
+
 
 
 });
@@ -65,9 +83,10 @@ Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () 
     // Route::get('/dashboard', function () {
     //     return "data";
     // });
-    Route::get('/EditVendor', [VendorProfileController::class, 'ModificationComplex']);
+    Route::post('/EditVendor', [VendorProfileController::class, 'ModificationComplex']);
     Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
     Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
     Route::post('/refreshToken ', [AuthController::class, 'RegenrateToken']);
     Route::post('/SendMessage ', [VendorProfileController::class, 'Message_VM_to_Vendor']);
 });
+  

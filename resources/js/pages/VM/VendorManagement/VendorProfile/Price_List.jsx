@@ -6,11 +6,10 @@ import Model from "./models/modelAddPriceList"
 
 const PriceList = () => {
     const [isOpen, setIsOpen] = useState(true);
-
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
-
+    
     return (
         <Fragment>
             <Card>

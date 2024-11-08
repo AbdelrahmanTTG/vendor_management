@@ -27,7 +27,7 @@ const Vendor = () => {
             };
             try {
                 const { data } = await axiosClient.post("Vendors", payload);
-                // console.log(data)
+               
                 setVendors(data.data);
                 setTotalPages(data.last_page);
             } catch (err) {
@@ -122,8 +122,8 @@ const Vendor = () => {
                             </thead>
                             <tbody>
                                 {
-                                    vendors.map((item) => (
-                                        <tr key={item.id}>
+                                    vendors.map((item  , index) => (
+                                        <tr key={index}>
                                             <td scope="row">{item.id || ''}</td>
                                             <td scope="row">{item.name || ''}</td>
                                             <td scope="row">{item.email || ''}</td>

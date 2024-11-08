@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { Fragment, useState, useEffect, useCallback, useImperativeHandle } from 'react';
 import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table, FormGroup, Form } from 'reactstrap';
 import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
@@ -7,18 +7,34 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { useForm, Controller } from 'react-hook-form';
 import axiosClient from "../../../../pages/AxiosClint";
 import { toast } from 'react-toastify';
+import SweetAlert from 'sweetalert2';
 
-const Billing = ({ ID }) => {
+const Billing = (props) => {
     toast.configure();
     const [isOpen, setIsOpen] = useState(true);
-    const [isChecked, setIsChecked] = useState({ Legal_Name: '', City_state: '', Street: '', Address: "" });
+    const [isChecked, setIsChecked] = useState({ billing_legal_name: '', city: '', street: '', billing_address: "" });
     const [selectedOptionC, setSelectedOptionC] = useState(null);
     const [optionsC, setOptionsC] = useState([]);
     const { control, register, handleSubmit, unregister, setValue, formState: { errors } } = useForm();
     const [loading, setLoading] = useState(false);
     const [initialOptions, setInitialOptions] = useState({})
     const [isSubmitting, setIsSubmitting] = useState(false);
-    ;
+    const [rows, setRows] = useState([]);
+    const [hasWalletMethods, setHasWalletMethods] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [BillingData_id, setBillingData_id] = useState("");
+    const [BankData_id, setBankData_id] = useState("");
+
+
+
+    useEffect(() => {
+        if(props.mode == "edit"){return}
+        if (rows.length > 0) {
+            setHasWalletMethods(true)
+        } else {
+            setHasWalletMethods(false)
+        }
+    }, [rows]);
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':
@@ -36,31 +52,33 @@ const Billing = ({ ID }) => {
         }
     };
     const handleCheckboxChange = (event) => {
-        if (event.target.checked) {
-            setIsChecked(
-                {
-                    Legal_Name: document.getElementById('Legal_Name').value,
-                    City_state: document.getElementById('City_state').value,
-                    Street: document.getElementById('Street').value,
-                    Address: document.getElementById('address').value,
-                }
-            )
-        } else {
-            setIsChecked({
-                Legal_Name: '',
-                City_state: "",
-                Street: '',
-                Address: '',
-            })
+        const isChecked = event.target.checked;
 
-        }
+        const values = isChecked
+            ? {
+                billing_legal_name: document.getElementById('Legal_Name').value,
+                city: document.getElementById('City_state').value,
+                street: document.getElementById('Street').value,
+                billing_address: document.getElementById('address').value,
+            }
+            : {
+                billing_legal_name: '',
+                city: '',
+                street: '',
+                billing_address: '',
+            };
 
+        setIsChecked(values);
 
+        setValue("billing_legal_name", values.billing_legal_name);
+        setValue("city", values.city);
+        setValue("street", values.street);
+        setValue("billing_address", values.billing_address);
     };
+
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
-    const [rows, setRows] = useState([]);
     const options = [
         { value: '4', label: '-- Other --' },
     ];
@@ -71,6 +89,17 @@ const Billing = ({ ID }) => {
             inputValue: '',
         };
         setRows([...rows, newRow]);
+    };
+    const editRow = (id , selec , input) => {
+        setRows(prevRows => [
+            ...prevRows,
+            {
+                id: id,
+                idUpdate: id,
+                type: selec,
+                inputValue: input,
+            },
+        ]);
     };
     const handleSelectChange = (selectedOption, rowId) => {
         const updatedRows = rows.map(row => {
@@ -90,17 +119,129 @@ const Billing = ({ ID }) => {
         });
         setRows(updatedRows);
     };
-    const deleteRow = (rowId) => {
-        if (window.confirm("Are you sure you want to delete this row?")) {
-            setRows((prevRows) => {
-                const updatedRows = prevRows.filter(row => row.id !== rowId);
-                unregister(`method[${rowId - 1}]`);
-                unregister(`account[${rowId - 1}]`);
-                return updatedRows;
+    const [rowIdToDelete, setRowIdToDelete] = useState(null)
+
+    const deleteRow = useCallback((rowId, idUpdate) => {
+        if (idUpdate) {
+            SweetAlert.fire({
+                title: 'Are you sure?',
+                text: `Do you want to delete that payment wallet ?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const success = await onDelete(idUpdate);
+                    if (success) {
+                        SweetAlert.fire(
+                            'Deleted!',
+                            `This payment wallet has been deleted..`,
+                            'success'
+                        );
+                        setRowIdToDelete(rowId);
+                    } else {
+                        SweetAlert.fire(
+                            'Ooops !',
+                            ' An error occurred while deleting. :)',
+                            'error'
+                        );
+                    }
+
+                } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
+                    SweetAlert.fire(
+                        'Cancelled',
+                        'Your item is safe :)',
+                        'info'
+                    );
+                }
             });
+        } else {
+            if (window.confirm("Are you sure you want to delete this row?")) {
+                setRowIdToDelete(rowId);
+            }
+        }
+    
+    }, []);
+    const onDelete = async (id) => {
+        try {
+            const payload = {
+                id: id,
+            }
+            const { data } = await axiosClient.delete("deleteWallet", { data: payload });
+            return data
+        } catch (err) {
+            const response = err.response;
+            if (response && response.data) {
+                setErrorMessage(response.data.message || "An unexpected error occurred.");
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+            return false
         }
     };
+    useEffect(() => {
+        if (rowIdToDelete !== null) {
+            unregister(`method[${rowIdToDelete}]`);
+            unregister(`account[${rowIdToDelete}]`);
+            setRows((prevRows) => prevRows.filter(row => row.id !== rowIdToDelete));
+            setRowIdToDelete(null);
+        }
+    }, [rowIdToDelete]);
 
+
+    const handleClick = (data) => {
+        if (props.onSubmit === 'onSubmit') {
+            onSubmit(data);
+        } else if (props.onSubmit === 'onUpdate') {
+            Update(data)
+        }
+    };
+    const Update = async (data) => { 
+        const formData = { ...data };
+        const result = rows?.map((row, index) => ({
+            id: row.idUpdate,
+            method: formData.method[row.id]?.value,
+            account: formData.account[row.id],
+        }));
+        const newFormData = {
+            ...formData,
+        };
+        if (result && result.length > 0) {
+            newFormData['Wallets Payment methods'] = result; 
+        }
+        newFormData['BillingData_id'] = BillingData_id; 
+        newFormData['BankData_id'] = BankData_id; 
+        setBankData_id
+        delete newFormData.method;
+        delete newFormData.account;
+  
+        try {
+            const response = await axiosClient.post("UpdateBillingData", newFormData);
+            basictoaster("successToast", "Updated successfully !");
+            setRows([])
+            response.data.forEach(element => {
+                editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
+                setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
+            });
+          
+        } catch (err) {
+            const response = err.response;
+            if (response && response.data) {
+                const errors = response.data;
+                Object.keys(errors).forEach(key => {
+                    const messages = errors[key];
+                    if (messages.length > 0) {
+                        messages.forEach(message => {
+                            basictoaster("dangerToast", message);
+                        });
+                    }
+                });
+            }
+            setIsSubmitting(false)
+        }
+    }
     const handleInputChangeSelect = (inputValue, tableName, fieldName, setOptions, options) => {
         if (inputValue.length === 0) {
             setOptions(initialOptions[fieldName] || []);
@@ -126,7 +267,7 @@ const Billing = ({ ID }) => {
             });
             const formattedOptions = data.map(item => ({
                 value: item.id,
-                label: item.name || item.gmt,
+                label: item.name,
             }));
 
             setOptions(formattedOptions);
@@ -150,44 +291,89 @@ const Billing = ({ ID }) => {
     };
     useEffect(() => {
         handelingSelect("currency", setOptionsC, "Currency");
-
-
-
     }, []);
+    useEffect(() => {
+        if (props.mode === "edit") {
+            setLoading(true);
+            if (props.BillingData) {
+                if (props.BillingData.BillingData) {
+                    const data = props.BillingData.BillingData;
+                    if (data.billingData) {
+                        setBillingData_id(data.billingData.id)
+                        setValue("billing_legal_name", data.billingData.billing_legal_name)
+                        setValue("city", data.billingData.city)
+                        setValue("city", data.billingData.city)
+                        const billing_currency = data.billingData.billing_currency ? {
+                            value: data.billingData.billing_currency.id,
+                            label: data.billingData.billing_currency.name
+                        } : null;
+                        setSelectedOptionC(billing_currency);
+                        setValue("billing_currency", billing_currency.value);
+                        setValue("street", data.billingData.street)
+                        setValue("billing_address", data.billingData.billing_address)
+                    }
+                    if (data.bankData) {
+                        setBankData_id(data.bankData.id)
+                        setValue("bank_name", data.bankData.bank_name)
+                        setValue("account_holder", data.bankData.account_holder)
+                        setValue("swift_bic", data.bankData.swift_bic)
+                        setValue("iban", data.bankData.iban)
+                        setValue("payment_terms", data.bankData.payment_terms)
+                        setValue("bank_address", data.bankData.bank_address)
+                    }
+                    if (data.walletData) {
+                        data.walletData.forEach(element => {
+                            editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
+                            setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
+                        });
+
+                    }
+                    setLoading(false);
+                }
+
+            }
+
+        }
+        
+    }, [props.BillingData, setValue])
+  
 
     const onSubmit = async (data) => {
-        if (!ID) {
+        if (!props.id) {
             basictoaster("dangerToast", "Make sure to send your personal information first.");
             const section = document.getElementById("personal-data");
             section.scrollIntoView({ behavior: 'smooth' });
         } else {
 
             const formData = { ...data };
-            const result = rows.map((row, index) => ({
-                method: formData.method[index]?.value,
-                account: formData.account[index],
+            const result = rows?.map((row, index) => ({
+                method: formData.method[index + 1]?.value,
+                account: formData.account[index + 1],
             }));
             const newFormData = {
                 ...formData,
-                'Wallets Payment methods': result,
-                vendor_id: ID,
+                vendor_id: props.id,
             };
+            if (result && result.length > 0) {
+                newFormData['Wallets Payment methods'] = result;
+            }
             delete newFormData.method;
             delete newFormData.account;
             try {
                 const response = await axiosClient.post("storeBilling", newFormData);
                 basictoaster("successToast", "Added successfully !");
                 setIsSubmitting(true)
-
             } catch (err) {
                 const response = err.response;
                 if (response && response.data) {
                     const errors = response.data;
                     Object.keys(errors).forEach(key => {
                         const messages = errors[key];
-                        messages.forEach(message => {
-                            basictoaster("dangerToast", message);
-                        });
+                        if (messages.length > 0) {
+                            messages.forEach(message => {
+                                basictoaster("dangerToast", message);
+                            });
+                        }
                     });
                 }
                 setIsSubmitting(false)
@@ -260,320 +446,340 @@ const Billing = ({ ID }) => {
                 <Collapse isOpen={isOpen}>
                     <CardBody>
                         <Form>
-                            <div className="border border-default p-3 mb-3 " style={{ borderStyle: "dashed!important" }}>
-                                <Col className="d-flex align-items-center mb-3">
-                                    <Label className="col-form-label m-0" style={{ lineHeight: '1.5', paddingRight: '10px' }}>
-                                        Use Same Vendo Data :
-                                    </Label>
-                                    <Input className="radio_animated " id="edo-ani" type="checkbox" onChange={handleCheckboxChange} name="rdo-ani" />
-                                </Col>
-                                <Row>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
+                            {
+                                loading ? (
+                                    <div className="loader-box" >
+                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                    </div>
+                                ) :
+                                    <div>
+                                        <div className="border border-default p-3 mb-3 " style={{ borderStyle: "dashed!important" }}>
+                                            {props.mode !== "edit" && (
+                                                <Col className="d-flex align-items-center mb-3">
+                                                    <Label className="col-form-label m-0" style={{ lineHeight: '1.5', paddingRight: '10px' }}>
+                                                        Use Same Vendor Data :
+                                                    </Label>
+                                                    <Input className="radio_animated" id="edo-ani" type="checkbox" onChange={handleCheckboxChange} name="rdo-ani" />
+                                                </Col>
+                                            )}
+                                            
 
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">Billing Legal Name</Label>
-                                            <Col sm="9">
-                                                <input
-                                                    disabled={isSubmitting}
-                                                    defaultValue={isChecked.Legal_Name}
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="billing_legal_name"
-                                                    {...register("billing_legal_name", { required: true })}
-                                                    placeholder="Legal Name"
-                                                />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
+                                            <Row>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
 
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">Billing Currency</Label>
-                                            <Col sm="9">
-                                                <Controller
-                                                    name="billing_currency"
-                                                    control={control}
-                                                    isDisabled={isSubmitting}
-                                                    rules={{ required: true }}
-                                                    render={({ field }) => (
-                                                        <Select
-                                                            {...field}
-                                                            value={selectedOptionC}
-                                                            options={optionsC}
-                                                            onInputChange={(inputValue) =>
-                                                                handleInputChangeSelect(inputValue, "currency", "Currency", setOptionsC, optionsC)
-                                                            }
-                                                            className="js-example-basic-single col-sm-12"
-                                                            isSearchable
-                                                            noOptionsMessage={() => loading ? (
-                                                                <div className="loader-box">
-                                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                                </div>
-                                                            ) : 'No options found'}
-                                                            onChange={(option) => {
-                                                                setSelectedOptionC(option);
-                                                                field.onChange(option.value);
-                                                            }}
-                                                        />
-                                                    )}
-                                                />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
-
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">City / state</Label>
-                                            <Col sm="9">
-                                                <input
-                                                    disabled={isSubmitting}
-                                                    defaultValue={isChecked.City_state}
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="city"
-                                                    {...register("city", { required: true })}
-                                                    placeholder="City / state"
-                                                />
-                                                {/* <Input className="form-control" defaultValue={isChecked.City_state} type="text" /> */}
-                                            </Col> </FormGroup> </Col>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
-
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">Street</Label>
-                                            <Col sm="9">
-                                                <input
-                                                    disabled={isSubmitting}
-                                                    defaultValue={isChecked.Street}
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="Street"
-                                                    {...register("street", { required: true })}
-                                                    placeholder="Street"
-                                                />
-                                                {/* <Input className="form-control" defaultValue={isChecked.Street} type="text" /> */}
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
-
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">Billing Address</Label>
-                                            <Col sm="9">
-                                                <CKEditor
-                                                    editor={ClassicEditor}
-                                                    data={isChecked.Address}
-                                                    onChange={(event, editor) => {
-                                                        const data = editor.getData();
-                                                        setValue('billing_address', data);
-                                                    }}
-                                                    disabled={isSubmitting}
-                                                />
-                                                <input
-                                                    type="hidden"
-                                                    {...register('billing_address', { required: true })}
-                                                />
-
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                </Row>
-
-                            </div>
-                            <div className="border border-default p-3 mb-3 " style={{ borderStyle: "dashed!important" }}>
-                                <Label className="col-col-sm-3 col-form-label m-r-10 mb-3 fw-bold">Bank details</Label>
-                                <Row>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">Bank name</Label>
-                                            <Col sm="9">
-                                                <input
-                                                    disabled={isSubmitting}
-                                                    defaultValue=""
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="Bank_name"
-                                                    {...register("bank_name", { required: true })}
-                                                    placeholder="Bank name"
-                                                />
-                                            </Col></FormGroup>
-                                    </Col>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
-
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">Account holder</Label>
-                                            <Col sm="9">
-                                                <input
-                                                    disabled={isSubmitting}
-                                                    defaultValue=""
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="account_holder"
-                                                    {...register("account_holder", { required: true })}
-                                                    placeholder="Account holder"
-                                                />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
-
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">SWIFT / BIC</Label>
-                                            <Col sm="9">
-                                                <input
-                                                    disabled={isSubmitting}
-                                                    defaultValue=""
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="swift_bic"
-                                                    {...register("swift_bic", {
-                                                        required: "required",
-                                                        validate: value => {
-                                                            const swiftRegex = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
-                                                            return swiftRegex.test(value) || "SWIFT/BIC is invalid";
-                                                        }
-                                                    })}
-                                                    placeholder="SWIFT / BIC"
-                                                />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
-
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">IBAN</Label>
-                                            <Col sm="9">
-                                                <input
-                                                    disabled={isSubmitting}
-                                                    defaultValue=""
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="iban"
-                                                    {...register("iban", {
-                                                        required: "required",
-                                                        validate: value => {
-                                                            const cleanValue = value.replace(/\s+/g, '');
-                                                            const ibanRegex = /^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/;
-                                                            return ibanRegex.test(cleanValue) || "IBAN is invalid";
-                                                        }
-                                                    })} placeholder="IBAN"
-                                                />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">Payment terms</Label>
-                                            <Col sm="9">
-                                                <input
-                                                    disabled={isSubmitting}
-                                                    defaultValue=""
-                                                    className="form-control"
-                                                    type="text"
-                                                    name="payment_terms"
-                                                    {...register("payment_terms", { required: true })}
-                                                    placeholder="Payment terms"
-                                                />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                    <Col md="6" className="mb-3">
-                                        <FormGroup className="row">
-
-                                            <Label className="col-sm-3 col-form-label" for="validationCustom01">Bank Address</Label>
-                                            <Col sm="9">
-                                                <CKEditor
-                                                    editor={ClassicEditor}
-                                                    onChange={(event, editor) => {
-                                                        const data = editor.getData();
-                                                        setValue('bank_address', data);
-                                                    }}
-                                                    disabled={isSubmitting}
-                                                />
-                                                <input
-                                                    type="hidden"
-                                                    {...register('bank_address', { required: true })}
-                                                />
-                                            </Col>
-                                        </FormGroup>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div className="border border-default p-3 mb-3 " style={{ borderStyle: "dashed!important" }}>
-                                <Label className="col-col-sm-3 col-form-label m-r-10 mb-3 fw-bold">Wallets Payment methods</Label>
-                                <Table hover>
-
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">{'#'}</th>
-                                            <th scope="col">{'Method'}</th>
-                                            <th scope="col">Account</th>
-                                            <th disabled={isSubmitting} style={{ width: "10%" }} scope="col"
-                                                onClick={(event) => {
-                                                    event.preventDefault();
-                                                    addRow()
-                                                }} >
-                                                <Btn attrBtn={{ color: 'btn btn-light' }} >
-                                                    <i className="fa fa-plus-circle"></i>
-                                                </Btn>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {rows.map((row, index) => (
-                                            <tr key={row.id}>
-                                                <td>{index + 1}</td>
-                                                <td>
-                                                    <Controller
-                                                        isDisabled={isSubmitting}
-                                                        name={`method[${row.id - 1}]`}
-                                                        control={control}
-                                                        rules={{ required: true }}
-                                                        render={({ field }) => (
-                                                            <Select
-                                                                {...field}
-                                                                options={options}
-                                                                className="js-example-basic-single col-sm-12"
-                                                                onChange={(selectedOption) => {
-                                                                    field.onChange(selectedOption);
-                                                                    handleSelectChange(selectedOption, row.id);
-                                                                }}
-                                                                value={field.value}
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Billing Legal Name</Label>
+                                                        <Col sm="9">
+                                                            <input
+                                                                disabled={isSubmitting}
+                                                                defaultValue={isChecked.billing_legal_name}
+                                                                className="form-control"
+                                                                type="text"
+                                                                name="billing_legal_name"
+                                                                {...register("billing_legal_name", { required: true })}
+                                                                placeholder="Legal Name"
                                                             />
-                                                        )}
-                                                    />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
 
-                                                </td>
-                                                <td>
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Billing Currency</Label>
+                                                        <Col sm="9">
+                                                            <Controller
+                                                                name="billing_currency"
+                                                                control={control}
+                                                                isDisabled={isSubmitting}
+                                                                rules={{ required: true }}
+                                                                render={({ field }) => (
+                                                                    <Select
+                                                                        {...field}
+                                                                        value={selectedOptionC}
+                                                                        options={optionsC}
+                                                                        onInputChange={(inputValue) =>
+                                                                            handleInputChangeSelect(inputValue, "currency", "Currency", setOptionsC, optionsC)
+                                                                        }
+                                                                        className="js-example-basic-single col-sm-12"
+                                                                        isSearchable
+                                                                        noOptionsMessage={() => loading ? (
+                                                                            <div className="loader-box">
+                                                                                <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                            </div>
+                                                                        ) : 'No options found'}
+                                                                        onChange={(option) => {
+                                                                            setSelectedOptionC(option);
+                                                                            field.onChange(option.value);
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                            />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
 
-                                                    <input
-                                                        disabled={isSubmitting}
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">City / state</Label>
+                                                        <Col sm="9">
+                                                            <input
+                                                                disabled={isSubmitting}
+                                                                defaultValue={isChecked.city}
+                                                                className="form-control"
+                                                                type="text"
+                                                                name="city"
+                                                                {...register("city", { required: true })}
+                                                                placeholder="City / state"
+                                                            />
+                                                        </Col> </FormGroup> </Col>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
 
-                                                        type="text"
-                                                        value={row.inputValue}
-                                                        {...register(`account[${row.id - 1}]`, { required: true })}
-                                                        onChange={(e) => handleInputChange(e, row.id)}
-                                                        className="form-control"
-                                                        placeholder="Account"
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Street</Label>
+                                                        <Col sm="9">
+                                                            <input
+                                                                disabled={isSubmitting}
+                                                                defaultValue={isChecked.street}
+                                                                className="form-control"
+                                                                type="text"
+                                                                name="Street"
+                                                                {...register("street", { required: true })}
+                                                                placeholder="Street"
+                                                            />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Billing Address</Label>
+                                                        <Col sm="9">
+                                                            <CKEditor
+                                                                editor={ClassicEditor}
+                                                                data={isChecked.billing_address || props.BillingData?.BillingData?.billingData?.billing_address}
+                                                                onChange={(event, editor) => {
+                                                                    const data = editor.getData();
+                                                                    setValue('billing_address', data);
+                                                                }}
+                                                                disabled={isSubmitting}
+                                                            />
+                                                            <input
+                                                                hidden
+                                                                {...register('billing_address', { required: true })}
+                                                            />
 
-                                                    />
-                                                </td>
-                                                <td disabled={isSubmitting} onClick={(event) => {
-                                                    event.preventDefault();
-                                                    deleteRow(row.id)
-                                                }}  >                                                    <Btn attrBtn={{ color: 'btn btn-danger' }}>
-                                                        <i className="fa fa-trash"></i>
-                                                    </Btn>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                <Btn disabled={isSubmitting} attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit, onError) }}>Submit</Btn>
-                            </div>
-                            {/* <button onClick={() => ref.current.submit()}>Trigger Form Submit</button> */}
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                            </Row>
 
+                                        </div>
+                                        <div className="border border-default p-3 mb-3 " style={{ borderStyle: "dashed!important" }}>
+                                            <Label className="col-col-sm-3 col-form-label m-r-10 mb-3 fw-bold">Bank details</Label>
+                                            <Row>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Bank name</Label>
+                                                        <Col sm="9">
+                                                            <input
+                                                                disabled={isSubmitting}
+                                                                defaultValue=""
+                                                                className="form-control"
+                                                                type="text"
+                                                                name="Bank_name"
+                                                                {...register("bank_name", { required: !hasWalletMethods })}
+                                                                placeholder="Bank name"
+                                                            />
+                                                        </Col></FormGroup>
+                                                </Col>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
+
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Account holder</Label>
+                                                        <Col sm="9">
+                                                            <input
+                                                                disabled={isSubmitting}
+                                                                defaultValue=""
+                                                                className="form-control"
+                                                                type="text"
+                                                                name="account_holder"
+                                                                {...register("account_holder", { required: !hasWalletMethods })}
+                                                                placeholder="Account holder"
+                                                            />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
+
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">SWIFT / BIC</Label>
+                                                        <Col sm="9">
+                                                            <input
+                                                                disabled={isSubmitting}
+                                                                defaultValue=""
+                                                                className="form-control"
+                                                                type="text"
+                                                                name="swift_bic"
+                                                                {...register("swift_bic", {
+                                                                    required: !hasWalletMethods,
+                                                                    validate: value => {
+                                                                        if (hasWalletMethods) {
+                                                                            return true;
+                                                                        }
+                                                                        const swiftRegex = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
+                                                                        return swiftRegex.test(value) || "SWIFT/BIC is invalid";
+                                                                    }
+                                                                })}
+                                                                placeholder="SWIFT / BIC"
+                                                            />
+
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
+
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">IBAN</Label>
+                                                        <Col sm="9">
+                                                            <input
+                                                                disabled={isSubmitting}
+                                                                defaultValue=""
+                                                                className="form-control"
+                                                                type="text"
+                                                                name="iban"
+                                                                {...register("iban", {
+                                                                    required: !hasWalletMethods,
+                                                                    validate: value => {
+                                                                        if (hasWalletMethods) {
+                                                                            return true;
+                                                                        }
+                                                                        const cleanValue = value.replace(/\s+/g, '');
+                                                                        const ibanRegex = /^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/;
+                                                                        return ibanRegex.test(cleanValue) || "IBAN is invalid";
+                                                                    }
+                                                                })}
+                                                                placeholder="IBAN"
+                                                            />
+
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Payment terms</Label>
+                                                        <Col sm="9">
+                                                            <input
+                                                                disabled={isSubmitting}
+                                                                defaultValue=""
+                                                                className="form-control"
+                                                                type="text"
+                                                                name="payment_terms"
+                                                                {...register("payment_terms", { required: !hasWalletMethods })}
+                                                                placeholder="Payment terms"
+                                                            />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
+
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Bank Address</Label>
+                                                        <Col sm="9">
+                                                            <CKEditor
+                                                                editor={ClassicEditor}
+                                                                data={props.BillingData?.BillingData?.bankData?.bank_address}
+                                                                onChange={(event, editor) => {
+                                                                    const data = editor.getData();
+                                                                    setValue('bank_address', data);
+                                                                }}
+                                                                disabled={isSubmitting}
+                                                            />
+                                                            <input
+                                                                type="hidden"
+                                                                {...register('bank_address', { required: !hasWalletMethods })}
+                                                            />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                            </Row>
+                                        </div>
+                                        <div className="border border-default p-3 mb-3 " style={{ borderStyle: "dashed!important" }}>
+                                            <Label className="col-col-sm-3 col-form-label m-r-10 mb-3 fw-bold">Wallets Payment methods</Label>
+                                            <Table hover>
+
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">{'#'}</th>
+                                                        <th scope="col">{'Method'}</th>
+                                                        <th scope="col">Account</th>
+                                                        <th disabled={isSubmitting} style={{ width: "10%" }} scope="col"
+                                                            onClick={(event) => {
+                                                                event.preventDefault();
+                                                                addRow()
+                                                            }} >
+                                                            <Btn attrBtn={{ color: 'btn btn-light' }} >
+                                                                <i className="fa fa-plus-circle"></i>
+                                                            </Btn>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {rows.map((row, index) => (
+                                                        <tr key={row.id}>
+                                                            <td>{index + 1}</td>
+                                                            <td>
+                                                                <Controller
+                                                                    isDisabled={isSubmitting}
+                                                                    name={`method[${row.id}]`}
+                                                                    control={control}
+                                                                    rules={{ required: true }}
+                                                                    render={({ field }) => (
+                                                                        <Select
+                                                                            {...field}
+                                                                            options={options}
+                                                                            className="js-example-basic-single col-sm-12"
+                                                                            onChange={(selectedOption) => {
+                                                                                field.onChange(selectedOption);
+                                                                                // console.log(selectedOption)
+                                                                                handleSelectChange(selectedOption, row.id);
+                                                                            }}
+                                                                            value={field.value}
+                                                                        />
+                                                                    )}
+                                                                />
+
+                                                            </td>
+                                                            <td>
+                                                             
+                                                                <input
+                                                                    disabled={isSubmitting}
+
+                                                                    type="text"
+                                                                    value={row.inputValue}
+                                                                    {...register(`account[${row.id}]`, { required: true })}
+                                                                    onChange={(e) => handleInputChange(e, row.id)}
+                                                                    className="form-control"
+                                                                    placeholder="Account"
+
+                                                                />
+                                                            </td>
+                                                            
+                                                            <td disabled={isSubmitting} onClick={(event) => {
+                                                                event.preventDefault();
+                                                                deleteRow(row.id, row.idUpdate)
+                                                            }}  >                                                    <Btn attrBtn={{ color: 'btn btn-danger' }}>
+                                                                    <i className="fa fa-trash"></i>
+                                                                </Btn>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </Table>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError), disabled: isSubmitting }}>Submit</Btn>
+                                        </div>
+                                    </div>
+                            }
                         </Form>
                     </CardBody>
                 </Collapse>

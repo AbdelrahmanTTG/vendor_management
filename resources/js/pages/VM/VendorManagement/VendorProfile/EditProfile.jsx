@@ -27,6 +27,13 @@ const EditProfile = () => {
     const [redirect, setRedirect] = useState(false);
     const [vendorPersonalData, setPersonalData] = useState([]);
     const [lastMessage, setlastMessage] = useState([]);
+    const [BillingData, setBillingData] = useState([]);
+    const [VendorExperience, setExperience] = useState([]);
+    const [VendorFiles, setVendorFiles] = useState([]);
+    const [InstantMessaging, setInstantMessaging] = useState([]);
+
+
+
 
     const [permissions, setPermissions] = useState({
         // type: 'hide',
@@ -43,15 +50,26 @@ const EditProfile = () => {
             const fetchVendor = async () => {
                 try {
                     const user = JSON.parse(localStorage.getItem('USER'));
-                    const data = await axiosClient.get("EditVendor", {
-                        params: {
-                            id: vendor.id,
-                            PersonalData: "Personal Data",
-                            VMNotes: {sender_email: user.email, receiver_email: vendor.email },
-                        }
+                    const data = await axiosClient.post("EditVendor", {
+                        id: vendor.id,
+                        PersonalData: "Personal Data",
+                        VMNotes: {
+                            sender_email: user.email,
+                            receiver_email: vendor.email
+                        },
+                        BillingData: "BillingData",
+                        Experience: "VendorExperience",
+                        VendorFiles: "VendorFiles",
+                        InstantMessaging: "InstantMessaging"
+
                     });
                     setPersonalData({ PersonalData: data.data.Data });
                     setlastMessage({ VMNotes: data.data.VMNotes })
+                    setBillingData({ BillingData: data.data.BillingData })
+                    setExperience({ Experience: data.data.Experience })
+                    setVendorFiles({ VendorFiles: data.data.VendorFiles })
+                    setInstantMessaging({ InstantMessaging: data.data.InstantMessaging })
+                    // console.log(data.data)
                 } catch (error) {
                     console.error('Error fetching vendor:', error);
                 } finally {
@@ -79,28 +97,28 @@ const EditProfile = () => {
                     />
                 </div>
                 <div id="messaging">
-                    <Messaging />
+                    <Messaging id={vendor?.id} mode="edit" onSubmit="onUpdate" InstantMessaging={InstantMessaging} />
                 </div>
                 <div id='VM-Notes'>
-                    <VMnote email={vendor.email} lastMessage={lastMessage} />
+                    <VMnote email={vendor?.email} lastMessage={lastMessage} />
                 </div>
                 <div id='Files-Certificate'>
-                    <FilesCertificate />
+                    <FilesCertificate id={vendor?.id} mode="edit" VendorFiles={VendorFiles} onSubmit="onUpdate"  />
                 </div>
                 <div id='Education'>
                     <Education />
                 </div>
                 <div id='Experience'>
-                    <Experience />
+                    <Experience id={vendor?.id} Experience={VendorExperience} mode="edit" onSubmit="onUpdate" />
                 </div>
                 <div id='Test'>
                     <Test />
                 </div>
                 <div id='Billing'>
-                    <Billing ID={id} />
+                    <Billing id={vendor?.id} BillingData={BillingData} onSubmit="onUpdate" mode="edit"  />
                 </div>
-                <div id='Portal_User'>
-                    <Portal_User />
+                <div id='Portal_User' >
+                    <Portal_User email={vendor?.email} onSubmit="onUpdate" mode="edit" />
                 </div>
                 <div id='Price_List'>
                     <Price_List />

@@ -23,7 +23,7 @@ return new class extends Migration
         });
         Schema::table('logger', function (Blueprint $table) {
             $table->unsignedBigInteger('master_id')->nullable();        
-            $table->foreign('master_id')->references('id')->on('logger_master')->noActionOnDelete()->noActionOnUpdate();    
+            // $table->foreign('master_id')->references('id')->on('logger_master')->noActionOnDelete()->noActionOnUpdate();    
         });
     }
 

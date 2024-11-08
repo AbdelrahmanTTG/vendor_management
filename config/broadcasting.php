@@ -15,8 +15,8 @@ return [
     |
     */
 
-    'default' => env('BROADCAST_CONNECTION', 'reverb'),
-
+    /* 'default' => env('BROADCAST_CONNECTION', 'reverb'),*/
+    'default' => env('BROADCAST_CONNECTION', 'log'),
     /*
     |--------------------------------------------------------------------------
     | Broadcast Connections
@@ -45,7 +45,7 @@ return [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
             ],
         ],
-
+        /*
         'pusher' => [
             'driver' => 'pusher',
             'key' => env('PUSHER_APP_KEY'),
@@ -62,8 +62,9 @@ return [
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
             ],
+            
         ],
-
+        */
         'ably' => [
             'driver' => 'ably',
             'key' => env('ABLY_KEY'),
