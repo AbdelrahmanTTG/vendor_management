@@ -15,7 +15,7 @@ class Permission extends Model
             ->select('groups')
             ->where('role', $role)
             ->where('groups', '!=', '0')
-            ->orderBy('menu_order', 'asc')
+            ->orderBy('groups', 'asc')
             ->get();
     }
     public function screen()
@@ -27,15 +27,28 @@ class Permission extends Model
         if (empty($groups)) {
             return collect();
         }
-
-        return self::with('screen')
-            ->where('groups', $groups)
-            ->where('role', $role)
-            ->whereHas('screen', function ($query) {
-                $query->where('menu', '1')
-                    ->where('use_system', 'like', '%VM%');
+        return self::with('screen') // Ensure you're eager loading the 'screen' relationship
+            ->where('groups', $groups) // Filter by 'groups' in the 'permission' table
+            ->where('role', $role) // Filter by 'role' in the 'permission' table
+            ->whereHas('screen', function ($query) use ($groups) { // Use $groups in the closure
+                $query->where('menu', '1') // Filter 'screen' table by 'menu' column
+                    ->where('groups', $groups) // Filter 'screen' table by 'groups' column
+                    ->where('use_system', 'like', '%VM%') // Filter by 'use_system'
+                    ->groupBy('id');
             })
-            ->orderBy('menu_order')
+            ->orderBy('menu_order') // Order by 'menu_order' in the 'permission' table
             ->get();
+
+
+        // return self::with('screen')
+        //     ->where('groups', $groups)
+        //     ->where('role', $role)
+        //     ->whereHas('screen', function ($query) {
+        //         $query->where('menu', '1')
+        //             ->where('groups', $groups)
+        //             ->where('use_system', 'like', '%VM%');
+        //     })
+        //     ->orderBy('menu_order')
+        //     ->get();
     }
 }

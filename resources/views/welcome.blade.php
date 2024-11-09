@@ -4,8 +4,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- <link rel="icon" sizes="192x192" href="{{ asset('android-icon-192x192.png') }}"> -->
 
- <title>{{ env('APP_NAME', 'Laravel') }}</title>
+  <title>lingo talents</title>
+  <!-- <title>{{ env('APP_NAME', 'Laravel') }}</title> -->
+  <!-- <link rel="icon" href="{{ asset('build/images/app_icon.png') }}" type="image/png"> -->
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.bunny.net">
@@ -17,26 +20,28 @@
 
 </head>
 <style>
-  .customDatePickerWidth, 
-.customDatePickerWidth > div.react-datepicker-wrapper, 
-.customDatePickerWidth > div > div.react-datepicker__input-container
-.customDatePickerWidth > div > div.react-datepicker__input-container input {
-   width: 100%;
-}
-table{
-  th{
-    font-size: 12px;
+  .customDatePickerWidth,
+  .customDatePickerWidth>div.react-datepicker-wrapper,
+  .customDatePickerWidth>div>div.react-datepicker__input-container .customDatePickerWidth>div>div.react-datepicker__input-container input {
+    width: 100%;
   }
-  td{
-    font-size: 12px;
 
+  table {
+    th {
+      font-size: 12px;
+    }
+
+    td {
+      font-size: 12px;
+
+    }
   }
-}
-#page-body{
-  padding-top: 0px;
-}
 
-/* 
+  #page-body {
+    padding-top: 0px;
+  }
+
+  /* 
 
 .nav-link {
     white-space: nowrap; 
@@ -76,13 +81,12 @@ table{
 .scroll-btn.right {
   right: 0;
 } */
-input.leg::placeholder {
-    color: red !important; 
-    opacity: 1 !important; 
-    text-align: center !important; 
-    
-}
+  input.leg::placeholder {
+    color: red !important;
+    opacity: 1 !important;
+    text-align: center !important;
 
+  }
 </style>
 
 <body>
@@ -90,4 +94,5 @@ input.leg::placeholder {
   @vite('resources/js/main.jsx')
 
 </body>
+
 </html>

@@ -109,16 +109,17 @@ class AuthController extends Controller
                 $groups[] = $screen;
             }
             $newData = [];
-            if ($groups) {
+            if (count($groups) > 0) {
                 $group = Group::getGroup($permission->groups);
                 $newData = [
                     'title' => $group->name,
                     'type' => "sub",
                     'active' => false
                 ];
+
+                $screen = array_merge(['children' => $groups], $newData);
+                $permissionsWithScreens[$permission->groups] = $screen;
             }
-            $screen = array_merge(['children' => $groups], $newData);
-            $permissionsWithScreens[$permission->groups] = $screen;
         }
 
         return response()->json(["Items" => $permissionsWithScreens], 200);
