@@ -71,6 +71,9 @@ jobs:
           /usr/bin/php artisan config:cache  # Cache configuration
           /usr/bin/php artisan route:cache  # Cache routes
           /usr/bin/php artisan view:cache  # Cache views
+
+          # Clear and optimize the application
+          php artisan optimize  # Optimize the application (optional)
           
           # Optionally restart your web server or PHP service if needed
           # sudo service php8.2-fpm restart
