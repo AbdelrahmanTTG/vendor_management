@@ -15,7 +15,7 @@ class Permission extends Model
             ->select('groups')
             ->where('role', $role)
             ->where('groups', '!=', '0')
-            ->orderBy('groups', 'asc')
+            ->orderBy('menu_order', 'asc')
             ->get();
     }
     public function screen()

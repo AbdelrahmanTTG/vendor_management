@@ -22,6 +22,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public static function authenticate($email, $password)
     {
+        $email = trim($email);
         $encryptedPassword = base64_encode($password);
 
         return self::where('email', $email)

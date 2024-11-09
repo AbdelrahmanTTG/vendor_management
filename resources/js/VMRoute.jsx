@@ -300,7 +300,7 @@ export const VM = [
             <LazyWrapper>
                 <CodeTable
                     table="Languages"
-                    dataTable="language"
+                    dataTable="languages"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[
