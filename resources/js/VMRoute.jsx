@@ -369,7 +369,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
-                    key="Unit"
+                    key="unit"
                     table="Unit"
                     dataTable="unit"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
@@ -392,7 +392,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
-                    key="University Degree" 
+                    key="University_Degree" 
                     table="University Degree"
                     dataTable="university_degree"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
