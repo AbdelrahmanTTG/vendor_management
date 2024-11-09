@@ -4,7 +4,7 @@ const Languages = React.lazy(() => import('./pages/VM/Admin/Languages'));
 const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/AddProfile'));
 const ProfileIndex = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
 const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/EditProfile'));
-const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable'));
+const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable/index'));
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
         {children}
