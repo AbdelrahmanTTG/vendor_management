@@ -541,7 +541,7 @@
             }
             .nav-menu {
               border-radius: 0;
-              height: $sidebar-height;
+              height: 100vh;
               left: -300px;
               z-index: 99;
               transition: color 1s ease;
