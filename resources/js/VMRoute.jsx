@@ -4,7 +4,7 @@ const Languages = React.lazy(() => import('./pages/VM/Admin/Languages'));
 const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/AddProfile'));
 const ProfileIndex = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
 const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/EditProfile'));
-const CodeTable = './pages/VM/VendorManagement/CodeTable';
+const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable'));
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
         {children}
@@ -44,7 +44,9 @@ export const VM = [
         path: 'Time zone',
         element: (
             <LazyWrapper>
-                <CodeTable table="Time zone" dataTable="time_zone" header={["id", "zone", "gmt", 'Active', "Edit", "Delete"]}
+                <CodeTable
+                    key="Time zone"
+                    table="Time zone" dataTable="time_zone" header={["id", "zone", "gmt", 'Active', "Edit", "Delete"]}
                     fields={[
                         { name: 'zone', type: 'text', field: "input", label: "zone" },
                         { name: 'gmt', type: 'text', field: "input", label: "gmt" },
@@ -67,6 +69,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="Regain"
                     table="Regain"
                     dataTable="regions"
                     columns={["id", "name", "abbreviations", "Active"]}
@@ -90,7 +93,10 @@ export const VM = [
         path: 'Country',
         element: (
             <LazyWrapper>
-                <CodeTable table="Country" dataTable="countries" header={["id", " name", "region", "Active", "Edit", "Delete"]} related={{
+                
+                <CodeTable
+                    key="Country"
+                    table="Country" dataTable="countries" header={["id", " name", "region", "Active", "Edit", "Delete"]} related={{
                     'table': 'regions',
                     'foreign_key': 'region',
                     'primary_key': 'id',
@@ -117,7 +123,9 @@ export const VM = [
         path: 'Messaging type',
         element: (
             <LazyWrapper>
-                <CodeTable table="Messaging type" dataTable="messaging_types"
+                <CodeTable
+                    key="Messaging type"
+                    table="Messaging type" dataTable="messaging_types"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[
@@ -139,7 +147,9 @@ export const VM = [
         element: (
             <LazyWrapper>
 
-                <CodeTable table="Main-Subject Matter" dataTable="fields" columns={["id", "name", "Active"]} header={["id", " name", "Active", "Edit", "Delete"]}
+                <CodeTable
+                    key="Main-Subject Matter"
+                    table="Main-Subject Matter" dataTable="fields" columns={["id", "name", "Active"]} header={["id", " name", "Active", "Edit", "Delete"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input", label: "name" },
                         {
@@ -159,6 +169,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="Sub–Subject Matter"
                     table="Sub–Subject Matter"
                     dataTable="fields"
                     columns={["id", "name", "Active"]}
@@ -181,6 +192,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="Service"   
                     table="Service"
                     dataTable="services"
                     columns={["id", "name", "abbreviations", "Active"]}
@@ -204,6 +216,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="Task Type"
                     table="Task Type"
                     dataTable="task_type"
                     header={["id", " name", "Service", "Active", "Edit", "Delete"]}
@@ -233,6 +246,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="Currency"
                     table="Currency"
                     dataTable="currency"
                     header={["id", " name", "Active", "Edit", "Delete"]}
@@ -254,7 +268,9 @@ export const VM = [
         path: 'Wallets Payment methods',
         element: (
             <LazyWrapper>
-                <CodeTable table="Wallets Payment methods"
+                <CodeTable
+                    key="Wallets Payment methods"
+                    table="Wallets Payment methods"
                     dataTable="payment_method"
                     header={["id", " name", "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
@@ -277,6 +293,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="Tools"
                     table="Tools"
                     dataTable="tools"
                     columns={["id", "name", "Active"]}
@@ -299,6 +316,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="Language"  
                     table="Languages"
                     dataTable="languages"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
@@ -321,6 +339,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="Dialect"
                     table="Dialect"
                     dataTable="languages_dialect"
                     header={["id", "dialect", "language", "Active", "Edit", "Delete"]}
@@ -350,6 +369,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="Unit"
                     table="Unit"
                     dataTable="unit"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
@@ -372,6 +392,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="University Degree" 
                     table="University Degree"
                     dataTable="university_degree"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
@@ -394,6 +415,7 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    key="Major"
                     table="Major"
                     dataTable="major"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
