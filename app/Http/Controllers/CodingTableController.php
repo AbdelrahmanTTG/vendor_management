@@ -20,12 +20,12 @@ use App\Models\Major;
 use App\Models\Skill;
 
 use Illuminate\Support\Facades\Validator;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major" , "skills"];
+    protected static $validTables = ['regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major", "skills"];
 
     protected static $models = [
         'regions' => Regions::class,
@@ -42,7 +42,7 @@ class CodingTableController extends Controller
         "unit" => Unit::class,
         "university_degree" => UniversityDegree::class,
         "major" => Major::class,
-        "skills"=> Skill::class,
+        "skills" => Skill::class,
     ];
     public function SelectDatatTable(Request $request)
     {
@@ -116,7 +116,6 @@ class CodingTableController extends Controller
         } else {
             return response()->json(['error' => 'Resource not found or already deleted'], 404);
         }
-
     }
     public function update(Request $request)
     {
@@ -137,7 +136,7 @@ class CodingTableController extends Controller
         if (!$modelClass) {
             return response()->json(['error' => 'Invalid model'], 400);
         }
-    
+
         $item = (new $modelClass())->updatedata($request->all());
 
         if (!$item) {
@@ -163,7 +162,4 @@ class CodingTableController extends Controller
         }
         return false;
     }
-
-
-
 }
