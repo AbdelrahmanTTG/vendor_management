@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +32,7 @@ class AuthController extends Controller
                     'first_login' => $Vendor->first_login,
                     'user_name' => $Vendor->name,
                     'user_type' => 'vendor',
-                    "email"=> base64_encode(app('encrypt')($Vendor->email)) ,
+                    "email" => base64_encode(app('encrypt')($Vendor->email)),
                     'loggedin_ttg' => 1,
                 ];
 
@@ -52,7 +53,7 @@ class AuthController extends Controller
             User::updateAccountData($userAccount);
             $loginData = [
                 'id' => Crypt::encrypt($userAccount->id),
-                'email' => base64_encode(app('encrypt')($userAccount->email) ),
+                'email' => base64_encode(app('encrypt')($userAccount->email)),
                 'username' => $userAccount->user_name,
                 'role' => Crypt::encrypt($userAccount->role),
                 'brand' => Crypt::encrypt($userAccount->brand),
@@ -79,7 +80,6 @@ class AuthController extends Controller
     {
         auth()->logout();
         return response()->json(["message" => 'logout Successfuly']);
-
     }
     public function userpermission(Request $request)
     {
@@ -91,8 +91,7 @@ class AuthController extends Controller
                 'error' => 'Invalid data provided',
                 'messages' => $validator->errors(),
             ], 422);
-        }
-        ;
+        };
         try {
             $role = Crypt::decrypt($request->input('role'));
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
@@ -101,27 +100,28 @@ class AuthController extends Controller
         $Permissions = Permission::getGroupByRole($role);
         $permissionsWithScreens = [];
         foreach ($Permissions as $permission) {
-        $groups = [];
+            $groups = [];
             $screens = Permission::getScreenByGroupAndRole($permission->groups, $role);
             foreach ($screens as $key) {
 
                 $screen = Screen::getScreen($key->screen);
-                $screen->type = 'link';  
+                $screen->type = 'link';
                 $groups[] = $screen;
             }
-            $group = Group::getGroup($permission->groups);
-            $newData = [
-                'title' => $group->name,
-                'type' => "sub",
-                'active' => false
-            ];
+            $newData = [];
+            if ($groups) {
+                $group = Group::getGroup($permission->groups);
+                $newData = [
+                    'title' => $group->name,
+                    'type' => "sub",
+                    'active' => false
+                ];
+            }
             $screen = array_merge(['children' => $groups], $newData);
             $permissionsWithScreens[$permission->groups] = $screen;
         }
 
-        return response()->json(["Items"=>$permissionsWithScreens], 200);
-
-
+        return response()->json(["Items" => $permissionsWithScreens], 200);
     }
     public function RegenrateToken(Request $request)
     {
@@ -129,7 +129,7 @@ class AuthController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
 
             if ($user) {
-                $authChannel = 'api'; 
+                $authChannel = 'api';
 
                 $payload = JWTAuth::getPayload(JWTAuth::getToken());
                 $expiresAt = Carbon::createFromTimestamp($payload['exp']);
@@ -154,7 +154,7 @@ class AuthController extends Controller
             }
             $vendor = auth('vendor')->user();
             if ($vendor) {
-                $authChannel = 'vendor'; 
+                $authChannel = 'vendor';
 
                 $payload = JWTAuth::getPayload(JWTAuth::getToken());
                 $expiresAt = Carbon::createFromTimestamp($payload['exp']);
@@ -187,6 +187,4 @@ class AuthController extends Controller
             return response()->json(['message' => 'Token not provided'], 400);
         }
     }
-
-
 }

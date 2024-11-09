@@ -6,12 +6,13 @@ import { LI, UL } from '../../../AbstractElements';
 import CustomizerContext from '../../../_helper/Customizer';
 import Bookmarks from './Bookmark';
 import LanguageClass from './Language';
-import LogoutClass from './Logout';
+
 import MessageDrop from './MessageDrop';
 import MoonLight from './MoonLight';
 import Notifications from './Notifiations';
 import Profile from './Profile';
 import LeftBar from "../LeftBar";
+
 const Rightbar = () => {
     const { sidebarResponsive } = useContext(CustomizerContext);
     //full screen function
@@ -43,11 +44,11 @@ const Rightbar = () => {
                     <LI><a className="text-dark" href="#javascript" onClick={goFull}>
                         <Maximize />
                     </a></LI>
-                    <LanguageClass />
-                    <Bookmarks />
+                    {/* <LanguageClass /> */}
+                    {/* <Bookmarks /> */}
                     <Notifications />
-                    <MoonLight />
-                    <MessageDrop />
+                    {/* <MoonLight /> */}
+                    {/* <MessageDrop /> */}
                     {/* <LogoutClass /> */}
                     <Profile />
 

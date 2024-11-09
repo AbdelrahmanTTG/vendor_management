@@ -12,11 +12,11 @@ class Permission extends Model
     public static  function getGroupByRole($role)
     {
         return self::distinct()
-                ->select('groups')
-                ->where('role', $role)
-                ->where('groups', '!=', '0')
-                ->orderBy('groups', 'asc')
-                ->get();
+            ->select('groups')
+            ->where('role', $role)
+            ->where('groups', '!=', '0')
+            ->orderBy('groups', 'asc')
+            ->get();
     }
     public function screen()
     {
@@ -33,10 +33,9 @@ class Permission extends Model
             ->where('role', $role)
             ->whereHas('screen', function ($query) {
                 $query->where('menu', '1')
-                                ->where('use_system', 'VM');
+                    ->where('use_system', 'like', '%VM%');
             })
             ->orderBy('menu_order')
             ->get();
     }
-   
 }

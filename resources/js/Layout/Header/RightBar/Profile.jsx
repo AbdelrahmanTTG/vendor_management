@@ -4,10 +4,9 @@ import { Button, Tooltip } from 'reactstrap';
 import { User } from 'react-feather';
 import UserSidebar from './UsersSidebar';
 import { useStateContext } from '../../../pages/context/contextAuth'
+import LogoutClass from './Logout';
 
 const Profile = () => {
-
-
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [tooltipOpen, setTooltipOpen] = useState(false);
     const sidebarRef = useRef(null);
@@ -60,6 +59,7 @@ const Profile = () => {
                 Open User Profile
             </Tooltip> */}
             {isSidebarOpen && (
+
                 <div
                     ref={sidebarRef}
                     className="sidebar"
@@ -81,9 +81,15 @@ const Profile = () => {
                         onLogout={handleLogout}
                         onClose={handleClose}
                     />
+
+                    <LogoutClass />
+
                 </div>
+
             )}
+
         </div>
+
     );
 };
 
