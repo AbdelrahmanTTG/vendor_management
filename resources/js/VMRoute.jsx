@@ -39,17 +39,17 @@ export const VM = [
             </LazyWrapper>
         )
     },
-    
+
     {
         path: 'Time zone',
         element: (
             <LazyWrapper>
                 <CodeTable table="Time zone" dataTable="time_zone" header={["id", "zone", "gmt", 'Active', "Edit", "Delete"]}
                     fields={[
-                        { name: 'zone', type: 'text', field: "input", label:"zone"},
-                        { name: 'gmt', type: 'text', field: "input", label:"gmt" },
+                        { name: 'zone', type: 'text', field: "input", label: "zone" },
+                        { name: 'gmt', type: 'text', field: "input", label: "gmt" },
                         {
-                            name: 'Active', type: 'number', field: "selec", label:"Active", static: [
+                            name: 'Active', type: 'number', field: "selec", label: "Active", static: [
                                 { value: 1, label: 'Active' },
                                 { value: 0, label: 'Inactive' },
                             ]
@@ -72,10 +72,10 @@ export const VM = [
                     columns={["id", "name", "abbreviations", "Active"]}
                     header={['ID', 'name', 'abbreviations', "Active", "Edit", "Delete"]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label:"name" },
+                        { name: 'name', type: 'text', field: "input", label: "name" },
                         { name: 'abbreviations', type: 'text', field: "input", label: "abbreviations" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label:"Active", static: [
+                            name: 'Active', type: 'text', field: "selec", label: "Active", static: [
                                 { value: 1, label: 'Active' },
                                 { value: 0, label: 'Inactive' },
                             ]
@@ -97,17 +97,17 @@ export const VM = [
                     'columns': ['id', 'name']
                 }}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "name"  },
+                        { name: 'name', type: 'text', field: "input", label: "name" },
                         { name: 'region', type: 'text', field: "selec", tableData: "regions", label: "region" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label:"Active", static: [
+                            name: 'Active', type: 'text', field: "selec", label: "Active", static: [
                                 { value: 1, label: 'Active' },
                                 { value: 0, label: 'Inactive' },
                             ]
                         }
 
                     ]}
-                    columns={["id", "name", "region","Active"]}
+                    columns={["id", "name", "region", "Active"]}
 
                 />
             </LazyWrapper>
@@ -213,7 +213,7 @@ export const VM = [
                         'primary_key': 'id',
                         'columns': ["id", 'name']
                     }}
-                    columns={["id", "name","parent", "Active"]}
+                    columns={["id", "name", "parent", "Active"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input", label: "Name" },
                         { name: 'parent', type: 'text', field: "selec", tableData: "services", label: "Service" },
@@ -254,7 +254,21 @@ export const VM = [
         path: 'Wallets Payment methods',
         element: (
             <LazyWrapper>
-                <CodeTable table="Wallets Payment methods" />
+                <CodeTable table="Wallets Payment methods"
+                    dataTable="payment_method"
+                    header={["id", " name", "Active", "Edit", "Delete"]}
+                    columns={["id", "name", "Active"]}
+                    fields={[
+                        { name: 'name', type: 'text', field: "input", label: "Name" },
+                        {
+                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
+                                { value: 1, label: 'Active' },
+                                { value: 0, label: 'Inactive' },
+                            ]
+                        }
+                    ]}
+                />
+
             </LazyWrapper>
         )
     },
@@ -285,8 +299,8 @@ export const VM = [
         element: (
             <LazyWrapper>
                 <CodeTable
-                    table="Language"
-                    dataTable="languages"
+                    table="Languages"
+                    dataTable="language"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[
@@ -315,7 +329,7 @@ export const VM = [
                         'table': 'languages',
                         'foreign_key': 'language',
                         'primary_key': 'id',
-                        'columns': ["id",'name']
+                        'columns': ["id", 'name']
                     }}
                     fields={[
                         { name: 'dialect', type: 'text', field: "input", label: "Dialect" },

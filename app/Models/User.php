@@ -13,7 +13,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable ,HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens;
     protected $table = 'master_user';
     /**
      * The attributes that are mass assignable.
@@ -25,31 +25,32 @@ class User extends Authenticatable implements JWTSubject
         $encryptedPassword = base64_encode($password);
 
         return self::where('email', $email)
-                    ->where('password', $encryptedPassword)
-                    ->first();
+            ->where('password', $encryptedPassword)
+            ->where('use_system', 'like', '%VM%')
+            ->first();
     }
     public static function getUserAccount($user)
     {
-        $brand = !empty($user->favourite_brand_id) 
-                ? $user->favourite_brand_id 
-                : DB::table('users')
-                    ->where('master_user_id', $user->id)
-                    ->where('status', '1')
-                    ->value('brand');
+        $brand = !empty($user->favourite_brand_id)
+            ? $user->favourite_brand_id
+            : DB::table('users')
+            ->where('master_user_id', $user->id)
+            ->where('status', '1')
+            ->value('brand');
 
         $userAccount = DB::table('users')
-                        ->where('employees_id', $user->employees_id)
-                        ->where('master_user_id', $user->id)
-                        ->where('brand', $brand)
-                        ->where('status', '1')
-                        ->first();
+            ->where('employees_id', $user->employees_id)
+            ->where('master_user_id', $user->id)
+            ->where('brand', $brand)
+            ->where('status', '1')
+            ->first();
 
         if (!$userAccount) {
             $userAccount = DB::table('users')
-                            ->where('employees_id', $user->employees_id)
-                            ->where('master_user_id', $user->id)
-                            ->where('status', '1')
-                            ->first();
+                ->where('employees_id', $user->employees_id)
+                ->where('master_user_id', $user->id)
+                ->where('status', '1')
+                ->first();
         }
 
         return $userAccount;
@@ -65,8 +66,8 @@ class User extends Authenticatable implements JWTSubject
             ->where('id', $userAccount->master_user_id)
             ->update($accountData);
     }
-   
-  
+
+
     protected $fillable = [
         'name',
         'email',
