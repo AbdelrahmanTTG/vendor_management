@@ -185,15 +185,28 @@ const table = (props) => {
                         <Table hover>
                             <thead>
                                 <tr>
-                                    {props.header?
-                                       ( 
-                                            Array.isArray(props.header) ? (
-                                                props.header.map((col, index) => <th key={index}>{col.toUpperCase()}</th>)
+                                    {props.header ? (
+                                        Array.isArray(props.header) ? (
+                                            props.header.length > 0 ? (
+                                                props.header.map((col, index) => (
+                                                    <th key={index}>{col.trim().toUpperCase()}</th>
+                                                ))
                                             ) : (
-                                                Object.keys(header).map((key) => <th key={key}>{props.header[key]}</th>)
+                                                <th>No Data</th> 
                                             )
-                                        ):null
-                                    }
+                                        ) : (
+                                            Object.keys(props.header).length > 0 ? (
+                                                Object.keys(props.header).map((key) => (
+                                                    <th key={key}>{props.header[key].trim().toUpperCase()}</th>
+                                                ))
+                                            ) : (
+                                                <th>No Data</th>    
+                                            )
+                                        )
+                                    ) : (
+                                        <th>No Data</th> 
+                                    )}
+                                    
                                 </tr>
                             </thead>
                             <tbody>
