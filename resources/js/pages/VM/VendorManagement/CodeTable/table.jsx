@@ -185,7 +185,7 @@ const table = (props) => {
                         <Table hover>
                             <thead>
                                 <tr>
-                                    {props.header ? (
+                                    {/* {props.header ? (
                                         Array.isArray(props.header) ? (
                                             props.header.length > 0 ? (
                                                 props.header.map((col, index) => (
@@ -205,7 +205,7 @@ const table = (props) => {
                                         )
                                     ) : (
                                         <th>No Data</th> 
-                                    )}
+                                    )} */}
                                     
                                 </tr>
                             </thead>
