@@ -27,10 +27,17 @@ class VendorProfileController extends Controller
     public function Vendors(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-
         $vendors = Vendor::select('id', 'name', 'email', 'legal_Name', 'phone_number', 'country', 'nationality')
-            ->with(['country:id,name', 'nationality:id,name'])
-            ->paginate($perPage);
+        ->with(['country:id,name', 'nationality:id,name']);
+
+        if (!empty(request("queryParams"))) {
+           foreach(request("queryParams") as $key=> $val){
+            if(!empty($val)){
+                $vendors = $vendors->where($key, "like", "%" . $val . "%");
+            }          
+           }           
+        }           
+        $vendors = $vendors->paginate($perPage);
         // $vendorsArray = $vendors->toArray();
         // foreach ($vendorsArray['data'] as &$vendor) {
         //     $vendor['id'] = Crypt::encrypt($vendor['id']); 
