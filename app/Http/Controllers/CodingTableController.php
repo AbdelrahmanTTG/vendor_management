@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\DB;
 
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major", "skills"];
+    protected static $validTables = ['MainSubjectMatter','regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major", "skills"];
 
     protected static $models = [
         'regions' => Regions::class,
@@ -43,6 +43,7 @@ class CodingTableController extends Controller
         "university_degree" => UniversityDegree::class,
         "major" => Major::class,
         "skills" => Skill::class,
+        "MainSubjectMatter"=> MainSubjectMatter::class
     ];
     public function SelectDatatTable(Request $request)
     {
@@ -63,7 +64,6 @@ class CodingTableController extends Controller
         $data = $modelClass::SelectData($searchTerm);
         return response()->json($data, 200);
     }
-
 
     public function store(Request $request)
     {
@@ -162,4 +162,5 @@ class CodingTableController extends Controller
         }
         return false;
     }
+   
 }

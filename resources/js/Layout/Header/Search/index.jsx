@@ -45,7 +45,12 @@ const Searchbar = () => {
     const removeFix = useCallback(() => {
         setSearchValue('');
         setSearchToggle(false);
-        setIsClose(false);
+        try {
+            setIsClose(false);
+
+        } catch (error) {
+            
+        }
     }, [setIsClose]);
 
     const handleSearchKeyword = (keyword) => {
@@ -59,13 +64,13 @@ const Searchbar = () => {
                 }
                 if (!mItems.children) return false;
                 mItems.children.filter(subItems => {
-                    if (subItems.title.toLowerCase().includes(keyword) && subItems.type === 'link') {
+                    if (subItems?.name?.toLowerCase().includes(keyword) && subItems.type === 'link') {
                         subItems.icon = mItems.icon;
                         items.push(subItems);
                     }
                     if (!subItems.children) return false;
                     subItems.children.filter(suSubItems => {
-                        if (suSubItems.title.toLowerCase().includes(keyword)) {
+                        if (suSubItems.name.toLowerCase().includes(keyword)) {
                             suSubItems.icon = mItems.icon;
                             items.push(suSubItems);
                         }

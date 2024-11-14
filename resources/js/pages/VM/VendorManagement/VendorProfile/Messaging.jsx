@@ -160,54 +160,54 @@ const Messaging = (props) => {
             setRowIdToDelete(null);
         }
     }, [rowIdToDelete]);
-    const handleClick = (data) => {
-        if (props.onSubmit === 'onSubmit') {
-            onSubmit(data);
-        } else if (props.onSubmit === 'onUpdate') {
-            Update(data)
-        }
-    };
-    const onSubmit = async (data) => {
-        if (!props.id) {
-            basictoaster("dangerToast", "Make sure to send your personal information first.");
-            const section = document.getElementById("personal-data");
-            section.scrollIntoView({ behavior: 'smooth' });
-        } else {
-            const formData = { ...data };
-            const result = rows?.map((row, index) => ({
-                messaging_type_id: formData.messaging[index + 1]?.value,
-                contact: formData.contact[index + 1],
-            }));
-            const newFormData = {
-                ...formData,
-                vendor_id: props.id,
-            };
-            if (result && result.length > 0) {
-                newFormData['Instant_Messaging'] = result;
-            }
-            delete newFormData.messaging;
-            delete newFormData.contact;
-            try {
-                const response = await axiosClient.post("instantMessaging", newFormData);
-                basictoaster("successToast", "Added successfully !");
-                setIsSubmitting(true)
-            } catch (err) {
-                const response = err.response;
-                if (response && response.data) {
-                    const errors = response.data;
-                    Object.keys(errors).forEach(key => {
-                        const messages = errors[key];
-                        if (messages.length > 0) {
-                            messages.forEach(message => {
-                                basictoaster("dangerToast", message);
-                            });
-                        }
-                    });
-                }
-                setIsSubmitting(false)
-            }
-        }
-    }
+    // const handleClick = (data) => {
+    //     if (props.onSubmit === 'onSubmit') {
+    //         onSubmit(data);
+    //     } else if (props.onSubmit === 'onUpdate') {
+    //         Update(data)
+    //     }
+    // };
+    // const onSubmit = async (data) => {
+    //     if (!props.id) {
+    //         basictoaster("dangerToast", "Make sure to send your personal information first.");
+    //         const section = document.getElementById("personal-data");
+    //         section.scrollIntoView({ behavior: 'smooth' });
+    //     } else {
+    //         const formData = { ...data };
+    //         const result = rows?.map((row, index) => ({
+    //             messaging_type_id: formData.messaging[index + 1]?.value,
+    //             contact: formData.contact[index + 1],
+    //         }));
+    //         const newFormData = {
+    //             ...formData,
+    //             vendor_id: props.id,
+    //         };
+    //         if (result && result.length > 0) {
+    //             newFormData['Instant_Messaging'] = result;
+    //         }
+    //         delete newFormData.messaging;
+    //         delete newFormData.contact;
+    //         try {
+    //             const response = await axiosClient.post("instantMessaging", newFormData);
+    //             basictoaster("successToast", "Added successfully !");
+    //             setIsSubmitting(true)
+    //         } catch (err) {
+    //             const response = err.response;
+    //             if (response && response.data) {
+    //                 const errors = response.data;
+    //                 Object.keys(errors).forEach(key => {
+    //                     const messages = errors[key];
+    //                     if (messages.length > 0) {
+    //                         messages.forEach(message => {
+    //                             basictoaster("dangerToast", message);
+    //                         });
+    //                     }
+    //                 });
+    //             }
+    //             setIsSubmitting(false)
+    //         }
+    //     }
+    // }
     const Update = async (data) => {
         if (!props.id) {
             basictoaster("dangerToast", "Make sure to send your personal information first.");
@@ -215,10 +215,13 @@ const Messaging = (props) => {
             section.scrollIntoView({ behavior: 'smooth' });
         } else {
             const formData = { ...data };
+            if (!formData || (typeof formData === 'object' && Object.keys(formData).length === 0) || (Array.isArray(formData) && formData.length === 0)) {
+                return;  
+            }
             const result = rows?.map((row, index) => ({
-                id: row.idUpdate,
-                messaging_type_id: formData.messaging[index + 1].value,
-                contact: formData.contact[index + 1],
+                id: row?.idUpdate,
+                messaging_type_id: formData.messaging[row.id]?.value,
+                contact: formData.contact[row.id],
             }));
             const newFormData = {
                 ...formData,
@@ -230,7 +233,7 @@ const Messaging = (props) => {
             delete newFormData.messaging;
             delete newFormData.contact;
             try {
-                const response = await axiosClient.post("updateinstantMessaging", newFormData);
+                const response = await axiosClient.post("saveOrUpdateMessages", newFormData);
                 basictoaster("successToast", "Updated successfully !");
                 setRows([])
                 setRows(response?.data?.map((element, index) => {
@@ -384,7 +387,7 @@ const Messaging = (props) => {
                             </tbody>
                         </Table>
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick), disabled: isSubmitting }}>Submit</Btn>
+                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(Update) }}>Submit</Btn>
                         </div>
                     </CardBody>
                 </Collapse>

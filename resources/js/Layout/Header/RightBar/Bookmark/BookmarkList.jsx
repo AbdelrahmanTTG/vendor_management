@@ -17,7 +17,7 @@ const BookmarkList = (props) => {
                     {bookmarkItems.map((items, index) => {
                         return (
                             <Col xs="4" className="text-center" key={index}>
-                                <Link to={items.path || '/'}>
+                                <Link to={items.url || '/'}>
                                     <items.icon id={`${items[index]}`} />
                                 </Link>
                             </Col>

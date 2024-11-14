@@ -100,10 +100,19 @@ const Experience = (props) => {
             if (props.Experience) {
                 if (props.Experience.Experience) {
                     const data = props.Experience.Experience;
-                    setValue("started_working", { value: data.started_working, label: data.started_working })
-                    setSelectedYear({ value: data.started_working, label: data.started_working })
-                    setValue("experience_year", data.experience_year)
-                    setValue("summary", data.summary)
+                    if (data.started_working) {
+                        setValue("started_working", { value: data.started_working, label: data.started_working });
+                        setSelectedYear({ value: data.started_working, label: data.started_working });
+                    }
+
+                    if (data.experience_year) {
+                        setValue("experience_year", data.experience_year);
+                    }
+
+                    if (data.summary) {
+                        setValue("summary", data.summary);
+                    }
+
                     setexpID(data.id)
 
                     if (data.skills) {
@@ -351,8 +360,8 @@ const Experience = (props) => {
                 case "started_working":
                     basictoaster("dangerToast", "Started working from year is required");
                     return;
-                case "summary":
-                    basictoaster("dangerToast", "Summary of Experience is required");
+                case "experience_year":
+                    basictoaster("dangerToast", "experience year is required");
                     return;
                 case "summary":
                     basictoaster("dangerToast", "Summary of Experience is required");

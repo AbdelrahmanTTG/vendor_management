@@ -24,17 +24,17 @@ const ListOfMenu = ({ searchToggle, searchBar, searchValue, removeFix, setBookma
                     searchResult.map((data, index) => {
                         return (
                             <div className="ProfileCard u-cf" key={index}>
-                                <div className="ProfileCard-avatar">
+                                {/* <div className="ProfileCard-avatar">
                                     <data.icon />
-                                </div>
+                                </div> */}
                                 <div className="ProfileCard-details">
                                     <div className="ProfileCard-realName">
                                         <Link
-                                            to={data.path}
+                                            to={data.url}
                                             className="realname"
                                             onClick={removeFix}
                                         >
-                                            {data.title}
+                                            {data?.name}
                                         </Link>
                                         {searchBar ? ''
                                             : <span className="pull-right">

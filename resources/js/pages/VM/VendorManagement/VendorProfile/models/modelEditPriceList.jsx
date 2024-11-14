@@ -7,7 +7,7 @@ import Select from 'react-select';
 import axiosClient from "../../../../AxiosClint";
 import { toast } from 'react-toastify';
 
-const AddNewBtn = (props) => {
+const EditNewBtn = (props) => {
     toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
@@ -47,62 +47,77 @@ const AddNewBtn = (props) => {
     const [initialOptions, setInitialOptions] = useState({});
     const [loading, setLoading] = useState(false);
     const [optionsC, setOptionsC] = useState([]);
-   
+
     const onSubmit = async (data) => {
-        if (props.id && props.currency) {
-            const formDate = Object.fromEntries(
-                Object.entries(data).map(([key, value]) => {
-                    if (typeof value === 'object' && value !== null) {
-                        return [key, value.value];
-                    }
-                    return [key, value];
-                })
-            );
-            formDate['vendor'] = props.id;
+        // const keys = Object.keys(data);
+        // const extractedValues = keys.map(key => {
+        //     const value = props?.data[key];
+        //     return value && typeof value === 'object' ? value.id : value;
+        // });
+        // const extractedValues2 = keys.map(key => formData[key]);
+        // const areEqual = extractedValues2.every((val, index) => val === extractedValues[index]);
 
-            try {
-                const response = await axiosClient.post("AddPriceList", formDate);
-                props.getData(response.data)
-                toggle()
-                reset()
-                setValue("rate", '')
-                setValue("special_rate", '')
-
-                basictoaster("successToast", "Added successfully !");
-            } catch (err) {
-                const response = err.response;
-                if (response && response.data) {
-                    const errors = response.data;
-                    Object.keys(errors).forEach(key => {
-                        const messages = errors[key];
-                        if (messages.length > 0) {
-                            messages.forEach(message => {
-                                basictoaster("dangerToast", message);
-                            });
-                        }
-                    });
+        const formDate = Object.fromEntries(
+            Object.entries(data).map(([key, value]) => {
+                if (typeof value === 'object' && value !== null) {
+                    return [key, value.value];
                 }
-            }
-        } else {
-            basictoaster("dangerToast", "Make sure to send your personal information first and send Billing data ");
+                return [key, value];
+            })
+        );
+        formDate['id'] = props?.data?.id;
 
+        try {
+            const response = await axiosClient.post("UpdatePriceList", formDate);
+            toggle()
+            props.getData(response.data)
+            reset()
+            setValue("rate", '')
+            setValue("special_rate", '')
+            basictoaster("successToast", "Updated successfully !");
+        } catch (err) {
+            const response = err.response;
+            if (response && response.data) {
+                const errors = response.data;
+                Object.keys(errors).forEach(key => {
+                    const messages = errors[key];
+                    if (messages.length > 0) {
+                        messages.forEach(message => {
+                            basictoaster("dangerToast", message);
+                        });
+                    }
+                });
+            }
+        }
+    };
+    useEffect(() => {
+        if (props?.data) {
+            setValue("subject", renameKeys(props?.data?.subject, { id: "value", name: "label" }))
+            setValue("SubSubject", renameKeys(props?.data?.sub_subject, { id: "value", name: "label" }))
+            setValue("service", renameKeys(props?.data?.service, { id: "value", name: "label" }))
+            setValue("task_type", renameKeys(props?.data?.task_type, { id: "value", name: "label" }))
+            setValue("source_lang", renameKeys(props?.data?.source_language, { id: "value", name: "label" }))
+            setValue("target_lang", renameKeys(props?.data?.target_language, { id: "value", name: "label" }))
+            setValue("dialect", renameKeys(props?.data?.dialect, { id: "value", dialect: "label" }))
+            setValue("dialect_target", renameKeys(props?.data?.dialect_target, { id: "value", dialect: "label" }))
+            setValue("unit", renameKeys(props?.data?.unit, { id: "value", name: "label" }))
+            setValue("rate", props?.data?.rate)
+            setValue("special_rate", props?.data?.special_rate)
+            setValue("Status", { value: props?.data?.Status, label: props?.data?.Status })
+            setValue("currency", renameKeys(props?.data?.currency, { id: "value", name: "label" }))
+            handelingSelectTasks(props?.data?.service?.id)
         }
 
-    };
+    }, [props?.data])
     const renameKeys = (obj, keysMap) => {
-        return Object.keys(obj).reduce((acc, key) => {
+        if (!obj){return}
+        return Object?.keys(obj)?.reduce((acc, key) => {
             const newKey = keysMap[key] || key;
             acc[newKey] = obj[key];
             return acc;
         }, {});
     };
-    useEffect(() => {
-        if (props.currency) {
-            const updatedData = renameKeys(props.currency, { id: "value", name: "label" });
-            setOptionsC(updatedData);
-            setValue("currency", updatedData )
-        }
-    }, [props.currency])
+
     const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
 
         if (inputValue.length === 0) {
@@ -183,8 +198,8 @@ const AddNewBtn = (props) => {
     };
     return (
         <Fragment>
-            <Btn attrBtn={{ color: 'btn btn-primary-light', onClick: toggle }} className="me-2" >Add price list</Btn>
-            <CommonModal isOpen={modal} title='Add new price list' toggler={toggle} size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
+            <Btn attrBtn={{ color: 'btn btn-primary-light', onClick: toggle }} className="me-2" > <i className="icofont icofont-ui-edit"></i></Btn>
+            <CommonModal isOpen={modal} title='Edit price list' toggler={toggle} size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
                 <Row className="g-3 mb-3">
                     <Col md="6">
                         <FormGroup className="row">
@@ -270,6 +285,7 @@ const AddNewBtn = (props) => {
                                         <Select
                                             {...field}
                                             value={field.value}
+
                                             options={optionsSre}
                                             onInputChange={(inputValue) =>
                                                 handleInputChange(inputValue, "services", "service", setOptionsSer, optionsSre)
@@ -432,7 +448,7 @@ const AddNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Target Dialect </Label>
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Target Dialect</Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Dialect --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -506,13 +522,14 @@ const AddNewBtn = (props) => {
                             <Col sm="8">
                                 {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
                                 <input
-                                  
-                                    defaultValue=""
+
+                                    value={props?.data?.rate}
+
                                     className="form-control"
                                     type="number"
                                     name="rate"
                                     {...register("rate", { required: true })}
-                                  
+
                                 />
                             </Col>
                         </FormGroup>
@@ -524,8 +541,8 @@ const AddNewBtn = (props) => {
                             <Col sm="8">
                                 {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
                                 <input
-                                
-                                    defaultValue=""
+
+                                    value={props?.data?.special_rate}
                                     className="form-control"
                                     type="number"
                                     name="special_rate"
@@ -539,7 +556,7 @@ const AddNewBtn = (props) => {
 
                             <Label className="col-sm-4 col-form-label" for="validationCustom01">Status</Label>
                             <Col sm="8">
-                              
+
                                 <Controller
                                     name="Status"
                                     control={control}
@@ -548,12 +565,12 @@ const AddNewBtn = (props) => {
                                         <Select
                                             id='Status'
                                             {...field}
-                                            value={field.value || { value: '', label: '-- Select Status --' }}
+                                            value={field.value}
                                             options={[
                                                 { value: 'Active', label: 'Active' },
                                                 { value: 'Not Active', label: 'Not Active' },
                                                 { value: 'Pending by PM', label: 'Pending by PM' }
-                                            ]} 
+                                            ]}
                                             className="js-example-basic-single col-sm-12"
                                             onChange={(option) => {
                                                 field.onChange(option);
@@ -569,12 +586,6 @@ const AddNewBtn = (props) => {
 
                             <Label className="col-sm-4 col-form-label" for="validationCustom01">Currency</Label>
                             <Col sm="8">
-                                {/* <Select isDisabled defaultValue={{ isDisabled: true, label: '-- Select Status --' }}
-                                    options={[
-                                        { value: 'Active', label: 'Active' },
-                                        { value: 'Not Active', label: 'Not Active' },
-                                        { value: 'Pending by PM', label: 'Pending by PM' }
-                                    ]} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
                                     name="currency"
                                     control={control}
@@ -583,7 +594,7 @@ const AddNewBtn = (props) => {
                                         <Select
                                             {...field}
                                             isDisabled
-                                            value={optionsC}
+                                            value={renameKeys(props?.data?.currency, { id: "value", name: "label" })}
                                             className="js-example-basic-single col-sm-12"
                                             onChange={(option) => {
                                                 field.onChange(option);
@@ -609,4 +620,4 @@ const AddNewBtn = (props) => {
     );
 };
 
-export default AddNewBtn;
+export default EditNewBtn;

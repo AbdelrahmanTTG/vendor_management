@@ -26,7 +26,7 @@ const UsersSidebar = ({ user, onLogout, onClose }) => {
                     </div> */}
                     <H6 attrH6={{ className: 'mt-3 f-14 f-w-600' }} >{user ? user.username : ''}</H6>
                 </Link>
-                <P attrPara={{ className: 'mb-0 font-roboto' }} >{user.email ? user.email : ''}</P>
+                {/* <P attrPara={{ className: 'mb-0 font-roboto' }} >{user.email ? user.email : ''}</P> */}
                 <P attrPara={{ className: 'mb-0 font-roboto' }} >{user.department ? user.department : ''}</P>
 
             </div>

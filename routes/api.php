@@ -36,9 +36,18 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/download', [VendorProfileController::class, 'download']);
     Route::delete('/delete', [VendorProfileController::class, 'deleteFile']);
     Route::post('/updateFiles', [VendorProfileController::class, 'updateFiles']);
-    Route::post('/instantMessaging', [VendorProfileController::class, 'AddinstantMessaging']);
-    Route::post('/updateinstantMessaging', [VendorProfileController::class, 'updateMessagesByVendorId']);
+    // Route::post('/instantMessaging', [VendorProfileController::class, 'AddinstantMessaging']);
+    // Route::post('/updateinstantMessaging', [VendorProfileController::class, 'updateMessagesByVendorId']);
     Route::delete('/deleteMessage', [VendorProfileController::class, 'deleteMessagesByVendorId']);
+    Route::get('/TaskType', [VendorProfileController::class, 'findTask']);
+    Route::post('/AddPriceList', [VendorProfileController::class, 'AddPriceList']);
+    Route::delete('/deletePricelist', [VendorProfileController::class, 'deletePricelist']);
+    Route::post('/UpdatePriceList', [VendorProfileController::class, 'UpdatePriceList']);
+    Route::post('/AddVendorstools', [VendorProfileController::class, 'AddVendorstools']);
+    Route::post('/VendorTest', [VendorProfileController::class, 'AddVendorTest']);
+    Route::post('/saveOrUpdateMessages', [VendorProfileController::class, 'saveOrUpdateMessages']);
+    Route::post('/VendorEducation', [VendorProfileController::class, 'saveOrUpdateEducation']);
+
 
 
 

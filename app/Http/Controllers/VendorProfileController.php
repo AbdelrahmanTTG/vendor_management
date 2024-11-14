@@ -17,6 +17,11 @@ use App\Models\Messages;
 use App\Models\Experience;
 use App\Models\VendorFile;
 use App\Models\InstantMessaging;
+use App\Models\TaskType;
+use App\Models\VendorSheet;
+use App\Models\VendorTest;
+use App\Models\VendorEducation;
+
 use App\Http\Controllers\InvoiceController;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\DB;
@@ -27,17 +32,19 @@ class VendorProfileController extends Controller
     public function Vendors(Request $request)
     {
         $perPage = $request->input('per_page', 10);
+
         $vendors = Vendor::select('id', 'name', 'email', 'legal_Name', 'phone_number', 'country', 'nationality')
-        ->with(['country:id,name', 'nationality:id,name']);
+            ->with(['country:id,name', 'nationality:id,name']);
 
         if (!empty(request("queryParams"))) {
-           foreach(request("queryParams") as $key=> $val){
-            if(!empty($val)){
-                $vendors = $vendors->where($key, "like", "%" . $val . "%");
-            }          
-           }           
-        }           
+            foreach (request("queryParams") as $key => $val) {
+                if (!empty($val)) {
+                    $vendors = $vendors->where($key, "like", "%" . $val . "%");
+                }
+            }
+        }
         $vendors = $vendors->paginate($perPage);
+
         // $vendorsArray = $vendors->toArray();
         // foreach ($vendorsArray['data'] as &$vendor) {
         //     $vendor['id'] = Crypt::encrypt($vendor['id']); 
@@ -50,6 +57,12 @@ class VendorProfileController extends Controller
         $id = $request->input('id');
         $Countries = Countries::getColumnValue($id);
         return response()->json($Countries, 201);
+    }
+    public function findTask(Request $request)
+    {
+        $id = $request->input('id');
+        $TaskType = TaskType::getColumnValue($id);
+        return response()->json($TaskType, 201);
     }
     public function store(Request $request)
     {
@@ -210,10 +223,10 @@ class VendorProfileController extends Controller
                 ]);
             }
         }
-
-        return response()->json([
-            'message' => 'Added successfully!',
-        ], 200);
+        $InvoiceController = new InvoiceController();
+        $decID = Crypt::encrypt($request->input('vendor_id'));
+        $BillingData = $InvoiceController->getVendorBillingData($decID);
+        return response()->json($BillingData, 200);
     }
     public function ModificationComplex(Request $request)
     {
@@ -238,10 +251,19 @@ class VendorProfileController extends Controller
         if ($request->input('VendorFiles')) {
             $VendorFiles = $this->getVendorFiles($id);
         }
-          if ($request->input('InstantMessaging')) {
+        if ($request->input('InstantMessaging')) {
             $InstantMessaging = $this->getMessagesByVendorId($id);
         }
-        
+        if ($request->input('priceList')) {
+            $VendorTools = $this->getVendorTools($id);
+            $priceList = $this->getpriceListByVendorId($id);
+        }
+        if ($request->input('VendorTestData')) {
+            $VendorTestData = $this->getVendorTestData($id);
+        }
+        if ($request->input('EducationVendor')) {
+            $EducationVendor = $this->getEducationByVendorId($id);
+        }
         return response()->json(
             [
                 'Data' => $PersonalData ?? null,
@@ -250,6 +272,9 @@ class VendorProfileController extends Controller
                 "Experience" => $VendorExperience ?? null,
                 "VendorFiles" => $VendorFiles ?? null,
                 "InstantMessaging" => $InstantMessaging ?? null,
+                "priceList" => [$priceList ?? null, $VendorTools ?? null],
+                "VendorTestData" => $VendorTestData ?? null,
+                "EducationVendor"=>$EducationVendor??null
             ],
             200
         );
@@ -306,8 +331,9 @@ class VendorProfileController extends Controller
     public function updateBillingData(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'BillingData_id' => 'required|integer',
-            "BankData_id" => 'required|integer',
+            'vendor_id' => 'required|integer',
+            'BillingData_id' => 'nullable|integer',
+            'BankData_id' => 'nullable|integer',
             'billing_legal_name' => 'required|string|max:255',
             'billing_currency' => 'required|integer',
             'city' => 'required|string|max:255',
@@ -319,22 +345,29 @@ class VendorProfileController extends Controller
             'iban' => ['required', 'string', 'regex:/^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/'],
             'payment_terms' => 'nullable|string',
             'swift_bic' => ['required', 'string', 'regex:/^[A-Z]{6}[A-Z2-9][A-NP-Z0-9](XXX)?$/'],
-            'Wallets Payment methods' => 'required|array|min:1',
-            'Wallets Payment methods.*.method' => 'required|string|max:10',
-            'Wallets Payment methods.*.account' => 'required|string|max:255',
+            'Wallets Payment methods' => 'nullable|array|min:1',
+            'Wallets Payment methods.*.method' => 'required_with:wallets_payment_methods|string|max:10',
+            'Wallets Payment methods.*.account' => 'required_with:wallets_payment_methods|string|max:255',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-        $billingData = BillingData::find($request->input("BillingData_id"));
-        if (!$billingData) {
-            return response()->json(['message' => 'Billing data not found'], 404);
+
+        if (!$request->filled('BillingData_id') && !$request->filled('BankData_id')) {
+            $billingData = BillingData::where('vendor_id', $request->input('vendor_id'))->first();
+
+            if (!$billingData) {
+                return $this->storeBilling($request);
+            }
+        } else {
+            $billingData = BillingData::find($request->input('BillingData_id'));
+            $bankDetails = BankDetails::find($request->input('BankData_id'));
+            if (!$billingData || !$bankDetails) {
+                return response()->json(['message' => 'Data not found'], 404);
+            }
         }
-        $BankDetails = BankDetails::find($request->input("BankData_id"));
-        if (!$billingData) {
-            return response()->json(['message' => 'Billing data not found'], 404);
-        }
+
         $billingData->update($request->only([
             'billing_legal_name',
             'billing_currency',
@@ -342,7 +375,8 @@ class VendorProfileController extends Controller
             'street',
             'billing_address',
         ]));
-        $BankDetails->update($request->only([
+
+        $bankDetails->update($request->only([
             'bank_name',
             'account_holder',
             'swift_bic',
@@ -350,14 +384,17 @@ class VendorProfileController extends Controller
             'payment_terms',
             'bank_address',
         ]));
+
         if ($request->has('Wallets Payment methods')) {
-            foreach ($request['Wallets Payment methods'] as $wallet) {
+            foreach ($request->input('Wallets Payment methods') as $wallet) {
                 if (isset($wallet['id'])) {
                     $walletUpdate = WalletsPaymentMethods::find($wallet['id']);
-                    $walletUpdate->update([
-                        'method' => $wallet['method'],
-                        'account' => $wallet['account'],
-                    ]);
+                    if ($walletUpdate) {
+                        $walletUpdate->update([
+                            'method' => $wallet['method'],
+                            'account' => $wallet['account'],
+                        ]);
+                    }
                 } else {
                     WalletsPaymentMethods::create([
                         'billing_data_id' => $billingData->id,
@@ -365,15 +402,13 @@ class VendorProfileController extends Controller
                         'account' => $wallet['account'],
                     ]);
                 }
-
             }
         }
-        $newWalletsPaymentMethods = WalletsPaymentMethods::where('billing_data_id', $billingData->id)->get();
 
-        return response()->json($newWalletsPaymentMethods, 200);
-
-
-
+        $InvoiceController = new InvoiceController();
+        $decID = Crypt::encrypt($request->input('vendor_id'));
+        $BillingData = $InvoiceController->getVendorBillingData($decID);
+        return response()->json($BillingData, 200);
     }
     public function setPassword(Request $request)
     {
@@ -473,7 +508,7 @@ class VendorProfileController extends Controller
         }
 
         $VendorSkill = VendorSkill::where('vendor_id', $request->input("vendor_id"))
-            ->with('skill')  
+            ->with('skill')
             ->get();
 
         return response()->json([
@@ -483,7 +518,8 @@ class VendorProfileController extends Controller
                     'id' => $vendorSkill->id,
                     'name' => $vendorSkill->skill->name,
                 ];
-            })], 200);
+            })
+        ], 200);
     }
     public function getVendorExperience($vendor_id)
     {
@@ -674,7 +710,6 @@ class VendorProfileController extends Controller
 
         return response()->json(['message' => 'File deleted successfully.'], 200);
     }
-
     public function updateFiles(Request $request)
     {
         $vendorId = $request->input('vendor_id');
@@ -701,7 +736,7 @@ class VendorProfileController extends Controller
                 }
 
                 $cvFilePath = $cvFile->store('cv_files');
-                $vendor->cv = $cvFilePath;  
+                $vendor->cv = $cvFilePath;
             }
 
             if ($request->hasFile('nda')) {
@@ -715,7 +750,7 @@ class VendorProfileController extends Controller
                 }
 
                 $ndaFilePath = $ndaFile->store('nda_files');
-                $vendor->nda = $ndaFilePath;  
+                $vendor->nda = $ndaFilePath;
             }
 
             $vendor->save();
@@ -724,7 +759,7 @@ class VendorProfileController extends Controller
             foreach ($request->all() as $key => $value) {
                 if (strpos($key, 'file_') === 0) {
                     $file = $request->file($key);
-                    $fileId = $request->input("file_id_" . substr($key, 5));  
+                    $fileId = $request->input("file_id_" . substr($key, 5));
                     $fileTitle = $request->input("file_title_" . substr($key, 5));
                     $fileContent = $request->input("file_content_" . substr($key, 5));
 
@@ -787,75 +822,401 @@ class VendorProfileController extends Controller
             return response()->json(['error' => 'An error occurred during the file update.'], 500);
         }
     }
+    // public function AddinstantMessaging(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'vendor_id' => 'required|integer',
+    //         'Instant_Messaging' => 'sometimes|required|array|min:1',
+    //         'Instant_Messaging.*.messaging_type_id' => 'required|integer',
+    //         'Instant_Messaging.*.contact' => 'required|string',
 
-    public function AddinstantMessaging(Request $request){
-        $validator = Validator::make($request->all(), [
-            'vendor_id' => 'required|integer',
-            'Instant_Messaging' => 'sometimes|required|array|min:1',
-            'Instant_Messaging.*.messaging_type_id' => 'required|integer',
-            'Instant_Messaging.*.contact' => 'required|string',
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+    //     $vendor_id = $request->input('vendor_id');
+    //     if ($request->has('Instant_Messaging')) {
+    //         foreach ($request['Instant_Messaging'] as $wallet) {
+    //             InstantMessaging::create([
+    //                 "vendor_id" => $vendor_id,
+    //                 'messaging_type_id' => $wallet['messaging_type_id'],
+    //                 'contact' => $wallet['contact'],
+    //             ]);
+    //         }
+    //     }
+    //     return response()->json(['message' => 'Added successfully.'], 200);
 
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-        $vendor_id = $request->input('vendor_id');
-        if ($request->has('Instant_Messaging')) {
-            foreach ($request['Instant_Messaging'] as $wallet) {
-                InstantMessaging::create([
-                    "vendor_id"=> $vendor_id,
-                    'messaging_type_id' => $wallet['messaging_type_id'],
-                    'contact' => $wallet['contact'],
-                ]);
-            }
-        }
-        return response()->json(['message' => 'Added successfully.'], 200);
+    // }
 
-    }
+
     public function getMessagesByVendorId($vendorId)
     {
         $messages = InstantMessaging::where('vendor_id', $vendorId)
-            ->with('messagingType:id,name') 
+            ->with('messagingType:id,name')
             ->get();
-                    return $messages;
+        return $messages;
     }
-    public function updateMessagesByVendorId(Request $request)
+
+    // public function updateMessagesByVendorId(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'vendor_id' => 'required|integer',
+    //         'Instant_Messaging' => 'sometimes|required|array|min:1',
+    //         'Instant_Messaging.*.messaging_type_id' => 'required|integer',
+    //         'Instant_Messaging.*.contact' => 'required|string',
+
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+    //     $vendor_id = $request->input('vendor_id');
+    //     if ($request->has('Instant_Messaging')) {
+    //         foreach ($request['Instant_Messaging'] as $Messaging) {
+    //             if (isset($Messaging['id'])) {
+    //                 $MessagingUpdate = InstantMessaging::find($Messaging['id']);
+    //                 $MessagingUpdate->update([
+    //                     'messaging_type_id' => $Messaging['messaging_type_id'],
+    //                     'contact' => $Messaging['contact'],
+    //                 ]);
+    //             } else {
+    //                 InstantMessaging::create([
+    //                     "vendor_id" => $vendor_id,
+    //                     'messaging_type_id' => $Messaging['messaging_type_id'],
+    //                     'contact' => $Messaging['contact'],
+    //                 ]);
+    //             }
+    //         }
+    //     }
+    //     $data = $this->getMessagesByVendorId($vendor_id);
+    //     return response()->json($data, 200);
+    // }
+    public function deleteMessagesByVendorId(Request $request)
+    {
+        return $this->deleteItem($request, InstantMessaging::class);
+
+    }
+    public function AddPriceList(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor' => 'required|integer',
+            'subject' => 'required|integer',
+            'SubSubject' => 'required|integer',
+            'service' => 'required|integer',
+            'task_type' => 'required|integer',
+            'source_lang' => 'required|integer',
+            'target_lang' => 'required|integer',
+            'dialect' => 'nullable|integer',
+            'dialect_target' => 'nullable|integer',
+            'unit' => 'required|integer',
+            'rate' => 'required|integer',
+            'special_rate' => 'required|integer',
+            'Status' => 'required|string',
+            'currency' => 'required|integer',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+        $vendorSheet = VendorSheet::create($request->all());
+        $vendorSheet->load([
+            'sourceLanguage:id,name',
+            'targetLanguage:id,name',
+            'dialect:id,dialect',
+            'dialect_target:id,dialect',
+            'service:id,name',
+            'taskType:id,name',
+            'unit:id,name',
+            'currency:id,name',
+            'subject:id,name',
+            'subSubject:id,name'
+        ]);
+        return response()->json($vendorSheet, 201);
+
+
+    }
+    public function getpriceListByVendorId($vendorId)
+    {
+        $vendorData = VendorSheet::with([
+            'sourceLanguage:id,name',
+            'targetLanguage:id,name',
+            'dialect:id,dialect',
+            'dialect_target:id,dialect',
+            'service:id,name',
+            'taskType:id,name',
+            'unit:id,name',
+            'currency:id,name',
+            'subject:id,name',
+            'subSubject:id,name'
+        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'SubSubject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency']);
+
+        if ($vendorData->isEmpty()) {
+            return response()->json([
+                'message' => 'No data found for the given vendor ID.'
+            ], 404);
+        }
+        return $vendorData;
+
+    }
+    public function deletePricelist(Request $request)
+    {
+        return $this->deleteItem($request, VendorSheet::class);
+
+    }
+    public function UpdatePriceList(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer',
+            'subject' => 'required|integer',
+            'SubSubject' => 'required|integer',
+            'service' => 'required|integer',
+            'task_type' => 'required|integer',
+            'source_lang' => 'required|integer',
+            'target_lang' => 'required|integer',
+            'dialect' => 'nullable|integer',
+            'dialect_target' => 'nullable|integer',
+            'unit' => 'required|integer',
+            'rate' => 'required|integer',
+            'special_rate' => 'required|integer',
+            'Status' => 'required|string',
+            'currency' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $vendorSheet = VendorSheet::findOrFail($request->input("id"));
+        $vendorSheet->update($request->except(['vendor']));
+        $vendorSheet->load([
+            'sourceLanguage:id,name',
+            'targetLanguage:id,name',
+            'dialect:id,dialect',
+            'dialect_target:id,dialect',
+            'service:id,name',
+            'taskType:id,name',
+            'unit:id,name',
+            'currency:id,name',
+            'subject:id,name',
+            'subSubject:id,name'
+        ]);
+        return response()->json($vendorSheet, 200);
+    }
+    public function AddVendorstools(Request $request)
+    {
+        $vendorId = $request->input('vendor_id');
+
+        if ($request->has('tool') && is_array($request->input('tool'))) {
+            $tools = $request->input('tool');
+            $toolIds = array_map(function ($tool) {
+                return $tool['tool'];
+            }, $tools);
+            DB::table('vendor_tools')
+                ->where('Vendor_id', $vendorId)
+                ->whereNotIn('tool', $toolIds)
+                ->delete();
+            foreach ($tools as $tool) {
+                DB::table('vendor_tools')->updateOrInsert(
+                    [
+                        'Vendor_id' => $vendorId,
+                        'tool' => $tool['tool'],
+                    ]
+                );
+            }
+
+            return response()->json(['message' => 'Added successfully']);
+        }
+
+        return response()->json(['message' => 'Not added, something went wrong'], 400);
+    }
+
+    public function getVendorTools($vendorId)
+    {
+        $vendorTools = DB::table('vendor_tools')
+            ->join('tools', 'vendor_tools.tool', '=', 'tools.id')
+            ->where('vendor_tools.vendor_id', $vendorId)
+            ->select('tools.id as id', 'tools.name as name')
+            ->get();
+        if ($vendorTools) {
+            return $vendorTools;
+        }
+
+    }
+    public function AddVendorTest(Request $request)
+    {
+        if (!$request->hasFile('test')) {
+            return response()->json(['error' => 'Test file is required.'], 400);
+        }
+
+        $testFile = $request->file('test');
+
+        DB::beginTransaction();
+        try {
+            $vendorId = $request->input('vendor_id');
+            $testType = $request->input('test_type');
+            $testResult = $request->input('test_result');
+            $sourceLang = $request->input('source_lang');
+            $targetLang = $request->input('target_lang');
+            $mainSubject = $request->input('MainSubject');
+            $subSubject = $request->input('SubSubject');
+            $service = $request->input('service');
+
+            $vendor = VendorTest::where('vendor_id', $vendorId)->first();
+
+            if (!$vendor) {
+                $vendor = new VendorTest();
+                $vendor->vendor_id = $vendorId;
+            } else {
+                if ($vendor->test_upload && Storage::disk('public')->exists($vendor->test_upload)) {
+                    Storage::disk('public')->delete($vendor->test_upload);
+                }
+            }
+
+            $vendor->test_type = $testType;
+            $vendor->test_result = $testResult;
+            $vendor->source_lang = $sourceLang;
+            $vendor->target_lang = $targetLang;
+            $vendor->MainSubject = $mainSubject;
+            $vendor->SubSubject = $subSubject;
+            $vendor->service = $service;
+
+            $path = $testFile->store('vendortests', 'public');
+            $vendor->test_upload = $path;
+
+            $vendor->save();
+
+            DB::commit();
+
+            return response()->json(['message' => 'Vendor test data added/updated successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'An error occurred during the file upload or vendor update.'], 500);
+        }
+    }
+    public function getVendorTestData($vendorId)
+    {
+        $vendorTest = VendorTest::where('vendor_id', $vendorId)
+            ->with([
+                'sourceLanguage' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'targetLanguage' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'mainSubject' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'subSubject' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'service' => function ($query) {
+                    $query->select('id', 'name');
+                }
+            ])
+            ->first();
+
+        if ($vendorTest) {
+            return $vendorTest;
+
+        }
+
+    }
+
+
+
+    public function saveOrUpdateMessages(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required|integer',
             'Instant_Messaging' => 'sometimes|required|array|min:1',
             'Instant_Messaging.*.messaging_type_id' => 'required|integer',
             'Instant_Messaging.*.contact' => 'required|string',
-
         ]);
+
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
         $vendor_id = $request->input('vendor_id');
+
         if ($request->has('Instant_Messaging')) {
-            foreach ($request['Instant_Messaging'] as $Messaging) {
-                 if (isset($Messaging['id'])) {
-                    $MessagingUpdate = InstantMessaging::find($Messaging['id']);
-                    $MessagingUpdate->update([
-                        'messaging_type_id' => $Messaging['messaging_type_id'],
-                        'contact' => $Messaging['contact'],
-                    ]);
+            foreach ($request['Instant_Messaging'] as $messaging) {
+                if (isset($messaging['id'])) {
+                    $messagingUpdate = InstantMessaging::find($messaging['id']);
+                    if ($messagingUpdate) {
+                        $messagingUpdate->update([
+                            'messaging_type_id' => $messaging['messaging_type_id'],
+                            'contact' => $messaging['contact'],
+                        ]);
+                    }
                 } else {
                     InstantMessaging::create([
                         "vendor_id" => $vendor_id,
-                        'messaging_type_id' => $Messaging['messaging_type_id'],
-                        'contact' => $Messaging['contact'],
+                        'messaging_type_id' => $messaging['messaging_type_id'],
+                        'contact' => $messaging['contact'],
                     ]);
                 }
             }
         }
+
         $data = $this->getMessagesByVendorId($vendor_id);
         return response()->json($data, 200);
     }
-    public function deleteMessagesByVendorId(Request $request){
-        return $this->deleteItem($request, InstantMessaging::class);
+    public function saveOrUpdateEducation(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id' => 'required|integer|exists:vendor,id',
+            'university_name' => 'required|string|max:255',
+            'latest_degree' => 'required|string|max:255',
+            'year_of_graduation' => 'required|integer',
+            'major' => 'required|integer|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $vendorId = $request->input('vendor_id');
+
+        $vendorEducation = VendorEducation::where('vendor_id', $vendorId)->first();
+
+        if ($vendorEducation) {
+            $vendorEducation->update([
+                'university_name' => $request->input('university_name'),
+                'latest_degree' => $request->input('latest_degree'),
+                'year_of_graduation' => $request->input('year_of_graduation'),
+                'major' => $request->input('major'),
+            ]);
+
+            return response()->json(['message' => 'Education data updated successfully.'], 200);
+        } else {
+            VendorEducation::create([
+                'vendor_id' => $vendorId,
+                'university_name' => $request->input('university_name'),
+                'latest_degree' => $request->input('latest_degree'),
+                'year_of_graduation' => $request->input('year_of_graduation'),
+                'major' => $request->input('major'),
+            ]);
+            return response()->json(['message' => 'Education data added successfully.'], 201);
+        }
+    }
+
+    public function getEducationByVendorId($vendorId)
+    {
+        $education = VendorEducation::where('vendor_id', $vendorId)
+            ->with('major:id,name')
+            ->first();
+
+        if ($education) {
+            return $education;
+        }
 
     }
+
+
+
+
+
+
+
 
 
 

@@ -32,4 +32,16 @@ class Major extends Model
         return $item;
 
     }
+    public static function SelectData($searchTerm = null)
+    {
+
+        if ($searchTerm) {
+            $query = self::where('name', 'like', '%' . $searchTerm . '%');
+        } else {
+            $query = self::select('id', 'name')->limit(5);
+
+        }
+        return $query->get();
+    }
+ 
 }

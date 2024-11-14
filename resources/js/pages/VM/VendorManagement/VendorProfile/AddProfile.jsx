@@ -17,9 +17,14 @@ import History from "./History"
 import Portal_User from "./Portal_User"
 const AddProfile = () => {
     const [data, setdata] = useState([]);
+    const [Currancydata, setCurrancy] = useState([]);
+
     const handleDataSend = (data) => {
         setdata(data);
     };
+    const getCurrancy = (Currancystat) => {
+        setCurrancy(Currancystat);
+    }
     
     return (
         <Fragment >
@@ -43,22 +48,22 @@ const AddProfile = () => {
                     <FilesCertificate onSubmit="onSubmit" id={data.id} />
                 </div>
                 <div id='Education'>
-                    <Education />
+                    <Education id={data.id} />
                 </div>
                 <div id='Experience'>
                     <Experience onSubmit="onSubmit" id={data.id} />
                 </div>
                 <div id='Test'>
-                    <Test />
+                    <Test id={data.id} onSubmit="onSubmit" />
                 </div>
                 <div id='Billing'>
-                    <Billing id={data.id} onSubmit="onSubmit" />
+                    <Billing id={data.id} onSubmit="onSubmit" Currancy={getCurrancy} />
                 </div>
                 <div id='Portal_User'>
                     <Portal_User email={data.email} onSubmit="onSubmit" />
                 </div>
                 <div id='Price_List'>
-                    <Price_List />
+                    <Price_List Currency={Currancydata} id={data.id} />
                 </div>
                 <div id='Evaluation'>
                     <Evaluation />

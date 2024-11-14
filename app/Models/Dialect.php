@@ -47,4 +47,15 @@ class Dialect extends Model
         ];
 
     }
+    public static function SelectData($searchTerm = null)
+    {
+
+        if ($searchTerm) {
+            $query = self::where('dialect', 'like', '%' . $searchTerm . '%');
+        } else {
+            $query = self::select('id', 'name')->limit(5);
+
+        }
+        return $query->get();
+    }
 }

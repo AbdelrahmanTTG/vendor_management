@@ -44,6 +44,7 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->hasMany(VendorFile::class, 'vendor_id');
     }
+   
 
     protected $fillable = [
         'name',

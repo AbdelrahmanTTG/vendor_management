@@ -1,15 +1,138 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState ,useEffect} from 'react';
 import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, FormGroup } from 'reactstrap';
-import { H5 } from '../../../../AbstractElements';
+import { H5, Spinner ,Btn} from '../../../../AbstractElements';
 import Select from 'react-select';
-
-const Education = () => {
+import { useForm, Controller, set } from 'react-hook-form';
+import axiosClient from "../../../AxiosClint";
+import { toast } from 'react-toastify';
+const Education = (props) => {
+    toast.configure();
+    const basictoaster = (toastname, status) => {
+        switch (toastname) {
+            case 'successToast':
+                toast.success(status, {
+                    position: toast.POSITION.TOP_RIGHT
+                });
+                break;
+            case 'dangerToast':
+                toast.error(status, {
+                    position: toast.POSITION.TOP_RIGHT
+                });
+                break;
+            default:
+        }
+    };
     const [isOpen, setIsOpen] = useState(true);
+    const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
+    const [optionsMaj, setoptionsMaj] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [initialOptions, setInitialOptions] = useState({});
 
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
+    const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
 
+        if (inputValue.length === 0) {
+            setOptions(initialOptions[fieldName] || []);
+        } else if (inputValue.length >= 1) {
+            const existingOption = options.some(option =>
+                option.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+            if (!existingOption) {
+                setLoading(true);
+                handelingSelect(tableName, setOptions, fieldName, inputValue);
+            }
+        }
+    };
+    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
+        if (!tablename) return
+        try {
+            setLoading(true);
+            const { data } = await axiosClient.get("SelectDatat", {
+                params: {
+                    search: searchTerm,
+                    table: tablename
+                }
+            });
+            const formattedOptions = data.map(item => ({
+                value: item.id,
+                label: item.name || item.gmt || item.dialect,
+            }));
+
+            setOptions(formattedOptions);
+            if (!searchTerm) {
+                setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
+            }
+        } catch (err) {
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+        } finally {
+            setLoading(false);
+        }
+
+    };
+    const onSubmit = async (data) => {
+        if (props.id) {
+            const formDate = Object.fromEntries(
+                Object.entries(data).map(([key, value]) => {
+                    if (typeof value === 'object' && value !== null) {
+                        return [key, value.value];
+                    }
+                    return [key, value];
+                })
+            );
+            formDate['vendor_id'] = props.id;
+            try {
+                const response = await axiosClient.post("VendorEducation", formDate);
+                basictoaster("successToast", "Added successfully !");
+            } catch (err) {
+                const response = err.response;
+                if (response && response.data) {
+                    const errors = response.data;
+                    Object.keys(errors).forEach(key => {
+                        const messages = errors[key];
+                        if (messages.length > 0) {
+                            messages.forEach(message => {
+                                basictoaster("dangerToast", message);
+                            });
+                        }
+                    });
+                }
+            }
+        } else {
+            basictoaster("dangerToast", "Make sure to send your personal information first.");
+            const section = document.getElementById("personal-data");
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+
+    };
+    const renameKeys = (obj, keysMap) => {
+        if (!obj) { return }
+        return Object?.keys(obj)?.reduce((acc, key) => {
+            const newKey = keysMap[key] || key;
+            acc[newKey] = obj[key];
+            return acc;
+        }, {});
+    };
+    useEffect(() => {
+        if (props.EducationVendor) {
+            if (props.EducationVendor.EducationVendor) {
+                const data = props.EducationVendor.EducationVendor
+                setValue("university_name", data?.university_name)
+                setValue("latest_degree", data?.latest_degree)
+                setValue("year_of_graduation", data?.year_of_graduation)
+                setValue("major", renameKeys(data?.major, { id: "value", name: "label" }))
+
+            }
+        }
+    }, [props.EducationVendor])
     return (
         <Fragment>
             <Card>
@@ -29,23 +152,44 @@ const Education = () => {
                                 <FormGroup className="row">
                                     <Label className="col-sm-3 col-form-label" for="validationCustom01">University name</Label>
                                     <Col sm="9">
-                                        <Input className="form-control" type="text" placeholder="University name" />
+                                        {/* <Input className="form-control" type="text" placeholder="University name" /> */}
+                                        <input
+                                            defaultValue=""
+                                            className="form-control"
+                                            type="text"
+                                            name="university_name"
+                                            {...register("university_name", { required: true })}
+                                        />
                                     </Col>
                                 </FormGroup>
                             </Col>
 
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-
                                     <Label className="col-sm-3 col-form-label" for="validationCustom01">Latest Degree</Label>
                                     <Col sm="9">
-
-                                        <Select  options={[
-                                            { value: 'Associate degree', label: 'Associate degree' },
-                                            { value: "Bachelor's degree", label: "Bachelor's degree" },
-                                            { value: "Master's degree", label: "Master's degree" },
-                                            { value: "Doctoral degree", label: "Doctoral degree" },
-                                        ]} className="js-example-basic-single col-sm-12" />
+                                        <Controller
+                                            name="latest_degree"
+                                            control={control}
+                                            rules={{ required: true }}
+                                            render={({ field }) => (
+                                                <Select
+                                                    id='Status'
+                                                    {...field}
+                                                    value={field.value || { value: '', label: '-- Select Latest Degree --' }}
+                                                    options={[
+                                                        { value: 'Associate degree', label: 'Associate degree' },
+                                                        { value: "Bachelor's degree", label: "Bachelor's degree" },
+                                                        { value: "Master's degree", label: "Master's degree" },
+                                                        { value: "Doctoral degree", label: "Doctoral degree" },
+                                                    ]}
+                                                    className="js-example-basic-single col-sm-12"
+                                                    onChange={(option) => {
+                                                        field.onChange(option);
+                                                    }}
+                                                />
+                                            )}
+                                        />
                                     </Col>
                                 </FormGroup>
                             </Col>
@@ -53,28 +197,55 @@ const Education = () => {
                                 <FormGroup className="row">
                                     <Label className="col-sm-3 col-form-label" for="validationCustom01">Year of graduation</Label>
                                     <Col sm="9">
-
-                                        <Input className="form-control" type="text" placeholder="" />
+                                        <input
+                                            defaultValue=""
+                                            className="form-control"
+                                            type="text"
+                                            name="year_of_graduation"
+                                            {...register("year_of_graduation", { required: true })}
+                                        />
                                     </Col>
                                 </FormGroup>
                             </Col>
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
 
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Status</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Major</Label>
                                     <Col sm="9">
 
-                                <Select  options={[
-                                    { value: 'Information Technology', label: 'Information Technology' },
-                                    { value: "Mechanical Engineering", label: "Mechanical Engineering" },
-                                    { value: "Statistics", label: "Statistics" },
-                                    { value: "Engineering", label: "Engineering" },
-                                    { value: "Other", label: "Other" },
-                                        ]} className="js-example-basic-single col-sm-12" />
+                                        <Controller
+                                            name="major"
+                                            control={control}
+                                            rules={{ required: true }}
+                                            render={({ field }) => (
+                                                <Select
+                                                    {...field}
+                                                    value={field.value}
+                                                    options={optionsMaj}
+                                                    onInputChange={(inputValue) =>
+                                                        handleInputChange(inputValue, "major", "major", setoptionsMaj, optionsMaj)
+                                                    }
+                                                    className="js-example-basic-single col-sm-12"
+                                                    isSearchable
+                                                    noOptionsMessage={() => loading ? (
+                                                        <div className="loader-box" >
+                                                            <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                        </div>
+                                                    ) : 'No options found'}
+                                                    onChange={(option) => {
+                                                        field.onChange(option);
+                                                    }}
+
+                                                />
+                                            )}
+                                        />
                                         </Col>
                                     </FormGroup>
                             </Col>
                         </Row>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: "2%" }}>
+                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit)}}>Submit</Btn>
+                        </div>
                     </CardBody>
                 </Collapse>
             </Card>

@@ -470,7 +470,7 @@ const PersonalData = (props) => {
                         <Controller
                           name="type"
                           control={control}
-                          rules={{ required: false }}
+                          rules={{ required: true }}
                           render={({ field }) => (
                             <Select
                               id='type'
@@ -878,7 +878,27 @@ const PersonalData = (props) => {
                         />
                       </Col>
                     </FormGroup>
-                  </Col>
+                    </Col>
+                    {props.vendorPersonalData?.PersonalData?.contact ? (
+                      <Col md="6" id="Old_Contact-wrapper">
+                        <FormGroup className="row">
+                          <Label className="col-sm-3 col-form-label" for="validationCustom01">Old Contact</Label>
+                          <Col sm="9">
+                            <input
+                              disabled={isSubmitting}
+                              className="form-control"
+                              defaultValue={props.vendorPersonalData.PersonalData.contact}
+                              // onChange={(e) => console.log(e.target.value)}
+                              placeholder="Old Contact Info"
+                            />
+                          </Col>
+                        </FormGroup>
+                      </Col>
+                    ) : (
+                      <Col md="6" id="Old_Contact-wrapper" style={{ minHeight: '100px' }}>
+                        <div style={{ height: '100%' }} />
+                      </Col>
+                    )}
                   < Col md="6" >
                     <FormGroup className="row" >
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > Notes </Label>
@@ -925,50 +945,38 @@ const PersonalData = (props) => {
                       </Col>
                     </FormGroup>
                   </Col>
-                  {
-                    Status && <Col md="6" id="reject_reason-wrapper" >
-                      <FormGroup className="row" >
+                    {
+                      Status && (
+                        <Col md="12" id="reject_reason-wrapper">
+                          <FormGroup className="row">
+                            <Label className="col-form-label" style={{ width: '12.5%' }} for="validationCustom01">
+                              Rejection Reason
+                            </Label>
 
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01" > Rejection Reason </Label>
-                        < Col sm="9" >
 
-                          <CKEditor
-                            editor={ClassicEditor}
-                            data={props.vendorPersonalData?.PersonalData?.reject_reason || ""}
-
-                            onChange={(event, editor) => {
-                              const data = editor.getData();
-                              setValue('reject_reason', data);
-                            }
-                            }
-                            disabled={isSubmitting || (props.permission && props.permission.reject_reason === "disable")}
-                          />
-                          < input
-                              disabled hidden
-                            {...register('reject_reason', { required: true })}
-                          />
+                            <Col style={{ width: '87.5%' }}>
+                              <CKEditor
+                                editor={ClassicEditor}
+                                data={props.vendorPersonalData?.PersonalData?.reject_reason || ""}
+                                onChange={(event, editor) => {
+                                  const data = editor.getData();
+                                  setValue('reject_reason', data);
+                                }}
+                                disabled={isSubmitting || (props.permission && props.permission.reject_reason === "disable")}
+                              />
+                              <input
+                                disabled
+                                hidden
+                                {...register('reject_reason', { required: true })}
+                              />
+                            </Col>
+                          </FormGroup>
                         </Col>
-                      </FormGroup>
-                      </Col>}
-                    
-                    {props.vendorPersonalData?.PersonalData?.contact && (
-                      < Col md="6" id="name-wrapper" >
-                    <FormGroup className="row" >
+                      )
+                    }
 
-                          <Label className="col-sm-3 col-form-label" for="validationCustom01" > Old Contact </Label>
-                      < Col sm="9" >
-                        <input
-                          disabled={isSubmitting}
-                          className="form-control"
-                              defaultValue={props.vendorPersonalData.PersonalData.contact}
-                              onChange={(e) => console.log(e.target.value)}
-                              placeholder="Old Contact Info"
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                      
-                    )}
+                    
+                   
                 </Row>
                 < div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Btn

@@ -55,4 +55,9 @@ class TaskType extends Model
         ];
 
     }
+    public static function getColumnValue($id)
+    {
+        return self::where('parent', $id)->get();
+    }
+
 }

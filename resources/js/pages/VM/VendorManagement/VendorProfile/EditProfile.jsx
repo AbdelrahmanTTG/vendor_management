@@ -31,6 +31,9 @@ const EditProfile = () => {
     const [VendorExperience, setExperience] = useState([]);
     const [VendorFiles, setVendorFiles] = useState([]);
     const [InstantMessaging, setInstantMessaging] = useState([]);
+    const [priceList, setpriceList] = useState([]); 
+    const [VendorTestData, setVendorTestData] = useState([]);
+    const [EducationVendor, setEducationVendor] = useState([]);
 
 
 
@@ -60,7 +63,10 @@ const EditProfile = () => {
                         BillingData: "BillingData",
                         Experience: "VendorExperience",
                         VendorFiles: "VendorFiles",
-                        InstantMessaging: "InstantMessaging"
+                        InstantMessaging: "InstantMessaging", 
+                        priceList: "priceList",
+                        VendorTestData: "VendorTestData",
+                        EducationVendor:"EducationVendor"
 
                     });
                     setPersonalData({ PersonalData: data.data.Data });
@@ -69,7 +75,10 @@ const EditProfile = () => {
                     setExperience({ Experience: data.data.Experience })
                     setVendorFiles({ VendorFiles: data.data.VendorFiles })
                     setInstantMessaging({ InstantMessaging: data.data.InstantMessaging })
-                    // console.log(data.data)
+                    setpriceList({ priceList: data.data.priceList })
+                    setVendorTestData({ VendorTestData: data.data.VendorTestData })
+                    setEducationVendor({ EducationVendor: data.data.EducationVendor })
+
                 } catch (error) {
                     console.error('Error fetching vendor:', error);
                 } finally {
@@ -106,13 +115,13 @@ const EditProfile = () => {
                     <FilesCertificate id={vendor?.id} mode="edit" VendorFiles={VendorFiles} onSubmit="onUpdate"  />
                 </div>
                 <div id='Education'>
-                    <Education />
+                    <Education id={vendor?.id} EducationVendor={EducationVendor} />
                 </div>
                 <div id='Experience'>
                     <Experience id={vendor?.id} Experience={VendorExperience} mode="edit" onSubmit="onUpdate" />
                 </div>
                 <div id='Test'>
-                    <Test />
+                    <Test id={vendor?.id} VendorTestData={VendorTestData} />
                 </div>
                 <div id='Billing'>
                     <Billing id={vendor?.id} BillingData={BillingData} onSubmit="onUpdate" mode="edit"  />
@@ -121,7 +130,7 @@ const EditProfile = () => {
                     <Portal_User email={vendor?.email} onSubmit="onUpdate" mode="edit" />
                 </div>
                 <div id='Price_List'>
-                    <Price_List />
+                    <Price_List Currency={BillingData?.BillingData?.billingData?.billing_currency} id={vendor?.id} priceList={priceList} />
                 </div>
                 <div id='Evaluation'>
                     <Evaluation />

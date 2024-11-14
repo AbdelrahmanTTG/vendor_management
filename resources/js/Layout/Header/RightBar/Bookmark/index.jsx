@@ -69,13 +69,13 @@ const Bookmarks = () => {
         }
         if (!Items.children) return false;
         Items.children.filter((subItems) => {
-          if (subItems.title.toLowerCase().includes(keyword) && subItems.type === "link") {
+          if (subItems.name.toLowerCase().includes(keyword) && subItems.type === "link") {
             subItems.icon = Items.icon;
             items.push(subItems);
           }
           if (!subItems.children) return false;
           subItems.children.filter((suSubItems) => {
-            if (suSubItems.title.toLowerCase().includes(keyword)) {
+            if (suSubItems.name.toLowerCase().includes(keyword)) {
               suSubItems.icon = Items.icon;
               items.push(suSubItems);
             }

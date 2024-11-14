@@ -1,19 +1,165 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState ,useEffect } from 'react';
 import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table, Media, FormGroup } from 'reactstrap';
-import { Btn, H5 } from '../../../../AbstractElements';
+import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
+import axiosClient from "../../../AxiosClint";
+import { toast } from 'react-toastify';
+import { useForm, Controller } from 'react-hook-form';
 
-const Test = () => {
+const Test = (props) => {
+    toast.configure();
+    const basictoaster = (toastname, status) => {
+        switch (toastname) {
+            case 'successToast':
+                toast.success(status, {
+                    position: toast.POSITION.TOP_RIGHT
+                });
+                break;
+            case 'dangerToast':
+                toast.error(status, {
+                    position: toast.POSITION.TOP_RIGHT
+                });
+                break;
+            default:
+                break;
+        }
+    };
     const [isOpen, setIsOpen] = useState(true);
     const [isChecked, setIsChecked] = useState(false);
+    const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
+    const [loading, setLoading] = useState(false);
+    const [initialOptions, setInitialOptions] = useState({});
 
+    const [optionsMain, setOptionsMain] = useState([]);
+    const [optionsSub, setOptionsSub] = useState([]);
+    const [optionsSL, setOptionsSL] = useState([]);
+    const [optionsTL, setOptionsTL] = useState([]);
+    const [optionsSre, setOptionsSer] = useState([]);
+    const [testFileName, setTestFileName] = useState(null);
+    const [selectedOption, setSelectedOption] = useState("1");
+    const [testResult, setTestResult] = useState("1");
+
+    const handleChange = (event) => {
+        setSelectedOption(event.target.value);
+    };
+    const handleTestResultChange = (event) => {
+        setTestResult(event.target.value);
+    };
     const handleCheckboxChange = () => {
         setIsChecked(!isChecked);
     };
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
+    const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
 
+        if (inputValue.length === 0) {
+            setOptions(initialOptions[fieldName] || []);
+        } else if (inputValue.length >= 1) {
+            const existingOption = options.some(option =>
+                option.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+            if (!existingOption) {
+                setLoading(true);
+                handelingSelect(tableName, setOptions, fieldName, inputValue);
+            }
+        }
+    };
+    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
+        if (!tablename) return
+        try {
+            setLoading(true);
+            const { data } = await axiosClient.get("SelectDatat", {
+                params: {
+                    search: searchTerm,
+                    table: tablename
+                }
+            });
+            const formattedOptions = data.map(item => ({
+                value: item.id,
+                label: item.name || item.gmt || item.dialect,
+            }));
+
+            setOptions(formattedOptions);
+            if (!searchTerm) {
+                setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
+            }
+        } catch (err) {
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+        } finally {
+            setLoading(false);
+        }
+
+    };
+
+   
+    const handleFileChange = (event, setFileName) => {
+        const file = event.target.files[0];
+
+        setFileName(file ? file : null);
+    };
+
+    const onSubmit = async (data) => {
+        if (!props.id) {
+            basictoaster("dangerToast", "Make sure to send your personal information first.");
+            const section = document.getElementById("personal-data");
+            section.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            const formData = new FormData();
+            formData.append('test', testFileName);
+            Object.entries(data).forEach(([key, value]) => {
+                if (typeof value === 'object' && value !== null) {
+                    formData.append(key, value.value);
+                } else {
+                    formData.append(key, value);
+                }
+            });
+            formData.append('test_type', selectedOption);
+            formData.append('test_result', testResult);
+            formData.append('vendor_id', props.id);
+            try {
+                const response = await axiosClient.post("VendorTest", formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+            } catch (err) {
+                console.error("Error:", err.response ? err.response.data : err.message);
+            }
+
+        }
+      
+
+    }
+    const renameKeys = (obj, keysMap) => {
+        if (!obj) { return }
+        return Object?.keys(obj)?.reduce((acc, key) => {
+            const newKey = keysMap[key] || key;
+            acc[newKey] = obj[key];
+            return acc;
+        }, {});
+    };
+    useEffect(() => {
+        if (props.VendorTestData) { 
+            if (props.VendorTestData.VendorTestData) {
+                const data = props.VendorTestData.VendorTestData
+                setSelectedOption(data?.test_type)
+                setTestResult(data?.test_result)
+                setValue("source_lang", renameKeys(data?.source_language, { id: "value", name: "label" }))
+                setValue("target_lang", renameKeys(data?.target_language, { id: "value", name: "label" }))
+                setValue("MainSubject", renameKeys(data?.main_subject, { id: "value", name: "label" }))
+                setValue("SubSubject", renameKeys(data?.sub_subject, { id: "value", name: "label" }))
+                setValue("service", renameKeys(data?.service, { id: "value", name: "label" }))
+            }
+        }
+    }, [props.VendorTestData])
     return (
         <Fragment>
             <Card>
@@ -47,13 +193,29 @@ const Test = () => {
                                             Test Type :
                                         </Label>
                                         <div className="radio radio-primary me-3 ms-4">
-                                            <Input id="radio11" type="radio" name="radio1" value="option1" defaultChecked />
-                                            <Label for="radio11" style={{ margin: 0, lineHeight: '1.5' }}>
+                                            <Input
+                                                id="radio11"
+                                                value="1"
+                                                className="form-control"
+                                                type="radio"
+                                                name="radio1"
+                                                checked={selectedOption == "1"} 
+                                                onChange={handleChange} 
+                                            />
+                                       <Label for="radio11" style={{ margin: 0, lineHeight: '1.5' }}>
                                                 <span className="digits">{"Client Test"}</span>
                                             </Label>
                                         </div>
                                         <div className="radio radio-danger ">
-                                            <Input id="radio12" type="radio" name="radio1" value="option1" />
+                                            <Input
+                                                id="radio12"
+                                                value="0"
+                                                className="form-control"
+                                                type="radio"
+                                                name="radio1"
+                                                checked={selectedOption == "0"} 
+                                                onChange={handleChange} 
+                                            />
                                             <Label for="radio12" style={{ margin: 0, lineHeight: '1.5' }}>
                                                 <span className="digits">{"On boarding test"}</span>
                                             </Label>
@@ -65,13 +227,27 @@ const Test = () => {
                                             Test result :
                                         </Label>
                                         <div className="radio radio-primary me-3 ms-3">
-                                            <Input id="radio21" type="radio" name="radio2" value="option1" defaultChecked />
+                                            <Input
+                                                id="radio21"
+                                                type="radio"
+                                                name="radio2"
+                                                value="1"
+                                                checked={testResult == "1"}
+                                                onChange={handleTestResultChange}
+                                            />
                                             <Label for="radio21" style={{ margin: 0, lineHeight: '1.5' }}>
                                                 <span className="digits">{"Pass"}</span>
                                             </Label>
                                         </div>
                                         <div className="radio radio-danger ms-5">
-                                            <Input id="radio22" type="radio" name="radio2" value="option1" />
+                                            <Input
+                                                id="radio22"
+                                                type="radio"
+                                                name="radio2"
+                                                value="0"
+                                                checked={testResult == "0"}
+                                                onChange={handleTestResultChange}
+                                            />
                                             <Label for="radio22" style={{ margin: 0, lineHeight: '1.5' }}>
                                                 <span className="digits">{"Fail"}</span>
                                             </Label>
@@ -82,7 +258,21 @@ const Test = () => {
                                             Test Upload :
                                         </Label>
                                         <div className="radio radio-primary me-3">
-                                            <Input id="radio21" type="file" name="" />
+                                            <Controller
+                                                name="test"
+                                                control={control}
+                                                rules={{ required: "test is required" }}
+                                                render={({ field }) => (
+                                                    <input
+                                                        type="file"
+                                                        className="form-control"
+                                                        onChange={(e) => {
+                                                            handleFileChange(e, setTestFileName);
+                                                            field.onChange(e);
+                                                        }}
+                                                    />
+                                                )}
+                                            />
 
                                         </div>
 
@@ -99,7 +289,33 @@ const Test = () => {
                                             <FormGroup className="row">
                                                 <Label className="col-sm-3 col-form-label" for="validationCustom01">Source</Label>
                                                 <Col sm="9">
-                                                    <Select className="js-example-basic-single col-sm-12" />
+
+                                                    <Controller
+                                                        name="source_lang"
+                                                        control={control}
+                                                        rules={{ required: true }}
+                                                        render={({ field }) => (
+                                                            <Select
+                                                                {...field}
+                                                                value={field.value}
+                                                                options={optionsSL}
+                                                                onInputChange={(inputValue) =>
+                                                                    handleInputChange(inputValue, "languages", "source_lang", setOptionsSL, optionsSL)
+                                                                }
+                                                                className="js-example-basic-single col-sm-12"
+                                                                isSearchable
+                                                                noOptionsMessage={() => loading ? (
+                                                                    <div className="loader-box" >
+                                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                    </div>
+                                                                ) : 'No options found'}
+                                                                onChange={(option) => {
+                                                                    field.onChange(option);
+                                                                }}
+
+                                                            />
+                                                        )}
+                                                    />
                                                 </Col>
                                             </FormGroup>
                                         </Col>
@@ -111,7 +327,32 @@ const Test = () => {
                                                 <Col sm="9">
 
 
-                                                    <Select  className="js-example-basic-single col-sm-12" />
+                                                    <Controller
+                                                        name="target_lang"
+                                                        control={control}
+                                                        rules={{ required: true }}
+                                                        render={({ field }) => (
+                                                            <Select
+                                                                {...field}
+                                                                value={field.value}
+                                                                options={optionsTL}
+                                                                onInputChange={(inputValue) =>
+                                                                    handleInputChange(inputValue, "languages", "target_lang", setOptionsTL, optionsTL)
+                                                                }
+                                                                className="js-example-basic-single col-sm-12"
+                                                                isSearchable
+                                                                noOptionsMessage={() => loading ? (
+                                                                    <div className="loader-box" >
+                                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                    </div>
+                                                                ) : 'No options found'}
+                                                                onChange={(option) => {
+                                                                    field.onChange(option);
+                                                                }}
+
+                                                            />
+                                                        )}
+                                                    />
                                                 </Col>
                                             </FormGroup>
                                         </Col>
@@ -120,29 +361,106 @@ const Test = () => {
 
                                                 <Label className="col-sm-3 col-form-label" for="validationCustom01">Main-Subject Matter</Label>
                                                 <Col sm="9">
+                                                    <Controller
+                                                        name="MainSubject"
+                                                        control={control}
+                                                        rules={{ required: true }}
+                                                        render={({ field }) => (
+                                                            <Select
+                                                                {...field}
+                                                                value={field.value}
+                                                                options={optionsMain}
+                                                                onInputChange={(inputValue) =>
+                                                                    handleInputChange(inputValue, "MainSubjectMatter", "MainSubject", setOptionsMain, optionsMain)
+                                                                }
+                                                                className="js-example-basic-single col-sm-12"
+                                                                isSearchable
+                                                                noOptionsMessage={() => loading ? (
+                                                                    <div className="loader-box" >
+                                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                    </div>
+                                                                ) : 'No options found'}
+                                                                onChange={(option) => {
 
-                                                    <Select className="js-example-basic-single col-sm-12" />
+                                                                    field.onChange(option);
+                                                                }}
+
+                                                            />
+                                                        )}
+                                                    />
                                                 </Col>
                                             </FormGroup>
                                         </Col>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
 
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Main-Subject Matter</Label>
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Sub–Subject Matter</Label>
                                                 <Col sm="9">
+                                                    <Controller
+                                                        name="SubSubject"
+                                                        control={control}
+                                                        rules={{ required: true }}
+                                                        render={({ field }) => (
+                                                            <Select
+                                                                {...field}
+                                                                value={field.value}
+                                                                options={optionsSub}
+                                                                onInputChange={(inputValue) =>
+                                                                    handleInputChange(inputValue, "MainSubjectMatter", "SubSubject", setOptionsSub, optionsSub)
+                                                                }
+                                                                className="js-example-basic-single col-sm-12"
+                                                                isSearchable
+                                                                noOptionsMessage={() => loading ? (
+                                                                    <div className="loader-box" >
+                                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                    </div>
+                                                                ) : 'No options found'}
+                                                                onChange={(option) => {
+                                                                    field.onChange(option);
+                                                                }}
 
-                                                    <Select  className="js-example-basic-single col-sm-12" />
+                                                            />
+                                                        )}
+                                                    />
                                                 </Col>
                                             </FormGroup></Col>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Sub–Subject Matter</Label>
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Service</Label>
                                                 <Col sm="9">
-                                                <Select  className="js-example-basic-single col-sm-12" />
-                                           </Col>
+                                                    <Controller
+                                                        name="service"
+                                                        control={control}
+                                                        rules={{ required: true }}
+                                                        render={({ field }) => (
+                                                            <Select
+                                                                {...field}
+                                                                value={field.value}
+                                                                options={optionsSre}
+                                                                onInputChange={(inputValue) =>
+                                                                    handleInputChange(inputValue, "services", "service", setOptionsSer, optionsSre)
+                                                                }
+                                                                className="js-example-basic-single col-sm-12"
+                                                                isSearchable
+                                                                noOptionsMessage={() => loading ? (
+                                                                    <div className="loader-box" >
+                                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                    </div>
+                                                                ) : 'No options found'}
+                                                                onChange={(option) => {
+                                                                    field.onChange(option);
+                                                                }}
+
+                                                            />
+                                                        )}
+                                                    />
+                                                </Col>
                                             </FormGroup>
                                         </Col>
                                     </Row>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                    <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit) }}>Submit</Btn>
                                 </div>
                             </div>
                         }

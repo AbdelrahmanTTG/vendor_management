@@ -4,7 +4,7 @@ import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, set } from 'react-hook-form';
 import axiosClient from "../../../../pages/AxiosClint";
 import { toast } from 'react-toastify';
 import SweetAlert from 'sweetalert2';
@@ -24,6 +24,7 @@ const Billing = (props) => {
     const [errorMessage, setErrorMessage] = useState("");
     const [BillingData_id, setBillingData_id] = useState("");
     const [BankData_id, setBankData_id] = useState("");
+    const [dataB, setdataB] = useState();
 
 
 
@@ -83,6 +84,7 @@ const Billing = (props) => {
         { value: '4', label: '-- Other --' },
     ];
     const addRow = () => {
+        if(isSubmitting){return}
         const newRow = {
             id: rows.length + 1,
             type: null,
@@ -199,6 +201,8 @@ const Billing = (props) => {
         }
     };
     const Update = async (data) => { 
+        if (isSubmitting) { return }
+
         const formData = { ...data };
         const result = rows?.map((row, index) => ({
             id: row.idUpdate,
@@ -213,18 +217,21 @@ const Billing = (props) => {
         }
         newFormData['BillingData_id'] = BillingData_id; 
         newFormData['BankData_id'] = BankData_id; 
-        setBankData_id
+        newFormData['vendor_id'] = props.id;
         delete newFormData.method;
         delete newFormData.account;
-  
+
         try {
             const response = await axiosClient.post("UpdateBillingData", newFormData);
+            setdataB(response.data)
             basictoaster("successToast", "Updated successfully !");
-            setRows([])
-            response.data.forEach(element => {
-                editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
-                setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
-            });
+            props.Currancy(optionsC)
+         
+
+            // response.data.forEach(element => {
+            //     editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
+            //     setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
+            // });
           
         } catch (err) {
             const response = err.response;
@@ -275,15 +282,14 @@ const Billing = (props) => {
                 setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
             }
         } catch (err) {
-            console.log(err)
-            // const response = err.response;
-            // if (response && response.status === 422) {
-            //     setErrorMessage(response.data.errors);
-            // } else if (response && response.status === 401) {
-            //     setErrorMessage(response.data.message);
-            // } else {
-            //     setErrorMessage("An unexpected error occurred.");
-            // }
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
         } finally {
             setLoading(false);
         }
@@ -297,8 +303,9 @@ const Billing = (props) => {
             setLoading(true);
             if (props.BillingData) {
                 if (props.BillingData.BillingData) {
-                    const data = props.BillingData.BillingData;
-                    if (data.billingData) {
+                    if (!dataB) { setdataB(props.BillingData.BillingData) }
+                    const data = dataB;
+                    if (data?.billingData) {
                         setBillingData_id(data.billingData.id)
                         setValue("billing_legal_name", data.billingData.billing_legal_name)
                         setValue("city", data.billingData.city)
@@ -308,11 +315,12 @@ const Billing = (props) => {
                             label: data.billingData.billing_currency.name
                         } : null;
                         setSelectedOptionC(billing_currency);
+                        // props.Currancy(billing_currency)
                         setValue("billing_currency", billing_currency.value);
                         setValue("street", data.billingData.street)
                         setValue("billing_address", data.billingData.billing_address)
                     }
-                    if (data.bankData) {
+                    if (data?.bankData) {
                         setBankData_id(data.bankData.id)
                         setValue("bank_name", data.bankData.bank_name)
                         setValue("account_holder", data.bankData.account_holder)
@@ -321,7 +329,8 @@ const Billing = (props) => {
                         setValue("payment_terms", data.bankData.payment_terms)
                         setValue("bank_address", data.bankData.bank_address)
                     }
-                    if (data.walletData) {
+                    if (data?.walletData) {
+                        setRows([])
                         data.walletData.forEach(element => {
                             editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
                             setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
@@ -335,10 +344,11 @@ const Billing = (props) => {
 
         }
         
-    }, [props.BillingData, setValue])
+    }, [props.BillingData, setValue , dataB])
   
 
     const onSubmit = async (data) => {
+        if (isSubmitting) { return }
         if (!props.id) {
             basictoaster("dangerToast", "Make sure to send your personal information first.");
             const section = document.getElementById("personal-data");
@@ -363,6 +373,7 @@ const Billing = (props) => {
                 const response = await axiosClient.post("storeBilling", newFormData);
                 basictoaster("successToast", "Added successfully !");
                 setIsSubmitting(true)
+                props.Currancy(selectedOptionC)
             } catch (err) {
                 const response = err.response;
                 if (response && response.data) {
@@ -555,7 +566,7 @@ const Billing = (props) => {
                                                         <Col sm="9">
                                                             <CKEditor
                                                                 editor={ClassicEditor}
-                                                                data={isChecked.billing_address || props.BillingData?.BillingData?.billingData?.billing_address}
+                                                                data={isChecked.billing_address || props.BillingData?.BillingData?.billingData?.billing_address || ""}
                                                                 onChange={(event, editor) => {
                                                                     const data = editor.getData();
                                                                     setValue('billing_address', data);
@@ -739,7 +750,6 @@ const Billing = (props) => {
                                                                             className="js-example-basic-single col-sm-12"
                                                                             onChange={(selectedOption) => {
                                                                                 field.onChange(selectedOption);
-                                                                                // console.log(selectedOption)
                                                                                 handleSelectChange(selectedOption, row.id);
                                                                             }}
                                                                             value={field.value}
