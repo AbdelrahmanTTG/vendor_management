@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Previous, Next } from '../../../../Constant';
 import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
-const Vendor = () => {  
+const Vendor = () => {
     const [vendors, setVendors] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -13,67 +13,77 @@ const Vendor = () => {
     const [loading, setLoading] = useState(false);
     const [initialOptions, setInitialOptions] = useState({});
     const [errorMessage, setErrorMessage] = useState(null);
-    const [selectedSearchCol, setSelectedSearchCol] = useState([]);    
-    const [optionsC, setOptionsC] = useState([]);    
+    const [selectedSearchCol, setSelectedSearchCol] = useState([]);
+    const [optionsC, setOptionsC] = useState([]);
+    const [optionsN, setOptionsN] = useState([]);
     const [queryParams, setQueryParams] = useState(null);
 
     const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
         if (inputValue.length === 0) {
-          setOptions(initialOptions[fieldName] || []);
+            setOptions(initialOptions[fieldName] || []);
         } else if (inputValue.length >= 1) {
-          const existingOption = options.some(option =>
-            option.label.toLowerCase().includes(inputValue.toLowerCase())
-          );
-          if (!existingOption) {
-            setLoading(true);
-            handelingSelect(tableName, setOptions, fieldName, inputValue);
-          }
+            const existingOption = options.some(option =>
+                option.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+            if (!existingOption) {
+                setLoading(true);
+                handelingSelect(tableName, setOptions, fieldName, inputValue);
+            }
         }
-      };
-      const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
+    };
+    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
         if (!tablename) return
         try {
-          setLoading(true);
-          const { data } = await axiosClient.get("SelectDatat", {
-            params: {
-              search: searchTerm,
-              table: tablename
+            setLoading(true);
+            const { data } = await axiosClient.get("SelectDatat", {
+                params: {
+                    search: searchTerm,
+                    table: tablename
+                }
+            });
+            const formattedOptions = data.map(item => ({
+                value: item.id,
+                label: item.name || item.gmt,
+            }));
+
+            setOptions(formattedOptions);
+            if (!searchTerm) {
+                setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
             }
-          });
-          const formattedOptions = data.map(item => ({
-            value: item.id,
-            label: item.name || item.gmt,
-          }));
-    
-          setOptions(formattedOptions);
-          if (!searchTerm) {
-            setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
-          }
         } catch (err) {
-          const response = err.response;
-          if (response && response.status === 422) {
-            setErrorMessage(response.data.errors);
-          } else if (response && response.status === 401) {
-            setErrorMessage(response.data.message);
-          } else {
-            setErrorMessage("An unexpected error occurred.");
-          }
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
-    
-      };
+
+    };
     useEffect(() => {
         handelingSelect("countries", setOptionsC, "country");
+        handelingSelect("countries", setOptionsN, "nationality");
     }, []);
 
     const options = [
         { value: 'name', label: 'Name' },
+        { value: 'legal_name', label: 'Legal Name' },
         { value: 'email', label: 'Email' },
         { value: 'status', label: 'Status' },
         { value: 'type', label: 'Type' },
         { value: 'country', label: 'Country' },
-    ];   
+        { value: 'nationality', label: 'Nationality' },
+    ];
+    const handleSearchInputsOnChange = (values) => {
+        setSelectedSearchCol(values.map(item => item.value));
+        if(values.length == 0){
+            setQueryParams(null);
+        }
+    }
     const searchVendors = (event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
@@ -178,25 +188,33 @@ const Vendor = () => {
                     <CardBody className='pt-0 px-3'>
                         <div className="search-panel mb-3">
                             <label className='f-12'>Searching Fields:   </label>
-                            <Select onChange={e => setSelectedSearchCol(e.map(item => item.value))} options={options} className="js-example-placeholder-multiple col-sm-12" isMulti />
+                            <Select onChange={e => handleSearchInputsOnChange(e)} options={options} className="js-example-placeholder-multiple col-sm-12" isMulti />
 
                         </div>
-                        <div className="search-panel mb-3">                            
+                        <div className="search-panel pb-3 b-b-primary">
                             {selectedSearchCol.length > 0 &&
                                 <form onSubmit={searchVendors}>
                                     <Row>
                                         {selectedSearchCol.indexOf("name") > -1 &&
                                             <Col>
                                                 <FormGroup>
-                                                    <Label className="col-form-label-sm" htmlFor='name'>{'Name'}</Label>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Name'}</Label>
                                                     <Input className='form-control form-control-sm' type='text' name='name' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }
+                                        {selectedSearchCol.indexOf("legal_name") > -1 &&
+                                            <Col>
+                                                <FormGroup>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='legal_name'>{'legal Name'}</Label>
+                                                    <Input className='form-control form-control-sm' type='text' name='legal_name' required />
                                                 </FormGroup>
                                             </Col>
                                         }{
                                             selectedSearchCol.indexOf("email") > -1 &&
                                             <Col>
                                                 <FormGroup>
-                                                    <Label className="col-form-label-sm" htmlFor='name'>{'Email'}</Label>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Email'}</Label>
                                                     <Input className='form-control form-control-sm' type='email' name='email' required />
                                                 </FormGroup>
                                             </Col>
@@ -205,7 +223,7 @@ const Vendor = () => {
                                             selectedSearchCol.indexOf("type") > -1 &&
                                             <Col>
                                                 <FormGroup>
-                                                    <Label className="col-form-label-sm" htmlFor='name'>{'Type'}</Label>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Type'}</Label>
                                                     <Select id='type' required
                                                         name='type'
                                                         options={
@@ -222,7 +240,7 @@ const Vendor = () => {
                                             selectedSearchCol.indexOf("status") > -1 &&
                                             <Col>
                                                 <FormGroup>
-                                                    <Label className="col-form-label-sm" htmlFor='name'>{'Status'}</Label>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Status'}</Label>
                                                     <Select id='status' required
                                                         name='status'
                                                         options={
@@ -239,12 +257,25 @@ const Vendor = () => {
                                             selectedSearchCol.indexOf("country") > -1 &&
                                             <Col>
                                                 <FormGroup>
-                                                    <Label className="col-form-label-sm" htmlFor='name'>{'Country'}</Label>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Country'}</Label>
                                                     <Select name='country' id='country' required
                                                         options={optionsC} className="js-example-basic-single "
                                                         onInputChange={(inputValue) =>
                                                             handleInputChange(inputValue, "countries", "country", setOptionsC, optionsC)
-                                                          }
+                                                        }
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("nationality") > -1 &&
+                                            <Col>
+                                                <FormGroup>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'nationality'}</Label>
+                                                    <Select name='nationality' id='nationality' required
+                                                        options={optionsN} className="js-example-basic-single "
+                                                        onInputChange={(inputValue) =>
+                                                            handleInputChange(inputValue, "countries", "nationality", setOptionsN, optionsN)
+                                                        }
                                                     />
                                                 </FormGroup>
                                             </Col>
@@ -253,7 +284,7 @@ const Vendor = () => {
                                     <Row>
                                         <Col>
                                             <div className="d-inline">
-                                                <Btn attrBtn={{ color: 'btn btn-primary-gradien',className: "btn-sm ",type: 'submit' }}><i class="fa fa-search me-1"></i> Search</Btn>
+                                                <Btn attrBtn={{ color: 'btn btn-primary-gradien', className: "btn-sm ", type: 'submit' }}><i className="fa fa-search me-1"></i> Search</Btn>
                                             </div>
                                         </Col>
                                     </Row>
@@ -301,12 +332,14 @@ const Vendor = () => {
 
                                 </tbody>
                             </Table>
-                            <Pagination aria-label="Page navigation example" className="pagination-primary mt-3">
-                                <PaginationItem onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><PaginationLink >{Previous}</PaginationLink></PaginationItem>
-                                {getPaginationItems()}
+                            {totalPages > 1 &&
+                                <Pagination aria-label="Page navigation example" className="pagination-primary mt-3">
+                                    <PaginationItem onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><PaginationLink >{Previous}</PaginationLink></PaginationItem>
+                                    {getPaginationItems()}
 
-                                <PaginationItem onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}><PaginationLink >{Next}</PaginationLink></PaginationItem>
-                            </Pagination>
+                                    <PaginationItem onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}><PaginationLink >{Next}</PaginationLink></PaginationItem>
+                                </Pagination>
+                            }
                         </div>
                     </CardBody>
                 </Card>
