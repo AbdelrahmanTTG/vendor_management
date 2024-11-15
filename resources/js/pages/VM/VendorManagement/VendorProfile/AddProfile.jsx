@@ -57,7 +57,7 @@ const AddProfile = () => {
                     <Test id={data.id} onSubmit="onSubmit" />
                 </div>
                 <div id='Billing'>
-                    <Billing id={data.id} onSubmit="onSubmit" Currancy={getCurrancy} />
+                    <Billing id={1} onSubmit="onSubmit" Currancy={getCurrancy} />
                 </div>
                 <div id='Portal_User'>
                     <Portal_User email={data.email} onSubmit="onSubmit" />

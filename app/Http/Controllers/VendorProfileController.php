@@ -159,27 +159,20 @@ class VendorProfileController extends Controller
             'billing_legal_name' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'street' => 'required|string|max:255',
-            'Wallets Payment methods' => 'required_without:bank_name|array|min:1',
-            'Wallets Payment methods.*.method' => 'required_without:bank_name|string|max:10',
-            'Wallets Payment methods.*.account' => 'required_without:bank_name|string|max:255',
-            'bank_name' => 'required_without:Wallets Payment methods|string|max:255',
-            'account_holder' => 'required_without:Wallets Payment methods|string|max:255',
-            'swift_bic' => 'required_without:Wallets Payment methods|string|max:255',
-            'iban' => 'required_without:Wallets Payment methods|string|max:255',
-            'payment_terms' => 'required_without:Wallets Payment methods|string|max:255',
-            'bank_address' => 'required_without:Wallets Payment methods|string|max:255',
+            'Wallets Payment methods' => 'array|min:1',
+            'Wallets Payment methods.*.method' => 'string|max:10',
+            'Wallets Payment methods.*.account' => 'string|max:255',
         ]);
 
         $validator->after(function ($validator) use ($request) {
-            if (
-                $request->filled('bank_name') ||
-                $request->filled('account_holder') ||
-                $request->filled('swift_bic') ||
-                $request->filled('iban') ||
-                $request->filled('payment_terms') ||
-                $request->filled('bank_address')
+            $hasBankDetails = $request->filled('bank_name') || $request->filled('account_holder') || $request->filled('swift_bic') || $request->filled('iban') || $request->filled('payment_terms') || $request->filled('bank_address');
+            $hasWalletMethods = $request->has('Wallets Payment methods') && is_array($request->input('Wallets Payment methods')) && count($request->input('Wallets Payment methods')) > 0;
 
-            ) {
+            if (!$hasBankDetails && !$hasWalletMethods) {
+                $validator->errors()->add('bank_or_wallet', 'You must provide either bank details or wallet payment methods.');
+            }
+
+            if ($hasBankDetails) {
                 if (
                     empty($request->bank_name) ||
                     empty($request->account_holder) ||
@@ -188,7 +181,16 @@ class VendorProfileController extends Controller
                     empty($request->payment_terms) ||
                     empty($request->bank_address)
                 ) {
-                    $validator->errors()->add('All bank details must be complete if you want to add them.');
+                    $validator->errors()->add('bank_details', 'Incomplete bank details provided. All fields must be filled or omitted entirely.');
+                }
+            }
+
+            if ($hasWalletMethods) {
+                foreach ($request->input('Wallets Payment methods') as $wallet) {
+                    if (empty($wallet['method']) || empty($wallet['account'])) {
+                        $validator->errors()->add('wallet_payment', 'Incomplete wallet payment method provided. Each method must include both method and account.');
+                        break;
+                    }
                 }
             }
         });
@@ -196,6 +198,12 @@ class VendorProfileController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
+        $existingBillingData = BillingData::where('vendor_id', $request['vendor_id'])->first();
+        if ($existingBillingData) {
+            return response()->json(['message' => 'Billing data for this vendor already exists.'], 400);
+        }
+
         $billingData = BillingData::create([
             'vendor_id' => $request['vendor_id'],
             'billing_legal_name' => $request['billing_legal_name'],
@@ -209,7 +217,9 @@ class VendorProfileController extends Controller
             $request->filled('bank_name') &&
             $request->filled('account_holder') &&
             $request->filled('swift_bic') &&
-            $request->filled('iban')
+            $request->filled('iban') &&
+            $request->filled('payment_terms') &&
+            $request->filled('bank_address')
         ) {
             $bankDetails = BankDetails::create([
                 'billing_data_id' => $billingData->id,
@@ -224,18 +234,22 @@ class VendorProfileController extends Controller
 
         if ($request->has('Wallets Payment methods')) {
             foreach ($request['Wallets Payment methods'] as $wallet) {
-                WalletsPaymentMethods::create([
-                    'billing_data_id' => $billingData->id,
-                    'method' => $wallet['method'],
-                    'account' => $wallet['account'],
-                ]);
+                if (!empty($wallet['method']) && !empty($wallet['account'])) {
+                    WalletsPaymentMethods::create([
+                        'billing_data_id' => $billingData->id,
+                        'method' => $wallet['method'],
+                        'account' => $wallet['account'],
+                    ]);
+                }
             }
         }
+
         $InvoiceController = new InvoiceController();
         $decID = Crypt::encrypt($request->input('vendor_id'));
         $BillingData = $InvoiceController->getVendorBillingData($decID);
         return response()->json($BillingData, 200);
     }
+
     public function ModificationComplex(Request $request)
     {
         $id = $request->input('id');
@@ -338,6 +352,9 @@ class VendorProfileController extends Controller
     }
     public function updateBillingData(Request $request)
     {
+        $hasBankDetails = $request->filled('bank_name') && $request->filled('account_holder') && $request->filled('swift_bic') && $request->filled('iban');
+        $hasWalletMethods = $request->has('Wallets Payment methods') && is_array($request->input('Wallets Payment methods')) && count($request->input('Wallets Payment methods')) > 0;
+
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required|integer',
             'BillingData_id' => 'nullable|integer',
@@ -347,53 +364,92 @@ class VendorProfileController extends Controller
             'city' => 'required|string|max:255',
             'street' => 'required|string|max:255',
             'billing_address' => 'required|string|max:255',
-            'account_holder' => 'required|string|max:255',
-            'bank_address' => 'nullable|string',
-            'bank_name' => 'required|string|max:255',
-            'iban' => ['required', 'string', 'regex:/^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/'],
-            'payment_terms' => 'nullable|string',
-            'swift_bic' => ['required', 'string', 'regex:/^[A-Z]{6}[A-Z2-9][A-NP-Z0-9](XXX)?$/'],
             'Wallets Payment methods' => 'nullable|array|min:1',
-            'Wallets Payment methods.*.method' => 'required_with:wallets_payment_methods|string|max:10',
-            'Wallets Payment methods.*.account' => 'required_with:wallets_payment_methods|string|max:255',
+            'Wallets Payment methods.*.method' => 'string|max:10',
+            'Wallets Payment methods.*.account' => 'string|max:255',
         ]);
+
+        $validator->after(function ($validator) use ($request) {
+            $hasBankDetails = $request->filled('bank_name') && $request->filled('account_holder') && $request->filled('swift_bic') && $request->filled('iban');
+            $hasWalletMethods = $request->has('Wallets Payment methods') && is_array($request->input('Wallets Payment methods')) && count($request->input('Wallets Payment methods')) > 0;
+
+            if (!$hasBankDetails && !$hasWalletMethods) {
+                $validator->errors()->add('bank_or_wallet', 'You must provide either complete bank details or wallet payment methods.');
+            }
+        });
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        if (!$request->filled('BillingData_id') && !$request->filled('BankData_id')) {
-            $billingData = BillingData::where('vendor_id', $request->input('vendor_id'))->first();
-
-            if (!$billingData) {
-                return $this->storeBilling($request);
-            }
-        } else {
+        if ($request->filled('BillingData_id')) {
             $billingData = BillingData::find($request->input('BillingData_id'));
-            $bankDetails = BankDetails::find($request->input('BankData_id'));
-            if (!$billingData || !$bankDetails) {
-                return response()->json(['message' => 'Data not found'], 404);
+            if ($billingData) {
+                $billingData->update($request->only([
+                    'billing_legal_name',
+                    'billing_currency',
+                    'city',
+                    'street',
+                    'billing_address',
+                ]));
+            } else {
+                $billingData = BillingData::create([
+                    'vendor_id' => $request->input('vendor_id'),
+                    'billing_legal_name' => $request->input('billing_legal_name'),
+                    'billing_currency' => $request->input('billing_currency'),
+                    'city' => $request->input('city'),
+                    'street' => $request->input('street'),
+                    'billing_address' => $request->input('billing_address'),
+                ]);
+            }
+        }else{
+            $billingData = BillingData::create([
+                'vendor_id' => $request->input('vendor_id'),
+                'billing_legal_name' => $request->input('billing_legal_name'),
+                'billing_currency' => $request->input('billing_currency'),
+                'city' => $request->input('city'),
+                'street' => $request->input('street'),
+                'billing_address' => $request->input('billing_address'),
+            ]);
+        }
+
+        if ($hasBankDetails) {
+            if ($request->filled('BankData_id')) {
+                $bankDetails = BankDetails::find($request->input('BankData_id'));
+                if ($bankDetails) {
+                    $bankDetails->update($request->only([
+                        'bank_name',
+                        'account_holder',
+                        'swift_bic',
+                        'iban',
+                        'payment_terms',
+                        'bank_address',
+                    ]));
+                } else {
+                    $bankDetails = BankDetails::create([
+                        'billing_data_id' => $billingData->id,
+                        'bank_name' => $request->input('bank_name'),
+                        'account_holder' => $request->input('account_holder'),
+                        'swift_bic' => $request->input('swift_bic'),
+                        'iban' => $request->input('iban'),
+                        'payment_terms' => $request->input('payment_terms'),
+                        'bank_address' => $request->input('bank_address'),
+                    ]);
+                }
+            } else {
+                $bankDetails = BankDetails::create([
+                    'billing_data_id' => $billingData->id,
+                    'bank_name' => $request->input('bank_name'),
+                    'account_holder' => $request->input('account_holder'),
+                    'swift_bic' => $request->input('swift_bic'),
+                    'iban' => $request->input('iban'),
+                    'payment_terms' => $request->input('payment_terms'),
+                    'bank_address' => $request->input('bank_address'),
+                ]);
             }
         }
 
-        $billingData->update($request->only([
-            'billing_legal_name',
-            'billing_currency',
-            'city',
-            'street',
-            'billing_address',
-        ]));
-
-        $bankDetails->update($request->only([
-            'bank_name',
-            'account_holder',
-            'swift_bic',
-            'iban',
-            'payment_terms',
-            'bank_address',
-        ]));
-
-        if ($request->has('Wallets Payment methods')) {
+        if ($hasWalletMethods) {
             foreach ($request->input('Wallets Payment methods') as $wallet) {
                 if (isset($wallet['id'])) {
                     $walletUpdate = WalletsPaymentMethods::find($wallet['id']);
@@ -418,6 +474,8 @@ class VendorProfileController extends Controller
         $BillingData = $InvoiceController->getVendorBillingData($decID);
         return response()->json($BillingData, 200);
     }
+
+
     public function setPassword(Request $request)
     {
         $request->validate([

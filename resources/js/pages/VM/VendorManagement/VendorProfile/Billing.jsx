@@ -29,7 +29,7 @@ const Billing = (props) => {
 
 
     useEffect(() => {
-        if(props.mode == "edit"){return}
+        // if(props.mode == "edit"){return}
         if (rows.length > 0) {
             setHasWalletMethods(true)
         } else {
@@ -84,7 +84,6 @@ const Billing = (props) => {
         { value: '4', label: '-- Other --' },
     ];
     const addRow = () => {
-        if(isSubmitting){return}
         const newRow = {
             id: rows.length + 1,
             type: null,
@@ -194,9 +193,9 @@ const Billing = (props) => {
 
 
     const handleClick = (data) => {
-        if (props.onSubmit === 'onSubmit') {
+        if (props.onSubmit === 'onSubmit' && !isSubmitting) {
             onSubmit(data);
-        } else if (props.onSubmit === 'onUpdate') {
+        } else if (props.onSubmit === 'onUpdate' || isSubmitting) {
             Update(data)
         }
     };
@@ -251,10 +250,10 @@ const Billing = (props) => {
         handelingSelect("currency", setOptionsC, "Currency");
     }, []);
     useEffect(() => {
-        if (props.mode === "edit") {
+        if (props.mode === "edit" || dataB) {
             setLoading(true);
-            if (props.BillingData) {
-                if (props.BillingData?.BillingData) {
+            if (props.BillingData || dataB) {
+                if (props.BillingData?.BillingData || dataB) {
                     if (!dataB) { setdataB(props.BillingData.BillingData) }
                     const data = dataB;
                     if (data?.billingData) {
@@ -331,12 +330,15 @@ const Billing = (props) => {
                     const errors = response.data;
                     Object.keys(errors).forEach(key => {
                         const messages = errors[key];
-                        if (messages.length > 0) {
+                        if (Array.isArray(messages) && messages.length > 0) {
                             messages.forEach(message => {
                                 basictoaster("dangerToast", message);
                             });
+                        } else {
+                            basictoaster("dangerToast", "Something went wrong. This cannot be added.");
                         }
                     });
+
                 }
                 setIsSubmitting(false)
             }
@@ -771,7 +773,7 @@ const Billing = (props) => {
                                             </Table>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError), disabled: isSubmitting }}>Submit</Btn>
+                                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError)}}>Submit</Btn>
                                         </div>
                                     </div>
                             }
