@@ -474,8 +474,6 @@ class VendorProfileController extends Controller
         $BillingData = $InvoiceController->getVendorBillingData($decID);
         return response()->json($BillingData, 200);
     }
-
-
     public function setPassword(Request $request)
     {
         $request->validate([
