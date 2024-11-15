@@ -45,7 +45,7 @@ const AddProfile = () => {
                     <VMnote id={data.id} email={data.email} onSubmit="onSubmit" />
                 </div>
                 <div id='Files-Certificate'>
-                    <FilesCertificate onSubmit="onSubmit" id={data.id} />
+                    <FilesCertificate onSubmit="onSubmit" id={1} />
                 </div>
                 <div id='Education'>
                     <Education id={data.id} />

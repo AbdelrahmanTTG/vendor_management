@@ -44,7 +44,6 @@ const FilesCertificate = (props) => {
         setFileName(file ? file : null);
     };
     const addRow = () => {
-        if (isSubmitting) { return }
         const maxId = rows.length > 0 ? Math.max(...rows.map(row => row.id)) : 0;
         const newRow = { id: maxId + 1, File_Title: '', File_Content: '', File: null };
         setRows([...rows, newRow]);
@@ -62,7 +61,6 @@ const FilesCertificate = (props) => {
     };
 
     const deleteRow = (rowId, idUpdate) => {
-        if(isSubmitting){return}
         if (idUpdate) {
             SweetAlert.fire({
                 title: 'Are you sure?',
@@ -156,6 +154,8 @@ const FilesCertificate = (props) => {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
+                basictoaster("successToast", "Added successfully !");
+
                 setIsSubmitting(true)
             } catch (err) {
                 console.error("Error:", err.response ? err.response.data : err.message);
@@ -208,9 +208,9 @@ const FilesCertificate = (props) => {
 
     };
     const handleClick = (data) => {
-        if (props.onSubmit === 'onSubmit') {
+        if (props.onSubmit === 'onSubmit' && !isSubmitting) {
             onSubmit(data);
-        } else if (props.onSubmit === 'onUpdate') {
+        } else if (props.onSubmit === 'onUpdate' || isSubmitting) {
             Update(data)
         }
     };
@@ -281,12 +281,23 @@ const FilesCertificate = (props) => {
                                             name="cv"
                                             control={control}
                                             rules={{ required: "CV is required" }}
+                                            accept=".zip"
                                             render={({ field }) => (
                                                 <input
-                                                    disabled={isSubmitting}
                                                     type="file"
                                                     className="form-control"
                                                     onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file && file.type !== "application/zip") {
+                                                            alert("The file must be a ZIP file.");
+                                                            e.target.value = ""
+                                                            return;
+                                                        }
+                                                        if (file && file.size > 5 * 1024 * 1024) {
+                                                            alert("The file size must not exceed 5MB.");
+                                                            e.target.value = ""
+                                                            return;
+                                                        }
                                                         handleFileChange(e, setCvFileName);
                                                         field.onChange(e); // Pass the file to react-hook-form
                                                     }}
@@ -321,12 +332,23 @@ const FilesCertificate = (props) => {
                                             name="NDA"
                                             control={control}
                                             rules={{ required: "NDA is required" }}
+                                            accept=".zip"
                                             render={({ field }) => (
                                                 <input
-                                                    disabled={isSubmitting}
                                                     type="file"
                                                     className="form-control"
                                                     onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file && file.type !== "application/zip") {
+                                                            alert("The file must be a ZIP file.");
+                                                            e.target.value = ""
+                                                            return;
+                                                        }
+                                                        if (file && file.size > 5 * 1024 * 1024) {
+                                                            alert("The file size must not exceed 5MB.");
+                                                            e.target.value = ""
+                                                            return;
+                                                        }
                                                         handleFileChange(e, setNdaFileName);
                                                         field.onChange(e); // Pass the file to react-hook-form
                                                     }}
@@ -363,7 +385,7 @@ const FilesCertificate = (props) => {
                                     <th>File Content</th>
                                     <th style={{ width: "30%" }}>File</th>
                                     <th style={{ width: "10%" }} onClick={addRow}>
-                                        <Btn attrBtn={{ color: 'btn btn-light', disabled: isSubmitting}}>
+                                        <Btn attrBtn={{ color: 'btn btn-light'}}>
                                             <i className="fa fa-plus-circle"></i>
                                         </Btn>
                                     </th>
@@ -379,7 +401,6 @@ const FilesCertificate = (props) => {
                                                 value={row.File_Title}
                                                 onChange={(e) => handleInputChange(e, row.id, "File_Title")}
                                                 className="form-control"
-                                                disabled={isSubmitting}
 
                                             />
                                         </td>
@@ -389,16 +410,32 @@ const FilesCertificate = (props) => {
                                                 className="form-control"
                                                 value={row.File_Content}
                                                 onChange={(e) => handleInputChange(e, row.id, "File_Content")}
-                                                disabled={isSubmitting}
 
                                             />
                                         </td>
                                         <td>
                                             <input
                                                 type="file"
-                                                onChange={(e) => handleRowFileChange(e, row.id)}
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0];
+                                                    if (!file) return;
+
+                                                    if (file.type !== "application/zip") {
+                                                        alert("The file must be a ZIP file.");
+                                                        e.target.value = "";
+                                                        return;
+                                                    }
+
+                                                    if (file.size > 5 * 1024 * 1024) {
+                                                        alert("The file size must not exceed 5MB.");
+                                                        e.target.value = ""; 
+                                                        return;
+                                                    }
+                                                    
+                                                    
+                                                    handleRowFileChange(e, row.id)
+                                                }}
                                                 className="form-control"
-                                                disabled={isSubmitting}
 
                                             />
                                             {row.File_URL ? (
@@ -415,7 +452,7 @@ const FilesCertificate = (props) => {
                                         </td>
                                         <td style={{ width: "10%" }} onClick={() => deleteRow(row.id , row.idUpdate)}>
                                                     
-                                            <button disabled={isSubmitting} className="btn btn-danger">
+                                            <button  className="btn btn-danger">
                                                 <i className="fa fa-trash"></i>
                                             </button>
                                         </td>
@@ -424,7 +461,7 @@ const FilesCertificate = (props) => {
                             </tbody>
                         </Table>
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Btn attrBtn={{ color: 'primary', onClick: handleClick, disabled: isSubmitting }}>Submit</Btn>
+                            <Btn attrBtn={{ color: 'primary', onClick: handleClick }}>Submit</Btn>
                         </div>
                     </CardBody>
                 </Collapse>

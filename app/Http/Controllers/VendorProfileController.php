@@ -650,19 +650,15 @@ class VendorProfileController extends Controller
         try {
             $cvFilePath = $cvFile->store('cv_files');
             $ndaFilePath = $ndaFile->store('nda_files');
-
             $vendorId = $request->input('vendor_id');
             $vendor = Vendor::find($vendorId);
-
             if (!$vendor) {
                 Storage::delete([$cvFilePath, $ndaFilePath]);
                 return response()->json(['error' => 'Vendor not found.'], 404);
             }
-
             $vendor->cv = $cvFilePath;
             $vendor->nda = $ndaFilePath;
             $vendor->save();
-
             $additionalFiles = [];
             foreach ($request->all() as $key => $value) {
                 if (strpos($key, 'file_') === 0) {
@@ -670,7 +666,7 @@ class VendorProfileController extends Controller
                     $fileTitle = $request->input("file_title_" . substr($key, 5));
                     $fileContent = $request->input("file_content_" . substr($key, 5));
 
-                    if ($file->getClientOriginalExtension() !== 'zip' || $file->getSize() > 5 * 1024 * 1024) {
+                    if ($file && $file->getClientOriginalExtension() !== 'zip' || $file->getSize() > 5 * 1024 * 1024) {
                         return response()->json(['error' => 'Each additional file must be a ZIP file and less than 5MB.'], 400);
                     }
 
@@ -693,21 +689,9 @@ class VendorProfileController extends Controller
                 }
             }
 
-            if (!$vendor->wasRecentlyCreated && !$vendorFile->exists) {
-                Storage::delete([$cvFilePath, $ndaFilePath]);
-                foreach ($additionalFiles as $file) {
-                    Storage::delete($file['file_path']);
-                }
-                DB::rollBack();
-                return response()->json(['error' => 'Failed to save vendor or additional files.'], 500);
-            }
-
             DB::commit();
 
             return response()->json([
-                // 'cv_file' => $cvFilePath,
-                // 'nda_file' => $ndaFilePath,
-                // 'additional_files' => $additionalFiles,
                 'message' => 'Files uploaded and vendor updated successfully.'
             ], 200);
 
@@ -718,9 +702,14 @@ class VendorProfileController extends Controller
                 Storage::delete($file['file_path']);
             }
 
-            return response()->json(['error' => 'An error occurred during the file upload or vendor update.'], 500);
+            return response()->json([
+                'error' => 'An error occurred while processing the request.',
+             
+            ], 500);
         }
     }
+
+
     public function getVendorFiles($vendorId)
     {
         $vendor = Vendor::with('vendorFiles')->find($vendorId);
