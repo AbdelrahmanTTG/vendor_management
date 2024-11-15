@@ -64,6 +64,8 @@ class VendorProfileController extends Controller
         $TaskType = TaskType::getColumnValue($id);
         return response()->json($TaskType, 201);
     }
+
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -75,13 +77,11 @@ class VendorProfileController extends Controller
             'legal_Name' => 'required|string',
             'email' => 'required|email|unique:vendor,email',
             'phone_number' => 'required|string',
-            // 'another_number' => 'nullable|string',
             'contact_linked_in' => 'required|string',
             'contact_ProZ' => 'required|string',
             'region' => 'required|int',
             'country' => 'required|int',
             'nationality' => 'required|int',
-            // 'rank' => 'nullable|string',
             'timezone' => 'nullable|int',
             'street' => 'nullable|string',
             'city' => 'nullable|string',
@@ -89,17 +89,19 @@ class VendorProfileController extends Controller
             'address' => 'nullable|string',
             'reject_reason' => 'nullable|string',
         ]);
+
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
         $vendor = Vendor::create($request->all());
-        // $encryptedId = Crypt::encrypt($vendor->id);
 
         return response()->json([
             'message' => 'Vendor created successfully!',
             'vendor' => ['id' => $vendor->id, "email" => $vendor->email]
         ], 201);
     }
+
     public function updatePersonalInfo(Request $request)
     {
         if (!$request->has('id')) {
@@ -107,35 +109,40 @@ class VendorProfileController extends Controller
                 'message' => 'ID is required'
             ], 400);
         }
+
         $id = $request->input('id');
-        $vendor = Vendor::findOrFail($id);
+        $vendor = Vendor::find($id);
+
         if (!$vendor) {
             return response()->json([
                 'message' => 'Vendor not found'
             ], 404);
         }
-        // $validator = Validator::make($request->all(), [
-        //     'name' => 'required|string',
-        //     'type' => 'required|string',
-        //     'status' => 'required|string',
-        //     'prfx_name' => 'required|string',
-        //     'contact_name' => 'required|string',
-        //     'legal_name' => 'required|string',
-        //     'phone_number' => 'required|string',
-        //     'contact' => 'required|string',
-        //     'region' => 'required|int',
-        //     'country' => 'required|int',
-        //     'nationality' => 'required|int',
-        //     'timezone' => 'nullable|int',
-        //     'street' => 'nullable|string',
-        //     'city' => 'nullable|string',
-        //     'note' => 'nullable|string',
-        //     'address' => 'nullable|string',
-        //     'reject_reason' => 'nullable|string',
-        // ]);
-        // if ($validator->fails()) {
-        //     return response()->json($validator->errors(), 422);
-        // }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string',
+            'type' => 'sometimes|required|string',
+            'status' => 'sometimes|required|string',
+            'prfx_name' => 'sometimes|required|string',
+            'contact_name' => 'sometimes|required|string',
+            'legal_Name' => 'sometimes|required|string',
+            'phone_number' => 'sometimes|required|string',
+            'contact_linked_in' => 'sometimes|required|string',
+            'contact_ProZ' => 'sometimes|required|string',
+            'region' => 'sometimes|required|int',
+            'country' => 'sometimes|required|int',
+            'nationality' => 'sometimes|required|int',
+            'timezone' => 'nullable|int',
+            'street' => 'nullable|string',
+            'city' => 'nullable|string',
+            'note' => 'nullable|string',
+            'address' => 'nullable|string',
+            'reject_reason' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
 
         $vendor->update($request->all());
 
@@ -144,6 +151,7 @@ class VendorProfileController extends Controller
             'vendor' => ['id' => $vendor->id]
         ], 200);
     }
+
     public function storeBilling(Request $request)
     {
         $validator = Validator::make($request->all(), [

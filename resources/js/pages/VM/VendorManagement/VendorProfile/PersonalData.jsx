@@ -54,6 +54,9 @@ const PersonalData = (props) => {
 
   const [modal, setModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [idVendor, setidVendor] = useState(false);
+
   const toggle = () => setModal(!modal);
 
   const toggleCollapse = () => {
@@ -185,9 +188,10 @@ const PersonalData = (props) => {
     delete formData.contacts;
     try {
       const response = await axiosClient.post("PersonalInformation", formData);
-      basictoaster("successToast", "Added successfully !");
       setIsSubmitting(true)
+      setidVendor(response.data.vendor.id)
       props.onDataSend(response.data.vendor)
+      basictoaster("successToast", response.data.message);
 
     } catch (err) {
       const response = err.response;
@@ -214,18 +218,11 @@ const PersonalData = (props) => {
     formData.type = formData.type.value;
     formData.status = formData.status.value;
     delete formData.contacts;
-    const keys = Object.keys(formData);
-    const extractedValues = keys.map(key => {
-      const value = props.vendorPersonalData.PersonalData[key];
-      return value && typeof value === 'object' ? value.id : value;
-    });
-    const extractedValues2 = keys.map(key => formData[key]);
-    const areEqual = extractedValues2.every((val, index) => val === extractedValues[index]);
-    if (!areEqual) {
+    idVendor ? formData.id = idVendor : false;
       try {
-        formData.id = props.vendorPersonalData.PersonalData.id
         const response = await axiosClient.post("updatePersonalInformation", formData);
-        basictoaster("successToast", "Modified successfully");
+        basictoaster("successToast", response.data.message);
+        props.onDataSend(response.data.vendor)
       } catch (err) {
         const response = err.response;
         if (response && response.data) {
@@ -239,10 +236,6 @@ const PersonalData = (props) => {
         }
         setIsSubmitting(false)
       }
-    } else {
-      basictoaster("dangerToast", "You have not modified the data !");
-
-    }
   };
 
   const onError = (errors) => {
@@ -322,9 +315,9 @@ const PersonalData = (props) => {
     toggle()
   }
   const handleClick = (data) => {
-    if (props.onSubmit === 'onSubmit') {
+    if (props.onSubmit === 'onSubmit' && !isSubmitting) {
       onSubmit(data);
-    } else if (props.onSubmit === 'onUpdate') {
+    } else if (props.onSubmit === 'onUpdate' || isSubmitting) {
       Update(data)
     }
   };
@@ -367,6 +360,7 @@ const PersonalData = (props) => {
       if (props.vendorPersonalData) {
         if (props.vendorPersonalData.PersonalData) {
           const data = props.vendorPersonalData.PersonalData;
+          setidVendor(data?.id)
           if (data.type !== null && data.type !== undefined && data.type != 0) {
             const vendorTypeOption = { value: data.type, label: data.type };
             handleVendorTypeChange(vendorTypeOption);
@@ -488,7 +482,7 @@ const PersonalData = (props) => {
                                 handleVendorTypeChange(option);
                                 field.onChange(option);
                               }}
-                              isDisabled={isSubmitting || (props.permission && props.permission.type === "disable")}
+                              isDisabled={ (props.permission && props.permission.type === "disable")}
                             />
                           )}
                         />
@@ -520,7 +514,7 @@ const PersonalData = (props) => {
                                 handleStatusChange(option);
                                 field.onChange(option);
                               }}
-                              isDisabled={isSubmitting || (props.permission && props.permission.status === "disable")}
+                              isDisabled={(props.permission && props.permission.status === "disable")}
                             />
                           )} />
                       </Col>
@@ -532,7 +526,6 @@ const PersonalData = (props) => {
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > {nameLabel} </Label>
                       < Col sm="9" >
                         <input
-                          disabled={isSubmitting}
                           defaultValue=""
                           className="form-control"
                           // id="name"
@@ -549,7 +542,7 @@ const PersonalData = (props) => {
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > {ContactLabel} </Label>
                       < Col sm="9" >
                         <InputGroup>
-                          <select disabled={isSubmitting || (props.permission && props.permission.contact === "disable")} className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: true })} >
+                          <select disabled={ (props.permission && props.permission.contact === "disable")} className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: true })} >
                             <option value="" disabled > Prefix </option>
                             < option value="Mr" > Mr </option>
                             < option value="Ms" > Ms </option>
@@ -558,7 +551,6 @@ const PersonalData = (props) => {
 
                           </select>
                           < input
-                            disabled={isSubmitting}
                             className="form-control"
                             // id="contact_name"
                             defaultValue=""
@@ -582,7 +574,6 @@ const PersonalData = (props) => {
                             name="legal_Name"
                             {...register("legal_Name", { required: true })}
                           placeholder="As Mentioned in ID and Passport"
-                          disabled={isSubmitting}
 
                         />
                       </Col>
@@ -595,7 +586,6 @@ const PersonalData = (props) => {
                         {/* <Input className="form-control" type="email" placeholder="email" /> */}
                         < input
                           className="form-control"
-                          disabled={isSubmitting}
 
                           // id="email"
                           type="email"
@@ -621,7 +611,6 @@ const PersonalData = (props) => {
 
                         <InputGroup>
                           <input
-                            disabled={isSubmitting}
                             className="form-control"
                             // id="Phone_number"
                             type="tel"
@@ -639,7 +628,6 @@ const PersonalData = (props) => {
                             }}
                           />
                           < input
-                            disabled={isSubmitting}
                             className="form-control "
                             // id="Anothernumber"
                             type="tel"
@@ -714,7 +702,6 @@ const PersonalData = (props) => {
                                 field.onChange(option.value);
                                 handelingSelectCountry(option.value)
                               }}
-                              isDisabled={isSubmitting}
 
                             />
                           )}
@@ -746,7 +733,6 @@ const PersonalData = (props) => {
                                 setSelectedOptionC(option);
                                 field.onChange(option.value);
                               }}
-                              isDisabled={isSubmitting}
 
                             />
                           )}
@@ -781,7 +767,6 @@ const PersonalData = (props) => {
                                 setSelectedOptionN(option);
                                 field.onChange(option.value);
                               }}
-                              isDisabled={isSubmitting}
 
                             />
                           )}
@@ -834,7 +819,6 @@ const PersonalData = (props) => {
                                 setSelectedOptionT(option);
                                 field.onChange(option.value);
                               }}
-                              isDisabled={isSubmitting}
 
                             />
                           )}
@@ -849,7 +833,6 @@ const PersonalData = (props) => {
                       < Col sm="9" >
 
                         <input
-                          disabled={isSubmitting}
 
                           className="form-control"
                           id="Street"
@@ -867,7 +850,6 @@ const PersonalData = (props) => {
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > City / state </Label>
                       < Col sm="9" >
                         <input
-                          disabled={isSubmitting}
 
                           className="form-control"
                           id="City_state"
@@ -885,7 +867,6 @@ const PersonalData = (props) => {
                           <Label className="col-sm-3 col-form-label" for="validationCustom01">Old Contact</Label>
                           <Col sm="9">
                             <input
-                              disabled={isSubmitting}
                               className="form-control"
                               defaultValue={props.vendorPersonalData.PersonalData.contact}
                               // onChange={(e) => console.log(e.target.value)}
@@ -911,7 +892,6 @@ const PersonalData = (props) => {
                             const data = editor.getData();
                             setValue('note', data);
                           }}
-                          disabled={isSubmitting}
                         />
                         < input
 
@@ -935,7 +915,7 @@ const PersonalData = (props) => {
                             const data = editor.getData();
                             setValue('address', data);
                           }}
-                          disabled={isSubmitting || (props.permission && props.permission.address === "disable")}
+                          disabled={ (props.permission && props.permission.address === "disable")}
                         />
                         < input
                           id='address'
@@ -962,7 +942,7 @@ const PersonalData = (props) => {
                                   const data = editor.getData();
                                   setValue('reject_reason', data);
                                 }}
-                                disabled={isSubmitting || (props.permission && props.permission.reject_reason === "disable")}
+                                disabled={ (props.permission && props.permission.reject_reason === "disable")}
                               />
                               <input
                                 disabled
@@ -980,7 +960,7 @@ const PersonalData = (props) => {
                 </Row>
                 < div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Btn
-                    attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError), disabled: isSubmitting }}
+                      attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError), }}
                   >
                     Submit
                   </Btn>

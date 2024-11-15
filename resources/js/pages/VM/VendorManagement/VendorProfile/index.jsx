@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { Previous, Next } from '../../../../Constant';
 import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
+import ExcelJS from 'exceljs';
+
 const Vendor = () => {
     const [vendors, setVendors] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -175,6 +177,58 @@ const Vendor = () => {
     const Add = () => {
         navigate('/vm/vendors/profiletest');
     }
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+
+        const sortedVendors = [...vendors].sort((a, b) => {
+            if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+            if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        setVendors(sortedVendors);
+    };
+    const exportToExcel = () => {
+        const tableRows = document.querySelectorAll("table tbody tr");
+        const data = [];
+        tableRows.forEach(row => {
+            const rowData = [];
+            row.querySelectorAll("td").forEach(cell => {
+                rowData.push(cell.innerText);
+            });
+            data.push(rowData);
+        });
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sheet 1');
+        worksheet.columns = [
+            { header: 'ID', key: 'id', width: 10 },
+            { header: 'Name', key: 'name', width: 20 },
+            { header: 'Email', key: 'email', width: 25 },
+            { header: 'Legal Name', key: 'legal_name', width: 25 },
+            { header: 'Phone Number', key: 'phone', width: 15 },
+            { header: 'Country', key: 'country', width: 20 },
+            { header: 'Nationality', key: 'nationality', width: 20 },
+        ];
+
+        data.forEach(rowData => {
+            worksheet.addRow(rowData);
+        });
+
+        workbook.xlsx.writeBuffer().then(buffer => {
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'table-data.xlsx';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+    };
     return (
         <Fragment >
             <Col sm="12">
@@ -291,53 +345,54 @@ const Vendor = () => {
                                 </form>
                             }
                         </div>
+                        {/* <button onClick={exportToExcel} className="btn btn-primary mb-3">Export to Excel</button> */}
 
                         <div className="table-responsive">
                             <Table hover>
                                 <thead>
                                     <tr>
-                                        <th scope="col">{'ID'}</th>
-                                        <th scope="col">{'Name'}</th>
-                                        <th scope="col">{'Email'}</th>
-                                        <th scope="col">{'legal Name'}</th>
-                                        <th scope="col">{'Phone number'}</th>
-                                        <th scope="col">{'country'}</th>
-                                        <th scope="col">{'Nationality'}</th>
+                                        <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                        <th scope="col" onClick={() => handleSort('name')}>{'Name'} {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                        <th scope="col" onClick={() => handleSort('email')}>{'Email'} {sortConfig.key === 'email' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                        <th scope="col" onClick={() => handleSort('legal_Name')}>{'Legal Name'} {sortConfig.key === 'legal_Name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                        <th scope="col" onClick={() => handleSort('phone_number')}>{'Phone Number'} {sortConfig.key === 'phone_number' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                        <th scope="col" onClick={() => handleSort('country')}>{'Country'} {sortConfig.key === 'country' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                        <th scope="col" onClick={() => handleSort('nationality')}>{'Nationality'} {sortConfig.key === 'nationality' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col">{'Edit'}</th>
                                         <th scope="col">{'Delete'}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {
-                                        vendors.map((item, index) => (
-                                            <tr key={index}>
-                                                <td scope="row">{item.id || ''}</td>
-                                                <td scope="row">{item.name || ''}</td>
-                                                <td scope="row">{item.email || ''}</td>
-                                                <td scope="row">{item.legal_Name || ''}</td>
-                                                <td scope="row">{item.phone_number || ''}</td>
-                                                <td scope="row">{item.country?.name || ''}</td>
-                                                <td>{item.nationality?.name || ''}</td>
-                                                <td>
-                                                    <button onClick={() => handleEdit(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
-                                                        <i className="icofont icofont-ui-edit"></i>
-                                                    </button>
-                                                </td>
-                                                <td>
-                                                    <i className="icofont icofont-ui-delete"></i>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    }
-
+                                    {vendors.map((item, index) => (
+                                        <tr key={index}>
+                                            <td scope="row">{item.id || ''}</td>
+                                            <td scope="row">{item.name || ''}</td>
+                                            <td scope="row">{item.email || ''}</td>
+                                            <td scope="row">{item.legal_Name || ''}</td>
+                                            <td scope="row">{item.phone_number || ''}</td>
+                                            <td scope="row">{item.country?.name || ''}</td>
+                                            <td>{item.nationality?.name || ''}</td>
+                                            <td>
+                                                <button onClick={() => handleEdit(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                                    <i className="icofont icofont-ui-edit"></i>
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <i className="icofont icofont-ui-delete"></i>
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </Table>
                             {totalPages > 1 &&
                                 <Pagination aria-label="Page navigation example" className="pagination-primary mt-3">
-                                    <PaginationItem onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><PaginationLink >{Previous}</PaginationLink></PaginationItem>
+                                    <PaginationItem onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+                                        <PaginationLink >{Previous}</PaginationLink>
+                                    </PaginationItem>
                                     {getPaginationItems()}
-
-                                    <PaginationItem onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}><PaginationLink >{Next}</PaginationLink></PaginationItem>
+                                    <PaginationItem onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+                                        <PaginationLink >{Next}</PaginationLink>
+                                    </PaginationItem>
                                 </Pagination>
                             }
                         </div>

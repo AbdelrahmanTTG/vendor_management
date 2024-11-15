@@ -43,7 +43,7 @@ const PriceList = (props) => {
         setdataPrice(prevData => prevData.filter(item => item.id !== id));
     };
     useEffect(() => {
-        if (props.priceList.priceList && props.priceList.priceList.length > 0) {
+        if (props.priceList?.priceList && props.priceList?.priceList.length > 0) {
             setdataPrice(props.priceList.priceList[0]); 
             const transformedArray = props.priceList.priceList[1]?.map(item => ({
                 value: item.id,
@@ -52,7 +52,7 @@ const PriceList = (props) => {
             setValue("tool", transformedArray)
         } 
 
-    }, [props.priceList.priceList]);
+    }, [props.priceList]);
 
     const deleteRow = (id) => {
         if (id) {

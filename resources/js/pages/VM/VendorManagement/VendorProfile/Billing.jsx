@@ -200,55 +200,7 @@ const Billing = (props) => {
             Update(data)
         }
     };
-    const Update = async (data) => { 
-        if (isSubmitting) { return }
-
-        const formData = { ...data };
-        const result = rows?.map((row, index) => ({
-            id: row.idUpdate,
-            method: formData.method[row.id]?.value,
-            account: formData.account[row.id],
-        }));
-        const newFormData = {
-            ...formData,
-        };
-        if (result && result.length > 0) {
-            newFormData['Wallets Payment methods'] = result; 
-        }
-        newFormData['BillingData_id'] = BillingData_id; 
-        newFormData['BankData_id'] = BankData_id; 
-        newFormData['vendor_id'] = props.id;
-        delete newFormData.method;
-        delete newFormData.account;
-
-        try {
-            const response = await axiosClient.post("UpdateBillingData", newFormData);
-            setdataB(response.data)
-            basictoaster("successToast", "Updated successfully !");
-            props.Currancy(optionsC)
-         
-
-            // response.data.forEach(element => {
-            //     editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
-            //     setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
-            // });
-          
-        } catch (err) {
-            const response = err.response;
-            if (response && response.data) {
-                const errors = response.data;
-                Object.keys(errors).forEach(key => {
-                    const messages = errors[key];
-                    if (messages.length > 0) {
-                        messages.forEach(message => {
-                            basictoaster("dangerToast", message);
-                        });
-                    }
-                });
-            }
-            setIsSubmitting(false)
-        }
-    }
+ 
     const handleInputChangeSelect = (inputValue, tableName, fieldName, setOptions, options) => {
         if (inputValue.length === 0) {
             setOptions(initialOptions[fieldName] || []);
@@ -302,7 +254,7 @@ const Billing = (props) => {
         if (props.mode === "edit") {
             setLoading(true);
             if (props.BillingData) {
-                if (props.BillingData.BillingData) {
+                if (props.BillingData?.BillingData) {
                     if (!dataB) { setdataB(props.BillingData.BillingData) }
                     const data = dataB;
                     if (data?.billingData) {
@@ -346,9 +298,7 @@ const Billing = (props) => {
         
     }, [props.BillingData, setValue , dataB])
   
-
     const onSubmit = async (data) => {
-        if (isSubmitting) { return }
         if (!props.id) {
             basictoaster("dangerToast", "Make sure to send your personal information first.");
             const section = document.getElementById("personal-data");
@@ -357,8 +307,8 @@ const Billing = (props) => {
 
             const formData = { ...data };
             const result = rows?.map((row, index) => ({
-                method: formData.method[index + 1]?.value,
-                account: formData.account[index + 1],
+                method: formData.method[row.id]?.value,
+                account: formData.account[row.id],
             }));
             const newFormData = {
                 ...formData,
@@ -371,6 +321,7 @@ const Billing = (props) => {
             delete newFormData.account;
             try {
                 const response = await axiosClient.post("storeBilling", newFormData);
+                setdataB(response.data)
                 basictoaster("successToast", "Added successfully !");
                 setIsSubmitting(true)
                 props.Currancy(selectedOptionC)
@@ -393,6 +344,53 @@ const Billing = (props) => {
 
         }
     }
+    const Update = async (data) => {
+        const formData = { ...data };
+        const result = rows?.map((row, index) => ({
+            id: row.idUpdate,
+            method: formData.method[row.id]?.value,
+            account: formData.account[row.id],
+        }));
+        const newFormData = {
+            ...formData,
+        };
+        if (result && result.length > 0) {
+            newFormData['Wallets Payment methods'] = result;
+        }
+        newFormData['BillingData_id'] = BillingData_id;
+        newFormData['BankData_id'] = BankData_id;
+        newFormData['vendor_id'] = props.id;
+        delete newFormData.method;
+        delete newFormData.account;
+
+        try {
+            const response = await axiosClient.post("UpdateBillingData", newFormData);
+            setdataB(response.data)
+            basictoaster("successToast", "Updated successfully !");
+            props.Currancy(selectedOptionC)
+
+            // response.data.forEach(element => {
+            //     editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
+            //     setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
+            // });
+
+        } catch (err) {
+            const response = err.response;
+            if (response && response.data) {
+                const errors = response.data;
+                Object.keys(errors).forEach(key => {
+                    const messages = errors[key];
+                    if (messages.length > 0) {
+                        messages.forEach(message => {
+                            basictoaster("dangerToast", message);
+                        });
+                    }
+                });
+            }
+            setIsSubmitting(false)
+        }
+    }
+
     const onError = (errors) => {
         for (const [key, value] of Object.entries(errors)) {
             switch (key) {
@@ -482,7 +480,6 @@ const Billing = (props) => {
                                                         <Label className="col-sm-3 col-form-label" for="validationCustom01">Billing Legal Name</Label>
                                                         <Col sm="9">
                                                             <input
-                                                                disabled={isSubmitting}
                                                                 defaultValue={isChecked.billing_legal_name}
                                                                 className="form-control"
                                                                 type="text"
@@ -501,7 +498,6 @@ const Billing = (props) => {
                                                             <Controller
                                                                 name="billing_currency"
                                                                 control={control}
-                                                                isDisabled={isSubmitting}
                                                                 rules={{ required: true }}
                                                                 render={({ field }) => (
                                                                     <Select
@@ -534,7 +530,6 @@ const Billing = (props) => {
                                                         <Label className="col-sm-3 col-form-label" for="validationCustom01">City / state</Label>
                                                         <Col sm="9">
                                                             <input
-                                                                disabled={isSubmitting}
                                                                 defaultValue={isChecked.city}
                                                                 className="form-control"
                                                                 type="text"
@@ -549,7 +544,6 @@ const Billing = (props) => {
                                                         <Label className="col-sm-3 col-form-label" for="validationCustom01">Street</Label>
                                                         <Col sm="9">
                                                             <input
-                                                                disabled={isSubmitting}
                                                                 defaultValue={isChecked.street}
                                                                 className="form-control"
                                                                 type="text"
@@ -571,7 +565,6 @@ const Billing = (props) => {
                                                                     const data = editor.getData();
                                                                     setValue('billing_address', data);
                                                                 }}
-                                                                disabled={isSubmitting}
                                                             />
                                                             <input
                                                                 hidden
@@ -592,7 +585,6 @@ const Billing = (props) => {
                                                         <Label className="col-sm-3 col-form-label" for="validationCustom01">Bank name</Label>
                                                         <Col sm="9">
                                                             <input
-                                                                disabled={isSubmitting}
                                                                 defaultValue=""
                                                                 className="form-control"
                                                                 type="text"
@@ -608,7 +600,6 @@ const Billing = (props) => {
                                                         <Label className="col-sm-3 col-form-label" for="validationCustom01">Account holder</Label>
                                                         <Col sm="9">
                                                             <input
-                                                                disabled={isSubmitting}
                                                                 defaultValue=""
                                                                 className="form-control"
                                                                 type="text"
@@ -625,7 +616,6 @@ const Billing = (props) => {
                                                         <Label className="col-sm-3 col-form-label" for="validationCustom01">SWIFT / BIC</Label>
                                                         <Col sm="9">
                                                             <input
-                                                                disabled={isSubmitting}
                                                                 defaultValue=""
                                                                 className="form-control"
                                                                 type="text"
@@ -652,7 +642,6 @@ const Billing = (props) => {
                                                         <Label className="col-sm-3 col-form-label" for="validationCustom01">IBAN</Label>
                                                         <Col sm="9">
                                                             <input
-                                                                disabled={isSubmitting}
                                                                 defaultValue=""
                                                                 className="form-control"
                                                                 type="text"
@@ -679,7 +668,6 @@ const Billing = (props) => {
                                                         <Label className="col-sm-3 col-form-label" for="validationCustom01">Payment terms</Label>
                                                         <Col sm="9">
                                                             <input
-                                                                disabled={isSubmitting}
                                                                 defaultValue=""
                                                                 className="form-control"
                                                                 type="text"
@@ -702,7 +690,6 @@ const Billing = (props) => {
                                                                     const data = editor.getData();
                                                                     setValue('bank_address', data);
                                                                 }}
-                                                                disabled={isSubmitting}
                                                             />
                                                             <input
                                                                 type="hidden"
@@ -722,7 +709,7 @@ const Billing = (props) => {
                                                         <th scope="col">{'#'}</th>
                                                         <th scope="col">{'Method'}</th>
                                                         <th scope="col">Account</th>
-                                                        <th disabled={isSubmitting} style={{ width: "10%" }} scope="col"
+                                                        <th  style={{ width: "10%" }} scope="col"
                                                             onClick={(event) => {
                                                                 event.preventDefault();
                                                                 addRow()
@@ -739,7 +726,6 @@ const Billing = (props) => {
                                                             <td>{index + 1}</td>
                                                             <td>
                                                                 <Controller
-                                                                    isDisabled={isSubmitting}
                                                                     name={`method[${row.id}]`}
                                                                     control={control}
                                                                     rules={{ required: true }}
@@ -761,7 +747,6 @@ const Billing = (props) => {
                                                             <td>
                                                              
                                                                 <input
-                                                                    disabled={isSubmitting}
 
                                                                     type="text"
                                                                     value={row.inputValue}
@@ -773,7 +758,7 @@ const Billing = (props) => {
                                                                 />
                                                             </td>
                                                             
-                                                            <td disabled={isSubmitting} onClick={(event) => {
+                                                            <td  onClick={(event) => {
                                                                 event.preventDefault();
                                                                 deleteRow(row.id, row.idUpdate)
                                                             }}  >                                                    <Btn attrBtn={{ color: 'btn btn-danger' }}>

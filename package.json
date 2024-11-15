@@ -42,6 +42,7 @@
         "easymde": "^2.18.0",
         "emoji-mart": "^5.5.2",
         "emoji-picker-react": "^4.9.2",
+        "exceljs": "^4.4.0",
         "feather-icons": "^4.29.0",
         "i18next-browser-languagedetector": "^7.0.1",
         "increase-memory-limit": "^1.0.7",
