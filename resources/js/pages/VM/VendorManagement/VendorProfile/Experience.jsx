@@ -46,6 +46,8 @@ const Experience = (props) => {
     const [rowIdToDelete, setRowIdToDelete] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expID, setexpID] = useState('');
+    const [dataE, setData] = useState();
+
 
     useEffect(() => {
         const generatedYears = [];
@@ -95,27 +97,28 @@ const Experience = (props) => {
     //     handelingSelect("skills", setOptionsN, "skill");
     // }, []);
     useEffect(() => {
-        if (props.mode === "edit") {
+        if (props.mode === "edit" || dataE) {
             setLoading2(true);
-            if (props.Experience) {
-                if (props.Experience.Experience) {
-                    const data = props.Experience.Experience;
-                    if (data.started_working) {
-                        setValue("started_working", { value: data.started_working, label: data.started_working });
-                        setSelectedYear({ value: data.started_working, label: data.started_working });
+            if (props.Experience || dataE) {
+                if (props.Experience?.Experience || dataE) {
+                    if (!dataE) { setData(props.Experience.Experience) }
+                    const data = dataE;
+                    if (data?.started_working) {
+                        setValue("started_working", { value: data?.started_working, label: data?.started_working });
+                        setSelectedYear({ value: data?.started_working, label: data?.started_working });
                     }
 
-                    if (data.experience_year) {
-                        setValue("experience_year", data.experience_year);
+                    if (data?.experience_year) {
+                        setValue("experience_year", data?.experience_year);
                     }
 
-                    if (data.summary) {
-                        setValue("summary", data.summary);
+                    if (data?.summary) {
+                        setValue("summary", data?.summary);
                     }
 
-                    setexpID(data.id)
+                    setexpID(data?.id)
 
-                    if (data.skills) {
+                    if (data?.skills) {
                         // data.skills.forEach(element => {
                         //     editRow(element.skill_id, element.id,{ value: element.skill_id, label: element.name })
                         //     setValue(`skill-${element.skill_id}`, element.skill_id)
@@ -123,11 +126,11 @@ const Experience = (props) => {
                         // });
                         setRows(data.skills.map((element, index) => {
                             setValue(`skill-${index + 1}`, element.skill_id);
-                            handleSelectChange({ value: element.skill_id, label: element.name }, index + 1)
+                            handleSelectChange({ value: element?.skill_id, label: element?.name }, index + 1)
                             return {
                                 id: index + 1,
                                 idUpdate: element.id,
-                                skill: { value: element.skill_id, label: element.name },
+                                skill: { value: element?.skill_id, label: element?.name },
                             };
                         }));
 
@@ -136,7 +139,7 @@ const Experience = (props) => {
                 }
             }
         }
-    }, [props.Experience, setValue]);
+    }, [props.Experience, setValue ,dataE]);
     const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
         if (inputValue.length === 0) {
             setOptions(initialOptions[fieldName] || []);
@@ -244,9 +247,9 @@ const Experience = (props) => {
         }
     };
     const handleClick = (data) => {
-        if (props.onSubmit === 'onSubmit') {
+        if (props.onSubmit === 'onSubmit' && !isSubmitting) {
             onSubmit(data);
-        } else if (props.onSubmit === 'onUpdate') {
+        } else if (props.onSubmit === 'onUpdate' || isSubmitting) {
             Update(data)
         }
     };
@@ -274,6 +277,8 @@ const Experience = (props) => {
             // console.log(newFormData)
             try {
                 const response = await axiosClient.post("AddExperience", newFormData);
+                console.log(response.data)
+                setData(response.data)
                 basictoaster("successToast", "Added successfully !");
                 setIsSubmitting(true)
             } catch (err) {
@@ -410,7 +415,6 @@ const Experience = (props) => {
                                                         rules={{ required: true }}
                                                         render={({ field }) => (
                                                             <Select
-                                                                isDisabled={isSubmitting}
                                                                 {...field}
                                                                 options={yearOptions}
                                                                 value={selectedYear}
@@ -456,7 +460,6 @@ const Experience = (props) => {
                                                             const data = editor.getData();
                                                             setValue('summary', data);
                                                         }}
-                                                        disabled={isSubmitting}
                                                     />
                                                     <input
                                                         type="hidden" disabled
@@ -474,7 +477,7 @@ const Experience = (props) => {
                                                 <th scope="col">{'Skill'}</th>
                                                 <th
                                                     style={{ width: "10%" }} scope="col" onClick={addRow}>
-                                                    <Btn attrBtn={{ color: 'btn btn-light', disabled: isSubmitting }} >
+                                                    <Btn attrBtn={{ color: 'btn btn-light' }} >
                                                         <i className="fa fa-plus-circle"></i>
                                                     </Btn>
                                                 </th>
@@ -492,7 +495,6 @@ const Experience = (props) => {
                                                             render={({ field }) => (
                                                                 <CreatableSelect
                                                                     {...field}
-                                                                    isDisabled={isSubmitting}
                                                                     value={selectedOptions[row.id] || null}
                                                                     options={optionsN}
                                                                     onInputChange={(inputValue) =>
@@ -524,7 +526,7 @@ const Experience = (props) => {
                                                         event.preventDefault();
                                                         deleteRow(row.id, row.idUpdate)
                                                     }}  >
-                                                        <Btn attrBtn={{ color: 'btn btn-danger', disabled: isSubmitting }}>
+                                                        <Btn attrBtn={{ color: 'btn btn-danger'}}>
                                                             <i className="fa fa-trash"></i>
                                                         </Btn>
                                                     </td>
@@ -533,7 +535,7 @@ const Experience = (props) => {
                                         </tbody>
                                     </Table>
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: "2%" }}>
-                                        <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError), disabled: isSubmitting }}>Submit</Btn>
+                                        <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError)}}>Submit</Btn>
                                     </div>
                                 </div>
                         }

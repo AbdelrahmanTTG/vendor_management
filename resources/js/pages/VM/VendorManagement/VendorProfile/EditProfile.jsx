@@ -34,6 +34,7 @@ const EditProfile = () => {
     const [priceList, setpriceList] = useState([]); 
     const [VendorTestData, setVendorTestData] = useState([]);
     const [EducationVendor, setEducationVendor] = useState([]);
+    const [marginBottom, setMarginBottom] = useState('18vh');
 
 
 
@@ -46,6 +47,22 @@ const EditProfile = () => {
         // address: "disable",
         // contact:"disable"
     });
+    useEffect(() => {
+        const updateMargin = () => {
+            if (window.innerWidth < 768) {
+                setMarginBottom('0vh');
+            } else {
+                setMarginBottom('20vh');
+            }
+        };
+
+        updateMargin();
+        window.addEventListener('resize', updateMargin);
+
+        return () => {
+            window.removeEventListener('resize', updateMargin);
+        };
+    }, []);
     useEffect(() => {
         if (!vendor) { 
             setRedirect(true);
@@ -93,13 +110,14 @@ const EditProfile = () => {
     }
     return (
         <Fragment >
-            <div id='nav-componant' className=" position-fixed  " style={{ zIndex: "1", top: "9vh" }} >
-                <div className="position-relative  nav_div" style={{ width: "99%" }}>
-                    <NavBar />
+            <div
+                id="nav-componant" className="position-relative" style={{ marginBottom }}>
+                <div className=" position-fixed" style={{ zIndex: "2", top: "8.4vh" }}>
+                    <NavBar  />
                 </div>
             </div>
 
-            <div style={{ marginTop: "25vh" }}>
+            <div className=" mt-5 mt-sm-6 mt-md-8 mt-lg-10 mt-xl-12 py-3 py-md-5">
                 <div id="personal-data">
                     <PersonalData  onSubmit="onUpdate" mode="edit"
                         permission={permissions} vendorPersonalData={vendorPersonalData}
@@ -115,7 +133,7 @@ const EditProfile = () => {
                     <FilesCertificate id={vendor?.id} mode="edit" VendorFiles={VendorFiles} onSubmit="onUpdate"  />
                 </div>
                 <div id='Education'>
-                    <Education id={vendor?.id} EducationVendor={EducationVendor} />
+                    <Education id={vendor?.id} EducationVendor={EducationVendor} mode="edit" />
                 </div>
                 <div id='Experience'>
                     <Experience id={vendor?.id} Experience={VendorExperience} mode="edit" onSubmit="onUpdate" />

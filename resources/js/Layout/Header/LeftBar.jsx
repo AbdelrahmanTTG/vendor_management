@@ -9,7 +9,7 @@ import darkLingoTalentsLogo from '../../assets/images/logo/Lingotalents-logo-W.p
 const Leftbar = () => {
 
     const { mixLayout, toggleSidebar } = useContext(CheckContext);
-    const [toggle, setToggle] = useState(false);
+    const [toggle, setToggle] = useState(true);
 
 
     const openCloseSidebar = () => {

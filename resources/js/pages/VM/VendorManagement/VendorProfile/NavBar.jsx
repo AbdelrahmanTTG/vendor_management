@@ -1,26 +1,18 @@
 import React, { useState } from 'react';
-import { Card, CardBody, CardHeader, Col, Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
+import { Card, CardBody, CardHeader, Col, Nav, NavItem, NavLink, Navbar, NavbarToggler, Collapse, NavbarBrand, Progress } from 'reactstrap';
 import { H5, P } from '../../../../AbstractElements';
 
-const Simple = () => {
+const Simple = (props) => {
+  
   const [BasicLineTab, setBasicLineTab] = useState('VendorDetails');
-  const scrollNav = (direction) => {
-    const scrollContainer = document.querySelector('.nav-scroll');
-    const scrollAmount = 190;
-
-    if (direction === 'left') {
-      scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-    } else {
-      scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
+ 
   const handleScroll = (section) => {
     const element = document.getElementById(section);
     if (element) {
       const offset = 200; 
       const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
       const offsetPosition = elementPosition - offset;
-  
+    
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth',
@@ -28,12 +20,25 @@ const Simple = () => {
     }
   };
   
+  const [isOpen, setIsOpen] = useState(false);
 
+  const toggle = () => setIsOpen(!isOpen);
   return (
-    <Col sm="12" xl="6" className="xl-100">
-      <Card >
-        <CardBody style={{ paddingBottom: '0px' ,paddingRight:"0px",paddingLeft:"0px"}}>
-          <Nav className="border-tab flex-wrap" tabs style={{margin:0}}>
+    // <Col sm="9" xl="3" className="xl-100">
+    //   <Card >
+    //     <CardBody style={{ paddingBottom: '0px', paddingRight: "0px", paddingLeft: "0px" ,paddingTop:"0px"}}>
+          
+          <Navbar expand="lg" className="bg-body-tertiary" light>
+      <div className="container-fluid">
+        <div style={{marginBottom:"5vh"}}>
+          <NavbarToggler
+            onClick={toggle}
+            style={{ position: "fixed", right: "0px", top: "8.4vh", width: "100%" }}
+          /> 
+        </div>
+                 <Collapse isOpen={isOpen} navbar>
+
+          <Nav className="border-tab flex-wrap " tabs style={{margin:0}}>
             <NavItem className="fw-bold" style={{ margin: 0 }}>
               <NavLink
                 style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
@@ -190,10 +195,34 @@ const Simple = () => {
                 <i className="icofont icofont-time"></i> History
               </NavLink>
             </NavItem>
-          </Nav>
-        </CardBody>
-      </Card>
-    </Col>
+                </Nav>
+                
+        </Collapse>
+        <div style={{ position: 'relative' }}>
+          <Progress value={props.value} color="success" style={{
+            height: '10px', position: 'relative', borderRadius: '0'
+          }}>
+            <span style={{
+              position: 'absolute',
+              width: '100%',
+              textAlign: 'center',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'white',
+              fontWeight: 'bold',
+
+            }}>
+              {props.value}%
+            </span>
+          </Progress>
+        </div>
+              </div>
+          </Navbar>
+
+         
+    //     </CardBody>
+    //   </Card>
+    // </Col>
  
   );
 };

@@ -539,8 +539,9 @@ class VendorProfileController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Experience added successfully!'], 201);
-    }
+     $data = $this->getVendorExperience($request->input('vendor_id'));
+        return response()->json($data, 201);
+        }
     public function UpdateExperience(Request $request)
     {
         $validator = Validator::make($request->all(), [

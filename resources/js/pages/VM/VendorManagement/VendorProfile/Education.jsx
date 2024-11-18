@@ -27,6 +27,7 @@ const Education = (props) => {
     const [optionsMaj, setoptionsMaj] = useState([]);
     const [loading, setLoading] = useState(false);
     const [initialOptions, setInitialOptions] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
@@ -91,7 +92,8 @@ const Education = (props) => {
             formDate['vendor_id'] = props.id;
             try {
                 const response = await axiosClient.post("VendorEducation", formDate);
-                basictoaster("successToast", "Added successfully !");
+                basictoaster("successToast", isSubmitting || props?.mode == "edit" ? " Updated successfully !" : "Added successfully !");
+                setIsSubmitting(true)
             } catch (err) {
                 const response = err.response;
                 if (response && response.data) {
@@ -133,6 +135,26 @@ const Education = (props) => {
             }
         }
     }, [props.EducationVendor])
+    const onError = (errors) => {
+        for (const [key, value] of Object.entries(errors)) {
+            switch (key) {
+                case "university_name":
+                    basictoaster("dangerToast", "University name is required");
+                    return;
+                case "latest_degree":
+                    basictoaster("dangerToast", "latest degree is required");
+                    return;
+                case "year_of_graduation":
+                    basictoaster("dangerToast", "Year of graduation is required");
+                    return;
+                case "major":
+                    basictoaster("dangerToast", "Major is required");
+                    return;
+                default:
+                    break;
+            }
+        }
+    };
     return (
         <Fragment>
             <Card>
@@ -244,7 +266,7 @@ const Education = (props) => {
                             </Col>
                         </Row>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: "2%" }}>
-                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit)}}>Submit</Btn>
+                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit, onError)}}>Submit</Btn>
                         </div>
                     </CardBody>
                 </Collapse>

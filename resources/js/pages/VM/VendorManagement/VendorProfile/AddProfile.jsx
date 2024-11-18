@@ -15,10 +15,16 @@ import Billing from "./Billing"
 import NavBar from './NavBar';
 import History from "./History"
 import Portal_User from "./Portal_User"
+import Steps from "./Steps"
 const AddProfile = () => {
     const [data, setdata] = useState([]);
     const [Currancydata, setCurrancy] = useState([]);
+    const [progressValue, setProgressValue] = useState(20);
+    const [marginBottom, setMarginBottom] = useState('18vh');
 
+    const handleProgressValue = (data) => {
+        setProgressValue(progressValue + data)
+    }
     const handleDataSend = (data) => {
         setdata(data);
     };
@@ -26,59 +32,117 @@ const AddProfile = () => {
         setCurrancy(Currancystat);
     }
     
+    useEffect(() => {
+        const updateMargin = () => {
+            if (window.innerWidth < 768) {
+                setMarginBottom('0vh'); 
+            } else {
+                setMarginBottom('20vh');  
+            }
+        };
+
+        updateMargin();
+        window.addEventListener('resize', updateMargin);
+
+        return () => {
+            window.removeEventListener('resize', updateMargin);
+        };
+    }, []);
     return (
         <Fragment >
 
-            <div id='nav-componant' className=" position-fixed  " style={{ zIndex: "2", top: "9vh" }} >
-                <div className="position-relative  nav_div" style={{ width: "99%" }}>
-                    <NavBar />
+            <div
+                id="nav-componant" className="position-relative" style={{ marginBottom }}>
+                <div className=" position-fixed" style={{ zIndex: "2", top: "8.4vh"  }}>
+                    <NavBar value={progressValue} />
                 </div>
             </div>
-            <div style={{ marginTop: "25vh" }}>
-                <div id="personal-data">
-                    <PersonalData onDataSend={handleDataSend} onSubmit="onSubmit" />
-                </div>
-                <div  id="messaging">
-                    <Messaging onSubmit="onSubmit" id={data.id} />
-                </div>
-                <div id='VM-Notes'>
-                    <VMnote id={data.id} email={data.email} onSubmit="onSubmit" />
-                </div>
-                <div id='Files-Certificate'>
-                    <FilesCertificate onSubmit="onSubmit" id={data.id} />
-                </div>
-                <div id='Education'>
-                    <Education id={data.id} />
-                </div>
-                <div id='Experience'>
-                    <Experience onSubmit="onSubmit" id={data.id} />
-                </div>
-                <div id='Test'>
-                    <Test id={data.id} onSubmit="onSubmit" />
-                </div>
-                <div id='Billing'>
-                    <Billing id={data.id} onSubmit="onSubmit" Currancy={getCurrancy} />
-                </div>
-                <div id='Portal_User'>
-                    <Portal_User email={data.email} onSubmit="onSubmit" />
-                </div>
-                <div id='Price_List'>
-                    <Price_List Currency={Currancydata} id={data.id} />
-                </div>
-                <div id='Evaluation'>
-                    <Evaluation />
-                </div>
-                <div id='Feedback'>
-                    <Feedback />
-                </div>
-                <div id='Vacation'>
-                    <Vacation />
-                </div>
-                <div id='History'>
-                    <History />
+            <div className=" mt-5 mt-sm-6 mt-md-8 mt-lg-10 mt-xl-12 py-3 py-md-5">
+                <div id="personal-data" className="row mb-3">
+                    <div className="col-12">
+                        <PersonalData onDataSend={handleDataSend} onSubmit="onSubmit" />
+                    </div>
                 </div>
 
+                <div id="messaging" className="row mb-3">
+                    <div className="col-12">
+                        <Messaging onSubmit="onSubmit" id={data.id} />
+                    </div>
+                </div>
+
+                <div id="VM-Notes" className="row mb-3">
+                    <div className="col-12">
+                        <VMnote id={data.id} email={data.email} onSubmit="onSubmit" />
+                    </div>
+                </div>
+
+                <div id="Files-Certificate" className="row mb-3">
+                    <div className="col-12">
+                        <FilesCertificate onSubmit="onSubmit" id={data.id} />
+                    </div>
+                </div>
+
+                <div id="Education" className="row mb-3">
+                    <div className="col-12">
+                        <Education id={data.id} />
+                    </div>
+                </div>
+
+                <div id="Experience" className="row mb-3">
+                    <div className="col-12">
+                        <Experience onSubmit="onSubmit" id={data.id} />
+                    </div>
+                </div>
+
+                <div id="Test" className="row mb-3">
+                    <div className="col-12">
+                        <Test id={data.id} onSubmit="onSubmit" />
+                    </div>
+                </div>
+
+                <div id="Billing" className="row mb-3">
+                    <div className="col-12">
+                        <Billing id={data.id} onSubmit="onSubmit" Currancy={getCurrancy} />
+                    </div>
+                </div>
+
+                <div id="Portal_User" className="row mb-3">
+                    <div className="col-12">
+                        <Portal_User email={data.email} onSubmit="onSubmit" />
+                    </div>
+                </div>
+
+                <div id="Price_List" className="row mb-3">
+                    <div className="col-12">
+                        <Price_List Currency={Currancydata} id={data.id} />
+                    </div>
+                </div>
+
+                <div id="Evaluation" className="row mb-3">
+                    <div className="col-12">
+                        <Evaluation />
+                    </div>
+                </div>
+
+                <div id="Feedback" className="row mb-3">
+                    <div className="col-12">
+                        <Feedback />
+                    </div>
+                </div>
+
+                <div id="Vacation" className="row mb-3">
+                    <div className="col-12">
+                        <Vacation />
+                    </div>
+                </div>
+
+                <div id="History" className="row mb-3">
+                    <div className="col-12">
+                        <History />
+                    </div>
+                </div>
             </div>
+
 
 
         </Fragment>

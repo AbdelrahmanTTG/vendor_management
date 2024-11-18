@@ -7,9 +7,9 @@ const CustomizerProvider = (props) => {
     const [settings, setSettings] = useState('');
     const [layout, setLayout] = useState('');
     const [mix_background_layout, setMixBackgroundLayout] = useState('');
-    const [toggleIcon, setToggleIcon] = useState(false);
+    const [toggleIcon, setToggleIcon] = useState(true);
     const [mixLayout, setMixLayout] = useState(true);
-    const [sidebarResponsive, setSidebarResponsive] = useState(true);
+    const [sidebarResponsive, setSidebarResponsive] = useState(false);
     const [IsOpen, setIsClose] = useState(true);
     const [size, setsize] = useState('');
 
@@ -57,14 +57,14 @@ const CustomizerProvider = (props) => {
 
     const toggleSidebar = (toggle) => {
         setToggleIcon(toggle);
-        if (toggleIcon) {
-            setsize("99%")
-            document.getElementById('nav-componant').style.width = size;
-        } 
-        if (!toggleIcon) {
-            setsize("")
-            document.getElementById('nav-componant').style.width = size;
-        }
+        // if (toggle) {
+        //     setsize("")
+        //     document.getElementById('nav-componant').style.width = size;
+        // } 
+        // if (!toggle) {
+        //     setsize("87%")
+        //     document.getElementById('nav-componant').style.width = size;
+        // }
     
 
     };

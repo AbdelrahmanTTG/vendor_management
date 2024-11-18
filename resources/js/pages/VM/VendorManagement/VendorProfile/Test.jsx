@@ -38,6 +38,7 @@ const Test = (props) => {
     const [testFileName, setTestFileName] = useState(null);
     const [selectedOption, setSelectedOption] = useState("1");
     const [testResult, setTestResult] = useState("1");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -130,6 +131,9 @@ const Test = (props) => {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
+                basictoaster("successToast", isSubmitting ? "Test Updated successfully" : "Test submitted successfully");
+                setIsSubmitting(true)
+
             } catch (err) {
                 console.error("Error:", err.response ? err.response.data : err.message);
             }
