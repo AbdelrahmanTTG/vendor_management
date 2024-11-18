@@ -82,16 +82,37 @@ const Vendor = () => {
     ];
     const handleSearchInputsOnChange = (values) => {
         setSelectedSearchCol(values.map(item => item.value));
-        if(values.length == 0){
+        if (values.length == 0) {
             setQueryParams(null);
         }
     }
     const searchVendors = (event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        setQueryParams(Object.fromEntries(formData));
-        setCurrentPage(1)
+        //  setQueryParams(Object.fromEntries(formData));
+        const data = {};
+        for (let keyValue of formData.entries()) {
+            data[keyValue[0]] = formData.getAll(keyValue[0]);
+        }
+        setQueryParams(data);
+        setCurrentPage(1);
     }
+
+    const addBtn = (event, divID) => {
+        event.preventDefault();
+        const div = document.querySelector(["." + divID]);
+        const container = document.getElementById(divID);
+        container.appendChild(div.cloneNode(true));
+
+    };
+
+    const delBtn = (event, divID) => {
+        event.preventDefault();
+        var divLength = document.querySelectorAll(["." + divID]).length;
+        var div = document.querySelector(['#' + divID + " ." + divID + ":last-child"]);
+        if (divLength > 1)
+            div && div.remove();
+    };
 
     const handleEdit = (vendor) => {
         setLoading(true);
@@ -251,25 +272,28 @@ const Vendor = () => {
                                     <Row>
                                         {selectedSearchCol.indexOf("name") > -1 &&
                                             <Col>
-                                                <FormGroup>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Name'}</Label>
-                                                    <Input className='form-control form-control-sm' type='text' name='name' required />
+                                                <FormGroup id='nameInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm nameInput mb-1' type='text' name='name' required />
                                                 </FormGroup>
                                             </Col>
                                         }
                                         {selectedSearchCol.indexOf("legal_name") > -1 &&
                                             <Col>
-                                                <FormGroup>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='legal_name'>{'legal Name'}</Label>
-                                                    <Input className='form-control form-control-sm' type='text' name='legal_name' required />
+                                                <FormGroup id='legalInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='legal_name'>{'legal Name'}<Btn attrBtn={{  datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'legalInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'legalInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm legalInput mb-1' type='text' name='legal_name' required />
                                                 </FormGroup>
                                             </Col>
                                         }{
                                             selectedSearchCol.indexOf("email") > -1 &&
                                             <Col>
-                                                <FormGroup>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Email'}</Label>
-                                                    <Input className='form-control form-control-sm' type='email' name='email' required />
+                                                <FormGroup id='emailInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Email'}<Btn attrBtn={{  datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'emailInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'emailInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm emailInput mb-1' type='email' name='email' required />
                                                 </FormGroup>
                                             </Col>
                                         }
@@ -286,7 +310,7 @@ const Vendor = () => {
                                                                 { value: 'Agency', label: 'Agency' },
                                                                 { value: 'Contractor', label: 'Contractor' },
                                                                 { value: 'In House', label: 'In House' },
-                                                            ]} className="js-example-basic-single "
+                                                            ]} className="js-example-basic-multiple typeInput mb-1" isMulti
                                                     />
                                                 </FormGroup>
                                             </Col>
@@ -303,7 +327,7 @@ const Vendor = () => {
                                                                 { value: 'Inactive', label: 'Inactive' },
                                                                 { value: 'Rejected', label: 'Rejected' },
                                                                 { value: 'Wait for Approval', label: 'Wait for Approval' },
-                                                            ]} className="js-example-basic-single "
+                                                            ]} className="js-example-basic-multiple statusInput mb-1" isMulti
                                                     />
                                                 </FormGroup>
                                             </Col>
@@ -317,7 +341,7 @@ const Vendor = () => {
                                                         onInputChange={(inputValue) =>
                                                             handleInputChange(inputValue, "countries", "country", setOptionsC, optionsC)
                                                         }
-                                                    />
+                                                        isMulti />
                                                 </FormGroup>
                                             </Col>
                                         }{
@@ -330,7 +354,7 @@ const Vendor = () => {
                                                         onInputChange={(inputValue) =>
                                                             handleInputChange(inputValue, "countries", "nationality", setOptionsN, optionsN)
                                                         }
-                                                    />
+                                                        isMulti />
                                                 </FormGroup>
                                             </Col>
                                         }

@@ -36,10 +36,19 @@ class VendorProfileController extends Controller
         $vendors = Vendor::select('id', 'name', 'email', 'legal_Name', 'phone_number', 'country', 'nationality')
             ->with(['country:id,name', 'nationality:id,name']);
 
-        if (!empty(request("queryParams"))) {
-            foreach (request("queryParams") as $key => $val) {
-                if (!empty($val)) {
-                    $vendors = $vendors->where($key, "like", "%" . $val . "%");
+        if (!empty($request->queryParams)) {
+            foreach ($request->queryParams as $key => $val) {
+                if (!empty($val)) {                   
+                    if(count($val) >= 1){
+                        foreach($val as $k => $v){
+                            if($k==0)
+                            $vendors = $vendors->where($key, "like", "%" . $v . "%");
+                        else
+                            $vendors = $vendors->orWhere($key, "like", "%" . $v . "%");
+                        }
+                    }else{
+                        $vendors = $vendors->where($key, "like", "%" . $val . "%");
+                    }
                 }
             }
         }
