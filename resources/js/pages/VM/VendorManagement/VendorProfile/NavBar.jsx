@@ -29,7 +29,6 @@ const Simple = (props) => {
     //     <CardBody style={{ paddingBottom: '0px', paddingRight: "0px", paddingLeft: "0px" ,paddingTop:"0px"}}>
           
           <Navbar expand="lg" className="bg-body-tertiary" light>
-      <div className="container-fluid">
         <div style={{marginBottom:"5vh"}}>
           <NavbarToggler
             onClick={toggle}
@@ -216,7 +215,6 @@ const Simple = (props) => {
             </span>
           </Progress>
         </div>
-              </div>
           </Navbar>
 
          
