@@ -35,6 +35,9 @@ jobs:
       - name: Build React App with Vite
         run: npm run build  # Adjust if your build command is different
 
+      - name: Ping the server
+        run: ping -c 4 $SERVER_ADDRESS
+  
       - name: List files in deployment directory (for debugging)
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
