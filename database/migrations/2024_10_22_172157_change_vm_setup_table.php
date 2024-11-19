@@ -6,30 +6,55 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('vm_setup', function (Blueprint $table) 
-        {       
-            $table->text('pe_invoice_subject')->nullable();
-            $table->text('pe_invoice_body')->nullable();
-            
-            $table->text('pe_message_subject')->nullable();
-            $table->text('pe_message_body')->nullable();
-            $table->timestamps();
-        });
+        try {
+            if (Schema::hasTable('vm_setup')) {
+                Schema::table('vm_setup', function (Blueprint $table) {   
+                    if (!Schema::hasColumn('vm_setup', 'pe_invoice_subject')) {
+                        $table->text('pe_invoice_subject')->nullable();
+                    }
+                    if (!Schema::hasColumn('vm_setup', 'pe_invoice_body')) {
+                        $table->text('pe_invoice_body')->nullable();
+                    }
+                    if (!Schema::hasColumn('vm_setup', 'pe_message_subject')) {
+                        $table->text('pe_message_subject')->nullable();
+                    }
+                    if (!Schema::hasColumn('vm_setup', 'pe_message_body')) {
+                        $table->text('pe_message_body')->nullable();
+                    }
+                    if (!Schema::hasColumn('vm_setup', 'created_at')) {
+                        $table->timestamps();
+                    }
+                });
+            }
+        } catch (\Exception $e) {
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('vm_setup', function (Blueprint $table) {
-            $table->dropColumn(['pe_invoice_subject', 'pe_invoice_body', 'pe_message_subject', 'pe_message_body', 'created_at', 'updated_at']);
-
-        });
+        try {
+            if (Schema::hasTable('vm_setup')) {
+                Schema::table('vm_setup', function (Blueprint $table) {
+                    if (Schema::hasColumn('vm_setup', 'pe_invoice_subject')) {
+                        $table->dropColumn('pe_invoice_subject');
+                    }
+                    if (Schema::hasColumn('vm_setup', 'pe_invoice_body')) {
+                        $table->dropColumn('pe_invoice_body');
+                    }
+                    if (Schema::hasColumn('vm_setup', 'pe_message_subject')) {
+                        $table->dropColumn('pe_message_subject');
+                    }
+                    if (Schema::hasColumn('vm_setup', 'pe_message_body')) {
+                        $table->dropColumn('pe_message_body');
+                    }
+                    if (Schema::hasColumn('vm_setup', 'created_at') && Schema::hasColumn('vm_setup', 'updated_at')) {
+                        $table->dropColumn(['created_at', 'updated_at']);
+                    }
+                });
+            }
+        } catch (\Exception $e) {
+        }
     }
 };

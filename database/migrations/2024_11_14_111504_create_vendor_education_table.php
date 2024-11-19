@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('vendor_education', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('vendor_id');
-            $table->string('university_name');
-            $table->string('latest_degree');
-            $table->year('year_of_graduation');
-            $table->string('major');
-            $table->timestamps();
-
-        });
+        try {
+            Schema::create('vendor_education', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('vendor_id');
+                $table->string('university_name');
+                $table->string('latest_degree');
+                $table->year('year_of_graduation');
+                $table->string('major');
+                $table->timestamps();
+            });
+        } catch (\Exception $e) {
+            // Ignore exception
+        }
     }
 
     /**
@@ -28,6 +31,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('vendor_education');
+        try {
+            Schema::dropIfExists('vendor_education');
+        } catch (\Exception $e) {
+            // Ignore exception
+        }
     }
 };

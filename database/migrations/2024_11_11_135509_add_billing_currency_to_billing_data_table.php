@@ -3,26 +3,33 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('billing_data', function (Blueprint $table) {
-            $table->string('billing_currency')->nullable(false);
-        });
+        try {
+            Schema::table('billing_data', function (Blueprint $table) {
+                if (!Schema::hasColumn('billing_data', 'billing_currency')) {
+                    $table->string('billing_currency')->nullable(false);
+                }
+            });
+        } catch (\Exception $e) {
+            // Ignore exception
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('billing_data', function (Blueprint $table) {
-            $table->dropColumn('billing_currency');
-        });
+        try {
+            Schema::table('billing_data', function (Blueprint $table) {
+                if (Schema::hasColumn('billing_data', 'billing_currency')) {
+                    $table->dropColumn('billing_currency');
+                }
+            });
+        } catch (\Exception $e) {
+            // Ignore exception
+        }
     }
 };

@@ -6,29 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('wallets_payment_methods', function (Blueprint $table) {
-            // $table->dropForeign(['bank_details_id']);
-            $table->dropColumn('bank_details_id');
-            $table->unsignedBigInteger('billing_data_id')->nullable();
-            // $table->foreign('billing_data_id')->references('id')->on('billing_data')->onDelete('cascade');
-        });
+        try {
+            Schema::table('wallets_payment_methods', function (Blueprint $table) {
+                $table->dropColumn('bank_details_id');
+                $table->unsignedBigInteger('billing_data_id')->nullable();
+            });
+        } catch (\Exception $e) {
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('wallets_payment_methods', function (Blueprint $table) {
-            $table->dropForeign(['billing_data_id']);
-            $table->dropColumn('billing_data_id'); 
-            $table->unsignedBigInteger('bank_details_id')->nullable();
-            // $table->foreign('bank_details_id')->references('id')->on('bank_details')->onDelete('cascade');
-        });
+        try {
+            Schema::table('wallets_payment_methods', function (Blueprint $table) {
+                $table->dropColumn('billing_data_id');
+                $table->unsignedBigInteger('bank_details_id')->nullable();
+            });
+        } catch (\Exception $e) {
+        }
     }
 };

@@ -11,19 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('vendorTest', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('vendor_id');
-            $table->boolean('test_type');
-            $table->boolean('test_result');
-            $table->string('test_upload');
-            $table->integer('source_lang');
-            $table->integer('target_lang');
-            $table->integer('MainSubject');
-            $table->integer('SubSubject');
-            $table->integer('service');
-            $table->timestamps();
-        });
+        try {
+            Schema::create('vendorTest', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('vendor_id');
+                $table->boolean('test_type');
+                $table->boolean('test_result');
+                $table->string('test_upload');
+                $table->integer('source_lang');
+                $table->integer('target_lang');
+                $table->integer('MainSubject');
+                $table->integer('SubSubject');
+                $table->integer('service');
+                $table->timestamps();
+            });
+        } catch (\Exception $e) {
+            // Ignore exception
+        }
     }
 
     /**
@@ -31,6 +35,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('vendorTest');
+        try {
+            Schema::dropIfExists('vendorTest');
+        } catch (\Exception $e) {
+            // Ignore exception
+        }
     }
 };

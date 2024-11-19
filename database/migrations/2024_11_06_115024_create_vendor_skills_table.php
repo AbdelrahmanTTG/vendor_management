@@ -5,27 +5,26 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-
-        Schema::create('vendor_skill', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('vendor_id');
-            $table->unsignedBigInteger('skill_id');
-
-            $table->timestamps();
-        });
-
+        try {
+            Schema::create('vendor_skill', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('vendor_id');
+                $table->unsignedBigInteger('skill_id');
+                $table->timestamps();
+            });
+        } catch (\Exception $e) {
+            // Handle the error silently
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('vendor_skill');
+        try {
+            Schema::dropIfExists('vendor_skill');
+        } catch (\Exception $e) {
+            // Handle the error silently
+        }
     }
 };

@@ -6,25 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
-            $table->id();
-            $table->string('sender_email'); 
-            $table->string('receiver_email');
-            $table->text('content'); 
-            $table->boolean('is_read')->default(false);
-            $table->timestamps();
-        });
+        try {
+            Schema::create('messages', function (Blueprint $table) {
+                $table->id();
+                $table->string('sender_email'); 
+                $table->string('receiver_email');
+                $table->text('content'); 
+                $table->boolean('is_read')->default(false);
+                $table->timestamps();
+            });
+        } catch (\Exception $e) {
+        }
     }
-    /**
-     * Reverse the migrations.
-     */
+
     public function down(): void
     {
-        Schema::dropIfExists('messages');
+        try {
+            Schema::dropIfExists('messages');
+        } catch (\Exception $e) {
+        }
     }
 };

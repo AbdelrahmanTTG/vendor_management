@@ -37,7 +37,7 @@ const AddProfile = () => {
             if (window.innerWidth < 768) {
                 setMarginBottom('0vh'); 
             } else {
-                setMarginBottom('15vh');  
+                setMarginBottom('20vh');  
             }
         };
 

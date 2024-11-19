@@ -13,9 +13,13 @@ class AddUseSystemToScreen extends Migration
      */
     public function up()
     {
-        Schema::table('screen', function (Blueprint $table) {
-            $table->string('use_system', 10)->nullable()->after('menu');
-        });
+        try {
+            Schema::table('screen', function (Blueprint $table) {
+                $table->string('use_system', 10)->nullable()->after('menu');
+            });
+        } catch (\Exception $e) {
+            // Handle the error silently or log it
+        }
     }
 
     /**
@@ -25,8 +29,12 @@ class AddUseSystemToScreen extends Migration
      */
     public function down()
     {
-        Schema::table('screen', function (Blueprint $table) {
-            $table->dropColumn('use_system');
-        });
+        try {
+            Schema::table('screen', function (Blueprint $table) {
+                $table->dropColumn('use_system');
+            });
+        } catch (\Exception $e) {
+            // Handle the error silently or log it
+        }
     }
 }

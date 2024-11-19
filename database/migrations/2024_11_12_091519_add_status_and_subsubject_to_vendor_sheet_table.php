@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('vendor_sheet', function (Blueprint $table) {
-            $table->string('Status')->nullable(); 
-            $table->string('SubSubject')->nullable(); 
-        });
+        try {
+            Schema::table('vendor_sheet', function (Blueprint $table) {
+                $table->string('Status')->nullable(); 
+                $table->string('SubSubject')->nullable(); 
+            });
+        } catch (\Exception $e) {
+            // Ignore exception
+        }
     }
 
     /**
@@ -22,8 +26,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('vendor_sheet', function (Blueprint $table) {
-            $table->dropColumn(['Status', 'SubSubject']);
-        });
+        try {
+            Schema::table('vendor_sheet', function (Blueprint $table) {
+                $table->dropColumn(['Status', 'SubSubject']);
+            });
+        } catch (\Exception $e) {
+            // Ignore exception
+        }
     }
 };

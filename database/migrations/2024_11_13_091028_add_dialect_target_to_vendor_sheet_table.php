@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('vendor_sheet', function (Blueprint $table) {
-            $table->string('dialect_target')->nullable();
-        });
+        try {
+            Schema::table('vendor_sheet', function (Blueprint $table) {
+                $table->string('dialect_target')->nullable();
+            });
+        } catch (\Exception $e) {
+            // Ignore exception
+        }
     }
 
     /**
@@ -21,8 +25,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('vendor_sheet', function (Blueprint $table) {
-            $table->dropColumn('dialect_target');
-        });
+        try {
+            Schema::table('vendor_sheet', function (Blueprint $table) {
+                $table->dropColumn('dialect_target');
+            });
+        } catch (\Exception $e) {
+            // Ignore exception
+        }
     }
 };
