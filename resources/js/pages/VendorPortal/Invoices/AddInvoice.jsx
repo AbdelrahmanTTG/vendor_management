@@ -35,7 +35,7 @@ const AddInvoice = () => {
                     setCompletedJobs(completedJobs);
                 });
             // get billing data 
-            axiosClient.post(baseURL + "EditVendor", {
+            axiosClient.post("/EditVendor", {
                 params: {
                     id: user.id,
                     BillingData: "Billing Data",
@@ -249,13 +249,13 @@ const AddInvoice = () => {
                                             <FormGroup className="row">
                                                 <Label className="col-sm-4 col-form-label">{'Billing Legal Name'}</Label>
                                                 <Col sm="8">
-                                                    <Input type="text" name="billing_legal_name" className="form-control" readOnly disabled defaultValue={billingData.billing_legal_name} />
+                                                    <Input type="text" name="billing_legal_name" className="form-control" readOnly disabled defaultValue={billingData?.billing_legal_name} />
                                                 </Col>
                                             </FormGroup>
                                             <FormGroup className="row">
                                                 <Label className="col-sm-4 col-form-label">{'Billing Address'}</Label>
                                                 <Col sm="8">
-                                                    <Input type="text" name="billing_address" className="form-control" readOnly disabled defaultValue={billingData.billing_address} />
+                                                    <Input type="text" name="billing_address" className="form-control" readOnly disabled defaultValue={billingData?.billing_address} />
                                                 </Col>
                                             </FormGroup>
                                         </Col>
@@ -276,7 +276,7 @@ const AddInvoice = () => {
                                             <FormGroup className="row">
                                                 <Label className="col-sm-4 col-form-label">{'Billing Currency'}</Label>
                                                 <Col sm="8">
-                                                    <Input type="text" name="billing_currency" className="form-control" readOnly disabled defaultValue={billingData.billing_currency} />
+                                                    <Input type="text" name="billing_currency" className="form-control" readOnly disabled defaultValue={billingData?.billing_currency} />
                                                 </Col>
                                             </FormGroup>
                                         </Col>
@@ -308,31 +308,31 @@ const AddInvoice = () => {
                                                     <FormGroup className="row">
                                                         <Label className="col-sm-4 col-form-label">{'Bank name'}</Label>
                                                         <Col sm="8">
-                                                            <Input type="text" name="bank_name" className="form-control" defaultValue={bankData.bank_name} />
+                                                            <Input type="text" name="bank_name" className="form-control" defaultValue={bankData?.bank_name} />
                                                         </Col>
                                                     </FormGroup>
                                                     <FormGroup className="row">
                                                         <Label className="col-sm-4 col-form-label">{'Account holder'}</Label>
                                                         <Col sm="8">
-                                                            <Input type="text" name="bank_account_holder" className="form-control" defaultValue={bankData.account_holder} />
+                                                            <Input type="text" name="bank_account_holder" className="form-control" defaultValue={bankData?.account_holder} />
                                                         </Col>
                                                     </FormGroup>
                                                     <FormGroup className="row">
                                                         <Label className="col-sm-4 col-form-label">{'SWIFT/BIC'}</Label>
                                                         <Col sm="8">
-                                                            <Input type="text" name="bank_swift" className="form-control" defaultValue={bankData.swift_bic} />
+                                                            <Input type="text" name="bank_swift" className="form-control" defaultValue={bankData?.swift_bic} />
                                                         </Col>
                                                     </FormGroup>
                                                     <FormGroup className="row">
                                                         <Label className="col-sm-4 col-form-label">{'IBAN'}</Label>
                                                         <Col sm="8">
-                                                            <Input type="text" name="bank_IBAN" className="form-control" defaultValue={bankData.iban} />
+                                                            <Input type="text" name="bank_IBAN" className="form-control" defaultValue={bankData?.iban} />
                                                         </Col>
                                                     </FormGroup>
                                                     <FormGroup className="row">
                                                         <Label className="col-sm-4 col-form-label">{'Bank Address'}</Label>
                                                         <Col sm="8">
-                                                            <Input type="text" name="bank_address" className="form-control" defaultValue={bankData.bank_address} />
+                                                            <Input type="text" name="bank_address" className="form-control" defaultValue={bankData?.bank_address} />
                                                         </Col>
                                                     </FormGroup>
                                                 </>)}
@@ -342,13 +342,13 @@ const AddInvoice = () => {
                                                     <FormGroup className="row">
                                                         <Label className="col-sm-4 col-form-label">{'Method'}</Label>
                                                         <Col sm="8">
-                                                            <Input type="text" name="wallet_method" className="form-control" defaultValue={walletData.method} />
+                                                            <Input type="text" name="wallet_method" className="form-control" defaultValue={walletData?.method} />
                                                         </Col>
                                                     </FormGroup>
                                                     <FormGroup className="row">
                                                         <Label className="col-sm-4 col-form-label">{'Account'}</Label>
                                                         <Col sm="8">
-                                                            <Input type="text" name="wallet_account" className="form-control" defaultValue={walletData.account} />
+                                                            <Input type="text" name="wallet_account" className="form-control" defaultValue={walletData?.account} />
                                                         </Col>
                                                     </FormGroup>
                                                 </>)}

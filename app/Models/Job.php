@@ -15,4 +15,10 @@ class Job extends Model
         return  $this->belongsTo(PriceList::class, 'price_list');
        
     }
+    
+    public function project()
+    {
+        return  $this->belongsTo(Project::class, 'project_id');
+       
+    }
 }

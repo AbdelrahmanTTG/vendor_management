@@ -28,7 +28,8 @@ class VendorInvoice extends Model
         'bank_IBAN',
         'bank_address',
         'wallet_method',
-        'wallet_account'
+        'wallet_account',
+        'brand_id'
     ];
 
     public function tasks()

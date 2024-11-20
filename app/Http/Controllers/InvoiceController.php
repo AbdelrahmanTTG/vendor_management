@@ -129,7 +129,8 @@ class InvoiceController extends Controller
                 $inv['bank_IBAN'] = $request->bank_IBAN;
                 $inv['bank_address'] = $request->bank_address;
                 $inv['wallet_method'] = $request->wallet_method;
-                $inv['wallet_account'] = $request->wallet_account;
+                $inv['wallet_account'] = $request->wallet_account;                
+                $inv['brand_id'] = 0;                
                 $invoice = VendorInvoice::create($inv);
                 $insert_id = $invoice->id;
                 $data['invoice_id'] = $insert_id;
@@ -137,6 +138,8 @@ class InvoiceController extends Controller
                 for ($i = 0; $i < count($jobs); $i++) {
                     $id = $jobs[$i];
                     $offer = Task::where('vendor', $request->vendor)->where('id', $id)->where('status', 1)->first();
+                    $brand['brand_id'] = $offer->getTaskBrandId();
+                    $invoice->update($brand);
                     if ($offer->update($data)) {
                         Logger::addToLoggerUpdate('job_task', 'id', $id, $request->vendor);                        
                         $msg['type'] = "success";

@@ -11,9 +11,15 @@ class Task extends Model
     protected $table = 'job_task';
     public $timestamps = false;
     protected $fillable = [
-        'status','vendor_attachment','vendor_notes','plan_comment','verified','vpo_file',
-        'invoice_created_at','invoice_id'
-        
+        'status',
+        'vendor_attachment',
+        'vendor_notes',
+        'plan_comment',
+        'verified',
+        'vpo_file',
+        'invoice_created_at',
+        'invoice_id'
+
     ];
 
     public function jobPrice()
@@ -50,7 +56,7 @@ class Task extends Model
     {
         return  $this->belongsTo(Job::class, 'job_id')->select(['job_file']);
     }
-    
+
     public function job()
     {
         return  $this->belongsTo(Job::class, 'job_id');
@@ -60,5 +66,12 @@ class Task extends Model
     {
         $taskArray = array("In Progress", "Delivered", "Cancelled", "Rejected", "Waiting Your Confirmation", "Waiting PM Confirmation", " ", "Heads-Up ", "Heads-Up ( Marked as Available )", "Heads-Up ( Marked as Not Available )");
         return $taskArray[$this->status];
+    }
+
+    public function getTaskBrandId()
+    {
+        $job =  $this->belongsTo(Job::class, 'job_id')->with(['project'])->first();
+        $data = $job->project->getcustomerBrand->brand;
+        return $data;
     }
 }
