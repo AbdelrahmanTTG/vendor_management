@@ -308,16 +308,16 @@ class VendorProfileController extends Controller
         }
 
         return response()->json(
-            [
-                'Data' => $PersonalData,
-                "VMNotes" => $VMNotes,
-                "BillingData" => $BillingData,
-                "Experience" => $VendorExperience,
-                "VendorFiles" => $VendorFiles,
-                "InstantMessaging" => $InstantMessaging,
-                "priceList" => [$priceList, $VendorTools],
-                "VendorTestData" => $VendorTestData,
-                "EducationVendor" => $EducationVendor
+               [
+                'Data' => $PersonalData ?? null,
+                "VMNotes" => $VMNotes ?? null,
+                "BillingData" => $BillingData ?? null,
+                "Experience" => $VendorExperience ?? null,
+                "VendorFiles" => $VendorFiles ?? null,
+                "InstantMessaging" => $InstantMessaging ?? null,
+                "priceList" => [$priceList ?? null, $VendorTools ?? null],
+                "VendorTestData" => $VendorTestData ?? null,
+                "EducationVendor" => $EducationVendor ?? null
             ],
             200
         );
