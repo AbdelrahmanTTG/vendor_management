@@ -52,15 +52,24 @@ class VendorProfileController extends Controller
                 }
             }
         }
-        $vendors = $vendors->paginate($perPage);
 
         // $vendorsArray = $vendors->toArray();
         // foreach ($vendorsArray['data'] as &$vendor) {
         //     $vendor['id'] = Crypt::encrypt($vendor['id']); 
         // }
         // $vendors->setCollection(collect($vendorsArray['data']));
-        return response()->json($vendors);
+        if ($request->has('sortBy') && $request->has('sortDirection')) {
+        $sortBy = $request->input('sortBy');
+        $sortDirection = $request->input('sortDirection');
+
+        if (in_array($sortDirection, ['asc', 'desc'])) {
+            $vendors = $vendors->orderBy($sortBy, $sortDirection);
+        }
     }
+    $vendors = $vendors->paginate($perPage);
+
+    return response()->json($vendors);  
+  }
     public function findCountry(Request $request)
     {
         $id = $request->input('id');

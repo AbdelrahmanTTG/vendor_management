@@ -47,6 +47,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/VendorTest', [VendorProfileController::class, 'AddVendorTest']);
     Route::post('/saveOrUpdateMessages', [VendorProfileController::class, 'saveOrUpdateMessages']);
     Route::post('/VendorEducation', [VendorProfileController::class, 'saveOrUpdateEducation']);
+    Route::get('perm', [AuthController::class, 'routes']);
 
 
 

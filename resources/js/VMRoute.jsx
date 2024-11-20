@@ -1,18 +1,32 @@
 import Home from './pages/Home'
-import React, { Suspense } from "react";
-
+import React, { Suspense  } from "react";
 const Languages = React.lazy(() => import('./pages/VM/Admin/Languages'));
 const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/AddProfile'));
 const ProfileIndex = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
 const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/EditProfile'));
 const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable/index'));
-
+import axios from './pages/AxiosClint'; 
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
         {children}
     </Suspense>
 );
-export const VM = [
+const checkIfRouteAllowed = (path, routes) => {
+    return routes.includes(path);
+};
+const fetchAllowedRoutes = async () => {  
+    try {
+        const payload = {
+            role: JSON.parse(localStorage.getItem('USER')).role
+        }
+        const response = await axios.get('perm', { params: payload });
+        response.data.allowedRoutes.push({url:""});
+        return response.data.allowedRoutes || [];
+    } catch (error) {
+        return [];
+    }
+};
+export const VM = (allowedPermissions) => [
     {
         path: '',
         element: <Home />
@@ -41,7 +55,6 @@ export const VM = [
             </LazyWrapper>
         )
     },
-
     {
         path: 'Time zone',
         element: (
@@ -314,11 +327,12 @@ export const VM = [
         )
     },
     {
-        path: 'Language',
+        path: 'language',
         element: (
             <LazyWrapper>
                 <CodeTable
                     key="Language"
+                    // permission_add={allowedPermissions['language']}
                     table="Languages"
                     dataTable="languages"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
@@ -437,3 +451,18 @@ export const VM = [
     }
 
 ]
+export const getAllowedRoutes = async () => {
+    const allowedRoutes = await fetchAllowedRoutes();
+    const allowedUrls = allowedRoutes.map(route => route.url);
+    const permissions = allowedRoutes.reduce((acc, route) => {
+        if (route?.add) {
+            acc[route?.url] = route.add;  
+        } else {
+            acc[route?.url] = null; 
+        }
+        return acc;
+    }, {});
+    return VM(permissions).filter(route =>
+        checkIfRouteAllowed(route.path, allowedUrls)
+    );
+};

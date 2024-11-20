@@ -214,7 +214,7 @@ const NotFound = () => {
                             <Col md="8" className="offset-md-2">
                                 <H3>Sorry, something goes wrong</H3>
                                 <P attrPara={{ className: 'sub-content' }} >The page you are attempting to reach is currently not available.This may be because the page does not exist or has been moved.</P>
-                                <Link to="/" className="btn btn-primary btn-lg">
+                                <Link to="/vm" className="btn btn-primary btn-lg">
                                     BACK TO HOME PAGE
                                 </Link>
                             </Col>

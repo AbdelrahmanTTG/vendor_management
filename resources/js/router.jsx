@@ -1,5 +1,5 @@
-import React, { Suspense } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import React, { Suspense, useEffect, useState } from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from './pages/Home'
 import About from './pages/About'
 import Login from './pages/Login'
@@ -19,103 +19,114 @@ import Portal_Admin from "./pages/VendorPortal/Admin";
 import Portal_Profile from "./pages/VendorPortal/Profile";
 import Portal_Notes from "./pages/VendorPortal/Notes";
 import NotFound from "./NotFound";
-import { VM } from './VMRoute'
-
+import { getAllowedRoutes } from './VMRoute'
+import axios from './pages/AxiosClint'; 
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
         {children}
     </Suspense>
 );
+const AppRouter = () => {
+    const [routes, setRoutes] = useState([]);
+    useEffect(() => {
+            const fetchRoutes = async () => {
+                const allowedRoutes = await getAllowedRoutes();
+                setRoutes(allowedRoutes);
+            };
+            fetchRoutes(); 
+    }, []);
+    const router = createBrowserRouter([
+        {
+            path: '/',
+            element: <Login />,
+        },
+        {
+            path: 'login',
+            element: <Login />,
+        },
+        {
+            path: '/VM',
+            element: <Dashboard />,
+            children: routes,
 
+        },
+        {
+            path: '/Vendor',
+            element: <Dashboard_p />,
+            children: [
+                {
+                    path: '',
+                    element: <Portal_Dashboard />
+                },
+                {
+                    path: 'Notes',
+                    element: <Portal_Notes />
+                },
+                {
+                    path: 'Jobs',
+                    children: [
+                        {
+                            path: '',
+                            element: <Portal_Jobs_All />
+                        }
+                        ,
+                        {
+                            path: 'Offers',
+                            element: <Portal_Jobs_Offers />
+                        },
+                        {
+                            path: 'Closed',
+                            element: <Portal_Jobs_Closed />
+                        },
+                        {
+                            path: 'Notifications',
+                            element: <Portal_Jobs_Notifications />
+                        },
+                        {
+                            path: 'ViewOffer/:type/:id',
+                            element: <Portal_ViewOffer />
+                        },
+                        {
+                            path: 'ViewJob/:id',
+                            element: <Portal_ViewJob />
+                        },
+                    ]
+                },
+                {
 
-const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <Login />,
-    },
-    {
-        path: 'login',
-        element: <Login />,
-    },
-    {
-        path: '/VM',
-        element: <Dashboard />,
-        children: VM
-    },
-    {
-        path: '/Vendor',
-        element: <Dashboard_p />,
-        children: [
-            {
-                path: '',
-                element: <Portal_Dashboard />
-            },
-            {
-                path: 'Notes',
-                element: <Portal_Notes />
-            },
-            {
-                path: 'Jobs',
-                children: [
-                    {
-                        path: '',
-                        element: <Portal_Jobs_All />
-                    }
-                    ,
-                    {
-                        path: 'Offers',
-                        element: <Portal_Jobs_Offers />
-                    },
-                    {
-                        path: 'Closed',
-                        element: <Portal_Jobs_Closed />
-                    },
-                    {
-                        path: 'Notifications',
-                        element: <Portal_Jobs_Notifications />
-                    },
-                    {
-                        path: 'ViewOffer/:type/:id',
-                        element: <Portal_ViewOffer />
-                    },
-                    {
-                        path: 'ViewJob/:id',
-                        element: <Portal_ViewJob />
-                    },
-                ]
-            },
-            {
+                    path: 'Invoices',
+                    children: [
+                        {
+                            path: '',
+                            element: <Portal_Invoices_All />
+                        }
+                        ,
+                        {
+                            path: 'Verified',
+                            element: <Portal_Invoices_Verified />
+                        },
+                        {
+                            path: 'addInvoice',
+                            element: <Portal_Add_Invoice />
+                        },
+                    ]
+                },
+                {
+                    path: 'Admin',
+                    element: <Portal_Admin />
+                }, {
+                    path: 'Profile',
+                    element: <Portal_Profile />
+                },
 
-                path: 'Invoices',
-                children: [
-                    {
-                        path: '',
-                        element: <Portal_Invoices_All />
-                    }
-                    ,
-                    {
-                        path: 'Verified',
-                        element: <Portal_Invoices_Verified />
-                    },
-                    {
-                        path: 'addInvoice',
-                        element: <Portal_Add_Invoice />
-                    },
-                ]
-            },
-            {
-                path: 'Admin',
-                element: <Portal_Admin />
-            }, {
-                path: 'Profile',
-                element: <Portal_Profile />
-            },
+            ]
+        },
+        {
+            path: '*',
+            element: <NotFound />,
+        }
+    ])
 
-        ]
-    },
-    {
-        path: '*',
-        element: <NotFound />,
-    }
-])
-export default router
+    return <RouterProvider router={router} />;
+};
+export default AppRouter;

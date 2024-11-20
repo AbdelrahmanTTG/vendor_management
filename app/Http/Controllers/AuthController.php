@@ -17,6 +17,7 @@ use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -42,7 +43,7 @@ class AuthController extends Controller
                     'user' => $loginData,
                     'token' => $token,
                     'token_type' => 'bearer',
-                    'expires_in' => auth('vendor')->factory()->getTTL() * 60
+                    'expires_in' => auth()->guard('vendor')->factory()->getTTL() * 60
                 ], 200);
             } else {
                 return response()->json(['message' => 'Invalid credentials'], 400);
@@ -51,6 +52,7 @@ class AuthController extends Controller
         $userAccount = User::getUserAccount($user);
         if ($userAccount) {
             User::updateAccountData($userAccount);
+
             $loginData = [
                 'id' => Crypt::encrypt($userAccount->id),
                 'email' => base64_encode(app('encrypt')($userAccount->email)),
@@ -69,7 +71,7 @@ class AuthController extends Controller
                 'user' => $loginData,
                 'token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => auth('api')->factory()->getTTL() * 60
+                'expires_in' => auth()->guard('api')->factory()->getTTL() * 60
             ], 200);
         } else {
             return response()->json(['message' => 'User account not found'], 404);
@@ -91,7 +93,8 @@ class AuthController extends Controller
                 'error' => 'Invalid data provided',
                 'messages' => $validator->errors(),
             ], 422);
-        };
+        }
+        ;
         try {
             $role = Crypt::decrypt($request->input('role'));
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
@@ -187,5 +190,32 @@ class AuthController extends Controller
         } catch (JWTException $e) {
             return response()->json(['message' => 'Token not provided'], 400);
         }
+    }
+    public function routes(Request $request)
+    {
+   $validator = Validator::make($request->all(), [
+            'role' => 'required|string',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 'Invalid data provided',
+                'messages' => $validator->errors(),
+            ], 401);
+        }
+        ;
+        try {
+            $role = Crypt::decrypt($request->input('role'));
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            return response()->json(['error' => 'Failed to decrypt role'], 400);
+        }
+      $allowedRoutes = DB::table('permission')
+    ->join('screen', 'permission.screen', '=', 'screen.id')
+    ->where('permission.role', $role)
+    ->where('screen.use_system', 'VM')
+    ->select('screen.url', 'permission.add as add') 
+    ->get();
+                return response()->json([
+                    'allowedRoutes' => $allowedRoutes,
+                ], 200);
     }
 }

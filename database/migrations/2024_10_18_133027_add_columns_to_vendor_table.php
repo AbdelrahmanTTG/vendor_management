@@ -21,7 +21,6 @@ return new class extends Migration {
             $table->string('contact_name')->nullable();
             $table->string('legal_Name')->nullable();
             $table->integer('region')->nullable();
-
             $table->text('note')->nullable();
         });
     }

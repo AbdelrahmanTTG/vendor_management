@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from 'react-dom/client'
-import { RouterProvider } from "react-router-dom";
 import { ContextProvider } from './pages/context/contextAuth'
 // import TodoProvider from './_helper/Todo/TodoProvider';
 // import EmailProvider from './_helper/Email/EmailProvider';
@@ -15,7 +14,7 @@ import WishListProvider from './_helper/Ecommerce/Wishlist/WishlistProvider';
 import AnimationThemeProvider from './_helper/AnimationTheme/AnimationThemeProvider';
 import CustomizerProvider from './_helper/Customizer/CustomizerProvider'
 
-import router from "./router";
+import Router from "./router";
 import "./index.scss";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -26,8 +25,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                     <WishListProvider>
                         <FilterProvider>
                             <CartProvider>
-                                <AnimationThemeProvider>
-                                    <RouterProvider router={router} />
+                            <AnimationThemeProvider>
+                                <Router />
                                 </AnimationThemeProvider>
                             </CartProvider>
                         </FilterProvider>
