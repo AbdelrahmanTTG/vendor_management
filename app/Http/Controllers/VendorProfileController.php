@@ -26,6 +26,9 @@ use App\Http\Controllers\InvoiceController;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+
 class VendorProfileController extends Controller
 {
 
@@ -1294,6 +1297,34 @@ class VendorProfileController extends Controller
         }
 
     }
+
+  public function AddFormate(Request $request)
+{
+    try {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+    } catch (JWTException $e) {
+        return response()->json(['error' => 'Token is invalid or expired'], 401);
+    }
+
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'format' => 'required|string',
+        'table' => 'required|string',
+    ]);
+
+    $format = \App\Models\Format::create([
+        'user_id' => $userId,
+        'name' => $validatedData['name'],
+        'format' => $validatedData['format'],
+        'table' => $validatedData['table'],
+    ]);
+
+    return response()->json([
+        'message' => 'Format added successfully',
+        'data' => $format
+    ], 201);
+}
 
 
 

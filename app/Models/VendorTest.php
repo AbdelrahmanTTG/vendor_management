@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class VendorTest extends Model
 {
     //
-    protected $table = 'vendortest';
+    protected $table = 'vendorTest';
     protected $fillable = ['vendor_id', 'test_type', 'test_result', 'test_upload','source_lang','target_lang',	'MainSubject',	'SubSubject',	'service','created_at', 'updated_at'];
 
     public function vendor()

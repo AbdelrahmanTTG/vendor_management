@@ -3,15 +3,22 @@ import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeade
 import CommonModal from './Model';
 import Select from 'react-select';
 import { useForm, Controller } from 'react-hook-form';
+import axiosClient from "../AxiosClint";
 
 const Format = (props) => {
     const [modal, setModal] = useState(false);
     const toggle = () => setModal(!modal);
     const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
-    const onSubmit = async (data) => { 
-        const result = data.format.map(item => item.value).join(',');
-        data.format = result;
-        console.log(data);   
+    const onSubmit = async (formData) => { 
+        const result = formData.format.map(item => item.value).join(',');
+        formData.format = result;
+        formData.table = props.table;
+        try {
+            const { data } = await axiosClient.post("AddFormate", formData);
+            console.log(data)
+        } catch (err) {
+            console.error(err);
+        }
     }
     return (
         <Fragment>
@@ -51,9 +58,9 @@ const Format = (props) => {
                                 defaultValue=""
                                 className="form-control"
                                 type="text"
-                                name="Format"
-                                {...register("Format", { required: true })}
-                                placeholder="Name Format "
+                                name="name"
+                                {...register("name", { required: true })}
+                                placeholder="name"
                             />
                         </Col>
                     </FormGroup>

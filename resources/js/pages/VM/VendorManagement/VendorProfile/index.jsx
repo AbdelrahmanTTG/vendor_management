@@ -410,14 +410,7 @@ const Vendor = () => {
                                     { value: 'street', label: 'Street' },
                                     { value: 'address', label: 'Address' },
                                     { value: 'note', label: 'Note' },
-
-
-
-
-
-
-
-                                ] } />
+                                ]  } table="vendors" />
                             </ButtonGroup>
                             {/* <Btn  className="me-2">Add New vendor</Btn> */}
                         </div>
