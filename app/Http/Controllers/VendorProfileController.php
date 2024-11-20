@@ -43,12 +43,15 @@ class VendorProfileController extends Controller
             foreach ($request->queryParams as $key => $val) {
                 if (!empty($val)) {                   
                     if(count($val) >= 1){
-                        foreach($val as $k => $v){
-                            if($k==0)
-                            $vendors = $vendors->where($key, "like", "%" . $v . "%");
-                        else
-                            $vendors = $vendors->orWhere($key, "like", "%" . $v . "%");
-                        }
+                        $vendors->where(function($query) use ($key,$val){
+                            foreach($val as $k => $v){
+                                if($k==0){
+                                    $query->where($key, "like", "%" . $v . "%");
+                                }else{
+                                    $query->orWhere($key, "like", "%" . $v . "%");
+                                }
+                            }                          
+                        });                       
                     }else{
                         $vendors = $vendors->where($key, "like", "%" . $val . "%");
                     }

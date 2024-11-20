@@ -20,6 +20,8 @@ const Vendor = () => {
     const [selectedSearchCol, setSelectedSearchCol] = useState([]);
     const [optionsC, setOptionsC] = useState([]);
     const [optionsN, setOptionsN] = useState([]);
+    const [optionsR, setOptionsR] = useState([]);
+    const [optionsT, setOptionsT] = useState([]);
     const [queryParams, setQueryParams] = useState(null);
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
@@ -70,19 +72,68 @@ const Vendor = () => {
         }
 
     };
+    const handelingSelectCountry = async (id) => {
+        if (!id) return
+        try {
+            setLoading(true);
+            const { data } = await axiosClient.get("GetCountry", {
+                params: {
+                    id: id
+                }
+            });
+            const formattedOptions = data.map(item => ({
+                value: item.id,
+                label: item.name,
+            }));
+
+            setOptionsC(formattedOptions);
+            if (!searchTerm) {
+                setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
+            }
+        } catch (err) {
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+        } finally {
+            setLoading(false);
+        }
+
+    };
+
     useEffect(() => {
         handelingSelect("countries", setOptionsC, "country");
         handelingSelect("countries", setOptionsN, "nationality");
+        handelingSelect("regions", setOptionsR, "region");
+        handelingSelect("time_zone", setOptionsT, "timeZone");
     }, []);
 
     const options = [
         { value: 'name', label: 'Name' },
         { value: 'legal_name', label: 'Legal Name' },
+        { value: 'prefix', label: 'Prefix' },
+        { value: 'contact_name', label: 'Contact Name' },
         { value: 'email', label: 'Email' },
+        { value: 'phone_number', label: 'Phone Number' },
+        { value: 'anotherNumber', label: 'Another Number' },
         { value: 'status', label: 'Status' },
         { value: 'type', label: 'Type' },
+        { value: 'region', label: 'Region' },
+        { value: 'timezone', label: 'Time Zone' },
         { value: 'country', label: 'Country' },
+        { value: 'city', label: 'City' },
         { value: 'nationality', label: 'Nationality' },
+        { value: 'contact_linked_in', label: 'LinkedIn' },
+        { value: 'contact_ProZ', label: 'ProZ' },
+        { value: 'contact_other1', label: 'Other Contact 1' },
+        { value: 'contact_other2', label: 'Other Contact 2' },
+        { value: 'contact_other3', label: 'Other Contact 3' },
+
+
     ];
     const handleSearchInputsOnChange = (values) => {
         setSelectedSearchCol(values.map(item => item.value));
@@ -273,96 +324,223 @@ const Vendor = () => {
                             <div className="search-panel pb-3 b-b-primary">
                                 {selectedSearchCol.length > 0 &&
                                     <form onSubmit={searchVendors}>
-                                        <Row>
-                                            {selectedSearchCol.indexOf("name") > -1 &&
-                                                <Col>
-                                                    <FormGroup id='nameInput'>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                        <Input className='form-control form-control-sm nameInput mb-1' type='text' name='name' required />
-                                                    </FormGroup>
-                                                </Col>
-                                            }
-                                            {selectedSearchCol.indexOf("legal_name") > -1 &&
-                                                <Col>
-                                                    <FormGroup id='legalInput'>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='legal_name'>{'legal Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'legalInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'legalInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                        <Input className='form-control form-control-sm legalInput mb-1' type='text' name='legal_name' required />
-                                                    </FormGroup>
-                                                </Col>
-                                            }{
-                                                selectedSearchCol.indexOf("email") > -1 &&
-                                                <Col>
-                                                    <FormGroup id='emailInput'>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Email'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'emailInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'emailInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                        <Input className='form-control form-control-sm emailInput mb-1' type='email' name='email' required />
-                                                    </FormGroup>
-                                                </Col>
-                                            }
-                                            {
-                                                selectedSearchCol.indexOf("type") > -1 &&
-                                                <Col>
-                                                    <FormGroup>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Type'}</Label>
-                                                        <Select id='type' required
-                                                            name='type'
-                                                            options={
-                                                                [
-                                                                    { value: 'Freelance', label: 'Freelance' },
-                                                                    { value: 'Agency', label: 'Agency' },
-                                                                    { value: 'Contractor', label: 'Contractor' },
-                                                                    { value: 'In House', label: 'In House' },
-                                                                ]} className="js-example-basic-multiple typeInput mb-1" isMulti
-                                                        />
-                                                    </FormGroup>
-                                                </Col>
-                                            }{
-                                                selectedSearchCol.indexOf("status") > -1 &&
-                                                <Col>
-                                                    <FormGroup>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Status'}</Label>
-                                                        <Select id='status' required
-                                                            name='status'
-                                                            options={
-                                                                [
-                                                                    { value: 'Active', label: 'Active' },
-                                                                    { value: 'Inactive', label: 'Inactive' },
-                                                                    { value: 'Rejected', label: 'Rejected' },
-                                                                    { value: 'Wait for Approval', label: 'Wait for Approval' },
-                                                                ]} className="js-example-basic-multiple statusInput mb-1" isMulti
-                                                        />
-                                                    </FormGroup>
-                                                </Col>
-                                            }{
-                                                selectedSearchCol.indexOf("country") > -1 &&
-                                                <Col>
-                                                    <FormGroup>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Country'}</Label>
-                                                        <Select name='country' id='country' required
-                                                            options={optionsC} className="js-example-basic-single "
-                                                            onInputChange={(inputValue) =>
-                                                                handleInputChange(inputValue, "countries", "country", setOptionsC, optionsC)
-                                                            }
-                                                            isMulti />
-                                                    </FormGroup>
-                                                </Col>
-                                            }{
-                                                selectedSearchCol.indexOf("nationality") > -1 &&
-                                                <Col>
-                                                    <FormGroup>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'nationality'}</Label>
-                                                        <Select name='nationality' id='nationality' required
-                                                            options={optionsN} className="js-example-basic-single "
-                                                            onInputChange={(inputValue) =>
-                                                                handleInputChange(inputValue, "countries", "nationality", setOptionsN, optionsN)
-                                                            }
-                                                            isMulti />
-                                                    </FormGroup>
-                                                </Col>
-                                            }
-                                        </Row>
+                                         <Row>
+                                        {selectedSearchCol.indexOf("name") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='nameInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm nameInput mb-1' type='text' name='name' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }{selectedSearchCol.indexOf("legal_name") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='legalInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='legal_name'>{'legal Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'legalInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'legalInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm legalInput mb-1' type='text' name='legal_name' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("prefix") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Prefix'}</Label>
+                                                    <Select id='prefix' required
+                                                        name='prefix'
+                                                        options={
+                                                            [
+                                                                { value: 'Mr', label: 'Mr' },
+                                                                { value: 'Ms', label: 'Ms' },
+                                                                { value: 'Mss', label: 'Mss' },
+                                                                { value: 'Mrs', label: 'Mrs' },
+                                                            ]} className="js-example-basic-multiple prefixInput mb-1" isMulti
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("contact_name") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='contactNameInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='contact_name'>{'Contact Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactNameInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactNameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm contactNameInput mb-1' type='text' name='contact_name' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("email") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='emailInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Email'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'emailInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'emailInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm emailInput mb-1' type='email' name='email' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("phone_number") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='phoneNumberInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Phone Number'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'phoneNumberInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'phoneNumberInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm phoneNumberInput mb-1' type='tel' name='Phone_number' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("anotherNumber") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='anotherNumberInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Another Number'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'anotherNumberInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'anotherNumberInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm anotherNumberInput mb-1' type='tel' name='anothernumber' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }
+                                        {
+                                            selectedSearchCol.indexOf("type") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Type'}</Label>
+                                                    <Select id='type' required
+                                                        name='type'
+                                                        options={
+                                                            [
+                                                                { value: 'Freelance', label: 'Freelance' },
+                                                                { value: 'Agency', label: 'Agency' },
+                                                                { value: 'Contractor', label: 'Contractor' },
+                                                                { value: 'In House', label: 'In House' },
+                                                            ]} className="js-example-basic-multiple typeInput mb-1" isMulti
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("status") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Status'}</Label>
+                                                    <Select id='status' required
+                                                        name='status'
+                                                        options={
+                                                            [
+                                                                { value: 'Active', label: 'Active' },
+                                                                { value: 'Inactive', label: 'Inactive' },
+                                                                { value: 'Rejected', label: 'Rejected' },
+                                                                { value: 'Wait for Approval', label: 'Wait for Approval' },
+                                                            ]} className="js-example-basic-multiple statusInput mb-1" isMulti
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("region") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Region'}</Label>
+                                                    <Select name='region' id='region' required
+                                                        options={optionsR} className="js-example-basic-single"
+                                                        onChange={(option) => {
+                                                            handelingSelectCountry(option.value)
+                                                        }}
+                                                        isMulti />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("timezone") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Time Zone'}</Label>
+                                                    <Select name='timezone' id='timezone' required
+                                                        options={optionsT} className="js-example-basic-single"
+                                                        isMulti />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("country") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Country'}</Label>
+                                                    <Select name='country' id='country' required
+                                                        options={optionsC} className="js-example-basic-single "
+                                                        onInputChange={(inputValue) =>
+                                                            handleInputChange(inputValue, "countries", "country", setOptionsC, optionsC)
+                                                        }
+                                                        isMulti />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                        }{
+                                            selectedSearchCol.indexOf("city") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='cityInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'City / state'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'cityInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'cityInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm cityInput mb-1' type='text' name='City_state' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }{
+                                            selectedSearchCol.indexOf("nationality") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'nationality'}</Label>
+                                                    <Select name='nationality' id='nationality' required
+                                                        options={optionsN} className="js-example-basic-single "
+                                                        onInputChange={(inputValue) =>
+                                                            handleInputChange(inputValue, "countries", "nationality", setOptionsN, optionsN)
+                                                        }
+                                                        isMulti />
+                                                </FormGroup>
+                                            </Col>
+                                        }
+                                        {
+                                            selectedSearchCol.indexOf("contact_linked_in") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='contactLinkedInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Linked IN'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactLinkedInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactLinkedInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm contactLinkedInput mb-1' type='text' name='contact_linked_in' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }
+                                        {
+                                            selectedSearchCol.indexOf("contact_ProZ") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='contactProzInput'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Proz'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactProzInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactProzInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm contactProzInput mb-1' type='text' name='contact_ProZ' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }
+                                        {
+                                            selectedSearchCol.indexOf("contact_other1") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='contactOther1Input'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Other Contact 1'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactOther1Input') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactOther1Input') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm contactOther1Input mb-1' type='text' name='contact_other1' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }
+                                        {
+                                            selectedSearchCol.indexOf("contact_other2") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='contactOther2Input'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Other Contact 2'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactOther2Input') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactOther2Input') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm contactOther2Input mb-1' type='text' name='contact_other2' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }
+                                        {
+                                            selectedSearchCol.indexOf("contact_other3") > -1 &&
+                                            <Col md='3'>
+                                                <FormGroup id='contactOther3Input'>
+                                                    <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Other Contact 3'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactOther3Input') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactOther3Input') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                    <Input className='form-control form-control-sm contactOther3Input mb-1' type='text' name='contact_other3' required />
+                                                </FormGroup>
+                                            </Col>
+                                        }
+
+                                    </Row>
                                         <Row>
                                             <Col>
                                                 <div className="d-inline">
@@ -379,7 +557,7 @@ const Vendor = () => {
             </Col>
             <Col sm="12">
                 <Card>
-                    <CardHeader className="d-flex justify-content-between align-items-center">
+                    <CardHeader className="px-3 d-flex justify-content-between align-items-center">
                         <H5>Vendors</H5>
                         <div className="ml-auto">
                             <ButtonGroup>
@@ -471,7 +649,6 @@ const Vendor = () => {
                     </CardBody>
                 </Card>
             </Col>
-
         </Fragment>
     );
 };
