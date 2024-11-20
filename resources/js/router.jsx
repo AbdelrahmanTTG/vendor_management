@@ -19,7 +19,7 @@ import Portal_Admin from "./pages/VendorPortal/Admin";
 import Portal_Profile from "./pages/VendorPortal/Profile";
 import Portal_Notes from "./pages/VendorPortal/Notes";
 import NotFound from "./NotFound";
-import { getAllowedRoutes } from './VMRoute'
+import { VM } from './VMRoute'
 import axios from './pages/AxiosClint'; 
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
@@ -27,14 +27,14 @@ const LazyWrapper = ({ children }) => (
     </Suspense>
 );
 const AppRouter = () => {
-    const [routes, setRoutes] = useState([]);
-    useEffect(() => {
-            const fetchRoutes = async () => {
-                const allowedRoutes = await getAllowedRoutes();
-                setRoutes(allowedRoutes);
-            };
-            fetchRoutes(); 
-    }, []);
+    // const [routes, setRoutes] = useState([]);
+    // useEffect(() => {
+    //         const fetchRoutes = async () => {
+    //             const allowedRoutes = await getAllowedRoutes();
+    //             setRoutes(allowedRoutes);
+    //         };
+    //         fetchRoutes(); 
+    // }, []);
     const router = createBrowserRouter([
         {
             path: '/',
@@ -47,7 +47,7 @@ const AppRouter = () => {
         {
             path: '/VM',
             element: <Dashboard />,
-            children: routes,
+            children: VM,
 
         },
         {
