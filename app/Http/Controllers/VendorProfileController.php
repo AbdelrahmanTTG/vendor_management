@@ -268,9 +268,12 @@ class VendorProfileController extends Controller
         return response()->json($BillingData, 200);
     }
 
-    public function ModificationComplex(Request $request)
-    {
+ public function ModificationComplex(Request $request)
+{
+    try {
         $id = $request->input('id');
+        $PersonalData = $BillingData = $VMNotes = $VendorExperience = $VendorFiles = $InstantMessaging = $priceList = $VendorTools = $VendorTestData = $EducationVendor = null;
+
         if ($request->input('PersonalData')) {
             $PersonalData = $this->PersonalData($id);
         }
@@ -278,7 +281,6 @@ class VendorProfileController extends Controller
             $InvoiceController = new InvoiceController();
             $decID = Crypt::encrypt($id);
             $BillingData = $InvoiceController->getVendorBillingData($decID);
-
         }
         if ($request->input('VMNotes')) {
             $sender_email = app('decrypt')(base64_decode($request->input('VMNotes')['sender_email']));
@@ -304,22 +306,32 @@ class VendorProfileController extends Controller
         if ($request->input('EducationVendor')) {
             $EducationVendor = $this->getEducationByVendorId($id);
         }
+
         return response()->json(
             [
-                'Data' => $PersonalData ?? null,
-                "VMNotes" => $VMNotes ?? null,
-                "BillingData" => $BillingData ?? null,
-                "Experience" => $VendorExperience ?? null,
-                "VendorFiles" => $VendorFiles ?? null,
-                "InstantMessaging" => $InstantMessaging ?? null,
-                "priceList" => [$priceList ?? null, $VendorTools ?? null],
-                "VendorTestData" => $VendorTestData ?? null,
-                "EducationVendor"=>$EducationVendor??null
+                'Data' => $PersonalData,
+                "VMNotes" => $VMNotes,
+                "BillingData" => $BillingData,
+                "Experience" => $VendorExperience,
+                "VendorFiles" => $VendorFiles,
+                "InstantMessaging" => $InstantMessaging,
+                "priceList" => [$priceList, $VendorTools],
+                "VendorTestData" => $VendorTestData,
+                "EducationVendor" => $EducationVendor
             ],
             200
         );
-
+    } catch (\Exception $e) {
+        return response()->json(
+            [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTrace()
+            ],
+            500
+        );
     }
+}
+
     public function PersonalData($id)
     {
         $vendor = Vendor::with(['country:id,name', 'nationality:id,name', 'region:id,name', 'timezone:id,gmt'])->findOrFail($id);
