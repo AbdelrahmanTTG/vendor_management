@@ -4,51 +4,238 @@ import CommonModal from './Model';
 import Select from 'react-select';
 import { useForm, Controller } from 'react-hook-form';
 import axiosClient from "../AxiosClint";
+import SweetAlert from 'sweetalert2';
 
 const Format = (props) => {
     const [modal, setModal] = useState(false);
+    const [formats, setFormats] = useState(false);
+    const [edit, setEdit] = useState();
+
+
     const toggle = () => setModal(!modal);
     const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
-    const onSubmit = async (formData) => { 
+    const onSubmit = async (formData) => {
+
         const result = formData.format.map(item => item.value).join(',');
         formData.format = result;
         formData.table = props.table;
+        if (edit) {
+            formData.id = edit.id
+            try {
+                const { data } = await axiosClient.post("updateFormat", formData);
+                console.log(data)
+                if (data.status) {props.FormatsChanged() }
+                setFormats(prevFormats => {
+                    const updatedFormats = prevFormats.map(format =>
+                        format.id === data?.id ? data : format
+                    );
+                    if (!updatedFormats.some(format => format.id === data?.id)) {
+                        updatedFormats.push(data);
+                    }
+                    return updatedFormats;
+                });
+                toggle()
+                reset()
+            } catch (err) {
+                console.error(err);
+            }
+        } else {
+            
         try {
             const { data } = await axiosClient.post("AddFormate", formData);
-            console.log(data)
+            setFormats(prevFormats =>
+                Array.isArray(prevFormats) && data?.data ? [...prevFormats, data?.data] : prevFormats
+            );
+            toggle()
+            reset()
         } catch (err) {
             console.error(err);
+            }
+        }
+
+    }
+    const editFormat = (item) => {
+        if (item) {
+            toggle()
+            setEdit(item) 
+            setValue("name", item.name)
+            setValue("format", item.format.split(',').map(value => ({
+                value: value.trim(),  
+                label: value.trim()
+            })));
+        }
+    }
+    useEffect(() => {
+        if (!modal) {
+            setEdit(null)
+            reset({name: '', format: [] });
+        }
+    }, [modal])
+    useEffect(() => {
+        setFormats(props.formats)
+    }, [props.formats])
+    const change = async (dataChange) => {
+        try {
+            const { data } = await axiosClient.post("changeFormat", dataChange);
+            props.FormatsChanged()
+
+        } catch (err) {
+            console.error(err);
+        }
+    }
+    const deleteFormat = async (item) => {
+            SweetAlert.fire({
+                title: 'Are you sure?',
+                text: `Do you want to delete Format ${item.name}  ?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const success = await onDelete(item);
+                    if (success) {
+                        SweetAlert.fire(
+                            'Deleted!',
+                            `This Format has been deleted..`,
+                            'success'
+                        );
+                    } else {
+                        SweetAlert.fire(
+                            'Ooops !',
+                            ' An error occurred while deleting. :)',
+                            'error'
+                        );
+                    }
+
+                } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
+                    SweetAlert.fire(
+                        'Cancelled',
+                        'Your item is safe :)',
+                        'info'
+                    );
+                }
+            });
+    }
+    const onDelete = async (item) => {
+      
+        try {
+            const payload = {
+                id: item.id,
+            }
+            const { data } = await axiosClient.delete("deleteFormat", { data: payload });
+            if (item.status) { props.FormatsChanged() }
+            setFormats(prevFormats =>
+                Array.isArray(prevFormats) && item ?
+                    prevFormats.filter(format => format.id !== item.id) : prevFormats
+            );
+
+            return data
+        } catch (err) {
+            const response = err.response;
+            return false
         }
     }
     return (
         <Fragment>
             <UncontrolledDropdown>
-                <DropdownToggle color='light'>
+                <DropdownToggle color="light">
                     {'Format table ▼'}
                 </DropdownToggle>
-                <DropdownMenu className="p-3">
-                    {/* <div className="radio radio-primary mb-2">
-                                            <Input id="radio1" type="radio" name="radio1" value="option1" defaultChecked />
-                                            <Label for="radio1">
-                                                {"Option"}<span className="digits">{" 1"}</span>
-                                            </Label>
+                <DropdownMenu direction="down" className="p-3" >
+                    {Array.isArray(formats) && formats.length > 0 ? (
+                        <>
+                            <div className="radio radio-primary mb-2 d-flex align-items-center">
+                                <Input
+                                    id="radioDefault"
+                                    type="radio"
+                                    name="radio1"
+                                    value="Default format"
+                                    defaultChecked={!formats.some(format => format.status)}
+                                    onClick={() => change({ table: props.table })}
+                                />
+                                <Label for="radioDefault" className="ms-2 flex-grow-1">
+                                    <span className="digits">Default</span>
+                                </Label>
+                            </div>
+                            {formats.map((format, formatsIndex) => (
+                                <div key={formatsIndex}>
+                                    <div className="radio radio-primary mb-2 d-flex align-items-center" >
+                                        <Input
+                                            id={`radio${formatsIndex}`}
+                                            type="radio"
+                                            name="radio1"
+                                            value={format.name}
+                                            defaultChecked={format.status}
+                                            onClick={() => change(format)}
+                                        />
+                                        <Label for={`radio${formatsIndex}`} className="ms-2 flex-grow-1">
+                                            <span className="digits">{format.name}</span>
+                                        </Label>
+                                        <div className="d-flex">
+                                            <button
+                                                style={{
+                                                    border: 'none',
+                                                    backgroundColor: 'transparent',
+                                                    padding: 0,
+                                                    marginLeft: '20px',
+                                                    marginRight: '20px',
+
+                                                }}
+                                                onClick={() => editFormat(format)}
+                                            >
+                                                <i
+                                                    className="icofont icofont-ui-edit"
+                                                    style={{ fontSize: '18px', color: '#ffc107' }}
+                                                ></i>
+                                            </button>
+                                            <button
+                                                style={{
+                                                    border: 'none',
+                                                    backgroundColor: 'transparent',
+                                                    padding: 0,
+                                                    marginLeft: '20px',
+                                                    marginRight: '20px',
+                                                }}
+                                                onClick={() => deleteFormat(format)}
+                                            >
+                                                <i
+                                                    className="icofont icofont-ui-delete"
+                                                    style={{ fontSize: '18px', color: '#dc3545' }}
+                                                ></i>
+                                            </button>
                                         </div>
-                                        <div className="radio radio-primary mb-2">
-                                            <Input id="radio3" type="radio" name="radio1" value="option1" disabled />
-                                            <Label for="radio3">{"Disabled"}</Label>
-                                        </div>
-                                        <div className="radio radio-primary mb-2">
-                                            <Input id="radio4" type="radio" name="radio1" value="option1" />
-                                            <Label for="radio4">{"Checked"}</Label>
-                                        </div> */}
-                    <DropdownItem divider />
+
+                                    </div>
+                                    <DropdownItem divider />
+                                </div>
+                            ))}
+                        </>
+                    ) : (
+                        <div className="radio radio-primary mb-2 d-flex align-items-center">
+                            <Input
+                                id="radioDefault"
+                                type="radio"
+                                name="radio1"
+                                value="Default format"
+                                defaultChecked={true}
+                            />
+                            <Label for="radioDefault" className="ms-2 flex-grow-1">
+                                <span className="digits">Default</span>
+                            </Label>
+                        </div>
+                    )}
+                    {/* <DropdownItem divider /> */}
                     <DropdownItem onClick={toggle} className="d-flex justify-content-center align-items-center">
                         <i className="fa fa-plus-square" style={{ fontSize: '20px' }}></i>
                     </DropdownItem>
                 </DropdownMenu>
-
             </UncontrolledDropdown>
-            < CommonModal isOpen={modal} title={props.title} toggler={toggle} onSave={handleSubmit(onSubmit)}  >
+
+
+
+            < CommonModal isOpen={modal} title={edit ? `Edit format ( ${edit.name} )`:props.title} toggler={toggle} onSave={handleSubmit(onSubmit)}  >
                 <Col md="12"  >
                     <FormGroup className="row" >
 

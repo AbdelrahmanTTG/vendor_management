@@ -280,3 +280,13 @@ MODIFY COLUMN password VARCHAR(255) NULL;
 ALTER TABLE vendor
 MODIFY COLUMN quality VARCHAR(255) NULL;
 
+
+INSERT INTO screen ( groups, name, url, menu, use_system) 
+VALUES 
+( 5, 'Add vendor profile', 'vendors/Profiletest', 0, 'VM'),
+( 5, 'edit vendor profile', 'vendors/editprofiletest', 0, 'VM');
+
+INSERT INTO permission ( groups,screen,role,follow,add,edit,delete,view) 
+VALUES 
+( 5,??,32,2,1,1,1,1),
+( 5,??,32,2,1,1,1,1),

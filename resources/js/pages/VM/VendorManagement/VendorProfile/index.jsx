@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState, useRef } from 'react';
+import React, { Fragment, useEffect, useState, useCallback } from 'react';
 import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../../../pages/AxiosClint";
 import { useNavigate } from 'react-router-dom';
@@ -7,14 +7,18 @@ import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
 import ExcelJS from 'exceljs';
 import FormatTable from "../../Format";
+import SweetAlert from 'sweetalert2'
 
 const Vendor = () => {
     const [isOpen, setIsOpen] = useState(true);
     const [vendors, setVendors] = useState([]);
+    const [fields, setFields] = useState([]); 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(false);
+
     const [initialOptions, setInitialOptions] = useState({});
     const [errorMessage, setErrorMessage] = useState(null);
     const [selectedSearchCol, setSelectedSearchCol] = useState([]);
@@ -23,8 +27,15 @@ const Vendor = () => {
     const [optionsR, setOptionsR] = useState([]);
     const [optionsT, setOptionsT] = useState([]);
     const [queryParams, setQueryParams] = useState(null);
+    const [formats, setFormats] = useState(null);
+    const [formatsChanged, setFormatsChanged] = useState(false);
+
+
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
+    }
+    const handleFormatsChanged = () => { 
+        setFormatsChanged(!formatsChanged)
     }
     const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
         if (inputValue.length === 0) {
@@ -177,27 +188,58 @@ const Vendor = () => {
         }, 10);
     };
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: 'asc' });
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const payload = {
-                per_page: 10,
-                page: currentPage,
-                queryParams: queryParams,
-                sortBy: sortConfig.key,
-                sortDirection: sortConfig.direction
-            };
-            try {
-                const { data } = await axiosClient.post("Vendors", payload);
-                setVendors(data.data);
-                setTotalPages(data.last_page);
-            } catch (err) {
-                console.error(err);
-            }
+    const fetchData = useCallback(async (ex) => {
+        const payload = {
+            per_page: 10,
+            page: currentPage,
+            queryParams: queryParams,
+            sortBy: sortConfig.key,
+            sortDirection: sortConfig.direction,
+            table: "vendors",
+            export: ex,
         };
-
+        try {
+            setLoading2(true)
+            const { data } = await axiosClient.post("Vendors", payload);
+            setVendors(data.vendors.data);
+            setFields(data.fields)
+            setFormats(data.formats)
+            setTotalPages(data.vendors.last_page);
+            if (data.AllVendors) { exportToExcel(data.AllVendors) }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading2(false)
+        }
+    });
+    useEffect(() => {
         fetchData();
-    }, [currentPage, queryParams, sortConfig]);
+    }, [currentPage, queryParams, sortConfig, formatsChanged]);
+    const EX = () => {
+      
+            SweetAlert.fire({
+                title: 'Are you sure?',
+                text: `Do you want to export all vendors or just the table ?`,
+                icon: 'warning',
+                showCancelButton: true, 
+                confirmButtonText: 'Table', 
+                denyButtonText: 'All vendors',     
+                showDenyButton: true,        
+                cancelButtonText: 'Cancel',   
+                confirmButtonColor: '#28a745', 
+                denyButtonColor: '#4d8de1',  
+                cancelButtonColor: '#6c757d', 
+              
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    exportToExcel()
+                } else if (result.isDenied) {
+                    fetchData(true)
+                } 
+            });
+       
+
+    };
     const handlePageChange = (newPage) => {
         if (newPage > 0 && newPage <= totalPages) {
             setCurrentPage(newPage);
@@ -265,30 +307,111 @@ const Vendor = () => {
     const Add = () => {
         navigate('/vm/vendors/profiletest');
     }
-    const exportToExcel = () => {
-        const tableRows = document.querySelectorAll("table tbody tr");
-        const data = [];
-        tableRows.forEach(row => {
-            const rowData = [];
-            row.querySelectorAll("td").forEach(cell => {
-                rowData.push(cell.innerText);
+    
+    const exportToExcel = async (exportEx) => {
+        let data = [];
+        if (exportEx) {
+            data = exportEx.map(item => {
+                if (typeof item === 'object' && item !== null) {
+                    const processedItem = { ...item };
+                    for (const key in processedItem) {
+                        if (typeof processedItem[key] === 'object' && processedItem[key] !== null) {
+                            processedItem[key] = String(processedItem[key]?.name || processedItem[key]?.gmt || '');
+                        } else if (processedItem[key] === null || processedItem[key] === undefined) {
+                            processedItem[key] = '';
+                        } else if (typeof processedItem[key] === 'number') {
+                            processedItem[key] = processedItem[key];  
+                        } else {
+                            processedItem[key] = String(processedItem[key]);
+                        }
+                        if (key === 'status') {
+                            processedItem[key] == 0 ? processedItem[key] = 'Active':"";
+                            processedItem[key] == 1 ? processedItem[key] = 'Inactive':"";
+                            processedItem[key] == 2 ? processedItem[key] = ' Wait for Approval ':"";
+                            processedItem[key] == 3 ? processedItem[key] = ' Rejected':"";
+                        }
+                        if (key === 'type') {
+                            processedItem[key] == 0 ? processedItem[key] = 'Freelance' : "";
+                            processedItem[key] == 1 ? processedItem[key] = 'In House' : "";
+                            processedItem[key] == 2 ? processedItem[key] = 'Agency' : "";
+                            processedItem[key] == 3 ? processedItem[key] = 'Contractor' : "";                        }
+                    }
+                    return Object.values(processedItem);
+                }
+                return item;
             });
-            data.push(rowData);
-        });
+        } else {
+            const tableRows = document.querySelectorAll("table tbody tr");
+            tableRows.forEach(row => {
+                const rowData = [];
+                const cells = row.querySelectorAll("td");
+                const dataWithoutLastTwo = Array.from(cells).slice(0, -2);
+                dataWithoutLastTwo.forEach(cell => {
+                    rowData.push(cell.innerText);
+                });
+                data.push(rowData);
+            });
+        }
+
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sheet 1');
-        worksheet.columns = [
-            { header: 'ID', key: 'id', width: 10 },
-            { header: 'Name', key: 'name', width: 20 },
-            { header: 'Email', key: 'email', width: 25 },
-            { header: 'Legal Name', key: 'legal_name', width: 25 },
-            { header: 'Phone Number', key: 'phone', width: 15 },
-            { header: 'Country', key: 'country', width: 20 },
-            { header: 'Nationality', key: 'nationality', width: 20 },
-        ];
+        const headersArray = ['id', ...fields];
+
+        worksheet.columns = headersArray.map((key) => {
+            return {
+                header: key.replace(/_/g, ' ')
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' '),
+                key: key,
+                width: 20,
+            };
+        });
+
+        worksheet.mergeCells('A1:' + String.fromCharCode(65 + headersArray.length - 1) + '1');
+        worksheet.getCell('A1').value = ' Vendor List';
+        worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell('A1').font = { bold: true };
+
+        const headerRow = worksheet.getRow(2); 
+        headersArray.forEach((header, index) => {
+            headerRow.getCell(index + 1).value = header.replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' '); 
+        });
+
+        headerRow.eachCell((cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'D3D3D3' }, 
+            };
+            cell.font = { bold: true }; 
+            cell.alignment = { vertical: 'middle', horizontal: 'center' }; 
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            }; 
+        });
 
         data.forEach(rowData => {
-            worksheet.addRow(rowData);
+            const row = worksheet.addRow(rowData);
+            row.eachCell((cell) => {
+                if (typeof cell.value === 'number') {
+                    cell.numFmt = '0'; 
+                } else {
+                    cell.numFmt = '@'; 
+                }
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                }; 
+            });
         });
 
         workbook.xlsx.writeBuffer().then(buffer => {
@@ -296,11 +419,22 @@ const Vendor = () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'table-data.xlsx';
+            a.download = 'Vendor-List.xlsx';
             a.click();
             window.URL.revokeObjectURL(url);
         });
     };
+
+
+
+   const formatString = (input)=> {
+        if (!input || typeof input !== 'string') return '';
+
+        return input
+            .split(/[_-]/) 
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) 
+            .join(' '); 
+    }
     return (
         <Fragment >
             <Col>
@@ -562,7 +696,8 @@ const Vendor = () => {
                         <div className="ml-auto">
                             <ButtonGroup>
                                 <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: Add }} >Add new vendor</Btn>
-                                <FormatTable title="Add vendor table formatting" Columns={[
+                                <FormatTable title="Add vendors table formatting"
+                                    Columns={[
                                     { value: 'name', label: 'Name' },
                                     { value: 'contact_name', label: 'Contact name' },
                                     { value: 'legal_Name', label: 'Legal name' },
@@ -588,40 +723,85 @@ const Vendor = () => {
                                     { value: 'street', label: 'Street' },
                                     { value: 'address', label: 'Address' },
                                     { value: 'note', label: 'Note' },
-                                ]  } table="vendors" />
+                                    ]} table="vendors"
+                                    formats={formats} FormatsChanged={handleFormatsChanged}
+                                />
+                                <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: EX }}  >Export to Excel</Btn>
+
                             </ButtonGroup>
                             {/* <Btn  className="me-2">Add New vendor</Btn> */}
                         </div>
                     </CardHeader>
                     <CardBody className='pt-0 px-3'>
 
-                        {/* <button onClick={exportToExcel} className="btn btn-primary mb-3">Export to Excel</button> */}
 
                         <div className="table-responsive">
+                            {
+                                loading2 ? (
+                                    <div className="loader-box" >
+                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                    </div>
+                                ) :
                             <Table hover>
+                              
+                                       
                                 <thead>
                                     <tr>
-                                        <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+
+                                        {/* <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('name')}>{'Name'} {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('email')}>{'Email'} {sortConfig.key === 'email' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('legal_Name')}>{'Legal Name'} {sortConfig.key === 'legal_Name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('phone_number')}>{'Phone Number'} {sortConfig.key === 'phone_number' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('country')}>{'Country'} {sortConfig.key === 'country' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
-                                        <th scope="col" onClick={() => handleSort('nationality')}>{'Nationality'} {sortConfig.key === 'nationality' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                        <th scope="col" onClick={() => handleSort('nationality')}>{'Nationality'} {sortConfig.key === 'nationality' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th> */}
+                                        <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                        {fields.map((field, fieldIndex) => (
+                                            <th key={fieldIndex} onClick={() => handleSort(field)} >
+                                                {formatString(field)}{sortConfig.key === field && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                            </th>
+                                        ))}
                                         <th scope="col">{'Edit'}</th>
                                         <th scope="col">{'Delete'}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {vendors.map((item, index) => (
+                                    {vendors?.map((item, index) => (
                                         <tr key={index}>
-                                            <td scope="row">{item.id || ''}</td>
-                                            <td scope="row">{item.name || ''}</td>
-                                            <td scope="row">{item.email || ''}</td>
-                                            <td scope="row">{item.legal_Name || ''}</td>
-                                            <td scope="row">{item.phone_number || ''}</td>
-                                            <td scope="row">{item.country?.name || ''}</td>
-                                            <td>{item.nationality?.name || ''}</td>
+                                            {Object.keys(item).map((key) => (
+                                                <td key={key}>
+                                                    {key === 'status' || key === 'type' ? (
+                                                        <div>
+                                                            {key === 'status' && (
+                                                                <div>
+                                                                    {item[key] == 0 && <span style={{ color: 'green' }}> Active</span>}
+                                                                    {item[key] == 1 && <span style={{ color: 'blue' }}> Inactive</span>}
+                                                                    {item[key] == 2 && <span style={{ color: 'gray' }}> Wait for Approval</span>}
+                                                                    {item[key] == 3 && <span style={{ color: 'red' }}> Rejected</span>}
+                                                                    {(item[key] < 0 || item[key] > 3) && <span>Status: Unknown</span>}
+                                                                </div>
+                                                            )}
+                                                            {key === 'type' && (
+                                                                <div>
+                                                                    {item[key] == 0 && <span style={{ color: 'green' }}> Freelance</span>}
+                                                                    {item[key] == 1 && <span style={{ color: 'blue' }}> In House</span>}
+                                                                    {item[key] == 2 && <span style={{ color: 'gray' }}> Agency</span>}
+                                                                    {item[key] == 3 && <span style={{ color: 'red' }}> Contractor</span>}
+                                                                    {(item[key] < 0 || item[key] > 3) && <span>Status: Unknown</span>}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        item[key] && typeof item[key] === 'object' && item[key]?.name || item[key]?.gmt ? (
+                                                            item[key].name || item[key].gmt
+                                                        ) : (
+                                                            item[key] || ''
+                                                        )
+                                                    )}
+                                                </td>
+                                            ))}
+
+
                                             <td>
                                                 <button onClick={() => handleEdit(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
                                                     <i className="icofont icofont-ui-edit"></i>
@@ -632,8 +812,11 @@ const Vendor = () => {
                                             </td>
                                         </tr>
                                     ))}
-                                </tbody>
+                                            </tbody>
+                                      
                             </Table>
+                                }
+
                             {totalPages > 1 &&
                                 <Pagination aria-label="Page navigation example" className="pagination-primary mt-3">
                                     <PaginationItem onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>

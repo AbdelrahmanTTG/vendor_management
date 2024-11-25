@@ -21,6 +21,8 @@ use App\Models\TaskType;
 use App\Models\VendorSheet;
 use App\Models\VendorTest;
 use App\Models\VendorEducation;
+use App\Models\Formatstable;
+
 
 use App\Http\Controllers\InvoiceController;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -31,51 +33,108 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class VendorProfileController extends Controller
 {
-
+    public function format($request){
+            try {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+            } catch (JWTException $e) {
+        return response()->json(['error' => 'Token is invalid or expired'], 401);
+                }
+            $tableName = $request->input('table');
+            $formats = DB::table('formatstable')
+                ->where('user_id', $userId)
+                ->where('table', $tableName)
+                ->get();
+                return $formats;
+            }
     public function Vendors(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
+        $formats = $this->format($request);
+            $filteredFormats = $formats->filter(function ($format) {
+                return $format->status == 1;
+            });
 
-        $vendors = Vendor::select('id', 'name', 'email', 'legal_Name', 'phone_number', 'country', 'nationality')
-            ->with(['country:id,name', 'nationality:id,name']);
+            if ($filteredFormats->isEmpty()) {
+                $formatArray = ['name', 'email', 'status', 'type', 'country'];
+            } else {
+                $formatArray = $filteredFormats->pluck('format')->toArray();
+                $formatArray = array_merge(...array_map(function ($item) {
+                    return explode(',', $item);
+                }, $formatArray));
+            }
 
-        if (!empty($request->queryParams)) {
-            foreach ($request->queryParams as $key => $val) {
-                if (!empty($val)) {                   
-                    if(count($val) >= 1){
-                        $vendors->where(function($query) use ($key,$val){
-                            foreach($val as $k => $v){
-                                if($k==0){
-                                    $query->where($key, "like", "%" . $v . "%");
-                                }else{
-                                    $query->orWhere($key, "like", "%" . $v . "%");
+            $relationships = [
+                'country' => ['id', 'name'],
+                'nationality' => ['id', 'name'],
+                'region' => ['id', 'name'],
+                "timezone" => ['id', 'gmt'],
+
+            ];
+            $vendorsQuery = Vendor::select('id')->addSelect(DB::raw(implode(',', $formatArray)));
+            foreach ($relationships as $relation => $columns) {
+                if (in_array($relation, $formatArray)) {
+                    $vendorsQuery->with([$relation => function ($query) use ($columns) {
+                        $query->select($columns);
+                    }]);
+                }
+            }
+               if ($request->has('sortBy') && $request->has('sortDirection')) {
+                $sortBy = $request->input('sortBy');
+                $sortDirection = $request->input('sortDirection');
+
+                if (in_array($sortDirection, ['asc', 'desc'])) {
+                    $vendorsQuery = $vendorsQuery->orderBy($sortBy, $sortDirection);
+                }
+            }
+          if ($request->has('export') && $request->input('export') === true) {
+                 $AllVendors = $vendorsQuery->get();
+            }
+               if ($request->has('queryParams') && is_array($request->queryParams) ) {
+                foreach ($request->queryParams as $key => $val) {
+                    if (!empty($val)) {
+                        if (!in_array($key, $formatArray)) {
+                            $vendorsQuery->addSelect($key);
+                            $formatArray[] = $key; 
+                        }
+                        if (count($val) >= 1) {
+                            $vendorsQuery->where(function ($query) use ($key, $val) {
+                                foreach ($val as $k => $v) {
+                                    if ($k == 0) {
+                                        $query->where($key, "like", "%" . $v . "%");
+                                    } else {
+                                        $query->orWhere($key, "like", "%" . $v . "%");
+                                    }
                                 }
-                            }                          
-                        });                       
-                    }else{
-                        $vendors = $vendors->where($key, "like", "%" . $val . "%");
+                            });
+                        } else {
+                            $vendorsQuery->where($key, "like", "%" . $val . "%");
+                        }
+
+                        if (array_key_exists($key, $relationships)) {
+                            $vendorsQuery->with([$key => function ($query) use ($key, $relationships) {
+                                $query->select($relationships[$key]);
+                            }]);
+                        }
                     }
                 }
             }
-        }
 
-        // $vendorsArray = $vendors->toArray();
+            $perPage = $request->input('per_page', 10);
+            $vendors = $vendorsQuery->paginate($perPage);
+
+            return response()->json([
+                "vendors" => $vendors,
+                "fields" => $formatArray,
+                "formats" => $formats,
+                "AllVendors"=>$AllVendors ?? null 
+            ], 200);
+
+            // $vendorsArray = $vendors->toArray();
         // foreach ($vendorsArray['data'] as &$vendor) {
         //     $vendor['id'] = Crypt::encrypt($vendor['id']); 
         // }
         // $vendors->setCollection(collect($vendorsArray['data']));
-        if ($request->has('sortBy') && $request->has('sortDirection')) {
-        $sortBy = $request->input('sortBy');
-        $sortDirection = $request->input('sortDirection');
-
-        if (in_array($sortDirection, ['asc', 'desc'])) {
-            $vendors = $vendors->orderBy($sortBy, $sortDirection);
-        }
     }
-    $vendors = $vendors->paginate($perPage);
-
-    return response()->json($vendors);  
-  }
     public function findCountry(Request $request)
     {
         $id = $request->input('id');
@@ -330,8 +389,7 @@ class VendorProfileController extends Controller
     } catch (\Exception $e) {
         return response()->json(
             [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTrace()
+                'error' => "Server Error",
             ],
             500
         );
@@ -1302,45 +1360,88 @@ class VendorProfileController extends Controller
     }
 
   public function AddFormate(Request $request)
-{
-    try {
-        $user = JWTAuth::parseToken()->authenticate();
-        $userId = $user->id;
-    } catch (JWTException $e) {
-        return response()->json(['error' => 'Token is invalid or expired'], 401);
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            $userId = $user->id;
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'format' => 'required|string',
+            'table' => 'required|string',
+        ]);
+
+        $format = \App\Models\Format::create([
+            'user_id' => $userId,
+            'name' => $validatedData['name'],
+            'format' => $validatedData['format'],
+            'table' => $validatedData['table'],
+        ]);
+
+        return response()->json([
+            'message' => 'Format added successfully',
+            'data' => $format
+        ], 201);
     }
+     public function changeFormat(Request $request){ try {
 
-    $validatedData = $request->validate([
-        'name' => 'required|string|max:255',
-        'format' => 'required|string',
-        'table' => 'required|string',
-    ]);
+                $user = JWTAuth::parseToken()->authenticate();
+                $userId = $user->id;
+                    } catch (JWTException $e) {
+                return response()->json(['error' => 'Token is invalid or expired'], 401);
+                        }
+                    $tableName = $request->input('table');
+                    $formatId = $request->input('id');
+                    if (isset($formatId)) {
+                        DB::table('formatsTable')
+                        ->where('table', $tableName)
+                        ->where('user_id', $userId)
+                        ->update(['status' => 0]);
+                    DB::table('formatsTable')
+                        ->where('user_id', $userId)
+                        ->where('table', $tableName)
+                        ->where('id', $formatId)  
+                        ->update(['status' => 1]);
+                    }else{
+                        DB::table('formatsTable')
+                        ->where('table', $tableName)
+                        ->where('user_id', $userId)
+                        ->update(['status' => 0]);
+                    }
+                    return response()->json([
+                    'message' => 'The format has been changed.'
+                ], 201);
+                
+            }
 
-    $format = \App\Models\Format::create([
-        'user_id' => $userId,
-        'name' => $validatedData['name'],
-        'format' => $validatedData['format'],
-        'table' => $validatedData['table'],
-    ]);
+          public function updateFormat(Request $request) {
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',     
+                'id' => 'required|integer|exists:formatstable,id', 
+                'format' => 'required|string',                
+            ]);
+                $formatExists = DB::table('formatstable')->where('id', $request->input('id'))->exists();
 
-    return response()->json([
-        'message' => 'Format added successfully',
-        'data' => $format
-    ], 201);
+            if (!$formatExists) {
+                return response()->json(['error' => 'Format not found.'], 404);
+            }
+
+            DB::table('formatstable')
+                ->where('id', $request->input('id'))
+                ->update([
+                    'name' => $request->input('name'),
+                    'format' => $request->input('format'), 
+                ]);
+            $updatedFormat = DB::table('formatstable')->where('id', $request->input('id'))->first();
+
+            return response()->json( $updatedFormat, 200);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+public function deleteFormat(Request $request){
+        return $this->deleteItem($request, Formatstable::class);
 
 }
+        }

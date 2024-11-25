@@ -41,7 +41,7 @@ const Simple = (props) => {
           <Nav className="border-tab flex-wrap " tabs style={{margin:0}}>
             <NavItem className="fw-bold" style={{ margin: 0 }}>
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
                 className={BasicLineTab === 'VendorDetails' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('VendorDetails'); handleScroll('personal-data'); }}
               >
@@ -52,7 +52,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
                 className={BasicLineTab === 'InstantMessaging' ? 'active' : ''}
                 onClick={(e) => {
                   e.preventDefault();
@@ -66,7 +66,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
               
                 className={BasicLineTab === 'VM-Notes' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('VM-Notes'); handleScroll('VM-Notes'); }}
@@ -77,7 +77,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
                 href="#Files-Certificate"
                 className={BasicLineTab === 'Files-Certificate' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('Files-Certificate'); handleScroll('Files-Certificate'); }}
@@ -88,7 +88,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
                
                 className={BasicLineTab === 'Education' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('Education'); handleScroll('Education'); }}
@@ -99,7 +99,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
                
                 className={BasicLineTab === 'Experience' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('Experience'); handleScroll('Experience'); }}
@@ -110,7 +110,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
            
                 className={BasicLineTab === 'Test' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('Test'); handleScroll('Test'); }}
@@ -121,7 +121,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
               
                 className={BasicLineTab === 'Billing' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('Billing'); handleScroll('Billing'); }}
@@ -132,7 +132,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
               
                 className={BasicLineTab === 'Portal_User' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('Portal_User'); handleScroll('Portal_User'); }}
@@ -143,7 +143,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
                 href="#Price List"
                 className={BasicLineTab === 'Price List' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('Price List'); handleScroll('Price_List'); }}
@@ -154,7 +154,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
              
                 className={BasicLineTab === 'Evaluation' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('Evaluation'); handleScroll('Evaluation'); }}
@@ -165,7 +165,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
                
                 className={BasicLineTab === 'Feedback' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('Feedback'); handleScroll('Feedback'); }}
@@ -176,7 +176,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
               
                 className={BasicLineTab === 'Vacation' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('Vacation'); handleScroll('Vacation'); }}
@@ -187,7 +187,7 @@ const Simple = (props) => {
 
             <NavItem className="fw-bold">
               <NavLink
-                style={{ fontSize: '11px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
              
                 className={BasicLineTab === 'History' ? 'active' : ''}
                 onClick={(e) => { e.preventDefault(); setBasicLineTab('History'); handleScroll('History'); }}

@@ -97,13 +97,7 @@ const EditProfile = () => {
                     setEducationVendor({ EducationVendor: data.data.EducationVendor })
 
                 } catch (error) {
-                    if (error.response) {
-                        console.error("Server Error:", error.response.data);
-                    } else if (error.request) {
-                        console.error("No Response:", error.request);
-                    } else {
-                        console.error("Request Error:", error.message);
-                    }
+                    console.error('Error fetching vendor:', error);
                 } finally {
                 }
             };

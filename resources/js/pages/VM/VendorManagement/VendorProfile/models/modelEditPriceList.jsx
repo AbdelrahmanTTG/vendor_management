@@ -103,7 +103,7 @@ const EditNewBtn = (props) => {
             setValue("unit", renameKeys(props?.data?.unit, { id: "value", name: "label" }))
             setValue("rate", props?.data?.rate)
             setValue("special_rate", props?.data?.special_rate)
-            setValue("Status", { value: props?.data?.Status, label: props?.data?.Status })
+            setValue("Status", { value: props?.data?.Status || "", label: props?.data?.Status || "" })
             setValue("currency", renameKeys(props?.data?.currency, { id: "value", name: "label" }))
             handelingSelectTasks(props?.data?.service?.id)
         }

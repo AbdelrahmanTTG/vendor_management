@@ -63,7 +63,7 @@ const PersonalData = (props) => {
     setIsOpen(!isOpen);
   }
   const handleVendorTypeChange = (selectedOption) => {
-    if (selectedOption.value === 'Agency') {
+    if (selectedOption.value == 2) {
       setNameLabel('Agency Name');
       setContactLabel('Contact person')
     } else {
@@ -72,7 +72,7 @@ const PersonalData = (props) => {
     }
   };
   const handleStatusChange = (selectedOption) => {
-    if (selectedOption.value === 'Rejected') {
+    if (selectedOption.value == 3) {
       setStatus(true)
     } else {
       setStatus(false)
@@ -361,14 +361,29 @@ const PersonalData = (props) => {
         if (props.vendorPersonalData.PersonalData) {
           const data = props.vendorPersonalData.PersonalData;
           setidVendor(data?.id)
-          if (data.type !== null && data.type !== undefined && data.type != 0) {
-            const vendorTypeOption = { value: data.type, label: data.type };
+          if (data.type !== null && data.type !== undefined ) {
+            const vendorTypeOption = {
+              value: data.type,
+              label:
+                data.type ==0 ? "Freelance" :
+                  data.type == 1 ? "In House" :
+                    data.type == 2 ? "Agency" :
+                      data.type == 3 ? "Contractor" :
+                        "Unknown"
+            };
             handleVendorTypeChange(vendorTypeOption);
             setValue("type", vendorTypeOption);
           }
-          if (data.status !== null && data.status !== undefined && data.status != 0) {
-            const statusOption = { value: data.status, label: data.status };
-            handleStatusChange(statusOption);
+          if (data.status !== null && data.status !== undefined ) {
+            const statusOption = {
+              value: data.status,
+              label:
+                data.status == 0 ? "Active" :
+                  data.status ==1 ? "Inactive" :
+                    data.status ==2 ? "Wait for Approval" :
+                      data.status ==3 ? "Rejected" :
+                        "Unknown"
+            };            handleStatusChange(statusOption);
             setValue("status", statusOption);
           }
           setValue("name", data.name);
@@ -472,10 +487,10 @@ const PersonalData = (props) => {
                               value={field.value || { value: '', label: '-- Select Type --' }}
                               options={
                                 [
-                                  { value: 'Freelance', label: 'Freelance' },
-                                  { value: 'Agency', label: 'Agency' },
-                                  { value: 'Contractor', label: 'Contractor' },
-                                  { value: 'In House', label: 'In House' },
+                                  { value: '0', label: 'Freelance' },
+                                  { value: '2', label: 'Agency' },
+                                  { value: '3', label: 'Contractor' },
+                                  { value: '1', label: 'In House' },
                                 ]}
                               className="js-example-basic-single col-sm-12"
                               onChange={(option) => {
@@ -505,10 +520,10 @@ const PersonalData = (props) => {
                               value={field.value ?? { value: '', label: '-- Select Status --' }}
                               options={
                                 [
-                                  { value: 'Active', label: 'Active' },
-                                  { value: 'Inactive', label: 'Inactive' },
-                                  { value: 'Rejected', label: 'Rejected' },
-                                  { value: 'Wait for Approval', label: 'Wait for Approval' },
+                                  { value: '0', label: 'Active' },
+                                  { value: '1', label: 'Inactive' },
+                                  { value: '2', label: 'Wait for Approval' },
+                                  { value: '3', label: 'Rejected' },
                                 ]} className="js-example-basic-single col-sm-12"
                               onChange={(option) => {
                                 handleStatusChange(option);

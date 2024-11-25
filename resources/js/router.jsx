@@ -19,22 +19,36 @@ import Portal_Admin from "./pages/VendorPortal/Admin";
 import Portal_Profile from "./pages/VendorPortal/Profile";
 import Portal_Notes from "./pages/VendorPortal/Notes";
 import NotFound from "./NotFound";
-import { VM } from './VMRoute'
-import axios from './pages/AxiosClint'; 
+import { getAllowedRoutes } from './VMRoute'
+import { useStateContext } from "./pages/context/contextAuth";
+
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
         {children}
     </Suspense>
 );
 const AppRouter = () => {
-    // const [routes, setRoutes] = useState([]);
-    // useEffect(() => {
-    //         const fetchRoutes = async () => {
-    //             const allowedRoutes = await getAllowedRoutes();
-    //             setRoutes(allowedRoutes);
-    //         };
-    //         fetchRoutes(); 
-    // }, []);
+    const [routes, setRoutes] = useState([]);
+    const [loading, setLoading] = useState(true); 
+    const { user } = useStateContext();
+    useEffect(() => {
+        if (user.role) {
+            const fetchRoutes = async () => {
+                const allowedRoutes = await getAllowedRoutes();
+                setRoutes(allowedRoutes);
+                setLoading(false);
+            };
+            fetchRoutes();   
+        } else {
+            setLoading(false);
+
+        }
+     
+    }, [user]);
+
+    if (loading) {
+        return <div>Loading...</div>; 
+    }
     const router = createBrowserRouter([
         {
             path: '/',
@@ -47,7 +61,7 @@ const AppRouter = () => {
         {
             path: '/VM',
             element: <Dashboard />,
-            children: VM,
+            children: routes,
 
         },
         {

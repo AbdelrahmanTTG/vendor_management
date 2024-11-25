@@ -72,15 +72,15 @@ const Login = () => {
                     </div>
                   </FormGroup>
                   <div className="form-group mb-0">
-                    <div className="checkbox ms-3">
+                    {/* <div className="checkbox ms-3">
                       <Input id="checkbox1" type="checkbox" />
                       <Label className="text-muted" htmlFor="checkbox1">
                         Remember Password
                       </Label>
-                    </div>
-                    <a className="link" href="#javascript">
+                    </div> */}
+                    {/* <a className="link" href="#javascript">
                       Forgot Password
-                    </a>
+                    </a> */}
                     <Btn attrBtn={{ color: "primary", className: "btn-block", disabled: loading ? loading : loading }}>Login</Btn>
                   </div>
                 </Form>

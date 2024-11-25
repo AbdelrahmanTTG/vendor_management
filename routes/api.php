@@ -49,6 +49,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/VendorEducation', [VendorProfileController::class, 'saveOrUpdateEducation']);
     Route::get('/perm', [AuthController::class, 'routes']);
     Route::post('/AddFormate', [VendorProfileController::class, 'AddFormate']);
+    Route::post('/changeFormat', [VendorProfileController::class, 'changeFormat']);
+    Route::post('/updateFormat', [VendorProfileController::class, 'updateFormat']);
+    Route::delete('/deleteFormat', [VendorProfileController::class, 'deleteFormat']);
+
 
 
 

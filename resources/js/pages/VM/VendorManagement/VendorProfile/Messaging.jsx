@@ -58,7 +58,7 @@ const Messaging = (props) => {
         );
     };
     const deleteRow = useCallback((rowId, idUpdate) => {
-        if (isSubmitting) { return }
+        // if (isSubmitting) { return }
         if (idUpdate) {
             SweetAlert.fire({
                 title: 'Are you sure?',

@@ -128,7 +128,7 @@ const Education = (props) => {
             if (props.EducationVendor.EducationVendor) {
                 const data = props.EducationVendor.EducationVendor
                 setValue("university_name", data?.university_name)
-                setValue("latest_degree", data?.latest_degree)
+                setValue("latest_degree", { value: data?.latest_degree, label: data?.latest_degree } )
                 setValue("year_of_graduation", data?.year_of_graduation)
                 setValue("major", renameKeys(data?.major, { id: "value", name: "label" }))
 
