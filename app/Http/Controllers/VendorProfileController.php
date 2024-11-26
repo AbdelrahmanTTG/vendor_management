@@ -41,7 +41,7 @@ class VendorProfileController extends Controller
         return response()->json(['error' => 'Token is invalid or expired'], 401);
                 }
             $tableName = $request->input('table');
-            $formats = DB::table('formatstable')
+            $formats = DB::table('formatsTable')
                 ->where('user_id', $userId)
                 ->where('table', $tableName)
                 ->get();
@@ -1424,22 +1424,22 @@ class VendorProfileController extends Controller
           public function updateFormat(Request $request) {
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',     
-                'id' => 'required|integer|exists:formatstable,id', 
+                'id' => 'required|integer|exists:formatsTable,id', 
                 'format' => 'required|string',                
             ]);
-                $formatExists = DB::table('formatstable')->where('id', $request->input('id'))->exists();
+                $formatExists = DB::table('formatsTable')->where('id', $request->input('id'))->exists();
 
             if (!$formatExists) {
                 return response()->json(['error' => 'Format not found.'], 404);
             }
 
-            DB::table('formatstable')
+            DB::table('formatsTable')
                 ->where('id', $request->input('id'))
                 ->update([
                     'name' => $request->input('name'),
                     'format' => $request->input('format'), 
                 ]);
-            $updatedFormat = DB::table('formatstable')->where('id', $request->input('id'))->first();
+            $updatedFormat = DB::table('formatsTable')->where('id', $request->input('id'))->first();
 
             return response()->json( $updatedFormat, 200);
 }

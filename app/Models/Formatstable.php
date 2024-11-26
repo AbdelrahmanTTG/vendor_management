@@ -6,6 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Formatstable extends Model
 {
-        protected $table = 'formatstable';
+        protected $table = 'formatsTable';
     //
 }
