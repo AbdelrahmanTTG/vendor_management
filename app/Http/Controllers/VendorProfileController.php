@@ -1378,7 +1378,7 @@ class VendorProfileController extends Controller
             'table' => 'required|string',
         ]);
 
-        $format = \App\Models\Format::create([
+        $format = \App\Models\Formatstable::create([
             'user_id' => $userId,
             'name' => $validatedData['name'],
             'format' => $validatedData['format'],
