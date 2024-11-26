@@ -52,13 +52,10 @@ jobs:
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS << 'EOF'
           cd /var/www/html/lingotalents.com
 
-          # Check if 'origin' remote exists
-          if git remote -v | grep -q 'origin'; then
-            echo "Remote 'origin' exists."
-          else
-            echo "Adding remote 'origin'."
-            git remote add origin https://github.com/AbdelrahmanTTG/vendor_management.git
-          fi
+          # Stash any local changes
+          git stash --include-untracked
+          # Discard local changes to package-lock.json
+          git checkout -- package-lock.json
 
           # Pull the latest changes
           git pull origin main
