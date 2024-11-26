@@ -47,94 +47,98 @@ class VendorProfileController extends Controller
                 ->get();
                 return $formats;
             }
-    public function Vendors(Request $request)
-    {
+   public function Vendors(Request $request)
+{
+    try {
         $formats = $this->format($request);
-            $filteredFormats = $formats->filter(function ($format) {
-                return $format->status == 1;
-            });
+        $filteredFormats = $formats->filter(function ($format) {
+            return $format->status == 1;
+        });
 
-            if ($filteredFormats->isEmpty()) {
-                $formatArray = ['name', 'email', 'status', 'type', 'country'];
-            } else {
-                $formatArray = $filteredFormats->pluck('format')->toArray();
-                $formatArray = array_merge(...array_map(function ($item) {
-                    return explode(',', $item);
-                }, $formatArray));
-            }
+        if ($filteredFormats->isEmpty()) {
+            $formatArray = ['name', 'email', 'status', 'type', 'country'];
+        } else {
+            $formatArray = $filteredFormats->pluck('format')->toArray();
+            $formatArray = array_merge(...array_map(function ($item) {
+                return explode(',', $item);
+            }, $formatArray));
+        }
 
-            $relationships = [
-                'country' => ['id', 'name'],
-                'nationality' => ['id', 'name'],
-                'region' => ['id', 'name'],
-                "timezone" => ['id', 'gmt'],
+        $relationships = [
+            'country' => ['id', 'name'],
+            'nationality' => ['id', 'name'],
+            'region' => ['id', 'name'],
+            "timezone" => ['id', 'gmt'],
+        ];
+        $vendorsQuery = Vendor::select('id')->addSelect(DB::raw(implode(',', $formatArray)));
+        foreach ($relationships as $relation => $columns) {
+            if (in_array($relation, $formatArray)) {
+                $vendorsQuery->with([$relation => function ($query) use ($columns) {
+                    $query->select($columns);
+                }]);
+            }
+        }
 
-            ];
-            $vendorsQuery = Vendor::select('id')->addSelect(DB::raw(implode(',', $formatArray)));
-            foreach ($relationships as $relation => $columns) {
-                if (in_array($relation, $formatArray)) {
-                    $vendorsQuery->with([$relation => function ($query) use ($columns) {
-                        $query->select($columns);
-                    }]);
-                }
-            }
-               if ($request->has('sortBy') && $request->has('sortDirection')) {
-                $sortBy = $request->input('sortBy');
-                $sortDirection = $request->input('sortDirection');
+        if ($request->has('sortBy') && $request->has('sortDirection')) {
+            $sortBy = $request->input('sortBy');
+            $sortDirection = $request->input('sortDirection');
 
-                if (in_array($sortDirection, ['asc', 'desc'])) {
-                    $vendorsQuery = $vendorsQuery->orderBy($sortBy, $sortDirection);
-                }
+            if (in_array($sortDirection, ['asc', 'desc'])) {
+                $vendorsQuery = $vendorsQuery->orderBy($sortBy, $sortDirection);
             }
-          if ($request->has('export') && $request->input('export') === true) {
-                 $AllVendors = $vendorsQuery->get();
-            }
-               if ($request->has('queryParams') && is_array($request->queryParams) ) {
-                foreach ($request->queryParams as $key => $val) {
-                    if (!empty($val)) {
-                        if (!in_array($key, $formatArray)) {
-                            $vendorsQuery->addSelect($key);
-                            $formatArray[] = $key; 
-                        }
-                        if (count($val) >= 1) {
-                            $vendorsQuery->where(function ($query) use ($key, $val) {
-                                foreach ($val as $k => $v) {
-                                    if ($k == 0) {
-                                        $query->where($key, "like", "%" . $v . "%");
-                                    } else {
-                                        $query->orWhere($key, "like", "%" . $v . "%");
-                                    }
+        }
+
+        if ($request->has('export') && $request->input('export') === true) {
+            $AllVendors = $vendorsQuery->get();
+        }
+
+        if ($request->has('queryParams') && is_array($request->queryParams)) {
+            foreach ($request->queryParams as $key => $val) {
+                if (!empty($val)) {
+                    if (!in_array($key, $formatArray)) {
+                        $vendorsQuery->addSelect($key);
+                        $formatArray[] = $key;
+                    }
+                    if (count($val) >= 1) {
+                        $vendorsQuery->where(function ($query) use ($key, $val) {
+                            foreach ($val as $k => $v) {
+                                if ($k == 0) {
+                                    $query->where($key, "like", "%" . $v . "%");
+                                } else {
+                                    $query->orWhere($key, "like", "%" . $v . "%");
                                 }
-                            });
-                        } else {
-                            $vendorsQuery->where($key, "like", "%" . $val . "%");
-                        }
+                            }
+                        });
+                    } else {
+                        $vendorsQuery->where($key, "like", "%" . $val . "%");
+                    }
 
-                        if (array_key_exists($key, $relationships)) {
-                            $vendorsQuery->with([$key => function ($query) use ($key, $relationships) {
-                                $query->select($relationships[$key]);
-                            }]);
-                        }
+                    if (array_key_exists($key, $relationships)) {
+                        $vendorsQuery->with([$key => function ($query) use ($key, $relationships) {
+                            $query->select($relationships[$key]);
+                        }]);
                     }
                 }
             }
+        }
 
-            $perPage = $request->input('per_page', 10);
-            $vendors = $vendorsQuery->paginate($perPage);
+        $perPage = $request->input('per_page', 10);
+        $vendors = $vendorsQuery->paginate($perPage);
 
-            return response()->json([
-                "vendors" => $vendors,
-                "fields" => $formatArray,
-                "formats" => $formats,
-                "AllVendors"=>$AllVendors ?? null ,
-            ], 200);
-
-            // $vendorsArray = $vendors->toArray();
-        // foreach ($vendorsArray['data'] as &$vendor) {
-        //     $vendor['id'] = Crypt::encrypt($vendor['id']); 
-        // }
-        // $vendors->setCollection(collect($vendorsArray['data']));
+        return response()->json([
+            "vendors" => $vendors,
+            "fields" => $formatArray,
+            "formats" => $formats,
+            "AllVendors" => $AllVendors ?? null,
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
     }
+}
+
     public function findCountry(Request $request)
     {
         $id = $request->input('id');
