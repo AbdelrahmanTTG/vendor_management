@@ -5,20 +5,31 @@ import Select from 'react-select';
 import { useForm, Controller } from 'react-hook-form';
 import axiosClient from "../AxiosClint";
 import SweetAlert from 'sweetalert2';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const Format = (props) => {
     const [modal, setModal] = useState(false);
     const [formats, setFormats] = useState(false);
     const [edit, setEdit] = useState();
+    const [selectedOptions, setSelectedOptions] = useState([]);
+    const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
+    const handleDragEnd = (result) => {
+        if (!result.destination) return;
 
+        const reorderedOptions = Array.from(selectedOptions);
+        const [removed] = reorderedOptions.splice(result.source.index, 1);
+        reorderedOptions.splice(result.destination.index, 0, removed);
+
+        setSelectedOptions(reorderedOptions);
+    };
 
     const toggle = () => setModal(!modal);
-    const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
     const onSubmit = async (formData) => {
 
-        const result = formData.format.map(item => item.value).join(',');
+        const result = selectedOptions?.map(item => item.value).join(',');
         formData.format = result;
         formData.table = props.table;
+        console.log(formData)
         if (edit) {
             formData.id = edit.id
             try {
@@ -63,12 +74,17 @@ const Format = (props) => {
                 value: value.trim(),  
                 label: value.trim()
             })));
+            setSelectedOptions(item.format.split(',').map(value => ({
+                value: value.trim(),
+                label: value.trim()
+            })))
         }
     }
     useEffect(() => {
         if (!modal) {
             setEdit(null)
-            reset({name: '', format: [] });
+            reset({ name: '', format: [] });
+            setSelectedOptions([])
         }
     }, [modal])
     useEffect(() => {
@@ -235,7 +251,7 @@ const Format = (props) => {
 
 
 
-            < CommonModal isOpen={modal} title={edit ? `Edit format ( ${edit.name} )`:props.title} toggler={toggle} onSave={handleSubmit(onSubmit)}  >
+            < CommonModal isOpen={modal} title={edit ? `Edit format ( ${edit.name} )`:props.title}  toggler={toggle} onSave={handleSubmit(onSubmit)}  >
                 <Col md="12"  >
                     <FormGroup className="row" >
 
@@ -256,28 +272,70 @@ const Format = (props) => {
                     <FormGroup className="row" >
                         <Label className="col-sm-3 col-form-label" for="validationCustom01" >Columns</Label>
                         < Col sm="9" >
-                            <Controller
-                                name="format"
-                                control={control}
-                                rules={{ required: true }}
-                                render={({ field }) => (
-                                    <Select
-                                        id='Columns'
-                                        {...field}
-                                        value={field.value}
-                                        options={props.Columns}
-                                        className="js-example-basic-single col-sm-12"
-                                        onChange={(option) => {
-                                            field.onChange(option);
-                                        }}
-                                        isMulti
+                             
+                                    <Controller
+                                        name="format"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                options={props.Columns} 
+                                                value={selectedOptions} 
+                                                isMulti
+                                                onChange={(selected) => {
+                                                    setSelectedOptions(selected); 
+                                                    field.onChange(selected); 
+                                                }}
+                                                placeholder="Select columns"
+                                            />
+                                        )}
                                     />
-                                )}
-                            />
-
                         </Col>
+                      
                     </FormGroup>
                 </Col>
+                <div
+                    className="border border-default p-3 mb-3"
+                    style={{
+                        borderStyle: "dashed!important",
+                        maxHeight: '20vh',  
+                        overflowY: 'auto',   
+                    }}
+                >
+                    {selectedOptions.length > 0 && (
+                        <DragDropContext onDragEnd={handleDragEnd}>
+                            <Droppable droppableId="selected-options">
+                                {(provided) => (
+                                    <div ref={provided.innerRef} {...provided.droppableProps}>
+                                        {selectedOptions.map((option, index) => (
+                                            <Draggable key={option.value} draggableId={option.value} index={index}>
+                                                {(provided) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        style={{
+                                                            ...provided.draggableProps.style,
+                                                            padding: '8px',
+                                                            margin: '4px 0',
+                                                            background: '#f9f9f9',
+                                                            border: '1px solid #ddd',
+                                                            borderRadius: '4px',
+                                                        }}
+                                                    >
+                                                        {option.label}
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </div>
+                                )}
+                            </Droppable>
+                        </DragDropContext>
+                    )}
+                </div>
+
             </CommonModal>
         </Fragment>
     )

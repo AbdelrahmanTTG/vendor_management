@@ -126,7 +126,7 @@ class VendorProfileController extends Controller
                 "vendors" => $vendors,
                 "fields" => $formatArray,
                 "formats" => $formats,
-                "AllVendors"=>$AllVendors ?? null 
+                "AllVendors"=>$AllVendors ?? null ,
             ], 200);
 
             // $vendorsArray = $vendors->toArray();
