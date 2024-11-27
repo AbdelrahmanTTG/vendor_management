@@ -126,7 +126,7 @@ const EditProfile = () => {
                     <Messaging id={vendor?.id} mode="edit" onSubmit="onUpdate" InstantMessaging={InstantMessaging} />
                 </div>
                 <div id='VM-Notes'>
-                    <VMnote email={vendor?.email} lastMessage={lastMessage} />
+                    <VMnote email={vendor?.email || vendorPersonalData?.PersonalData?.email} lastMessage={lastMessage} />
                 </div>
                 <div id='Files-Certificate'>
                     <FilesCertificate id={vendor?.id} mode="edit" VendorFiles={VendorFiles} onSubmit="onUpdate"  />
@@ -144,7 +144,7 @@ const EditProfile = () => {
                     <Billing id={vendor?.id} BillingData={BillingData} onSubmit="onUpdate" mode="edit"  />
                 </div>
                 <div id='Portal_User' >
-                    <Portal_User email={vendor?.email} onSubmit="onUpdate" mode="edit" />
+                    <Portal_User email={vendor?.email || vendorPersonalData?.PersonalData?.email} onSubmit="onUpdate" mode="edit" />
                 </div>
                 <div id='Price_List'>
                     <Price_List Currency={BillingData?.BillingData?.billingData?.billing_currency} id={vendor?.id} priceList={priceList} />

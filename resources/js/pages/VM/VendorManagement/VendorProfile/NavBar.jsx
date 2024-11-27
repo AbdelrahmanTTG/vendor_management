@@ -30,7 +30,7 @@ const Simple = (props) => {
           
           <Navbar expand="lg" className="bg-body-tertiary" light>
       <div >
-        <div style={{marginBottom:"5vh"}}>
+        <div className={`${window.innerWidth <= 768 ? "mb-5" : "mb-0"}`} >
           <NavbarToggler
             onClick={toggle}
             style={{ position: "fixed", right: "0px", top: "8.4vh", width: "100%" }}
