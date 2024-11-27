@@ -434,7 +434,29 @@ const Vendor = () => {
             .split(/[_-]/) 
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) 
             .join(' '); 
-    }
+   }
+    const handleDownload = async (filename) => {
+        try {
+            const response = await axiosClient.post("download", { filename }, { responseType: 'blob' });
+            const file = new Blob([response.data], { type: response.headers['content-type'] });
+            const link = document.createElement('a');
+            const url = window.URL.createObjectURL(file);
+            const contentDisposition = response.headers['content-disposition'];
+            const fileName = contentDisposition ? contentDisposition.split('filename=')[1] : filename;
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            const response = err.response;
+            console.error(response);
+            alert('Error downloading the file: ' + (response?.data?.message || 'Unknown error'));
+        }
+
+
+    };
     return (
         <Fragment >
             <Col>
@@ -770,8 +792,47 @@ const Vendor = () => {
                                         <tr key={index}>
                                             {Object.keys(item).map((key) => (
                                                 <td key={key}>
-                                                    {key === 'status' || key === 'type' ? (
+                                                    
+                                                    {key === 'status' || key === 'type' || key === 'cv' || key === "NDA" ? (
                                                         <div>
+                                                            {key === 'cv' && (
+                                                                <div>
+                                                                    {item[key] ? (
+                                                                        <Btn
+                                                                            attrBtn={{
+                                                                                className: "btn btn-pill btn-air-primary",
+                                                                                color: "warning-gradien",
+                                                                                onClick: () => handleDownload(item[key])
+                                                                            }}
+                                                                        >
+                                                                            <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
+                                                                        </Btn>
+
+                                                                
+                                                                    ) : (
+                                                                        <></>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                            {key === 'NDA' && (
+                                                                <div>
+                                                                    {item[key] ? (
+                                                                        <Btn
+                                                                            attrBtn={{
+                                                                                className: "btn btn-pill btn-air-primary",
+                                                                                color: "secondary-gradien",
+                                                                                onClick: () => handleDownload(item[key])
+                                                                            }}
+                                                                        >
+                                                                            <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
+                                                                        </Btn>
+
+
+                                                                    ) : (
+                                                                        <></>
+                                                                    )}
+                                                                </div>
+                                                            )}
                                                             {key === 'status' && (
                                                                 <div>
                                                                     {item[key] == 0 && <span style={{ color: 'green' }}> Active</span>}

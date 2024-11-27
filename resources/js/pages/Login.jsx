@@ -6,7 +6,15 @@ import { toast } from "react-toastify";
 import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
 
-const Login = () => {   
+const Login = () => {
+  const { user, token } = useStateContext();
+  if (token || user) {
+    if (user.user_type) {
+      return <Navigate to='/vendor' />
+    } else {
+      return <Navigate to='/vm' />
+    }
+  }
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [errorMessage, setErrorMessage] = useState(null);
@@ -26,13 +34,13 @@ const Login = () => {
     axiosClient.post("auth/login", payload).then(({ data }) => {
       setUser(data.user);
       setToken(data.token, data.expires_in);
-        if (data.user.user_type) {
-          setRedirect("/vendor");
-         }else{
-          setRedirect("/vm");
-         }
+      if (data.user.user_type) {
+        setRedirect("/vendor");
+      } else {
+        setRedirect("/vm");
+      }
       setLoading(false);
-        }).catch(err => {
+    }).catch(err => {
       const response = err.response;
       if (response && response.status === 422) {
         setErrorMessage(response.data.errors);
@@ -43,11 +51,11 @@ const Login = () => {
       }
       setLoading(false);
     });
-    
-   
-  }    
+
+
+  }
   if (redirect) {
-    return <Navigate to = {redirect} />;
+    return <Navigate to={redirect} />;
   }
   return (
     <Fragment>
