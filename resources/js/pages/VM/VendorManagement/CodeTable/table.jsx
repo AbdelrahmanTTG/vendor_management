@@ -170,16 +170,17 @@ const table = (props) => {
             }
     };
 
-
     return (
         <Fragment>
             <Col sm="12">
                 <Card>
                     <CardHeader className="d-flex justify-content-between align-items-center">
                         <H5>{props.table}</H5>
-                        <div className="ml-auto">
-                            <Add nameBtm={`Add ${props.table}`} titelModel={`Add New ${props.table}`} fields={props.fields} dataTable={props.dataTable} onAddData={onAddData} />
-                        </div>
+                        {props.permissions?.add == 1 && (
+                            <div className="ml-auto">
+                                <Add nameBtm={`Add ${props.table}`} titelModel={`Add New ${props.table}`} fields={props.fields} dataTable={props.dataTable} onAddData={onAddData} />
+                            </div>
+                        ) }
                     </CardHeader>
                     <div className="table-responsive">
                         <Table hover>
@@ -189,7 +190,17 @@ const table = (props) => {
                                         Array.isArray(props.header) ? (
                                             props.header.length > 0 ? (
                                                 props.header.map((col, index) => (
-                                                    <th key={index}>{col.trim().toUpperCase()}</th>
+
+                                                    <th key={index}>
+                                                        
+                                                        {
+                                                            col.trim().toLowerCase() === 'edit'
+                                                                ? (props.permissions?.edit == 1 ? col.trim().toUpperCase() : null)
+                                                                : col.trim().toLowerCase() === 'delete'
+                                                                    ? (props.permissions?.delete == 1 ? col.trim().toUpperCase() : null)
+                                                                    : col.trim().toUpperCase()
+                                                        }
+                                                    </th>
                                                 ))
                                             ) : (
                                                 <th>No Data</th> 
@@ -240,21 +251,26 @@ const table = (props) => {
                                                 <td key="Active">
                                                     {item.Active == 0 ? <i className="fa fa-circle font-danger f-12" /> : <i className="fa fa-circle font-success f-12" />}
                                                 </td>
-                                                <td>
-                                                   
-                                                    <Edit
-                                                        titelModel={`Edit ${props.table}`}
-                                                        fields={props.fields}
-                                                        dataTable={props.dataTable}
-                                                        selectedRow={item}
-                                                        onUpdateData={onUpdateData}
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <button onClick={() => handelDelete(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
-                                                        <i className="icofont icofont-ui-delete"></i>
-                                                    </button>
-                                                </td>
+                                                {props.permissions?.edit == 1 && (
+                                                    <td>
+
+                                                        <Edit
+                                                            titelModel={`Edit ${props.table}`}
+                                                            fields={props.fields}
+                                                            dataTable={props.dataTable}
+                                                            selectedRow={item}
+                                                            onUpdateData={onUpdateData}
+                                                        />
+                                                    </td>
+                                                )}
+                                                {props.permissions?.delete == 1 && (
+
+                                                    <td>
+                                                        <button onClick={() => handelDelete(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                                            <i className="icofont icofont-ui-delete"></i>
+                                                        </button>
+                                                    </td>
+                                                )}
                                             </tr>
                                         ))
                                     )

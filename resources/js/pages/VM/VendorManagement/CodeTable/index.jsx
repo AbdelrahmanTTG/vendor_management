@@ -6,7 +6,7 @@ const CodeTables = (props) => {
         <Fragment>
             {/* <Search /> */}
             {/* <h1>{props.permission_add}</h1> */}
-            <Table table={props.table} dataTable={props.dataTable} header={props.header} fields={props.fields} related={props.related} columns={props.columns}  />
+            <Table permissions={props.permissions} table={props.table} dataTable={props.dataTable} header={props.header} fields={props.fields} related={props.related} columns={props.columns}  />
         </Fragment>
     );
 };

@@ -1,13 +1,13 @@
 import Home from './pages/Home'
-import React, { Suspense  } from "react";
+import React, { Suspense } from "react";
 const Languages = React.lazy(() => import('./pages/VM/Admin/Languages'));
 const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/AddProfile'));
 const ProfileIndex = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
 const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/EditProfile'));
 const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable/index'));
 const Tickets = React.lazy(() => import('./pages/VM/Tickets/index'));
-const viewTicket = React.lazy(() => import('./pages/VM/Tickets/viewTicket'));
-import axios from './pages/AxiosClint'; 
+const ViewTicket = React.lazy(() => import('./pages/VM/Tickets/viewTicket'));
+import axios from './pages/AxiosClint';
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
         {children}
@@ -16,7 +16,7 @@ const LazyWrapper = ({ children }) => (
 const checkIfRouteAllowed = (path, routes) => {
     return routes.includes(path);
 };
-const fetchAllowedRoutes = async () => {  
+const fetchAllowedRoutes = async () => {
     try {
         const payload = {
             role: JSON.parse(localStorage.getItem('USER')).role
@@ -53,7 +53,7 @@ export const VM = (allowedPermissions) => [
         path: 'vendors/Profile',
         element: (
             <LazyWrapper>
-                <ProfileIndex />
+                <ProfileIndex permissions={allowedPermissions['vendors/profile']} />
             </LazyWrapper>
         )
     },
@@ -61,7 +61,7 @@ export const VM = (allowedPermissions) => [
         path: 'vendors/profiletest',
         element: (
             <LazyWrapper>
-                <VendorProfile />
+                <VendorProfile permissions={allowedPermissions['vendors/profiletest']} />
             </LazyWrapper>
         )
     },
@@ -69,7 +69,7 @@ export const VM = (allowedPermissions) => [
         path: 'vendors/Editprofiletest',
         element: (
             <LazyWrapper>
-                <EditVendorProfile />
+                <EditVendorProfile permissions={allowedPermissions['vendors/Editprofiletest']} />
             </LazyWrapper>
         )
     },
@@ -78,6 +78,7 @@ export const VM = (allowedPermissions) => [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    permissions={allowedPermissions['Time zone']}
                     key="Time zone"
                     table="Time zone" dataTable="time_zone" header={["id", "zone", "gmt", 'Active', "Edit", "Delete"]}
                     fields={[
@@ -102,6 +103,8 @@ export const VM = (allowedPermissions) => [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    permissions={allowedPermissions['Regain']}
+
                     key="Regain"
                     table="Regain"
                     dataTable="regions"
@@ -129,6 +132,8 @@ export const VM = (allowedPermissions) => [
 
                 <CodeTable
                     key="Country"
+                    permissions={allowedPermissions['Country']}
+
                     table="Country" dataTable="countries" header={["id", " Name", "Region", "Active", "Edit", "Delete"]} related={{
                         'table': 'regions',
                         'foreign_key': 'region',
@@ -158,6 +163,7 @@ export const VM = (allowedPermissions) => [
             <LazyWrapper>
                 <CodeTable
                     key="Messaging type"
+                    permissions={allowedPermissions['Messaging type']}
                     table="Messaging type" dataTable="messaging_types"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
@@ -181,6 +187,7 @@ export const VM = (allowedPermissions) => [
             <LazyWrapper>
 
                 <CodeTable
+                    permissions={allowedPermissions['Main-Subject Matter']}
                     key="Main-Subject Matter"
                     table="Main-Subject Matter" dataTable="fields" columns={["id", "name", "Active"]} header={["id", " name", "Active", "Edit", "Delete"]}
                     fields={[
@@ -202,6 +209,7 @@ export const VM = (allowedPermissions) => [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    permissions={allowedPermissions['Sub–Subject Matter']}
                     key="Sub–Subject Matter"
                     table="Sub–Subject Matter"
                     dataTable="fields"
@@ -225,6 +233,7 @@ export const VM = (allowedPermissions) => [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    permissions={allowedPermissions['Service']}
                     key="Service"
                     table="Service"
                     dataTable="services"
@@ -250,6 +259,7 @@ export const VM = (allowedPermissions) => [
             <LazyWrapper>
                 <CodeTable
                     key="Task Type"
+                    permissions={allowedPermissions['Task Type']}
                     table="Task Type"
                     dataTable="task_type"
                     header={["id", " name", "Service", "Active", "Edit", "Delete"]}
@@ -280,6 +290,7 @@ export const VM = (allowedPermissions) => [
             <LazyWrapper>
                 <CodeTable
                     key="Currency"
+                    permissions={allowedPermissions['Wallets Payment methods']}
                     table="Currency"
                     dataTable="currency"
                     header={["id", " name", "Active", "Edit", "Delete"]}
@@ -302,6 +313,7 @@ export const VM = (allowedPermissions) => [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    permissions={allowedPermissions['Wallets Payment methods']}
                     key="Wallets Payment methods"
                     table="Wallets Payment methods"
                     dataTable="payment_method"
@@ -326,6 +338,8 @@ export const VM = (allowedPermissions) => [
         element: (
             <LazyWrapper>
                 <CodeTable
+                    permissions={allowedPermissions['Tools']}
+
                     key="Tools"
                     table="Tools"
                     dataTable="tools"
@@ -350,7 +364,7 @@ export const VM = (allowedPermissions) => [
             <LazyWrapper>
                 <CodeTable
                     key="Language"
-                    // permission_add={allowedPermissions['language']}
+                    permissions={allowedPermissions['language']}
                     table="Languages"
                     dataTable="languages"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
@@ -374,6 +388,7 @@ export const VM = (allowedPermissions) => [
             <LazyWrapper>
                 <CodeTable
                     key="Dialect"
+                    permissions={allowedPermissions['Dialect']}
                     table="Dialect"
                     dataTable="languages_dialect"
                     header={["id", "dialect", "language", "Active", "Edit", "Delete"]}
@@ -405,6 +420,7 @@ export const VM = (allowedPermissions) => [
                 <CodeTable
                     key="unit"
                     table="Unit"
+                    permissions={allowedPermissions['unit']}
                     dataTable="unit"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
@@ -428,6 +444,7 @@ export const VM = (allowedPermissions) => [
                 <CodeTable
                     key="University_Degree"
                     table="University Degree"
+                    permissions={allowedPermissions['University Degree']}
                     dataTable="university_degree"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
@@ -451,6 +468,7 @@ export const VM = (allowedPermissions) => [
                 <CodeTable
                     key="Major"
                     table="Major"
+                    permissions={allowedPermissions['Major']}
                     dataTable="major"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
@@ -471,14 +489,19 @@ export const VM = (allowedPermissions) => [
 ]
 export const getAllowedRoutes = async () => {
     const allowedRoutes = await fetchAllowedRoutes();
-    const allowedUrls = allowedRoutes.map(route => route.url.toLowerCase()); 
+    const allowedUrls = allowedRoutes.map(route => route.url.toLowerCase());
+    // console.log(allowedRoutes)
     const permissions = allowedRoutes.reduce((acc, route) => {
-        const urlKey = route?.url?.toLowerCase();
-        acc[urlKey] = route?.add || null;
+        const urlKey = route?.url;
+        acc[urlKey] = {
+            add: route?.add || null,
+            edit: route?.edit || null,
+            delete: route?.delete || null,
+        };
         return acc;
     }, {});
     return VM(permissions).filter(route =>
-        checkIfRouteAllowed(route.path.toLowerCase(), allowedUrls) 
+        checkIfRouteAllowed(route.path.toLowerCase(), allowedUrls)
     );
 };
 

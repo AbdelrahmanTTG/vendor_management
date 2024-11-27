@@ -9,10 +9,10 @@ import ExcelJS from 'exceljs';
 import FormatTable from "../../Format";
 import SweetAlert from 'sweetalert2'
 
-const Vendor = () => {
+const Vendor = (props) => {
     const [isOpen, setIsOpen] = useState(true);
     const [vendors, setVendors] = useState([]);
-    const [fields, setFields] = useState([]); 
+    const [fields, setFields] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const navigate = useNavigate();
@@ -29,12 +29,10 @@ const Vendor = () => {
     const [queryParams, setQueryParams] = useState(null);
     const [formats, setFormats] = useState(null);
     const [formatsChanged, setFormatsChanged] = useState(false);
-
-
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
-    const handleFormatsChanged = () => { 
+    const handleFormatsChanged = () => {
         setFormatsChanged(!formatsChanged)
     }
     const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
@@ -216,28 +214,28 @@ const Vendor = () => {
         fetchData();
     }, [currentPage, queryParams, sortConfig, formatsChanged]);
     const EX = () => {
-      
-            SweetAlert.fire({
-                title: 'Are you sure?',
-                text: `Do you want to export all vendors or just the table ?`,
-                icon: 'warning',
-                showCancelButton: true, 
-                confirmButtonText: 'Table', 
-                denyButtonText: 'All vendors',     
-                showDenyButton: true,        
-                cancelButtonText: 'Cancel',   
-                confirmButtonColor: '#28a745', 
-                denyButtonColor: '#4d8de1',  
-                cancelButtonColor: '#6c757d', 
-              
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    exportToExcel()
-                } else if (result.isDenied) {
-                    fetchData(true)
-                } 
-            });
-       
+
+        SweetAlert.fire({
+            title: 'Are you sure?',
+            text: `Do you want to export all vendors or just the table ?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Table',
+            denyButtonText: 'All vendors',
+            showDenyButton: true,
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#28a745',
+            denyButtonColor: '#4d8de1',
+            cancelButtonColor: '#6c757d',
+
+        }).then((result) => {
+            if (result.isConfirmed) {
+                exportToExcel()
+            } else if (result.isDenied) {
+                fetchData(true)
+            }
+        });
+
 
     };
     const handlePageChange = (newPage) => {
@@ -307,7 +305,7 @@ const Vendor = () => {
     const Add = () => {
         navigate('/vm/vendors/profiletest');
     }
-    
+
     const exportToExcel = async (exportEx) => {
         let data = [];
         if (exportEx) {
@@ -320,21 +318,22 @@ const Vendor = () => {
                         } else if (processedItem[key] === null || processedItem[key] === undefined) {
                             processedItem[key] = '';
                         } else if (typeof processedItem[key] === 'number') {
-                            processedItem[key] = processedItem[key];  
+                            processedItem[key] = processedItem[key];
                         } else {
                             processedItem[key] = String(processedItem[key]);
                         }
                         if (key === 'status') {
-                            processedItem[key] == 0 ? processedItem[key] = 'Active':"";
-                            processedItem[key] == 1 ? processedItem[key] = 'Inactive':"";
-                            processedItem[key] == 2 ? processedItem[key] = ' Wait for Approval ':"";
-                            processedItem[key] == 3 ? processedItem[key] = ' Rejected':"";
+                            processedItem[key] == 0 ? processedItem[key] = 'Active' : "";
+                            processedItem[key] == 1 ? processedItem[key] = 'Inactive' : "";
+                            processedItem[key] == 2 ? processedItem[key] = ' Wait for Approval ' : "";
+                            processedItem[key] == 3 ? processedItem[key] = ' Rejected' : "";
                         }
                         if (key === 'type') {
                             processedItem[key] == 0 ? processedItem[key] = 'Freelance' : "";
                             processedItem[key] == 1 ? processedItem[key] = 'In House' : "";
                             processedItem[key] == 2 ? processedItem[key] = 'Agency' : "";
-                            processedItem[key] == 3 ? processedItem[key] = 'Contractor' : "";                        }
+                            processedItem[key] == 3 ? processedItem[key] = 'Contractor' : "";
+                        }
                     }
                     return Object.values(processedItem);
                 }
@@ -373,44 +372,44 @@ const Vendor = () => {
         worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell('A1').font = { bold: true };
 
-        const headerRow = worksheet.getRow(2); 
+        const headerRow = worksheet.getRow(2);
         headersArray.forEach((header, index) => {
             headerRow.getCell(index + 1).value = header.replace(/_/g, ' ')
                 .split(' ')
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' '); 
+                .join(' ');
         });
 
         headerRow.eachCell((cell) => {
             cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: 'D3D3D3' }, 
+                fgColor: { argb: 'D3D3D3' },
             };
-            cell.font = { bold: true }; 
-            cell.alignment = { vertical: 'middle', horizontal: 'center' }; 
+            cell.font = { bold: true };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
             cell.border = {
                 top: { style: 'thin' },
                 left: { style: 'thin' },
                 bottom: { style: 'thin' },
                 right: { style: 'thin' }
-            }; 
+            };
         });
 
         data.forEach(rowData => {
             const row = worksheet.addRow(rowData);
             row.eachCell((cell) => {
                 if (typeof cell.value === 'number') {
-                    cell.numFmt = '0'; 
+                    cell.numFmt = '0';
                 } else {
-                    cell.numFmt = '@'; 
+                    cell.numFmt = '@';
                 }
                 cell.border = {
                     top: { style: 'thin' },
                     left: { style: 'thin' },
                     bottom: { style: 'thin' },
                     right: { style: 'thin' }
-                }; 
+                };
             });
         });
 
@@ -427,14 +426,14 @@ const Vendor = () => {
 
 
 
-   const formatString = (input)=> {
+    const formatString = (input) => {
         if (!input || typeof input !== 'string') return '';
 
         return input
-            .split(/[_-]/) 
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) 
-            .join(' '); 
-   }
+            .split(/[_-]/)
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    }
     const handleDownload = async (filename) => {
         try {
             const response = await axiosClient.post("download", { filename }, { responseType: 'blob' });
@@ -480,223 +479,223 @@ const Vendor = () => {
                             <div className="search-panel pb-3 b-b-primary">
                                 {selectedSearchCol.length > 0 &&
                                     <form onSubmit={searchVendors}>
-                                         <Row>
-                                        {selectedSearchCol.indexOf("name") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='nameInput'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm nameInput mb-1' type='text' name='name' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }{selectedSearchCol.indexOf("legal_name") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='legalInput'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='legal_name'>{'legal Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'legalInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'legalInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm legalInput mb-1' type='text' name='legal_name' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                            selectedSearchCol.indexOf("prefix") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Prefix'}</Label>
-                                                    <Select id='prefix' required
-                                                        name='prefix'
-                                                        options={
-                                                            [
-                                                                { value: 'Mr', label: 'Mr' },
-                                                                { value: 'Ms', label: 'Ms' },
-                                                                { value: 'Mss', label: 'Mss' },
-                                                                { value: 'Mrs', label: 'Mrs' },
-                                                            ]} className="js-example-basic-multiple prefixInput mb-1" isMulti
-                                                    />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                            selectedSearchCol.indexOf("contact_name") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='contactNameInput'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='contact_name'>{'Contact Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactNameInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactNameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm contactNameInput mb-1' type='text' name='contact_name' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                            selectedSearchCol.indexOf("email") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='emailInput'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Email'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'emailInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'emailInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm emailInput mb-1' type='email' name='email' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                            selectedSearchCol.indexOf("phone_number") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='phoneNumberInput'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Phone Number'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'phoneNumberInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'phoneNumberInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm phoneNumberInput mb-1' type='tel' name='Phone_number' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                            selectedSearchCol.indexOf("anotherNumber") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='anotherNumberInput'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Another Number'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'anotherNumberInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'anotherNumberInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm anotherNumberInput mb-1' type='tel' name='anothernumber' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }
-                                        {
-                                            selectedSearchCol.indexOf("type") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Type'}</Label>
-                                                    <Select id='type' required
-                                                        name='type'
-                                                        options={
-                                                            [
-                                                                { value: 'Freelance', label: 'Freelance' },
-                                                                { value: 'Agency', label: 'Agency' },
-                                                                { value: 'Contractor', label: 'Contractor' },
-                                                                { value: 'In House', label: 'In House' },
-                                                            ]} className="js-example-basic-multiple typeInput mb-1" isMulti
-                                                    />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                            selectedSearchCol.indexOf("status") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Status'}</Label>
-                                                    <Select id='status' required
-                                                        name='status'
-                                                        options={
-                                                            [
-                                                                { value: 'Active', label: 'Active' },
-                                                                { value: 'Inactive', label: 'Inactive' },
-                                                                { value: 'Rejected', label: 'Rejected' },
-                                                                { value: 'Wait for Approval', label: 'Wait for Approval' },
-                                                            ]} className="js-example-basic-multiple statusInput mb-1" isMulti
-                                                    />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                            selectedSearchCol.indexOf("region") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Region'}</Label>
-                                                    <Select name='region' id='region' required
-                                                        options={optionsR} className="js-example-basic-single"
-                                                        onChange={(option) => {
-                                                            handelingSelectCountry(option.value)
-                                                        }}
-                                                        isMulti />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                            selectedSearchCol.indexOf("timezone") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Time Zone'}</Label>
-                                                    <Select name='timezone' id='timezone' required
-                                                        options={optionsT} className="js-example-basic-single"
-                                                        isMulti />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                            selectedSearchCol.indexOf("country") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'Country'}</Label>
-                                                    <Select name='country' id='country' required
-                                                        options={optionsC} className="js-example-basic-single "
-                                                        onInputChange={(inputValue) =>
-                                                            handleInputChange(inputValue, "countries", "country", setOptionsC, optionsC)
-                                                        }
-                                                        isMulti />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                        }{
-                                            selectedSearchCol.indexOf("city") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='cityInput'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'City / state'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'cityInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'cityInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm cityInput mb-1' type='text' name='City_state' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }{
-                                            selectedSearchCol.indexOf("nationality") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='name'>{'nationality'}</Label>
-                                                    <Select name='nationality' id='nationality' required
-                                                        options={optionsN} className="js-example-basic-single "
-                                                        onInputChange={(inputValue) =>
-                                                            handleInputChange(inputValue, "countries", "nationality", setOptionsN, optionsN)
-                                                        }
-                                                        isMulti />
-                                                </FormGroup>
-                                            </Col>
-                                        }
-                                        {
-                                            selectedSearchCol.indexOf("contact_linked_in") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='contactLinkedInput'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Linked IN'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactLinkedInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactLinkedInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm contactLinkedInput mb-1' type='text' name='contact_linked_in' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }
-                                        {
-                                            selectedSearchCol.indexOf("contact_ProZ") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='contactProzInput'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Proz'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactProzInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactProzInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm contactProzInput mb-1' type='text' name='contact_ProZ' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }
-                                        {
-                                            selectedSearchCol.indexOf("contact_other1") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='contactOther1Input'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Other Contact 1'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactOther1Input') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactOther1Input') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm contactOther1Input mb-1' type='text' name='contact_other1' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }
-                                        {
-                                            selectedSearchCol.indexOf("contact_other2") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='contactOther2Input'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Other Contact 2'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactOther2Input') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactOther2Input') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm contactOther2Input mb-1' type='text' name='contact_other2' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }
-                                        {
-                                            selectedSearchCol.indexOf("contact_other3") > -1 &&
-                                            <Col md='3'>
-                                                <FormGroup id='contactOther3Input'>
-                                                    <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Other Contact 3'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactOther3Input') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                        <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactOther3Input') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                    <Input className='form-control form-control-sm contactOther3Input mb-1' type='text' name='contact_other3' required />
-                                                </FormGroup>
-                                            </Col>
-                                        }
+                                        <Row>
+                                            {selectedSearchCol.indexOf("name") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='nameInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm nameInput mb-1' type='text' name='name' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{selectedSearchCol.indexOf("legal_name") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='legalInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='legal_name'>{'legal Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'legalInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'legalInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm legalInput mb-1' type='text' name='legal_name' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("prefix") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Prefix'}</Label>
+                                                        <Select id='prefix' required
+                                                            name='prefix'
+                                                            options={
+                                                                [
+                                                                    { value: 'Mr', label: 'Mr' },
+                                                                    { value: 'Ms', label: 'Ms' },
+                                                                    { value: 'Mss', label: 'Mss' },
+                                                                    { value: 'Mrs', label: 'Mrs' },
+                                                                ]} className="js-example-basic-multiple prefixInput mb-1" isMulti
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("contact_name") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='contactNameInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='contact_name'>{'Contact Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactNameInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactNameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm contactNameInput mb-1' type='text' name='contact_name' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("email") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='emailInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Email'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'emailInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'emailInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm emailInput mb-1' type='email' name='email' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("phone_number") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='phoneNumberInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Phone Number'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'phoneNumberInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'phoneNumberInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm phoneNumberInput mb-1' type='tel' name='Phone_number' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("anotherNumber") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='anotherNumberInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Another Number'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'anotherNumberInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'anotherNumberInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm anotherNumberInput mb-1' type='tel' name='anothernumber' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("type") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Type'}</Label>
+                                                        <Select id='type' required
+                                                            name='type'
+                                                            options={
+                                                                [
+                                                                    { value: 'Freelance', label: 'Freelance' },
+                                                                    { value: 'Agency', label: 'Agency' },
+                                                                    { value: 'Contractor', label: 'Contractor' },
+                                                                    { value: 'In House', label: 'In House' },
+                                                                ]} className="js-example-basic-multiple typeInput mb-1" isMulti
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("status") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Status'}</Label>
+                                                        <Select id='status' required
+                                                            name='status'
+                                                            options={
+                                                                [
+                                                                    { value: 'Active', label: 'Active' },
+                                                                    { value: 'Inactive', label: 'Inactive' },
+                                                                    { value: 'Rejected', label: 'Rejected' },
+                                                                    { value: 'Wait for Approval', label: 'Wait for Approval' },
+                                                                ]} className="js-example-basic-multiple statusInput mb-1" isMulti
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("region") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Region'}</Label>
+                                                        <Select name='region' id='region' required
+                                                            options={optionsR} className="js-example-basic-single"
+                                                            onChange={(option) => {
+                                                                handelingSelectCountry(option.value)
+                                                            }}
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("timezone") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Time Zone'}</Label>
+                                                        <Select name='timezone' id='timezone' required
+                                                            options={optionsT} className="js-example-basic-single"
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("country") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Country'}</Label>
+                                                        <Select name='country' id='country' required
+                                                            options={optionsC} className="js-example-basic-single "
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "countries", "country", setOptionsC, optionsC)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                            }{
+                                                selectedSearchCol.indexOf("city") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='cityInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'City / state'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'cityInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'cityInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm cityInput mb-1' type='text' name='City_state' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("nationality") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'nationality'}</Label>
+                                                        <Select name='nationality' id='nationality' required
+                                                            options={optionsN} className="js-example-basic-single "
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "countries", "nationality", setOptionsN, optionsN)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("contact_linked_in") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='contactLinkedInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Linked IN'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactLinkedInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactLinkedInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm contactLinkedInput mb-1' type='text' name='contact_linked_in' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("contact_ProZ") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='contactProzInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Proz'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactProzInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactProzInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm contactProzInput mb-1' type='text' name='contact_ProZ' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("contact_other1") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='contactOther1Input'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Other Contact 1'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactOther1Input') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactOther1Input') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm contactOther1Input mb-1' type='text' name='contact_other1' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("contact_other2") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='contactOther2Input'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Other Contact 2'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactOther2Input') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactOther2Input') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm contactOther2Input mb-1' type='text' name='contact_other2' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("contact_other3") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='contactOther3Input'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='linked_in'>{'Other Contact 3'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'contactOther3Input') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'contactOther3Input') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm contactOther3Input mb-1' type='text' name='contact_other3' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
 
-                                    </Row>
+                                        </Row>
                                         <Row>
                                             <Col>
                                                 <div className="d-inline">
@@ -717,34 +716,37 @@ const Vendor = () => {
                         <H5>Vendors</H5>
                         <div className="ml-auto">
                             <ButtonGroup>
-                                <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: Add }} >Add new vendor</Btn>
+                                {props.permissions?.add == 1 && (
+
+                                    <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: Add }} >Add new vendor</Btn>
+                                )}
                                 <FormatTable title="Add vendors table formatting"
                                     Columns={[
-                                    { value: 'name', label: 'Name' },
-                                    { value: 'contact_name', label: 'Contact name' },
-                                    { value: 'legal_Name', label: 'Legal name' },
-                                    { value: 'prfx_name', label: 'prefix name' },
-                                    { value: 'email', label: 'Email' },
-                                    { value: 'phone_number', label: 'Phone number' },
-                                    { value: 'Anothernumber', label: 'Another number' },
-                                    { value: 'country', label: 'Country' },
-                                    { value: 'cv', label: 'CV' },
-                                    { value: 'NDA', label: 'NDA' },
-                                    { value: 'type', label: 'Type' },
-                                    { value: 'status', label: 'Status' },
-                                    { value: 'contact_linked_in', label: 'linked In' },
-                                    { value: 'contact_ProZ', label: 'ProZ' },
-                                    { value: 'contact_other1', label: 'Contact other 1' },
-                                    { value: 'contact_other2', label: 'Contact other 2' },
-                                    { value: 'contact_other3', label: 'Contact other 3' },
-                                    { value: 'nationality', label: 'Nationality' },
-                                    { value: 'region', label: 'Region' },
-                                    { value: 'timezone', label: 'Time zone' },
-                                    { value: 'reject_reason', label: 'Reject reason' },
-                                    { value: 'city', label: 'City' },
-                                    { value: 'street', label: 'Street' },
-                                    { value: 'address', label: 'Address' },
-                                    { value: 'note', label: 'Note' },
+                                        { value: 'name', label: 'Name' },
+                                        { value: 'contact_name', label: 'Contact name' },
+                                        { value: 'legal_Name', label: 'Legal name' },
+                                        { value: 'prfx_name', label: 'prefix name' },
+                                        { value: 'email', label: 'Email' },
+                                        { value: 'phone_number', label: 'Phone number' },
+                                        { value: 'Anothernumber', label: 'Another number' },
+                                        { value: 'country', label: 'Country' },
+                                        { value: 'cv', label: 'CV' },
+                                        { value: 'NDA', label: 'NDA' },
+                                        { value: 'type', label: 'Type' },
+                                        { value: 'status', label: 'Status' },
+                                        { value: 'contact_linked_in', label: 'linked In' },
+                                        { value: 'contact_ProZ', label: 'ProZ' },
+                                        { value: 'contact_other1', label: 'Contact other 1' },
+                                        { value: 'contact_other2', label: 'Contact other 2' },
+                                        { value: 'contact_other3', label: 'Contact other 3' },
+                                        { value: 'nationality', label: 'Nationality' },
+                                        { value: 'region', label: 'Region' },
+                                        { value: 'timezone', label: 'Time zone' },
+                                        { value: 'reject_reason', label: 'Reject reason' },
+                                        { value: 'city', label: 'City' },
+                                        { value: 'street', label: 'Street' },
+                                        { value: 'address', label: 'Address' },
+                                        { value: 'note', label: 'Note' },
                                     ]} table="vendors"
                                     formats={formats} FormatsChanged={handleFormatsChanged}
                                 />
@@ -764,119 +766,128 @@ const Vendor = () => {
                                         <Spinner attrSpinner={{ className: 'loader-6' }} />
                                     </div>
                                 ) :
-                            <Table hover>
-                              
-                                       
-                                <thead>
-                                    <tr>
+                                    <Table hover>
 
-                                        {/* <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+
+                                        <thead>
+                                            <tr>
+
+                                                {/* <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('name')}>{'Name'} {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('email')}>{'Email'} {sortConfig.key === 'email' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('legal_Name')}>{'Legal Name'} {sortConfig.key === 'legal_Name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('phone_number')}>{'Phone Number'} {sortConfig.key === 'phone_number' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('country')}>{'Country'} {sortConfig.key === 'country' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                         <th scope="col" onClick={() => handleSort('nationality')}>{'Nationality'} {sortConfig.key === 'nationality' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th> */}
-                                        <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
-                                        {fields.map((field, fieldIndex) => (
-                                            <th key={fieldIndex} onClick={() => handleSort(field)} >
-                                                {formatString(field)}{sortConfig.key === field && (sortConfig.direction === 'asc' ? '▲' : '▼')}
-                                            </th>
-                                        ))}
-                                        <th scope="col">{'Edit'}</th>
-                                        <th scope="col">{'Delete'}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {vendors?.map((item, index) => (
-                                        <tr key={index}>
-                                            {Object.keys(item).map((key) => (
-                                                <td key={key}>
-                                                    
-                                                    {key === 'status' || key === 'type' || key === 'cv' || key === "NDA" ? (
-                                                        <div>
-                                                            {key === 'cv' && (
-                                                                <div>
-                                                                    {item[key] ? (
-                                                                        <Btn
-                                                                            attrBtn={{
-                                                                                className: "btn btn-pill btn-air-primary",
-                                                                                color: "warning-gradien",
-                                                                                onClick: () => handleDownload(item[key])
-                                                                            }}
-                                                                        >
-                                                                            <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
-                                                                        </Btn>
+                                                <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                                {fields.map((field, fieldIndex) => (
+                                                    <th key={fieldIndex} onClick={() => handleSort(field)} >
+                                                        {formatString(field)}{sortConfig.key === field && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                                    </th>
+                                                ))}
+                                                {props.permissions?.edit == 1 && (
+                                                    <th scope="col">{'Edit'}</th>
+                                                )}
+                                                {props.permissions?.delete == 1 && (
+                                                    <th scope="col">{'Delete'}</th>
+                                                )}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {vendors?.map((item, index) => (
+                                                <tr key={index}>
+                                                    {Object.keys(item).map((key) => (
+                                                        <td key={key}>
 
-                                                                
-                                                                    ) : (
-                                                                        <></>
+                                                            {key === 'status' || key === 'type' || key === 'cv' || key === "NDA" ? (
+                                                                <div>
+                                                                    {key === 'cv' && (
+                                                                        <div>
+                                                                            {item[key] ? (
+                                                                                <Btn
+                                                                                    attrBtn={{
+                                                                                        className: "btn btn-pill btn-air-primary",
+                                                                                        color: "warning-gradien",
+                                                                                        onClick: () => handleDownload(item[key])
+                                                                                    }}
+                                                                                >
+                                                                                    <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
+                                                                                </Btn>
+
+
+                                                                            ) : (
+                                                                                <></>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                    {key === 'NDA' && (
+                                                                        <div>
+                                                                            {item[key] ? (
+                                                                                <Btn
+                                                                                    attrBtn={{
+                                                                                        className: "btn btn-pill btn-air-primary",
+                                                                                        color: "secondary-gradien",
+                                                                                        onClick: () => handleDownload(item[key])
+                                                                                    }}
+                                                                                >
+                                                                                    <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
+                                                                                </Btn>
+
+
+                                                                            ) : (
+                                                                                <></>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                    {key === 'status' && (
+                                                                        <div>
+                                                                            {item[key] == 0 && <span style={{ color: 'green' }}> Active</span>}
+                                                                            {item[key] == 1 && <span style={{ color: 'blue' }}> Inactive</span>}
+                                                                            {item[key] == 2 && <span style={{ color: 'gray' }}> Wait for Approval</span>}
+                                                                            {item[key] == 3 && <span style={{ color: 'red' }}> Rejected</span>}
+                                                                            {(item[key] < 0 || item[key] > 3) && <span>Status: Unknown</span>}
+                                                                        </div>
+                                                                    )}
+                                                                    {key === 'type' && (
+                                                                        <div>
+                                                                            {item[key] == 0 && <span style={{ color: 'green' }}> Freelance</span>}
+                                                                            {item[key] == 1 && <span style={{ color: 'blue' }}> In House</span>}
+                                                                            {item[key] == 2 && <span style={{ color: 'gray' }}> Agency</span>}
+                                                                            {item[key] == 3 && <span style={{ color: 'red' }}> Contractor</span>}
+                                                                            {(item[key] < 0 || item[key] > 3) && <span>Status: Unknown</span>}
+                                                                        </div>
                                                                     )}
                                                                 </div>
+                                                            ) : (
+                                                                item[key] && typeof item[key] === 'object' && item[key]?.name || item[key]?.gmt ? (
+                                                                    item[key].name || item[key].gmt
+                                                                ) : (
+                                                                    item[key] || ''
+                                                                )
                                                             )}
-                                                            {key === 'NDA' && (
-                                                                <div>
-                                                                    {item[key] ? (
-                                                                        <Btn
-                                                                            attrBtn={{
-                                                                                className: "btn btn-pill btn-air-primary",
-                                                                                color: "secondary-gradien",
-                                                                                onClick: () => handleDownload(item[key])
-                                                                            }}
-                                                                        >
-                                                                            <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
-                                                                        </Btn>
+                                                        </td>
+                                                    ))}
 
+                                                    {props.permissions?.edit == 1 && (
 
-                                                                    ) : (
-                                                                        <></>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                            {key === 'status' && (
-                                                                <div>
-                                                                    {item[key] == 0 && <span style={{ color: 'green' }}> Active</span>}
-                                                                    {item[key] == 1 && <span style={{ color: 'blue' }}> Inactive</span>}
-                                                                    {item[key] == 2 && <span style={{ color: 'gray' }}> Wait for Approval</span>}
-                                                                    {item[key] == 3 && <span style={{ color: 'red' }}> Rejected</span>}
-                                                                    {(item[key] < 0 || item[key] > 3) && <span>Status: Unknown</span>}
-                                                                </div>
-                                                            )}
-                                                            {key === 'type' && (
-                                                                <div>
-                                                                    {item[key] == 0 && <span style={{ color: 'green' }}> Freelance</span>}
-                                                                    {item[key] == 1 && <span style={{ color: 'blue' }}> In House</span>}
-                                                                    {item[key] == 2 && <span style={{ color: 'gray' }}> Agency</span>}
-                                                                    {item[key] == 3 && <span style={{ color: 'red' }}> Contractor</span>}
-                                                                    {(item[key] < 0 || item[key] > 3) && <span>Status: Unknown</span>}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        item[key] && typeof item[key] === 'object' && item[key]?.name || item[key]?.gmt ? (
-                                                            item[key].name || item[key].gmt
-                                                        ) : (
-                                                            item[key] || ''
-                                                        )
+                                                        <td>
+                                                            <button onClick={() => handleEdit(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                                                <i className="icofont icofont-ui-edit"></i>
+                                                            </button>
+                                                        </td>
                                                     )}
-                                                </td>
+                                                    {props.permissions?.delete == 1 && (
+
+                                                        <td>
+                                                            <i className="icofont icofont-ui-delete"></i>
+                                                        </td>
+                                                    )}
+                                                </tr>
                                             ))}
+                                        </tbody>
 
-
-                                            <td>
-                                                <button onClick={() => handleEdit(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
-                                                    <i className="icofont icofont-ui-edit"></i>
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <i className="icofont icofont-ui-delete"></i>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                            </tbody>
-                                      
-                            </Table>
-                                }
+                                    </Table>
+                            }
 
                             {totalPages > 1 &&
                                 <Pagination aria-label="Page navigation example" className="pagination-primary mt-3">
