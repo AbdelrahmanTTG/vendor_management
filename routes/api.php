@@ -8,6 +8,7 @@ use App\Http\Controllers\CodingTableController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PortalAdminController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\VendorProfileController;
 
 Route::group(['prefix' => 'auth'], function () {
@@ -52,11 +53,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/changeFormat', [VendorProfileController::class, 'changeFormat']);
     Route::post('/updateFormat', [VendorProfileController::class, 'updateFormat']);
     Route::delete('/deleteFormat', [VendorProfileController::class, 'deleteFormat']);
-
-
-
-
-
+    Route::post('/getTickets', [TicketsController::class, 'index']);
+    Route::post('/getTicketsTotal', [TicketsController::class, 'getTicketsTotal']);
+    Route::post('/getPMSalesData', [TicketsController::class, 'getPMSalesData']);
 
 
 

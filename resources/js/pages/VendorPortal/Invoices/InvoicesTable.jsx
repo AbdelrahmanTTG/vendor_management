@@ -4,13 +4,9 @@ import { Pagination, PaginationItem, PaginationLink, Table } from 'reactstrap';
 const InvoicesTable = (props) => {
     let currentPage = props.currentPage;
     const handlePageChange = (newPage) => {
-        if (newPage > 0 && newPage <= props.pageLinks.length - 2) {
+        if (newPage > 0 ) {
             currentPage = newPage;
-        } else if (newPage == 0 && currentPage != 1) {
-            currentPage = currentPage - 1;
-        } else if (newPage == props.pageLinks.length - 1 && currentPage != props.pageLinks.length - 2) {
-            currentPage = currentPage + 1;
-        }
+        } 
         props.sendDataToParent(currentPage);
     };
     return (
@@ -56,7 +52,7 @@ const InvoicesTable = (props) => {
                 <div className="mt-5 ">
                     <Pagination aria-label="Page navigation example" className="pagination justify-content-end pagination-primary">
                         {props.pageLinks.map((link, i) => (
-                            <PaginationItem key={i} active={link.active} className={`${link.url ? "" : "disabled"}`} onClick={() => handlePageChange(i)}>
+                            <PaginationItem key={i} active={link.active} className={`${link.url ? "" : "disabled"}`} onClick={() => handlePageChange(link.url.split('page=').pop())}>
                                 <PaginationLink dangerouslySetInnerHTML={{ __html: link.label }} ></PaginationLink>
                             </PaginationItem>
 

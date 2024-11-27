@@ -5,6 +5,8 @@ const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/Vendo
 const ProfileIndex = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
 const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/EditProfile'));
 const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable/index'));
+const Tickets = React.lazy(() => import('./pages/VM/Tickets/index'));
+const viewTicket = React.lazy(() => import('./pages/VM/Tickets/viewTicket'));
 import axios from './pages/AxiosClint'; 
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
@@ -30,6 +32,22 @@ export const VM = (allowedPermissions) => [
     {
         path: '',
         element: <Home />
+    },
+    {
+        path: 'Tickets',
+        element: (
+            <LazyWrapper>
+                <Tickets />
+            </LazyWrapper>
+        )
+    },
+    {
+        path: 'ViewTicket',
+        element: (
+            <LazyWrapper>
+                <ViewTicket />
+            </LazyWrapper>
+        )
     },
     {
         path: 'vendors/Profile',

@@ -21,7 +21,6 @@ import Portal_Notes from "./pages/VendorPortal/Notes";
 import NotFound from "./NotFound";
 import { getAllowedRoutes } from './VMRoute'
 import { useStateContext } from "./pages/context/contextAuth";
-
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
         {children}
@@ -63,7 +62,7 @@ const AppRouter = () => {
             element: <Dashboard />,
             children: routes,
 
-        },
+        },        
         {
             path: '/Vendor',
             element: <Dashboard_p />,
