@@ -29,7 +29,7 @@ const Format = (props) => {
         const result = selectedOptions?.map(item => item.value).join(',');
         formData.format = result;
         formData.table = props.table;
-        console.log(formData)
+        // console.log(formData)
         if (edit) {
             formData.id = edit.id
             try {

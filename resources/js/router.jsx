@@ -43,7 +43,7 @@ const AppRouter = () => {
             setLoading(false);
 
         }
-     
+
     }, [user]);
 
     if (loading) {

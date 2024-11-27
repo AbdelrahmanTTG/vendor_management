@@ -20,7 +20,7 @@ const fetchAllowedRoutes = async () => {
             role: JSON.parse(localStorage.getItem('USER')).role
         }
         const response = await axios.get('perm', { params: payload });
-        response.data.allowedRoutes.push({url:""});
+        response.data.allowedRoutes.push({ url: "" });
         return response.data.allowedRoutes || [];
     } catch (error) {
         return [];
@@ -453,7 +453,6 @@ export const VM = (allowedPermissions) => [
 ]
 export const getAllowedRoutes = async () => {
     const allowedRoutes = await fetchAllowedRoutes();
-    console.log(allowedRoutes)
     const allowedUrls = allowedRoutes.map(route => route.url.toLowerCase()); 
     const permissions = allowedRoutes.reduce((acc, route) => {
         const urlKey = route?.url?.toLowerCase();

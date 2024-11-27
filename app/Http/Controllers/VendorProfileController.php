@@ -391,12 +391,10 @@ class VendorProfileController extends Controller
             200
         );
     } catch (\Exception $e) {
-        return response()->json(
-            [
-                'error' => "Server Error",
-            ],
-            500
-        );
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
     }
 }
 
