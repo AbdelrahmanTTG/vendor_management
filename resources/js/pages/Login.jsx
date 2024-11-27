@@ -8,7 +8,7 @@ import { useStateContext } from "./context/contextAuth";
 
 const Login = () => {
   const { user, token } = useStateContext();
-  if (token || user) {
+  if (token) {
     if (user.user_type) {
       return <Navigate to='/vendor' />
     } else {
