@@ -133,8 +133,9 @@ class VendorProfileController extends Controller
         ], 200);
     } catch (\Exception $e) {
         return response()->json([
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
+             'error' => "Server error"
+            // 'error' => $e->getMessage(),
+            // 'trace' => $e->getTraceAsString(),
         ], 500);
     }
 }
@@ -353,7 +354,11 @@ class VendorProfileController extends Controller
         }
         if ($request->input('VMNotes')) {
             $sender_email = app('decrypt')(base64_decode($request->input('VMNotes')['sender_email']));
-            $receiver_email = $request->input('VMNotes')['receiver_email'];
+            if (isset($request->input('VMNotes')['receiver_email'])) {
+                 $receiver_email = $request->input('VMNotes')['receiver_email'];
+            } else {
+                $receiver_email = $PersonalData->email;
+                }
             $VMNotes = $this->VMNotes($sender_email, $receiver_email);
         }
         if ($request->input('Experience')) {
@@ -386,14 +391,15 @@ class VendorProfileController extends Controller
                 "InstantMessaging" => $InstantMessaging ?? null,
                 "priceList" => [$priceList ?? null, $VendorTools ?? null],
                 "VendorTestData" => $VendorTestData ?? null,
-                "EducationVendor" => $EducationVendor ?? null
+                "EducationVendor" => $EducationVendor ?? null,
             ],
             200
         );
     } catch (\Exception $e) {
         return response()->json([
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
+            'error' => "Server error"
+            // 'error' => $e->getMessage(),
+            // 'trace' => $e->getTraceAsString(),
         ], 500);
     }
 }

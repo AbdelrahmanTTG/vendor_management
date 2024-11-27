@@ -95,7 +95,6 @@ const EditProfile = () => {
                     setpriceList({ priceList: data.data.priceList })
                     setVendorTestData({ VendorTestData: data.data.VendorTestData })
                     setEducationVendor({ EducationVendor: data.data.EducationVendor })
-
                 } catch (error) {
                     console.error('Error fetching vendor:', error);
                 } finally {
