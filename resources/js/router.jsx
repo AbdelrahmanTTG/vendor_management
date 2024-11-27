@@ -31,7 +31,7 @@ const AppRouter = () => {
     const [loading, setLoading] = useState(true); 
     const { user } = useStateContext();
     useEffect(() => {
-        if (user.role) {
+        if (user?.role) {
             const fetchRoutes = async () => {
                 const allowedRoutes = await getAllowedRoutes();
                 setRoutes(allowedRoutes);

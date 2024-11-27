@@ -7,14 +7,16 @@ import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
 
 const Login = () => {
+
   const { user, token } = useStateContext();
   if (token) {
-    if (user.user_type) {
+    if (user?.user_type) {
       return <Navigate to='/vendor' />
     } else {
       return <Navigate to='/vm' />
     }
   }
+
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [errorMessage, setErrorMessage] = useState(null);

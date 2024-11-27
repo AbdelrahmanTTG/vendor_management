@@ -5,6 +5,7 @@ import { User } from 'react-feather';
 import UserSidebar from './UsersSidebar';
 import { useStateContext } from '../../../pages/context/contextAuth'
 import LogoutClass from './Logout';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -15,9 +16,15 @@ const Profile = () => {
     // const auth0_profile = JSON.parse(localStorage.getItem('auth0_profile'));
 
     const handleLogout = () => {
-        localStorage.removeItem('authenticated');
-        localStorage.removeItem('user');
-        window.location.href = '/login'; // Redirect to login page
+    //     const navigate = useNavigate();
+
+    //     const logoutUser = () => {
+    //         localStorage.removeItem('ACCESS_TOKEN');
+    //         localStorage.removeItem('USER');
+    //         // navigate('/login'); 
+    //     };
+
+    //     return logoutUser;
     };
 
     const handleClose = () => {
@@ -81,7 +88,7 @@ const Profile = () => {
                         onLogout={handleLogout}
                         onClose={handleClose}
                     />
-
+    
                     <LogoutClass />
 
                 </div>
