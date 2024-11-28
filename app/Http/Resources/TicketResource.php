@@ -37,8 +37,16 @@ class TicketResource extends JsonResource
             'subject' => $this->SubjectName->name,
             'software' => $this->SoftwareName->name,
             'status' => $this->getTicketStatus(),          
+            'statusVal' => $this->status,          
             'created_by' => $this->user?$this->user->user_name:$this->created_by,         
-            'created_at' => $this->created_at,          
+            'created_at' => $this->created_at,                     
+            'number_of_resource' => $this->number_of_resource,                     
+            'comment' => $this->comment,                             
+            'fileLink'=> $this->file?"https://aixnexus.com/erp/assets/uploads/tickets/$this->file":null,                     
+            'Time'=> TicketTimeResource::collection($this->whenLoaded('Time')),
+            'TeamResponse'=>TicketTeamResponseResource::collection($this->whenLoaded('TeamResponse')),
+            'Response'=> TicketResponseResource::collection($this->whenLoaded('Response')), 
+            'TimeTaken'=> $this->ticketTime().' H:M', 
                     
                         
         ];

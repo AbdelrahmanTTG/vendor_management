@@ -447,7 +447,7 @@ const TicketsList = () => {
                             <div className="mt-5 ">
                                 <Pagination aria-label="Page navigation example" className="pagination justify-content-end pagination-primary">
                                     {pageLinks.map((link, i) => (
-                                        <PaginationItem key={i} active={link.active} className={`${link.url ? "" : "disabled"}`} onClick={() => handlePageChange(link.url.split('page=').pop())}>
+                                        <PaginationItem key={i} active={link.active} className={`${link.url ? "" : "disabled"}`} onClick={() => handlePageChange(link.url ?link.url.split('page=').pop():0)}>
                                             <PaginationLink dangerouslySetInnerHTML={{ __html: link.label }} ></PaginationLink>
                                         </PaginationItem>
 
