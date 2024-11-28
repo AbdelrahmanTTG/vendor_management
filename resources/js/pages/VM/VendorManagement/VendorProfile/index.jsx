@@ -23,9 +23,16 @@ const Vendor = (props) => {
     const [errorMessage, setErrorMessage] = useState(null);
     const [selectedSearchCol, setSelectedSearchCol] = useState([]);
     const [optionsC, setOptionsC] = useState([]);
+    const [optionsCU, setOptionsCU] = useState([]);
     const [optionsN, setOptionsN] = useState([]);
     const [optionsR, setOptionsR] = useState([]);
     const [optionsT, setOptionsT] = useState([]);
+    const [optionsTS, setOptionsTS] = useState([]);
+    const [optionsSL, setOptionsSL] = useState([]);
+    const [optionsTL, setOptionsTL] = useState([]);
+    const [optionsSre, setOptionsSer] = useState([]);
+    const [optionsUnit, setOptionsUnit] = useState([]);
+
     const [queryParams, setQueryParams] = useState(null);
     const [formats, setFormats] = useState(null);
     const [formatsChanged, setFormatsChanged] = useState(false);
@@ -119,9 +126,18 @@ const Vendor = (props) => {
         handelingSelect("countries", setOptionsN, "nationality");
         handelingSelect("regions", setOptionsR, "region");
         handelingSelect("time_zone", setOptionsT, "timeZone");
+
     }, []);
 
     const options = [
+        { value: 'source_lang', label: 'Source language' }, 
+        { value: 'rate', label: 'rate' }, 
+        { value: 'special_rate', label: 'Special rate' }, 
+        { value: 'currency', label: 'Currency' }, 
+        { value: 'task_type', label: ' Task type' }, 
+        { value: 'unit', label: 'Unit' }, 
+        { value: 'target_lang', label: 'Target language' },
+        { value: 'service', label: 'Service' },
         { value: 'name', label: 'Name' },
         { value: 'legal_name', label: 'Legal Name' },
         { value: 'prefix', label: 'Prefix' },
@@ -150,17 +166,51 @@ const Vendor = (props) => {
             setQueryParams(null);
         }
     }
+    
     const searchVendors = (event) => {
+        const priceListArr = ["source_lang", "target_lang", "service", "task_type", 'unit', 'rate', 'special_rate','currency'];
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        //  setQueryParams(Object.fromEntries(formData));
+        const priceList = [];
         const data = {};
-        for (let keyValue of formData.entries()) {
-            data[keyValue[0]] = formData.getAll(keyValue[0]);
+        const keysToDelete = [];
+        for (let [key, value] of formData.entries()) {
+            if (priceListArr.includes(key)) {
+                const existingFilter = priceList.find(filter => filter.column === key);
+                if (existingFilter) {
+                    existingFilter.value.push(value);
+                } else {
+                    priceList.push({ column: key, value: [value] });
+                }
+                keysToDelete.push(key);
+            }
         }
-        setQueryParams(data);
+        keysToDelete.forEach((key) => {
+            formData.delete(key);
+        });
+        for (let [key, value] of formData.entries()) {
+            data[key] = formData.getAll(key);
+        }
+        const queryParams = {
+            ...data,
+            filters: [
+                {
+                    table: "vendorSheet",
+                    columns: priceList,
+                },
+            ],
+        };
+
+        setQueryParams(queryParams);
         setCurrentPage(1);
-    }
+
+        console.log(queryParams);
+    };
+
+
+
+
+
 
     const addBtn = (event, divID) => {
         event.preventDefault();
@@ -195,6 +245,78 @@ const Vendor = (props) => {
             sortDirection: sortConfig.direction,
             table: "vendors",
             export: ex,
+            // "queryParams": {
+            //    "filters": [
+            //     {
+            //         "table": "vendorSheet",
+            //         "columns": [
+            //             {
+            //                 "column": "source_lang",
+            //                 "value": ["238","575"]
+            //             },
+            //             {
+            //                 "column": "target_lang",
+            //                 "value": ["238"]
+            //             },
+            //             {
+            //                 "column": "service",
+            //                 "value": ["1"]
+            //             },
+            //             //  {
+            //             //      "column": "rate",
+            //             //      "value": ["10"]
+            //             // }
+            //         ]
+            //     },
+            //     {
+            //         "table": "vendorEducation",
+            //         "columns": [
+            //             {
+            //                 "column": "university_name",
+            //                 "value": ["cairo","giza"]
+            //             },
+            //             // {
+            //             //     "column": "major",
+            //             //     "value": ["2","3"]
+            //             // },
+            //         ]
+            //     }
+               
+            // ]
+            // }
+            // filters: [
+            //     {
+            //         "table": "vendorSheet",
+            //         "columns": [
+            //             {
+            //                 "column": "source_lang",
+            //                 "value": ["371", "338"]
+            //             },
+            //             {
+            //                 "column": "target_lang",
+            //                 "value": ["400","510"]
+            //             },
+            //              {
+            //                  "column": "rate",
+            //                  "value": ["0.05"]
+            //             }
+            //         ]
+            //     },
+            //     {
+            //         "table": "vendorEducation",
+            //         "columns": [
+            //             {
+            //                 "column": "university_name",
+            //                 "value": ["cairo","giza"]
+            //             },
+            //             {
+            //                 "column": "major",
+            //                 "value": ["2","3"]
+            //             },
+            //         ]
+            //     }
+               
+            // ]
         };
         try {
             setLoading2(true)
@@ -456,6 +578,7 @@ const Vendor = (props) => {
 
 
     };
+  
     return (
         <Fragment >
             <Col>
@@ -597,7 +720,115 @@ const Vendor = (props) => {
                                                             isMulti />
                                                     </FormGroup>
                                                 </Col>
-                                            }{
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("source_lang") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Source language'}</Label>
+                                                        <Select name='source_lang' id='source_lang' required
+                                                            data-table="languages"
+                                                            options={optionsSL} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "languages", "source_lang", setOptionsSL, optionsSL)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("target_lang") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Target language'}</Label>
+                                                        <Select name='target_lang' id='target_lang' required
+                                                          
+                                                            options={optionsTL} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "languages", "target_lang", setOptionsTL, optionsTL)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("service") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Service'}</Label>
+                                                            <Select name='service' id='service' required
+                                                            data-table="languages"
+                                                                options={optionsSre} className="js-example-basic-single"
+                                                                onInputChange={(inputValue) =>
+                                                                    handleInputChange(inputValue, "services", "service", setOptionsSer, optionsSre)
+                                                                }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("task_type") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Task type'}</Label>
+                                                            <Select name='task_type' id='task_type' required
+                                                            data-table="languages"
+                                                                options={optionsTS} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "task_type", "task_type", setOptionsTS, optionsTS)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("unit") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Unit'}</Label>
+                                                            <Select name='unit' id='unit' required
+                                                            
+                                                                options={optionsUnit} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "unit", "unit", setOptionsUnit, optionsUnit)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {selectedSearchCol.indexOf("rate") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='rateInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='rate'>{'Rate'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'rateInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'rateInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm rateInput mb-1' step="any" type='number' name='rate' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {selectedSearchCol.indexOf("special_rate") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='specialInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='special_rate'>{'Special rate'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'specialInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'specialInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm specialInput mb-1' step="any" type='number' name='special_rate' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("currency") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Currency'}</Label>
+                                                            <Select name='currency' id='currency' required
+                                                                options={optionsCU} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "currency", "Currency", setOptionsCU, optionsCU)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
                                                 selectedSearchCol.indexOf("timezone") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>

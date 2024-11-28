@@ -47,7 +47,7 @@ class VendorProfileController extends Controller
                 ->get();
                 return $formats;
             }
-   public function Vendors(Request $request)
+ public function Vendors(Request $request)
 {
     try {
         $formats = $this->format($request);
@@ -70,7 +70,9 @@ class VendorProfileController extends Controller
             'region' => ['id', 'name'],
             "timezone" => ['id', 'gmt'],
         ];
+
         $vendorsQuery = Vendor::select('id')->addSelect(DB::raw(implode(',', $formatArray)));
+
         foreach ($relationships as $relation => $columns) {
             if (in_array($relation, $formatArray)) {
                 $vendorsQuery->with([$relation => function ($query) use ($columns) {
@@ -78,6 +80,68 @@ class VendorProfileController extends Controller
                 }]);
             }
         }
+
+     if ($request->has('queryParams') && is_array($request->queryParams)) {
+    $queryParams = $request->queryParams;
+
+    foreach ($queryParams as $key => $val) {
+        if ($key !== 'filters' && !empty($val)) {
+            if (!in_array($key, $formatArray)) {
+                $vendorsQuery->addSelect($key);
+                $formatArray[] = $key;
+            }
+
+            if (is_array($val)) {
+                $vendorsQuery->where(function ($query) use ($key, $val) {
+                    foreach ($val as $k => $v) {
+                        if ($k == 0) {
+                            $query->where($key, "like", "%" . $v . "%");
+                        } else {
+                            $query->orWhere($key, "like", "%" . $v . "%");
+                        }
+                    }
+                });
+            } else {
+                $vendorsQuery->where($key, "like", "%" . $val . "%");
+            }
+
+            if (array_key_exists($key, $relationships)) {
+                $vendorsQuery->with([$key => function ($query) use ($key, $relationships) {
+                    $query->select($relationships[$key]);
+                }]);
+            }
+        }
+    }
+
+if (isset($queryParams['filters']) && is_array($queryParams['filters'])) {
+    foreach ($queryParams['filters'] as $filter) {
+        if (method_exists(Vendor::class, $filter['table'])) {
+            $table = $filter['table'];
+            $vendorsQuery->whereHas($table, function ($query) use ($filter) {
+                $query->where(function ($query) use ($filter) {
+                    foreach ($filter['columns'] as $columnFilter) {
+                        if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
+                            $column = $columnFilter['column'];
+                            $values = $columnFilter['value'];
+                            if (count($values) > 1) {
+                                $query->where(function ($query) use ($column, $values) {
+                                    foreach ($values as $value) {
+                                        $query->orWhere($column, '=', $value);
+                                    }
+                                });
+                            } else {
+                                $query->where($column, '=', $values[0]);
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    }
+}
+
+
+}
 
         if ($request->has('sortBy') && $request->has('sortDirection')) {
             $sortBy = $request->input('sortBy');
@@ -92,36 +156,6 @@ class VendorProfileController extends Controller
             $AllVendors = $vendorsQuery->get();
         }
 
-        if ($request->has('queryParams') && is_array($request->queryParams)) {
-            foreach ($request->queryParams as $key => $val) {
-                if (!empty($val)) {
-                    if (!in_array($key, $formatArray)) {
-                        $vendorsQuery->addSelect($key);
-                        $formatArray[] = $key;
-                    }
-                    if (count($val) >= 1) {
-                        $vendorsQuery->where(function ($query) use ($key, $val) {
-                            foreach ($val as $k => $v) {
-                                if ($k == 0) {
-                                    $query->where($key, "like", "%" . $v . "%");
-                                } else {
-                                    $query->orWhere($key, "like", "%" . $v . "%");
-                                }
-                            }
-                        });
-                    } else {
-                        $vendorsQuery->where($key, "like", "%" . $val . "%");
-                    }
-
-                    if (array_key_exists($key, $relationships)) {
-                        $vendorsQuery->with([$key => function ($query) use ($key, $relationships) {
-                            $query->select($relationships[$key]);
-                        }]);
-                    }
-                }
-            }
-        }
-
         $perPage = $request->input('per_page', 10);
         $vendors = $vendorsQuery->paginate($perPage);
 
@@ -133,12 +167,14 @@ class VendorProfileController extends Controller
         ], 200);
     } catch (\Exception $e) {
         return response()->json([
-             'error' => "Server error"
-            // 'error' => $e->getMessage(),
+            // 'error' => "Server error",
+            'error' => $e->getMessage(),
             // 'trace' => $e->getTraceAsString(),
         ], 500);
     }
 }
+
+
 
     public function findCountry(Request $request)
     {

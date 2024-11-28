@@ -490,7 +490,6 @@ export const VM = (allowedPermissions) => [
 export const getAllowedRoutes = async () => {
     const allowedRoutes = await fetchAllowedRoutes();
     const allowedUrls = allowedRoutes.map(route => route.url.toLowerCase());
-    // console.log(allowedRoutes)
     const permissions = allowedRoutes.reduce((acc, route) => {
         const urlKey = route?.url;
         acc[urlKey] = {
