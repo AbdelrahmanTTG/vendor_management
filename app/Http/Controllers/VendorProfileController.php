@@ -459,7 +459,8 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters'])) {
 
     public function Message_VM_to_Vendor(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        try{
+       $validator = Validator::make($request->all(), [
             'sender_id' => 'required|string|max:255',
             'receiver_id' => 'required|string|max:255',
             'content' => 'required|string',
@@ -478,6 +479,14 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters'])) {
         event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
         return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "created_at" => $data->created_at]], 200);
 
+        }catch (\Exception $e) {
+        return response()->json([
+            // 'error' => "Server error",
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+ 
     }
     public function deleteWalletsPayment(Request $request)
     {
