@@ -113,7 +113,7 @@ class VendorProfileController extends Controller
         }
     }
 
-if (isset($queryParams['filters']) && is_array($queryParams['filters'])) {
+if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empty($queryParams['filters'])) {
     foreach ($queryParams['filters'] as $filter) {
         if (method_exists(Vendor::class, $filter['table'])) {
             $table = $filter['table'];
@@ -155,7 +155,7 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters'])) {
         if ($request->has('export') && $request->input('export') === true) {
             $AllVendors = $vendorsQuery->get();
         }
-
+        $totalVendors = $vendorsQuery->count();
         $perPage = $request->input('per_page', 10);
         $vendors = $vendorsQuery->paginate($perPage);
 
@@ -163,6 +163,7 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters'])) {
             "vendors" => $vendors,
             "fields" => $formatArray,
             "formats" => $formats,
+            "totalVendors" => $totalVendors,
             "AllVendors" => $AllVendors ?? null,
         ], 200);
     } catch (\Exception $e) {

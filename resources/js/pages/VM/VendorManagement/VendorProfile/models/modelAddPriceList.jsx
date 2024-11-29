@@ -550,9 +550,9 @@ const AddNewBtn = (props) => {
                                             {...field}
                                             value={field.value || { value: '', label: '-- Select Status --' }}
                                             options={[
-                                                { value: 'Active', label: 'Active' },
-                                                { value: 'Not Active', label: 'Not Active' },
-                                                { value: 'Pending by PM', label: 'Pending by PM' }
+                                                { value: '0', label: 'Active' },
+                                                { value: '1', label: 'Not Active' },
+                                                { value: '2', label: 'Pending by PM' }
                                             ]} 
                                             className="js-example-basic-single col-sm-12"
                                             onChange={(option) => {
