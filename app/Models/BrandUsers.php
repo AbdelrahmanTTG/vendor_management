@@ -8,10 +8,10 @@ class BrandUsers extends Model
 {   
     protected $table = 'users'; 
    
-    public static function SelectPMSalesData($brand)
+    public static function SelectPMSalesData()
     {
         $role = ['2,3,12,16,20,29,42,43,45,47,49'];
-        $query = self::whereIn("role",$role)->where("brand",$brand)->select('id', 'user_name');      
+        $query = self::whereIn("role",$role)->select('id', 'user_name');      
         return $query->get();
     }
    

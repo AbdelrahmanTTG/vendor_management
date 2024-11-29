@@ -16,7 +16,7 @@ const TicketsList = () => {
     const [totalCount, setTotalCount] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [initialOptions, setInitialOptions] = useState({});
     const [errorMessage, setErrorMessage] = useState(null);
@@ -26,6 +26,7 @@ const TicketsList = () => {
     const [optionsSL, setOptionsSL] = useState([]);
     const [optionsS, setOptionsS] = useState([]);
     const [optionsU, setOptionsU] = useState([]);
+    const [optionsB, setOptionsB] = useState([]);
     const [queryParams, setQueryParams] = useState(null);
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
@@ -79,9 +80,7 @@ const TicketsList = () => {
     const handelingSelectUsers = async () => {
         try {
             setLoading(true);
-            const { data } = await axiosClient.post("getPMSalesData", {
-                brand: user.brand,
-            });
+            const { data } = await axiosClient.post("getPMSalesData");
             const formattedOptions = data.map(item => ({
                 value: item.id,
                 label: item.user_name,
@@ -108,11 +107,13 @@ const TicketsList = () => {
         handelingSelect("languages", setOptionsSL, "source_lang");
         handelingSelect("languages", setOptionsTL, "target_lang");
         handelingSelect("tools", setOptionsT, "software");
+        handelingSelect("brand", setOptionsB, "brand");
         handelingSelectUsers();
     }, []);
 
     // search 
     const options = [
+        { value: 'brand', label: 'Brand' },
         { value: 'id', label: 'Ticket Number' },
         { value: 'request_type', label: 'Ticket Type' },
         { value: 'status', label: 'Status' },
@@ -163,25 +164,21 @@ const TicketsList = () => {
     };
 
     useEffect(() => {
-        const payload = {
-            brand: user.brand,
-        };
         try {
-            axiosClient.post("getTicketsTotal", payload)  .then(({ data }) => {
+            axiosClient.post("getTicketsTotal").then(({ data }) => {
                 setTotalCount(data?.Total);
-              });
-           
+            });
+
         } catch (err) {
             console.error(err);
         }
 
     }, []);
-    
+
     useEffect(() => {
         const fetchData = async () => {
             const payload = {
                 per_page: 10,
-                brand: user.brand,
                 page: currentPage,
                 queryParams: queryParams,
             };
@@ -195,7 +192,7 @@ const TicketsList = () => {
         };
         fetchData();
     }, [currentPage, queryParams]);
-    
+
     const handlePageChange = (newPage) => {
         let tempPage = currentPage;
         if (newPage > 0) {
@@ -238,15 +235,15 @@ const TicketsList = () => {
             <Col>
                 <Card className="m-b-10">
                     <CardHeader
-                        className="pb-3 d-flex justify-content-between align-items-center"
+                        className=" py-3 d-flex justify-content-between align-items-center"
                         onClick={toggleCollapse}
-                        style={{ cursor: 'pointer', paddingBottom: '25px' }}
+                        style={{ cursor: 'pointer' }}
                     >
                         <H5>Search Tickets</H5>
-                        <i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '22px' }}></i>
+                        <i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '20px' }}></i>
                     </CardHeader>
                     <Collapse isOpen={isOpen}>
-                        <CardBody className='pt-0'>
+                        <CardBody className='p-t-0'>
                             <div className="search-panel mb-3">
                                 <label className='f-12'>Searching Fields:   </label>
                                 <Select onChange={e => handleSearchInputsOnChange(e)} options={options} className="js-example-placeholder-multiple col-sm-12" isMulti />
@@ -367,6 +364,17 @@ const TicketsList = () => {
                                                             isMulti />
                                                     </FormGroup>
                                                 </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("brand") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Brand'}</Label>
+                                                        <Select id='brand' required
+                                                            name='brand'
+                                                            options={optionsB} className="js-example-basic-single "
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
                                             }
 
 
@@ -393,6 +401,7 @@ const TicketsList = () => {
                                 <thead>
                                     <tr>
                                         <th scope="col" >{'Ticket Number'}</th>
+                                        <th scope="col" >{'Brand'}</th>
                                         <th scope="col" >{'Request Type'}</th>
                                         <th scope="col">{'Service'}</th>
                                         <th scope="col">{'Task Type	'}</th>
@@ -416,6 +425,7 @@ const TicketsList = () => {
                                     {tickets.map((item, index) => (
                                         <tr key={index}>
                                             <td scope="row">{item.id}</td>
+                                            <td scope="row">{item.brand}</td>
                                             <td scope="row">{item.request_type}</td>
                                             <td scope="row">{item.service}</td>
                                             <td scope="row">{item.task_type}</td>
@@ -447,7 +457,7 @@ const TicketsList = () => {
                             <div className="mt-5 ">
                                 <Pagination aria-label="Page navigation example" className="pagination justify-content-end pagination-primary">
                                     {pageLinks.map((link, i) => (
-                                        <PaginationItem key={i} active={link.active} className={`${link.url ? "" : "disabled"}`} onClick={() => handlePageChange(link.url ?link.url.split('page=').pop():0)}>
+                                        <PaginationItem key={i} active={link.active} className={`${link.url ? "" : "disabled"}`} onClick={() => handlePageChange(link.url ? link.url.split('page=').pop() : 0)}>
                                             <PaginationLink dangerouslySetInnerHTML={{ __html: link.label }} ></PaginationLink>
                                         </PaginationItem>
 

@@ -47,6 +47,7 @@ class TicketResource extends JsonResource
             'TeamResponse'=>TicketTeamResponseResource::collection($this->whenLoaded('TeamResponse')),
             'Response'=> TicketResponseResource::collection($this->whenLoaded('Response')), 
             'TimeTaken'=> $this->ticketTime().' H:M', 
+            'brand'=> $this->brand?$this->BrandName->name:'', 
                     
                         
         ];

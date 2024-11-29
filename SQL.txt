@@ -290,3 +290,5 @@ INSERT INTO permission ( groups,screen,role,follow,add,edit,delete,view)
 VALUES 
 ( 5,??,32,2,1,1,1,1),
 ( 5,??,32,2,1,1,1,1),
+
+ALTER TABLE `vm_ticket` ADD `brand_id` INT(11) NULL AFTER `created_at`; 

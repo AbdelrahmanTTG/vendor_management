@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use Illuminate\Http\Request;
 use App\Models\Regions;
 use App\Models\Service;
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\DB;
 
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['MainSubjectMatter','regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major", "skills"];
+    protected static $validTables = ['MainSubjectMatter','regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major", "skills",'brand'];
 
     protected static $models = [
         'regions' => Regions::class,
@@ -43,7 +44,8 @@ class CodingTableController extends Controller
         "university_degree" => UniversityDegree::class,
         "major" => Major::class,
         "skills" => Skill::class,
-        "MainSubjectMatter"=> MainSubjectMatter::class
+        "MainSubjectMatter"=> MainSubjectMatter::class,
+        "brand"=> Brand::class
     ];
     public function SelectDatatTable(Request $request)
     {

@@ -68,7 +68,7 @@ class VmTicket extends Model
 
     public function Time()
     {
-        return  $this->hasMany(vmTicketTime::class, 'ticket');
+        return  $this->hasMany(VmTicketTime::class, 'ticket');
     }
     public function Response()
     {
@@ -98,6 +98,11 @@ class VmTicket extends Model
         } else {
             return $date[0] . ':0';
         }
+    }
+
+    public function BrandName()
+    {
+        return  $this->belongsTo(Brand::class, 'brand');
     }
 
 }
