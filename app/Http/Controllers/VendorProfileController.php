@@ -1367,7 +1367,7 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required|integer|exists:vendor,id',
             'university_name' => 'required|string|max:255',
-            'latest_degree' => 'required|string|max:255',
+            'latest_degree' => 'required|integer|max:255',
             'year_of_graduation' => 'required|integer',
             'major' => 'required|integer|max:255',
         ]);

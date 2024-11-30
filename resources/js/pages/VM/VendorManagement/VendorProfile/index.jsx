@@ -34,6 +34,8 @@ const Vendor = (props) => {
     const [optionsUnit, setOptionsUnit] = useState([]);
     const [optionsMain, setOptionsMain] = useState([]);
     const [optionsSub, setOptionsSub] = useState([]);
+    const [optionsLD, setoptionsLD] = useState([]);
+    const [optionsMaj, setoptionsMaj] = useState([]);
     const [queryParams, setQueryParams] = useState(null);
     const [formats, setFormats] = useState(null);
     const [formatsChanged, setFormatsChanged] = useState(false);
@@ -173,13 +175,28 @@ const Vendor = (props) => {
             ],
         },
         {
-            label: "Education",
+            label: "Education", 
             options: [
                 { value: 'university_name', label: 'University name' },
-            
+                { value: 'latest_degree', label: 'latest degree' },
+                { value: 'major', label: 'Major' },
+                { value: 'year_of_graduation', label: 'Year of graduation' },
+
+
+
             ],
         },
+        {
+            label: "Test",
+            options: [
+                { value: 'source_lang2', label: 'Source language' },
+                { value: 'target_lang2', label: 'Target language' },
+                { value: 'MainSubject', label: 'Main-Subject Matter' },
+                { value: 'SubSubject2', label: 'Sub–Subject Matter' },
+                { value: 'testType', label: 'Test Type' },
 
+            ],
+        },
 
         
 
@@ -203,11 +220,14 @@ const Vendor = (props) => {
 
     const searchVendors = (event) => {
         const priceListArr = ["source_lang", "target_lang", "service", "task_type", 'unit', 'rate', 'special_rate', 'currency', 'subject', 'SubSubject'];
-        const EducationArr = ["university_name"]
+        const EducationArr = ["university_name", 'latest_degree', 'major','year_of_graduation']
+        const TestArr = ['source_lang2', "target_lang2", "MainSubject", "SubSubject2","test_type"];
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const priceList = [];
         const Education = []
+        const Test = []
+
 
         const data = {};
         const keysToDelete = [];
@@ -230,6 +250,15 @@ const Vendor = (props) => {
                 }
                 keysToDelete.push(key);
             }
+            if (TestArr.includes(key)) {
+                const existingFilter = Test.find(filter => filter.column === key);
+                if (existingFilter) {
+                    existingFilter.value.push(value);
+                } else {
+                    Test.push({ column: removeLastIfNumber(key), value: [value] });
+                }
+                keysToDelete.push(key);
+            }
         }
         keysToDelete.forEach((key) => {
             formData.delete(key);
@@ -247,6 +276,10 @@ const Vendor = (props) => {
                 Education.length > 0 ?  {
                     table: "vendorEducation",
                     columns: Education,
+                } : undefined,
+                Test.length > 0 ? {
+                    table: "vendorTest",
+                    columns: Test,
                 } : undefined
             ].filter(Boolean),
         };
@@ -596,7 +629,12 @@ const Vendor = (props) => {
             window.URL.revokeObjectURL(url);
         });
     };
-
+    function removeLastIfNumber(str) {
+        if (/\d$/.test(str)) {
+            return str.slice(0, -1);
+        }
+        return str;
+    }
 
 
     const formatString = (input) => {
@@ -868,6 +906,7 @@ const Vendor = (props) => {
                                             }
                                         </Row>
                                         <Row>
+                                            
                                             {
                                                 selectedSearchCol.indexOf("source_lang") > -1 &&
                                                 <Col md='3'>
@@ -997,6 +1036,9 @@ const Vendor = (props) => {
 
                                         </Row>
                                         <Row>
+                                            {/* {(selectedSearchCol.indexOf("university_name") > -1 || selectedSearchCol.indexOf("latest_degree") > -1 || selectedSearchCol.indexOf("major") > -1 || selectedSearchCol.indexOf("year_of_graduation") > -1) && (
+                                                <label className='f-12'>Education Fields:   </label>
+                                            )} */}
                                             {selectedSearchCol.indexOf("university_name") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup id='university_nameInput'>
@@ -1006,7 +1048,135 @@ const Vendor = (props) => {
                                                     </FormGroup>
                                                 </Col>
                                             }
-                                            
+                                            {
+                                                selectedSearchCol.indexOf("latest_degree") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Latest Degree'}</Label>
+                                                            <Select name='latest_degree' id='latest_degree' required
+                                                                options={optionsLD} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "university_degree", "latest_degree", setoptionsLD, optionsLD)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }  {
+                                                selectedSearchCol.indexOf("major") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Major'}</Label>
+                                                            <Select name='major' id='major' required
+                                                          
+                                                                options={optionsMaj} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "major", "major", setoptionsMaj, optionsMaj)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {selectedSearchCol.indexOf("year_of_graduation") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='year_of_graduationInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='year_of_graduation'>{'Year of graduation'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'year_of_graduationInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'year_of_graduationInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm year_of_graduationInput mb-1' type='number' name='year_of_graduation' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                        </Row>
+                                        <Row>
+                                            {
+                                                selectedSearchCol.indexOf("source_lang2") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Source language (test)'}</Label>
+                                                            <Select name='source_lang2' id='source_lang2' required
+                                                            data-table="languages"
+                                                            options={optionsSL} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "languages", "source_lang2", setOptionsSL, optionsSL)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("target_lang2") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Target language (test)'}</Label>
+                                                        <Select name='target_lang2' id='target_lang2' required
+
+                                                            options={optionsTL} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "languages", "target_lang2", setOptionsTL, optionsTL)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("MainSubject") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Main-Subject Matter (test)'}</Label>
+                                                            <Select name='MainSubject' id='MainSubject' required
+                                                            options={optionsMain} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "MainSubjectMatter", "MainSubject", setOptionsMain, optionsMain)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("SubSubject2") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Sub–Subject Matter (test)'}</Label>
+                                                        <Select name='SubSubject2' id='SubSubject2' required
+                                                            options={optionsSub} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "MainSubjectMatter", "SubSubject2", setOptionsSub, optionsSub)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{selectedSearchCol.indexOf("testType") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='testStatusInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='testType'>
+                                                            {'Test Type'}
+                                                        </Label>
+                                                        <div className="d-flex">
+                                                            <FormGroup check>
+                                                                <Label check>
+                                                                    <Input className="checkbox_animated"
+                                                                        id="test_type"
+                                                                        type="checkbox"
+                                                                        name="test_type"
+                                                                        value="1"
+                                                                         />
+
+                                                                    Client Test
+                                                                </Label>
+                                                            </FormGroup>
+
+                                                            <FormGroup check className="ml-3">
+                                                                <Label check>
+                                                                    <Input className="checkbox_animated"
+                                                                        id="test_type"
+                                                                        type="checkbox"
+                                                                        name="test_type"
+                                                                        value="0"
+                                                                    />   
+                                                                    On boarding test
+                                                                </Label>
+                                                            </FormGroup>
+                                                        </div>
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+
                                         </Row>
                                         <Row>
                                             <Col>

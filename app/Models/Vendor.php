@@ -52,7 +52,10 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->hasMany(VendorEducation::class, 'vendor_id');
     }
-
+      public function vendorTest()
+    {
+        return $this->hasMany(vendorTest::class, 'vendor_id');
+    }
     protected $fillable = [
         'name',
         'email',

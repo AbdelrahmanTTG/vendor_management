@@ -25,6 +25,8 @@ const Education = (props) => {
     const [isOpen, setIsOpen] = useState(true);
     const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
     const [optionsMaj, setoptionsMaj] = useState([]);
+    const [optionsLD, setoptionsLD] = useState([]);
+
     const [loading, setLoading] = useState(false);
     const [initialOptions, setInitialOptions] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -196,19 +198,23 @@ const Education = (props) => {
                                             rules={{ required: true }}
                                             render={({ field }) => (
                                                 <Select
-                                                    id='Status'
                                                     {...field}
-                                                    value={field.value || { value: '', label: '-- Select Latest Degree --' }}
-                                                    options={[
-                                                        { value: 'Associate degree', label: 'Associate degree' },
-                                                        { value: "Bachelor's degree", label: "Bachelor's degree" },
-                                                        { value: "Master's degree", label: "Master's degree" },
-                                                        { value: "Doctoral degree", label: "Doctoral degree" },
-                                                    ]}
+                                                    value={field.value}
+                                                    options={optionsLD}
+                                                    onInputChange={(inputValue) =>
+                                                        handleInputChange(inputValue, "university_degree", "latest_degree", setoptionsLD, optionsLD)
+                                                    }
                                                     className="js-example-basic-single col-sm-12"
+                                                    isSearchable
+                                                    noOptionsMessage={() => loading ? (
+                                                        <div className="loader-box" >
+                                                            <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                        </div>
+                                                    ) : 'No options found'}
                                                     onChange={(option) => {
                                                         field.onChange(option);
                                                     }}
+
                                                 />
                                             )}
                                         />
