@@ -23,6 +23,7 @@ const MessageDrop = () => {
                 // start real time
                 echo.private(`newMessage-private-channel.User.${userId.email}`)
                     .listen('.newMessage', (e) => {
+                        console.log(e)
                         const msg = e.data;
                         const newMsg = msg.replace(/(<([^>]+)>)/gi, "").substring(0, 70);
                         setNotifications(notifications => [...notifications, newMsg]);
