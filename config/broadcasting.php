@@ -35,7 +35,7 @@ return [
             'app_id' => "897670",
             'options' => [
                 'host' => "dev.aixnexus.com",
-                'port' => 8080,
+                'port' => 6001,
                 'scheme' => "https",
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],

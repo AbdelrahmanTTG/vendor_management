@@ -10,8 +10,8 @@ const createEcho = () => {
         broadcaster: 'reverb',
         key:appKey,
         wsHost: "dev.aixnexus.com",
-        wsPort:  8080,
-        wssPort: 8080,
+        wsPort:  6001,
+        wssPort: 6001,
         forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
         enabledTransports: ['ws', 'wss'],
         auth: {
