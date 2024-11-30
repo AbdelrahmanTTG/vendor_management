@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('BROADCAST_DRIVER', 'reverb'),
+    'default' => 'reverb',
     // 'default' => env('BROADCAST_DRIVER', 'log'),
     /*
     |--------------------------------------------------------------------------
@@ -28,22 +28,36 @@ return [
     |
     */
     'connections' => [
-
-        'reverb' => [
+      'reverb' => [
             'driver' => 'reverb',
-            'key' => env('REVERB_APP_KEY'),
-            'secret' => env('REVERB_APP_SECRET'),
-            'app_id' => env('REVERB_APP_ID'),
+            'key' => "qm42aq7xixjvpowejavl",
+            'secret' => "pbcycd8psvfrxkv2qkuf",
+            'app_id' => "897670",
             'options' => [
-                'host' => env('REVERB_HOST'),
-                'port' => env('REVERB_PORT', 443),
-                'scheme' => env('REVERB_SCHEME', 'https'),
+                'host' => "dev.aixnexus.com",
+                'port' => 8080,
+                'scheme' => "https",
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
             ],
         ],
+        // 'reverb' => [
+        //     'driver' => 'reverb',
+        //     'key' => env('REVERB_APP_KEY'),
+        //     'secret' => env('REVERB_APP_SECRET'),
+        //     'app_id' => env('REVERB_APP_ID'),
+        //     'options' => [
+        //         'host' => env('REVERB_HOST'),
+        //         'port' => env('REVERB_PORT', 443),
+        //         'scheme' => env('REVERB_SCHEME', 'https'),
+        //         'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+        //     ],
+        //     'client_options' => [
+        //         // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+        //     ],
+        // ],
      
       
     
