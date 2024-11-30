@@ -8,8 +8,8 @@ window.Pusher = Pusher;
 const createEcho = () => {
     return new Echo({
         broadcaster: 'reverb',
-        key: import.meta.env.VITE_REVERB_APP_KEY,
-        wsHost: import.meta.env.VITE_REVERB_HOST,
+        key: import.meta.env.VITE_REVERB_APP_KEY ?? "qm42aq7xixjvpowejavl",
+        wsHost: import.meta.env.VITE_REVERB_HOST ?? "dev.aixnexus.com",
         wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
         wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
         forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
