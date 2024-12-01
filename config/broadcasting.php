@@ -36,7 +36,7 @@ return [
             'options' => [
                 'host' => "dev.aixnexus.com",
                 'port' => 6001,
-                'scheme' => "http",
+                'scheme' => "https",
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
             'client_options' => [
