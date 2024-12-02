@@ -1,13 +1,13 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import axiosClient from "../../../pages/AxiosClint";
-import { useStateContext } from '../../../pages/context/contextAuth';
+import axiosClient from "../../AxiosClint";
+import { useStateContext } from '../../context/contextAuth';
 import { Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
 import { Btn, H5, P } from '../../../AbstractElements';
 import ResponseModal from './ResponseModal';
 import VmResponseModal from './VmResponseModal';
 
-const viewTicket = () => {
+const ViewTicket = () => {
     const [redirect, setRedirect] = useState(false);
     const location = useLocation();
     const [ticketData, setTicketData] = useState([]);
@@ -293,4 +293,4 @@ const viewTicket = () => {
     );
 };
 
-export default viewTicket;
+export default ViewTicket;

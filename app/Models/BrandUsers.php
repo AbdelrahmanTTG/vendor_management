@@ -14,5 +14,12 @@ class BrandUsers extends Model
         $query = self::whereIn("role",$role)->select('id', 'user_name');      
         return $query->get();
     }
+
+    public static function SelectVmData()
+    {
+        $role = ['11'];
+        $query = self::whereIn("role",$role)->where('status',1)->select('id', 'user_name');      
+        return $query->get();
+    }
    
 }

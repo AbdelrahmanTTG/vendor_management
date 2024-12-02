@@ -292,3 +292,6 @@ VALUES
 ( 5,??,32,2,1,1,1,1),
 
 ALTER TABLE `vm_ticket` ADD `brand_id` INT(11) NULL AFTER `created_at`; 
+
+INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '7', 'VM Activity Sheet', 'reports/vmActivity', '1', 'VM'); 
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '271', '32', '1', '1', '1', '1', '1', '0') ;

@@ -67,7 +67,7 @@ class VmTicket extends Model
     }
 
     public function Time()
-    {
+    {   
         return  $this->hasMany(VmTicketTime::class, 'ticket');
     }
     public function Response()
@@ -105,4 +105,16 @@ class VmTicket extends Model
         return  $this->belongsTo(Brand::class, 'brand');
     }
 
+    public function getUser($id)
+    {
+        $row = BrandUsers::find($id);
+        return  $row->user_name;
+    }
+
+    public function getResourcesCount($type)
+    {
+        $row = VmTicketResource::where('ticket',$this->id)->where('type',$type)->count();
+        return  $row;
+    }
+   
 }

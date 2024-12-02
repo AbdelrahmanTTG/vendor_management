@@ -7,6 +7,7 @@ use App\Http\Controllers\VmCodeTableController;
 use App\Http\Controllers\CodingTableController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PortalAdminController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\VendorProfileController;
@@ -59,6 +60,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/getTicketData', [TicketsController::class, 'getTicketData']);
     Route::post('/sendTicketResponse', [TicketsController::class, 'sendTicketResponse']);
     Route::post('/sendTicketVmResponse', [TicketsController::class, 'sendTicketVmResponse']);
+    Route::post('/vmActivity', [ReportsController::class, 'vmActivity']);
+    Route::post('/getVmData', [ReportsController::class, 'getVmData']);
 
 
 

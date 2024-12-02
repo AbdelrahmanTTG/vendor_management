@@ -3,7 +3,7 @@ import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeade
 import axiosClient from "../../../pages/AxiosClint";
 import { useNavigate } from 'react-router-dom';
 import { useStateContext } from '../../../pages/context/contextAuth';
-import { Btn, H4, H5, P, Image } from '../../../AbstractElements';
+import { Btn, H4, H5, P, Image, Spinner } from '../../../AbstractElements';
 import Select from 'react-select';
 import CountUp from 'react-countup';
 import countImage from '../../../assets/images/dashboard/safari.png';
@@ -158,7 +158,7 @@ const TicketsList = () => {
     const handleView = (ticket) => {
         setLoading(true);
         setTimeout(() => {
-            navigate('/vm/viewTicket', { state: { ticket } });
+            navigate('/vm/ViewTicket', { state: { ticket } });
             setLoading(false);
         }, 10);
     };
@@ -183,12 +183,14 @@ const TicketsList = () => {
                 queryParams: queryParams,
             };
             try {
+                setLoading(true);
                 const { data } = await axiosClient.post("getTickets", payload);
                 setTickets(data?.Tickets);
                 setPageLinks(data?.Links);
+                setLoading(false);
             } catch (err) {
                 console.error(err);
-            }
+            }           
         };
         fetchData();
     }, [currentPage, queryParams]);
@@ -397,6 +399,11 @@ const TicketsList = () => {
                 <Card>
                     <CardBody className='pt-0 px-3'>
                         <div className="table-responsive">
+                        { loading ? (
+                                    <div className="loader-box" >
+                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                    </div>
+                                ) :
                             <Table hover>
                                 <thead>
                                     <tr>
@@ -452,6 +459,7 @@ const TicketsList = () => {
                                     ))}
                                 </tbody>
                             </Table>
+                        }
                         </div>
                         {pageLinks && pageLinks.length > 3 && (
                             <div className="mt-5 ">

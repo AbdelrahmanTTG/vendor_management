@@ -26,9 +26,7 @@ class TicketTimeResource extends JsonResource
             'status' => $this->getStatus(), 
             'created_by' => $this->user?$this->user->user_name:$this->created_by,         
             'created_at' => $this->created_at,                    
-            
-                    
-                        
+           
         ];
   }
 }
