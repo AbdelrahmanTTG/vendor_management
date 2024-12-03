@@ -40,6 +40,7 @@ jobs:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
           SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}  
         run: |
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS "ls -la /var/www/html/lingotalents.com"
 
@@ -48,6 +49,7 @@ jobs:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}  # Your SSH password
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}  # Your SSH username
           SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}  # Your server address
+          SSH_PORT: ${{ secrets.SSH_PORT }}  
         run: |
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS << 'EOF'
           cd /var/www/html/lingotalents.com
