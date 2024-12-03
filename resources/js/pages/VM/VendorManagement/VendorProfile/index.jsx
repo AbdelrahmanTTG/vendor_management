@@ -194,11 +194,23 @@ const Vendor = (props) => {
                 { value: 'MainSubject', label: 'Main-Subject Matter' },
                 { value: 'SubSubject2', label: 'Sub–Subject Matter' },
                 { value: 'testType', label: 'Test Type' },
+                { value: 'test_result', label: 'Test result' },
+            ],
+        },
+        {
+            label: "experiences",
+            options: [
+                { value: 'experience_year', label: 'Experience year' },
+             
+            ],
+        },
+        {
+            label: "Bank",
+            options: [
+                { value: 'bank_name', label: 'Bank name' },
 
             ],
         },
-
-        
 
     ];
     const customStyles = {
@@ -221,14 +233,16 @@ const Vendor = (props) => {
     const searchVendors = (event) => {
         const priceListArr = ["source_lang", "target_lang", "service", "task_type", 'unit', 'rate', 'special_rate', 'currency', 'subject', 'SubSubject'];
         const EducationArr = ["university_name", 'latest_degree', 'major','year_of_graduation']
-        const TestArr = ['source_lang2', "target_lang2", "MainSubject", "SubSubject2","test_type"];
+        const TestArr = ['source_lang2', "target_lang2", "MainSubject", "SubSubject2", "test_type", 'test_result'];
+        const ExpArr = ["experience_year"]
+        const BankArr = ["bank_name"]
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const priceList = [];
         const Education = []
         const Test = []
-
-
+        const Exp = []
+        const Bank = []
         const data = {};
         const keysToDelete = [];
         for (let [key, value] of formData.entries()) {
@@ -259,6 +273,24 @@ const Vendor = (props) => {
                 }
                 keysToDelete.push(key);
             }
+            if (ExpArr.includes(key)) {
+                const existingFilter = Exp.find(filter => filter.column === key);
+                if (existingFilter) {
+                    existingFilter.value.push(value);
+                } else {
+                    Exp.push({ column: key, value: [value] });
+                }
+                keysToDelete.push(key);
+            }
+            if (BankArr.includes(key)) {
+                const existingFilter = Bank.find(filter => filter.column === key);
+                if (existingFilter) {
+                    existingFilter.value.push(value);
+                } else {
+                    Bank.push({ column: key, value: [value] });
+                }
+                keysToDelete.push(key);
+            }
         }
         keysToDelete.forEach((key) => {
             formData.delete(key);
@@ -269,25 +301,16 @@ const Vendor = (props) => {
         const queryParams = {
             ...data,
             filters: [
-                priceList.length > 0 ? {
-                    table: "vendorSheet",
-                    columns: priceList,
-                }: undefined,
-                Education.length > 0 ?  {
-                    table: "vendorEducation",
-                    columns: Education,
-                } : undefined,
-                Test.length > 0 ? {
-                    table: "vendorTest",
-                    columns: Test,
-                } : undefined
+                priceList.length > 0 ? {table: "vendorSheet",columns: priceList,}: undefined,
+                Education.length > 0 ?  {table: "vendorEducation",columns: Education,} : undefined,
+                Test.length > 0 ? {table: "vendorTest",columns: Test,} : undefined,Exp.length > 0 ? {table: "vendorExperiences",columns: Exp,} : undefined,
+                Bank.length > 0 ? {table: "bankDetails",columns: Bank,} : undefined,
             ].filter(Boolean),
         };
 
         setQueryParams(queryParams);
         setCurrentPage(1);
 
-        console.log(queryParams);
     };
 
 
@@ -328,79 +351,8 @@ const Vendor = (props) => {
             sortDirection: sortConfig.direction,
             table: "vendors",
             export: ex,
-            // "queryParams": {
-            //    "filters": [
-            //     {
-            //         "table": "vendorSheet",
-            //         "columns": [
-            //             {
-            //                 "column": "source_lang",
-            //                 "value": ["238","575"]
-            //             },
-            //             {
-            //                 "column": "target_lang",
-            //                 "value": ["238"]
-            //             },
-            //             {
-            //                 "column": "service",
-            //                 "value": ["1"]
-            //             },
-            //             //  {
-            //             //      "column": "rate",
-            //             //      "value": ["10"]
-            //             // }
-            //         ]
-            //     },
-            //     {
-            //         "table": "vendorEducation",
-            //         "columns": [
-            //             {
-            //                 "column": "university_name",
-            //                 "value": ["cairo","giza"]
-            //             },
-            //             // {
-            //             //     "column": "major",
-            //             //     "value": ["2","3"]
-            //             // },
-            //         ]
-            //     }
-
-            // ]
-            // }
-            // filters: [
-            //     {
-            //         "table": "vendorSheet",
-            //         "columns": [
-            //             {
-            //                 "column": "source_lang",
-            //                 "value": ["371", "338"]
-            //             },
-            //             {
-            //                 "column": "target_lang",
-            //                 "value": ["400","510"]
-            //             },
-            //              {
-            //                  "column": "rate",
-            //                  "value": ["0.05"]
-            //             }
-            //         ]
-            //     },
-            //     {
-            //         "table": "vendorEducation",
-            //         "columns": [
-            //             {
-            //                 "column": "university_name",
-            //                 "value": ["cairo","giza"]
-            //             },
-            //             {
-            //                 "column": "major",
-            //                 "value": ["2","3"]
-            //             },
-            //         ]
-            //     }
-
-            // ]
-        };
+       
+        }
         try {
             setLoading2(true)
             const { data } = await axiosClient.post("Vendors", payload);
@@ -772,10 +724,10 @@ const Vendor = (props) => {
                                                             name='type'
                                                             options={
                                                                 [
-                                                                    { value: 'Freelance', label: 'Freelance' },
-                                                                    { value: 'Agency', label: 'Agency' },
-                                                                    { value: 'Contractor', label: 'Contractor' },
-                                                                    { value: 'In House', label: 'In House' },
+                                                                    { value: '0', label: 'Freelance' },
+                                                                    { value: '2', label: 'Agency' },
+                                                                    { value: '3', label: 'Contractor' },
+                                                                    { value: '1', label: 'In House' },
                                                                 ]} className="js-example-basic-multiple typeInput mb-1" isMulti
                                                         />
                                                     </FormGroup>
@@ -789,10 +741,10 @@ const Vendor = (props) => {
                                                             name='status'
                                                             options={
                                                                 [
-                                                                    { value: 'Active', label: 'Active' },
-                                                                    { value: 'Inactive', label: 'Inactive' },
-                                                                    { value: 'Rejected', label: 'Rejected' },
-                                                                    { value: 'Wait for Approval', label: 'Wait for Approval' },
+                                                                    { value: '0', label: 'Active' },
+                                                                    { value: '1', label: 'Inactive' },
+                                                                    { value: '2', label: 'Wait for Approval' },
+                                                                    { value: '3', label: 'Rejected' },
                                                                 ]} className="js-example-basic-multiple statusInput mb-1" isMulti
                                                         />
                                                     </FormGroup>
@@ -1175,8 +1127,67 @@ const Vendor = (props) => {
                                                         </div>
                                                     </FormGroup>
                                                 </Col>
+                                            }{selectedSearchCol.indexOf("test_result") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup id='testStatusInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='test_result'>
+                                                            {'Test result'}
+                                                        </Label>
+                                                        <div className="d-flex">
+                                                            <FormGroup check>
+                                                                <Label check>
+                                                                    <Input className="checkbox_animated"
+                                                                        id="test_result"
+                                                                        type="checkbox"
+                                                                        name="test_result"
+                                                                        value="1"
+                                                                    />
+
+                                                                    Pass
+                                                                </Label>
+                                                            </FormGroup>
+
+                                                            <FormGroup check className="ml-3">
+                                                                <Label check>
+                                                                    <Input className="checkbox_animated"
+                                                                        id="test_result"
+                                                                        type="checkbox"
+                                                                        name="test_result"
+                                                                        value="0"
+                                                                    />
+                                                                    Fail
+                                                                </Label>
+                                                            </FormGroup>
+                                                        </div>
+                                                    </FormGroup>
+                                                </Col>
                                             }
 
+
+                                        </Row>
+                                        <Row>
+                                            {
+                                                selectedSearchCol.indexOf("experience_year") > -1 &&
+                                                <Col md='3'>
+                                                        <FormGroup id='experience_yearInput'>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='experience_year'>{'Experience year'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'experience_yearInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                                <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'experience_yearInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                            <Input className='form-control form-control-sm experience_yearInput mb-1' step="any" type='number' name='experience_year' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                        </Row>
+                                        <Row>
+                                            {
+                                                selectedSearchCol.indexOf("bank_name") > -1 &&
+                                                <Col md='3'>
+                                                        <FormGroup id='bank_nameInput'>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='bank_name'>{'Bank name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'bank_nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                                <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'bank_nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                            <Input className='form-control form-control-sm bank_nameInput mb-1' step="any" type='text' name='bank_name' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
                                         </Row>
                                         <Row>
                                             <Col>

@@ -184,7 +184,7 @@ const AddNewBtn = (props) => {
     return (
         <Fragment>
             <Btn attrBtn={{ color: 'btn btn-primary-light', onClick: toggle }} className="me-2" >Add price list</Btn>
-            <CommonModal isOpen={modal} title='Add new price list' toggler={toggle} size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
+            <CommonModal isOpen={modal} title='Add new price list' icon={<><i className="fa fa-info-circle" style={{ fontSize: '18px', color: 'darkred', marginRight: '1%' }}></i><span style={{ fontSize: '14px', color: 'darkred' }}> Type in the fields to search.</span></>} toggler={toggle} size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
                 <Row className="g-3 mb-3">
                     <Col md="6">
                         <FormGroup className="row">

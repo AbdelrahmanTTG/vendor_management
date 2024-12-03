@@ -15,8 +15,8 @@ return [
     |
     */
 
-    'default' => 'reverb',
-    // 'default' => env('BROADCAST_DRIVER', 'log'),
+    /* 'default' => env('BROADCAST_CONNECTION', 'reverb'),*/
+    'default' => env('BROADCAST_DRIVER', 'log'),
     /*
     |--------------------------------------------------------------------------
     | Broadcast Connections
@@ -28,39 +28,42 @@ return [
     |
     */
     'connections' => [
-      'reverb' => [
+
+        'reverb' => [
             'driver' => 'reverb',
-            'key' => "qm42aq7xixjvpowejavl",
-            'secret' => "pbcycd8psvfrxkv2qkuf",
-            'app_id' => "897670",
+            'key' => env('REVERB_APP_KEY'),
+            'secret' => env('REVERB_APP_SECRET'),
+            'app_id' => env('REVERB_APP_ID'),
             'options' => [
-                'host' => "dev.aixnexus.com",
-                'port' => 6001,
-                'scheme' => "https",
+                'host' => env('REVERB_HOST'),
+                'port' => env('REVERB_PORT', 443),
+                'scheme' => env('REVERB_SCHEME', 'https'),
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
             ],
         ],
-        // 'reverb' => [
-        //     'driver' => 'reverb',
-        //     'key' => env('REVERB_APP_KEY'),
-        //     'secret' => env('REVERB_APP_SECRET'),
-        //     'app_id' => env('REVERB_APP_ID'),
-        //     'options' => [
-        //         'host' => env('REVERB_HOST'),
-        //         'port' => env('REVERB_PORT', 443),
-        //         'scheme' => env('REVERB_SCHEME', 'https'),
-        //         'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
-        //     ],
-        //     'client_options' => [
-        //         // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
-        //     ],
-        // ],
-     
-      
-    
+        /*
+        'pusher' => [
+            'driver' => 'pusher',
+            'key' => env('PUSHER_APP_KEY'),
+            'secret' => env('PUSHER_APP_SECRET'),
+            'app_id' => env('PUSHER_APP_ID'),
+            'options' => [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'host' => env('PUSHER_HOST') ?: 'api-'.env('PUSHER_APP_CLUSTER', 'mt1').'.pusher.com',
+                'port' => env('PUSHER_PORT', 443),
+                'scheme' => env('PUSHER_SCHEME', 'https'),
+                'encrypted' => true,
+                'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
+            ],
+            'client_options' => [
+                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+            ],
+            
+        ],
+        */
         'ably' => [
             'driver' => 'ably',
             'key' => env('ABLY_KEY'),

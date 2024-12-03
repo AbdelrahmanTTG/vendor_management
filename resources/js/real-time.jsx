@@ -3,15 +3,13 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 window.Pusher = Pusher;
-const appKey = "qm42aq7xixjvpowejavl";
-console.log("App Key:", appKey);
 const createEcho = () => {
     return new Echo({
         broadcaster: 'reverb',
-        key:appKey,
-        wsHost: "dev.aixnexus.com",
-        wsPort:  6001,
-        wssPort: 6001,
+        key: import.meta.env.VITE_REVERB_APP_KEY ?? "qm42aq7xixjvpowejavl",
+        wsHost: import.meta.env.VITE_REVERB_HOST ?? "dev.aixnexus.com",
+        wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
+        wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
         forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
         enabledTransports: ['ws', 'wss'],
         auth: {

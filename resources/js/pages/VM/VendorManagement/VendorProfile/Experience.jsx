@@ -277,7 +277,6 @@ const Experience = (props) => {
             // console.log(newFormData)
             try {
                 const response = await axiosClient.post("AddExperience", newFormData);
-                console.log(response.data)
                 setData(response.data)
                 basictoaster("successToast", "Added successfully !");
                 setIsSubmitting(true)

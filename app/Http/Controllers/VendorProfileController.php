@@ -381,9 +381,15 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
         $id = $request->input('id');
         $PersonalData = $BillingData = $VMNotes = $VendorExperience = $VendorFiles = $InstantMessaging = $priceList = $VendorTools = $VendorTestData = $EducationVendor = null;
 
-        if ($request->input('PersonalData')) {
-            $PersonalData = $this->PersonalData($id);
+      if ($request->input('PersonalData')) {    
+            try {
+                $decID = Crypt::decrypt($id);
+            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                $decID = $id;
+            }
+            $PersonalData = $this->PersonalData($decID);
         }
+
         if ($request->input('BillingData')) {
             $InvoiceController = new InvoiceController();
             $decID = Crypt::encrypt($id);
@@ -681,59 +687,76 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
      $data = $this->getVendorExperience($request->input('vendor_id'));
         return response()->json($data, 201);
         }
-    public function UpdateExperience(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'vendor_id' => 'required|integer',
-            'experience' => 'required|integer',
-            'started_working' => 'required|digits:4',
-            'experience_year' => 'required|integer',
-            'summary' => 'required|string|max:255',
-            'skills' => 'sometimes|required|array|min:1',
-            'skills.*.skill' => 'required',
+  public function UpdateExperience(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'vendor_id' => 'required|integer',
+        'experience' => 'nullable|integer',
+        'started_working' => 'required|digits:4',
+        'experience_year' => 'required|integer',
+        'summary' => 'required|string|max:255',
+        'skills' => 'sometimes|required|array|min:1',
+        'skills.*.skill' => 'required',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json($validator->errors(), 422);
+    }
+
+    $Experience = Experience::find($request->input("experience"));
+
+    if (!$Experience) {
+        $Experience = Experience::create([
+            'vendor_id' => $request->input('vendor_id'),
+            'started_working' => $request->input('started_working'),
+            'experience_year' => $request->input('experience_year'),
+            'summary' => $request->input('summary'),
         ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-        $Experience = Experience::find($request->input("experience"));
+    } else {
         $Experience->update($request->only([
             'started_working',
             'experience_year',
             'summary',
         ]));
-        if ($request->has('skills')) {
-            foreach ($request['skills'] as $skill) {
-                if (isset($skill['id'])) {
-                    $skillUpdate = VendorSkill::find($skill['id']);
-                    $skillId = is_numeric(value: $skill['skill']) ? $skill['skill'] : Skill::firstOrCreate(['name' => $skill['skill']])->id;
-                    $skillUpdate->update([
-                        'skill_id' => $skillId,
-                    ]);
-                } else {
-                    $skillId = is_numeric(value: $skill['skill']) ? $skill['skill'] : Skill::firstOrCreate(['name' => $skill['skill']])->id;
-                    VendorSkill::create([
-                        'vendor_id' => $request->input('vendor_id'),
-                        'skill_id' => $skillId,
-                    ]);
-                }
+    }
 
+    if ($request->has('skills')) {
+        foreach ($request['skills'] as $skill) {
+            if (isset($skill['id'])) {
+                $skillUpdate = VendorSkill::find($skill['id']);
+                $skillId = is_numeric($skill['skill']) 
+                    ? $skill['skill'] 
+                    : Skill::firstOrCreate(['name' => $skill['skill']])->id;
+                $skillUpdate->update([
+                    'skill_id' => $skillId,
+                ]);
+            } else {
+                $skillId = is_numeric($skill['skill']) 
+                    ? $skill['skill'] 
+                    : Skill::firstOrCreate(['name' => $skill['skill']])->id;
+                VendorSkill::create([
+                    'vendor_id' => $request->input('vendor_id'),
+                    'skill_id' => $skillId,
+                ]);
             }
         }
-
-        $VendorSkill = VendorSkill::where('vendor_id', $request->input("vendor_id"))
-            ->with('skill')
-            ->get();
-
-        return response()->json([
-            'skills' => $VendorSkill->map(function ($vendorSkill) {
-                return [
-                    "skill_id" => $vendorSkill->skill->id,
-                    'id' => $vendorSkill->id,
-                    'name' => $vendorSkill->skill->name,
-                ];
-            })
-        ], 200);
     }
+
+    $VendorSkill = VendorSkill::where('vendor_id', $request->input("vendor_id"))
+        ->with('skill')
+        ->get();
+
+    return response()->json([
+        'skills' => $VendorSkill->map(function ($vendorSkill) {
+            return [
+                "skill_id" => $vendorSkill->skill->id,
+                'id' => $vendorSkill->id,
+                'name' => $vendorSkill->skill->name,
+            ];
+        })
+    ], 200);
+}
+
     public function getVendorExperience($vendor_id)
     {
         $experience = Experience::where('vendor_id', $vendor_id)

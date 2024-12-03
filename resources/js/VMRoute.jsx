@@ -429,7 +429,7 @@ export const VM = (allowedPermissions) => [
                 <CodeTable
                     key="unit"
                     table="Unit"
-                    permissions={allowedPermissions['unit']}
+                    permissions={allowedPermissions['Unit']}
                     dataTable="unit"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}

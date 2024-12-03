@@ -11,7 +11,7 @@ import EditMyProfile from '../VM/VendorManagement/VendorProfile/PersonalData';
 import Billing from '../VM/VendorManagement/VendorProfile/Billing';
 
 const Profile = () => {
-  const baseURL = "/Portal/Admin/";    
+  const baseURL = "/Portal/Admin/";
   const { user } = useStateContext();
   const [activeTab, setActiveTab] = useState('1');
   const [id, setId] = useState(user.id);
@@ -23,29 +23,28 @@ const Profile = () => {
   };
   useEffect(() => {
     if (user) {
-        const payload = {
-            'id': user.id,           
-        };
-        const fetchVendor = async () => {
-          try {
-              const user = JSON.parse(localStorage.getItem('USER'));
-              const data = await axiosClient.get("EditVendor", {
-                  params: {
-                      id: user.id,
-                      PersonalData: "Personal Data",
-                      BillingData: "Billing Data",
-                  }
-              });
-              setPersonalData({ PersonalData: data.data.Data });
-              setBillingData({ BillingData: data.data.BillingData })
-          } catch (error) {
-              console.error('Error fetching vendor:', error);
-          } finally {
-          }
+      const payload = {
+        'id': user.id,
       };
-      fetchVendor();  
+      const fetchVendor = async () => {
+        try {
+          const user = JSON.parse(localStorage.getItem('USER'));
+
+          const data = await axiosClient.post("EditVendor", {
+              id: user.id,
+              PersonalData: "Personal Data",
+              BillingData: "Billing Data",
+          });
+          setPersonalData({ PersonalData: data.data.Data });
+          setBillingData({ BillingData: data.data.BillingData })
+        } catch (error) {
+          console.error('Error fetching vendor:', error);
+        } finally {
+        }
+      };
+      fetchVendor();
     }
-}, [user]);
+  }, [user]);
 
   const [permissions, setPermissions] = useState({
     // type: 'hide',
@@ -86,7 +85,7 @@ const Profile = () => {
                   </div>
                 </CardHeader> */}
                 <CardBody className='b-t-primary px-3'>
-                <form onSubmit={handleSubmit}>
+                  <form onSubmit={handleSubmit}>
                     <Row className="mb-2">
                       <div className="profile-title">
                         <div className="media d-flex">
@@ -107,14 +106,14 @@ const Profile = () => {
                     </FormGroup>
                     <FormGroup className="mb-3">
                       <Label className="form-label">{Password}</Label>
-                      <Input className="form-control"  name='old_pass' type="password" defaultValue="" />
+                      <Input className="form-control" name='old_pass' type="password" defaultValue="" />
                     </FormGroup>
                     <FormGroup className="mb-3">
                       <Label className="form-label">{'New Password'}</Label>
                       <Input className="form-control" name='new_pass' type="password" defaultValue="" />
                     </FormGroup>
                     <div className="form-footer">
-                      <Btn attrBtn={{ className: 'btn-block', color: 'primary',type: 'submit'}} >{'Change Password'}</Btn>
+                      <Btn attrBtn={{ className: 'btn-block', color: 'primary', type: 'submit' }} >{'Change Password'}</Btn>
                     </div>
                   </form>
                 </CardBody>
@@ -142,7 +141,7 @@ const Profile = () => {
                   <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
                       <EditMyProfile onSubmit="onUpdate" mode="edit"
-                        permission={permissions} vendorPersonalData={personalData}/>
+                        permission={permissions} vendorPersonalData={personalData} />
                     </TabPane>
                     <TabPane tabId="2">
                       <Billing ID={id} />
