@@ -20,8 +20,8 @@ return new class extends Migration
                 $table->string('test_upload');
                 $table->integer('source_lang');
                 $table->integer('target_lang');
-                $table->integer('MainSubject');
-                $table->integer('SubSubject');
+                $table->integer('main_subject');
+                $table->integer('sub_subject');
                 $table->integer('service');
                 $table->timestamps();
             });

@@ -47,7 +47,7 @@ const AddNewBtn = (props) => {
     const [initialOptions, setInitialOptions] = useState({});
     const [loading, setLoading] = useState(false);
     const [optionsC, setOptionsC] = useState([]);
-   
+
     const onSubmit = async (data) => {
         if (props.id && props.currency) {
             const formDate = Object.fromEntries(
@@ -100,7 +100,7 @@ const AddNewBtn = (props) => {
         if (props.currency) {
             const updatedData = renameKeys(props.currency, { id: "value", name: "label" });
             setOptionsC(updatedData);
-            setValue("currency", updatedData )
+            setValue("currency", updatedData)
         }
     }, [props.currency])
     const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
@@ -226,7 +226,7 @@ const AddNewBtn = (props) => {
                             <Label className="col-sm-4 col-form-label" for="validationCustom01">Sub–Subject Matter</Label>
                             <Col sm="8">
                                 <Controller
-                                    name="SubSubject"
+                                    name="sub_subject"
                                     control={control}
                                     rules={{ required: true }}
                                     render={({ field }) => (
@@ -235,7 +235,7 @@ const AddNewBtn = (props) => {
                                             value={field.value}
                                             options={optionsSub}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "MainSubjectMatter", "SubSubject", setOptionsSub, optionsSub)
+                                                handleInputChange(inputValue, "MainSubjectMatter", "sub_subject", setOptionsSub, optionsSub)
                                             }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
@@ -506,13 +506,13 @@ const AddNewBtn = (props) => {
                             <Col sm="8">
                                 {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
                                 <input
-                                  
+
                                     defaultValue=""
                                     className="form-control"
                                     type="number"
                                     name="rate"
                                     {...register("rate", { required: true })}
-                                  
+
                                 />
                             </Col>
                         </FormGroup>
@@ -524,7 +524,7 @@ const AddNewBtn = (props) => {
                             <Col sm="8">
                                 {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
                                 <input
-                                
+
                                     defaultValue=""
                                     className="form-control"
                                     type="number"
@@ -539,7 +539,7 @@ const AddNewBtn = (props) => {
 
                             <Label className="col-sm-4 col-form-label" for="validationCustom01">Status</Label>
                             <Col sm="8">
-                              
+
                                 <Controller
                                     name="Status"
                                     control={control}
@@ -553,7 +553,7 @@ const AddNewBtn = (props) => {
                                                 { value: '0', label: 'Active' },
                                                 { value: '1', label: 'Not Active' },
                                                 { value: '2', label: 'Pending by PM' }
-                                            ]} 
+                                            ]}
                                             className="js-example-basic-single col-sm-12"
                                             onChange={(option) => {
                                                 field.onChange(option);

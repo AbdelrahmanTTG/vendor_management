@@ -14,7 +14,7 @@ return new class extends Migration
         try {
             Schema::table('vendor_sheet', function (Blueprint $table) {
                 $table->string('Status')->nullable(); 
-                $table->string('SubSubject')->nullable(); 
+                $table->string('sub_subject')->nullable(); 
             });
         } catch (\Exception $e) {
             // Ignore exception
@@ -28,7 +28,7 @@ return new class extends Migration
     {
         try {
             Schema::table('vendor_sheet', function (Blueprint $table) {
-                $table->dropColumn(['Status', 'SubSubject']);
+                $table->dropColumn(['Status', 'sub_subject']);
             });
         } catch (\Exception $e) {
             // Ignore exception

@@ -93,7 +93,7 @@ const EditNewBtn = (props) => {
     useEffect(() => {
         if (props?.data) {
             setValue("subject", renameKeys(props?.data?.subject, { id: "value", name: "label" }))
-            setValue("SubSubject", renameKeys(props?.data?.sub_subject, { id: "value", name: "label" }))
+            setValue("sub_subject", renameKeys(props?.data?.sub_subject, { id: "value", name: "label" }))
             setValue("service", renameKeys(props?.data?.service, { id: "value", name: "label" }))
             setValue("task_type", renameKeys(props?.data?.task_type, { id: "value", name: "label" }))
             setValue("source_lang", renameKeys(props?.data?.source_language, { id: "value", name: "label" }))
@@ -110,7 +110,7 @@ const EditNewBtn = (props) => {
 
     }, [props?.data])
     const renameKeys = (obj, keysMap) => {
-        if (!obj){return}
+        if (!obj) { return }
         return Object?.keys(obj)?.reduce((acc, key) => {
             const newKey = keysMap[key] || key;
             acc[newKey] = obj[key];
@@ -199,7 +199,7 @@ const EditNewBtn = (props) => {
     return (
         <Fragment>
             <Btn attrBtn={{ color: 'btn btn-primary-light', onClick: toggle }} className="me-2" > <i className="icofont icofont-ui-edit"></i></Btn>
-            <CommonModal isOpen={modal} title='Edit price list' icon={<><i className="fa fa-info-circle" style={{ fontSize: '18px', color: 'darkred' , marginRight:'1%' }}>  </i><span style={{ fontSize: '14px', color: 'darkred' }}>Type in the fields to search.</span></>} toggler={toggle} size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
+            <CommonModal isOpen={modal} title='Edit price list' icon={<><i className="fa fa-info-circle" style={{ fontSize: '18px', color: 'darkred', marginRight: '1%' }}>  </i><span style={{ fontSize: '14px', color: 'darkred' }}>Type in the fields to search.</span></>} toggler={toggle} size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
                 <Row className="g-3 mb-3">
                     <Col md="6">
                         <FormGroup className="row">
@@ -241,7 +241,7 @@ const EditNewBtn = (props) => {
                             <Label className="col-sm-4 col-form-label" for="validationCustom01">Sub–Subject Matter</Label>
                             <Col sm="8">
                                 <Controller
-                                    name="SubSubject"
+                                    name="sub_subject"
                                     control={control}
                                     rules={{ required: true }}
                                     render={({ field }) => (
@@ -250,7 +250,7 @@ const EditNewBtn = (props) => {
                                             value={field.value}
                                             options={optionsSub}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "MainSubjectMatter", "SubSubject", setOptionsSub, optionsSub)
+                                                handleInputChange(inputValue, "MainSubjectMatter", "sub_subject", setOptionsSub, optionsSub)
                                             }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable

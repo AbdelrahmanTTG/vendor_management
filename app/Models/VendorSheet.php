@@ -13,7 +13,7 @@ class VendorSheet extends Model
     protected $fillable = [
         'vendor',
         'subject',
-        'SubSubject',
+        'sub_subject',
         'service',
         'task_type',
         'source_lang',
@@ -26,12 +26,12 @@ class VendorSheet extends Model
         'currency',
         'dialect_target'
     ];
-    public function sourceLanguage()
+    public function source_lang()
     {
         return $this->belongsTo(Language::class, 'source_lang');
     }
 
-    public function targetLanguage()
+    public function target_lang()
     {
         return $this->belongsTo(Language::class, 'target_lang');
     }
@@ -49,7 +49,7 @@ class VendorSheet extends Model
         return $this->belongsTo(Service::class, 'service');
     }
 
-    public function taskType()
+    public function task_type()
     {
         return $this->belongsTo(TaskType::class, 'task_type');
     }
@@ -69,8 +69,10 @@ class VendorSheet extends Model
         return $this->belongsTo(MainSubjectMatter::class, 'subject');
     }
 
-    public function subSubject()
-    {
-        return $this->belongsTo(MainSubjectMatter::class, 'SubSubject');
-    }
+ public function sub_subject()
+{
+    return $this->belongsTo(MainSubjectMatter::class, 'sub_subject');
+}
+
+
 }

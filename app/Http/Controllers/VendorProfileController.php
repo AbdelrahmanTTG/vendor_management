@@ -49,7 +49,7 @@ class VendorProfileController extends Controller
             }
  public function Vendors(Request $request)
 {
-    try {
+    // try {
         $formats = $this->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
@@ -70,7 +70,7 @@ class VendorProfileController extends Controller
             'region' => ['id', 'name'],
             "timezone" => ['id', 'gmt'],
         ];
-
+     
         $vendorsQuery = Vendor::select('id')->addSelect(DB::raw(implode(',', $formatArray)));
 
         foreach ($relationships as $relation => $columns) {
@@ -112,7 +112,6 @@ class VendorProfileController extends Controller
             }
         }
     }
-
 if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empty($queryParams['filters'])) {
     foreach ($queryParams['filters'] as $filter) {
         if (method_exists(Vendor::class, $filter['table'])) {
@@ -123,6 +122,7 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
                         if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
                             $column = $columnFilter['column'];
                             $values = $columnFilter['value'];
+
                             if (count($values) > 1) {
                                 $query->where(function ($query) use ($column, $values) {
                                     foreach ($values as $value) {
@@ -135,7 +135,53 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
                         }
                     }
                 });
-            });
+            })
+           ->with([$table => function ($query) use ($filter,$table) {
+    $columns = [];
+     if ($table == 'vendor_sheet') { 
+        $columns[] = 'vendor';
+    }else{
+        $columns[] = 'vendor_id';
+
+    }
+    foreach ($filter['columns'] as $columnFilter) {
+        if (!empty($columnFilter['column'])) {
+            $columns[] = $columnFilter['column'];
+        }
+    }
+    if (!empty($columns)) {
+        $query->select($columns);
+    }
+   foreach ($filter['columns'] as $columnFilter) {
+    if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
+        if (is_array($columnFilter['value'])) {
+            $query->whereIn($columnFilter['column'], $columnFilter['value']);
+        } else {
+            $query->where($columnFilter['column'], $columnFilter['operator'] ?? '=', $columnFilter['value']);
+        }
+    }
+}
+    $relationships2 = ['source_lang' => ['id', 'name'], 'target_lang' => ['id', 'name'],
+    'dialect' => ['id', 'dialect'] ,'service' => ['id', 'name'],'task_type' => ['id', 'name']
+    ,'unit' => ['id', 'name'],'currency' => ['id', 'name'],'subject' => ['id', 'name'],'sub_subject' => ['id', 'name']
+    ,'major' => ['id', 'name'],'main_subject' => ['id', 'name']
+];
+    foreach ($relationships2 as $relationship => $fields) {
+        if (in_array($relationship, $columns)) {
+            $query->with([$relationship => function ($query) use ($fields) {
+                $query->select($fields);
+            }]);
+        }
+    }
+    
+}]) ->first();
+
+            foreach ($filter['columns'] as $columnFilter) {
+                if (!empty($columnFilter['column'])) {
+                    $formatArray[] = $columnFilter['column'];
+                }
+            }
+            
         }
     }
 }
@@ -158,22 +204,47 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
         $totalVendors = $vendorsQuery->count();
         $perPage = $request->input('per_page', 10);
         $vendors = $vendorsQuery->paginate($perPage);
+        $tableKeys = array_column($queryParams['filters'] ?? [], 'table');
+        $vendorsData = $vendors->toArray();
+        $flattenedVendors = array_map(function ($vendor) use ($tableKeys) {
+        foreach ($tableKeys as $table) {
+                if (isset($vendor[$table])) {
+                    unset($vendor[$table]['vendor']);
+                    unset($vendor[$table]['vendor_id']);
 
-        return response()->json([
-            "vendors" => $vendors,
-            "fields" => $formatArray,
-            "formats" => $formats,
-            "totalVendors" => $totalVendors,
-            "AllVendors" => $AllVendors ?? null,
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            // 'error' => "Server error",
-            'error' => $e->getMessage(),
-            // 'trace' => $e->getTraceAsString(),
-        ], 500);
-    }
+                }
+            }        return $this->flattenObject($vendor, $tableKeys);
+            }, $vendorsData['data']);
+
+            $vendors->setCollection(collect($flattenedVendors));
+
+            return response()->json([
+                "vendors" => $vendors, 
+                "fields" => $formatArray,
+                "formats" => $formats,
+                "totalVendors" => $totalVendors,
+                "AllVendors" => $AllVendors ?? null,
+            ], 200);
+ 
 }
+private function flattenObject($array, $tableKeys = null, $prefix = '')
+{
+    $flattened = [];
+
+    foreach ($array as $key => $value) {
+        $newKey = $prefix ? $prefix . '.' . $key : $key; 
+        $shouldFlatten = is_null($tableKeys) || (is_array($tableKeys) && in_array($key, $tableKeys));
+
+        if ($shouldFlatten && is_array($value)) {
+            $flattened += $this->flattenObject($value, $tableKeys, $newKey);
+        } else {
+            $flattened[$newKey] = $value;
+        }
+    }
+
+    return $flattened;
+}
+
 
 
 
@@ -440,8 +511,8 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
         );
     } catch (\Exception $e) {
         return response()->json([
-            'error' => "Server error"
-            // 'error' => $e->getMessage(),
+            // 'error' => "Server error"
+            'error' => $e->getMessage(),
             // 'trace' => $e->getTraceAsString(),
         ], 500);
     }
@@ -1125,7 +1196,7 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
         $validator = Validator::make($request->all(), [
             'vendor' => 'required|integer',
             'subject' => 'required|integer',
-            'SubSubject' => 'required|integer',
+            'sub_subject' => 'required|integer',
             'service' => 'required|integer',
             'task_type' => 'required|integer',
             'source_lang' => 'required|integer',
@@ -1143,16 +1214,16 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
         }
         $vendorSheet = VendorSheet::create($request->all());
         $vendorSheet->load([
-            'sourceLanguage:id,name',
-            'targetLanguage:id,name',
+            'source_lang:id,name',
+            'target_lang:id,name',
             'dialect:id,dialect',
             'dialect_target:id,dialect',
             'service:id,name',
-            'taskType:id,name',
+            'task_type:id,name',
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'subSubject:id,name'
+            'sub_subject:id,name'
         ]);
         return response()->json($vendorSheet, 201);
 
@@ -1161,17 +1232,17 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
     public function getpriceListByVendorId($vendorId)
     {
         $vendorData = VendorSheet::with([
-            'sourceLanguage:id,name',
-            'targetLanguage:id,name',
+            'source_lang:id,name',
+            'target_lang:id,name',
             'dialect:id,dialect',
             'dialect_target:id,dialect',
             'service:id,name',
-            'taskType:id,name',
+            'task_type:id,name',
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'subSubject:id,name'
-        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'SubSubject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency']);
+            'sub_subject:id,name'
+        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency']);
 
         if ($vendorData->isEmpty()) {
             return response()->json([
@@ -1191,7 +1262,7 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer',
             'subject' => 'required|integer',
-            'SubSubject' => 'required|integer',
+            'sub_subject' => 'required|integer',
             'service' => 'required|integer',
             'task_type' => 'required|integer',
             'source_lang' => 'required|integer',
@@ -1212,16 +1283,16 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
         $vendorSheet = VendorSheet::findOrFail($request->input("id"));
         $vendorSheet->update($request->except(['vendor']));
         $vendorSheet->load([
-            'sourceLanguage:id,name',
-            'targetLanguage:id,name',
+            'source_lang:id,name',
+            'target_lang:id,name',
             'dialect:id,dialect',
             'dialect_target:id,dialect',
             'service:id,name',
-            'taskType:id,name',
+            'task_type:id,name',
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'subSubject:id,name'
+            'sub_subject:id,name'
         ]);
         return response()->json($vendorSheet, 200);
     }
@@ -1280,8 +1351,8 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
             $testResult = $request->input('test_result');
             $sourceLang = $request->input('source_lang');
             $targetLang = $request->input('target_lang');
-            $mainSubject = $request->input('MainSubject');
-            $subSubject = $request->input('SubSubject');
+            $main_subject = $request->input('main_subject');
+            $sub_subject = $request->input('sub_subject');
             $service = $request->input('service');
 
             $vendor = VendorTest::where('vendor_id', $vendorId)->first();
@@ -1299,8 +1370,8 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
             $vendor->test_result = $testResult;
             $vendor->source_lang = $sourceLang;
             $vendor->target_lang = $targetLang;
-            $vendor->MainSubject = $mainSubject;
-            $vendor->SubSubject = $subSubject;
+            $vendor->main_subject = $main_subject;
+            $vendor->sub_subject = $sub_subject;
             $vendor->service = $service;
 
             $path = $testFile->store('vendortests', 'public');
@@ -1320,16 +1391,16 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
     {
         $vendorTest = VendorTest::where('vendor_id', $vendorId)
             ->with([
-                'sourceLanguage' => function ($query) {
+                'source_lang' => function ($query) {
                     $query->select('id', 'name');
                 },
-                'targetLanguage' => function ($query) {
+                'target_lang' => function ($query) {
                     $query->select('id', 'name');
                 },
-                'mainSubject' => function ($query) {
+                'main_subject' => function ($query) {
                     $query->select('id', 'name');
                 },
-                'subSubject' => function ($query) {
+                'sub_subject' => function ($query) {
                     $query->select('id', 'name');
                 },
                 'service' => function ($query) {

@@ -1,4 +1,4 @@
-import React, { Fragment, useState ,useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table, Media, FormGroup } from 'reactstrap';
 import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
@@ -100,7 +100,7 @@ const Test = (props) => {
 
     };
 
-   
+
     const handleFileChange = (event, setFileName) => {
         const file = event.target.files[0];
 
@@ -139,7 +139,7 @@ const Test = (props) => {
             }
 
         }
-      
+
 
     }
     const renameKeys = (obj, keysMap) => {
@@ -151,15 +151,15 @@ const Test = (props) => {
         }, {});
     };
     useEffect(() => {
-        if (props.VendorTestData) { 
+        if (props.VendorTestData) {
             if (props.VendorTestData.VendorTestData) {
                 const data = props.VendorTestData.VendorTestData
                 setSelectedOption(data?.test_type)
                 setTestResult(data?.test_result)
                 setValue("source_lang", renameKeys(data?.source_language, { id: "value", name: "label" }))
                 setValue("target_lang", renameKeys(data?.target_language, { id: "value", name: "label" }))
-                setValue("MainSubject", renameKeys(data?.main_subject, { id: "value", name: "label" }))
-                setValue("SubSubject", renameKeys(data?.sub_subject, { id: "value", name: "label" }))
+                setValue("main_subject", renameKeys(data?.main_subject, { id: "value", name: "label" }))
+                setValue("sub_subject", renameKeys(data?.sub_subject, { id: "value", name: "label" }))
                 setValue("service", renameKeys(data?.service, { id: "value", name: "label" }))
             }
         }
@@ -203,10 +203,10 @@ const Test = (props) => {
                                                 className="form-control"
                                                 type="radio"
                                                 name="radio1"
-                                                checked={selectedOption == "1"} 
-                                                onChange={handleChange} 
+                                                checked={selectedOption == "1"}
+                                                onChange={handleChange}
                                             />
-                                       <Label for="radio11" style={{ margin: 0, lineHeight: '1.5' }}>
+                                            <Label for="radio11" style={{ margin: 0, lineHeight: '1.5' }}>
                                                 <span className="digits">{"Client Test"}</span>
                                             </Label>
                                         </div>
@@ -217,8 +217,8 @@ const Test = (props) => {
                                                 className="form-control"
                                                 type="radio"
                                                 name="radio1"
-                                                checked={selectedOption == "0"} 
-                                                onChange={handleChange} 
+                                                checked={selectedOption == "0"}
+                                                onChange={handleChange}
                                             />
                                             <Label for="radio12" style={{ margin: 0, lineHeight: '1.5' }}>
                                                 <span className="digits">{"On boarding test"}</span>
@@ -366,7 +366,7 @@ const Test = (props) => {
                                                 <Label className="col-sm-3 col-form-label" for="validationCustom01">Main-Subject Matter</Label>
                                                 <Col sm="9">
                                                     <Controller
-                                                        name="MainSubject"
+                                                        name="main_subject"
                                                         control={control}
                                                         rules={{ required: true }}
                                                         render={({ field }) => (
@@ -375,7 +375,7 @@ const Test = (props) => {
                                                                 value={field.value}
                                                                 options={optionsMain}
                                                                 onInputChange={(inputValue) =>
-                                                                    handleInputChange(inputValue, "MainSubjectMatter", "MainSubject", setOptionsMain, optionsMain)
+                                                                    handleInputChange(inputValue, "MainSubjectMatter", "main_subject", setOptionsMain, optionsMain)
                                                                 }
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
@@ -401,7 +401,7 @@ const Test = (props) => {
                                                 <Label className="col-sm-3 col-form-label" for="validationCustom01">Sub–Subject Matter</Label>
                                                 <Col sm="9">
                                                     <Controller
-                                                        name="SubSubject"
+                                                        name="sub_subject"
                                                         control={control}
                                                         rules={{ required: true }}
                                                         render={({ field }) => (
@@ -410,7 +410,7 @@ const Test = (props) => {
                                                                 value={field.value}
                                                                 options={optionsSub}
                                                                 onInputChange={(inputValue) =>
-                                                                    handleInputChange(inputValue, "MainSubjectMatter", "SubSubject", setOptionsSub, optionsSub)
+                                                                    handleInputChange(inputValue, "MainSubjectMatter", "sub_subject", setOptionsSub, optionsSub)
                                                                 }
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable

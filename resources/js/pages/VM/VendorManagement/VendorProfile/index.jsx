@@ -166,7 +166,7 @@ const Vendor = (props) => {
                 { value: 'rate', label: 'rate' },
                 { value: 'special_rate', label: 'Special rate' },
                 { value: 'subject', label: 'Main-Subject Matter' },
-                { value: 'SubSubject', label: 'Sub–Subject Matter' },
+                { value: 'sub_subject', label: 'Sub–Subject Matter' },
                 { value: 'currency', label: 'Currency' },
                 { value: 'task_type', label: ' Task type' },
                 { value: 'unit', label: 'Unit' },
@@ -175,7 +175,7 @@ const Vendor = (props) => {
             ],
         },
         {
-            label: "Education", 
+            label: "Education",
             options: [
                 { value: 'university_name', label: 'University name' },
                 { value: 'latest_degree', label: 'latest degree' },
@@ -191,8 +191,8 @@ const Vendor = (props) => {
             options: [
                 { value: 'source_lang2', label: 'Source language' },
                 { value: 'target_lang2', label: 'Target language' },
-                { value: 'MainSubject', label: 'Main-Subject Matter' },
-                { value: 'SubSubject2', label: 'Sub–Subject Matter' },
+                { value: 'main_subject', label: 'Main-Subject Matter' },
+                { value: 'sub_subject2', label: 'Sub–Subject Matter' },
                 { value: 'testType', label: 'Test Type' },
                 { value: 'test_result', label: 'Test result' },
             ],
@@ -201,7 +201,7 @@ const Vendor = (props) => {
             label: "experiences",
             options: [
                 { value: 'experience_year', label: 'Experience year' },
-             
+
             ],
         },
         {
@@ -231,9 +231,9 @@ const Vendor = (props) => {
     }
 
     const searchVendors = (event) => {
-        const priceListArr = ["source_lang", "target_lang", "service", "task_type", 'unit', 'rate', 'special_rate', 'currency', 'subject', 'SubSubject'];
-        const EducationArr = ["university_name", 'latest_degree', 'major','year_of_graduation']
-        const TestArr = ['source_lang2', "target_lang2", "MainSubject", "SubSubject2", "test_type", 'test_result'];
+        const priceListArr = ["source_lang", "target_lang", "service", "task_type", 'unit', 'rate', 'special_rate', 'currency', 'subject', 'sub_subject'];
+        const EducationArr = ["university_name", 'latest_degree', 'major', 'year_of_graduation']
+        const TestArr = ['source_lang2', "target_lang2", "main_subject", "sub_subject2", "test_type", 'test_result'];
         const ExpArr = ["experience_year"]
         const BankArr = ["bank_name"]
         event.preventDefault();
@@ -301,10 +301,11 @@ const Vendor = (props) => {
         const queryParams = {
             ...data,
             filters: [
-                priceList.length > 0 ? {table: "vendorSheet",columns: priceList,}: undefined,
-                Education.length > 0 ?  {table: "vendorEducation",columns: Education,} : undefined,
-                Test.length > 0 ? {table: "vendorTest",columns: Test,} : undefined,Exp.length > 0 ? {table: "vendorExperiences",columns: Exp,} : undefined,
-                Bank.length > 0 ? {table: "bankDetails",columns: Bank,} : undefined,
+                priceList.length > 0 ? { table: "vendor_sheet", columns: priceList, } : undefined,
+                Education.length > 0 ? { table: "vendor_education", columns: Education, } : undefined,
+                Test.length > 0 ? { table: "vendor_test", columns: Test, } : undefined,
+                Exp.length > 0 ? { table: "vendor_experiences", columns: Exp, } : undefined,
+                Bank.length > 0 ? { table: "bank_details", columns: Bank, } : undefined,
             ].filter(Boolean),
         };
 
@@ -312,11 +313,6 @@ const Vendor = (props) => {
         setCurrentPage(1);
 
     };
-
-
-
-
-
 
     const addBtn = (event, divID) => {
         event.preventDefault();
@@ -351,11 +347,46 @@ const Vendor = (props) => {
             sortDirection: sortConfig.direction,
             table: "vendors",
             export: ex,
-       
+            // "queryParams": {
+            //     filters: [
+            //         {
+            //             "table": "vendor_sheet",
+            //             "columns": [
+            //                 {
+            //                     "column": "source_lang",
+            //                     "value": ["371", "338"]
+            //                 },
+            //                 {
+            //                     "column": "target_lang",
+            //                     "value": ["400", "510"]
+            //                 },
+            //                 // {
+            //                 //     "column": "rate",
+            //                 //     "value": ["0.05"]
+            //                 // }
+            //             ]
+            //         },
+            //         // {
+            //         //     "table": "VendorEducation",
+            //         //     "columns": [
+            //         //         {
+            //         //             "column": "university_name",
+            //         //             "value": ["cairo", "giza"]
+            //         //         },
+            //         //         {
+            //         //             "column": "major",
+            //         //             "value": ["2", "3"]
+            //         //         },
+            //         //     ]
+            //         // }
+
+            //     ]
+            // }
         }
         try {
             setLoading2(true)
             const { data } = await axiosClient.post("Vendors", payload);
+            console.log(data)
             setVendors(data.vendors.data);
             setFields(data.fields)
             setFormats(data.formats)
@@ -858,7 +889,7 @@ const Vendor = (props) => {
                                             }
                                         </Row>
                                         <Row>
-                                            
+
                                             {
                                                 selectedSearchCol.indexOf("source_lang") > -1 &&
                                                 <Col md='3'>
@@ -972,14 +1003,14 @@ const Vendor = (props) => {
                                                     </FormGroup>
                                                 </Col>
                                             }{
-                                                selectedSearchCol.indexOf("SubSubject") > -1 &&
+                                                selectedSearchCol.indexOf("sub_subject") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
                                                         <Label className="col-form-label-sm f-12" htmlFor='name'>{'Sub–Subject Matter'}</Label>
-                                                        <Select name='SubSubject' id='SubSubject' required
+                                                        <Select name='sub_subject' id='sub_subject' required
                                                             options={optionsSub} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
-                                                                handleInputChange(inputValue, "MainSubjectMatter", "SubSubject", setOptionsSub, optionsSub)
+                                                                handleInputChange(inputValue, "MainSubjectMatter", "sub_subject", setOptionsSub, optionsSub)
                                                             }
                                                             isMulti />
                                                     </FormGroup>
@@ -996,7 +1027,7 @@ const Vendor = (props) => {
                                                     <FormGroup id='university_nameInput'>
                                                         <Label className="col-form-label-sm f-12" htmlFor='university_name'>{'University name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'university_nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
                                                             <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'university_nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                        <Input className='form-control form-control-sm university_nameInput mb-1'  type='text' name='university_name' required />
+                                                        <Input className='form-control form-control-sm university_nameInput mb-1' type='text' name='university_name' required />
                                                     </FormGroup>
                                                 </Col>
                                             }
@@ -1004,9 +1035,9 @@ const Vendor = (props) => {
                                                 selectedSearchCol.indexOf("latest_degree") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
-                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Latest Degree'}</Label>
-                                                            <Select name='latest_degree' id='latest_degree' required
-                                                                options={optionsLD} className="js-example-basic-single"
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Latest Degree'}</Label>
+                                                        <Select name='latest_degree' id='latest_degree' required
+                                                            options={optionsLD} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
                                                                 handleInputChange(inputValue, "university_degree", "latest_degree", setoptionsLD, optionsLD)
                                                             }
@@ -1017,10 +1048,10 @@ const Vendor = (props) => {
                                                 selectedSearchCol.indexOf("major") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
-                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Major'}</Label>
-                                                            <Select name='major' id='major' required
-                                                          
-                                                                options={optionsMaj} className="js-example-basic-single"
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Major'}</Label>
+                                                        <Select name='major' id='major' required
+
+                                                            options={optionsMaj} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
                                                                 handleInputChange(inputValue, "major", "major", setoptionsMaj, optionsMaj)
                                                             }
@@ -1044,7 +1075,7 @@ const Vendor = (props) => {
                                                 <Col md='3'>
                                                     <FormGroup>
                                                         <Label className="col-form-label-sm f-12" htmlFor='name'>{'Source language (test)'}</Label>
-                                                            <Select name='source_lang2' id='source_lang2' required
+                                                        <Select name='source_lang2' id='source_lang2' required
                                                             data-table="languages"
                                                             options={optionsSL} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
@@ -1057,7 +1088,7 @@ const Vendor = (props) => {
                                                 selectedSearchCol.indexOf("target_lang2") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
-                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Target language (test)'}</Label>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Target language (test)'}</Label>
                                                         <Select name='target_lang2' id='target_lang2' required
 
                                                             options={optionsTL} className="js-example-basic-single"
@@ -1068,27 +1099,27 @@ const Vendor = (props) => {
                                                     </FormGroup>
                                                 </Col>
                                             }{
-                                                selectedSearchCol.indexOf("MainSubject") > -1 &&
+                                                selectedSearchCol.indexOf("main_subject") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
                                                         <Label className="col-form-label-sm f-12" htmlFor='name'>{'Main-Subject Matter (test)'}</Label>
-                                                            <Select name='MainSubject' id='MainSubject' required
+                                                            <Select name='main_subject' id='main_subject' required
                                                             options={optionsMain} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
-                                                                handleInputChange(inputValue, "MainSubjectMatter", "MainSubject", setOptionsMain, optionsMain)
+                                                                handleInputChange(inputValue, "MainSubjectMatter", "main_subject", setOptionsMain, optionsMain)
                                                             }
                                                             isMulti />
                                                     </FormGroup>
                                                 </Col>
                                             }{
-                                                selectedSearchCol.indexOf("SubSubject2") > -1 &&
+                                                selectedSearchCol.indexOf("sub_subject2") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
                                                         <Label className="col-form-label-sm f-12" htmlFor='name'>{'Sub–Subject Matter (test)'}</Label>
-                                                        <Select name='SubSubject2' id='SubSubject2' required
+                                                        <Select name='sub_subject2' id='sub_subject2' required
                                                             options={optionsSub} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
-                                                                handleInputChange(inputValue, "MainSubjectMatter", "SubSubject2", setOptionsSub, optionsSub)
+                                                                handleInputChange(inputValue, "MainSubjectMatter", "sub_subject2", setOptionsSub, optionsSub)
                                                             }
                                                             isMulti />
                                                     </FormGroup>
@@ -1107,7 +1138,7 @@ const Vendor = (props) => {
                                                                         type="checkbox"
                                                                         name="test_type"
                                                                         value="1"
-                                                                         />
+                                                                    />
 
                                                                     Client Test
                                                                 </Label>
@@ -1120,7 +1151,7 @@ const Vendor = (props) => {
                                                                         type="checkbox"
                                                                         name="test_type"
                                                                         value="0"
-                                                                    />   
+                                                                    />
                                                                     On boarding test
                                                                 </Label>
                                                             </FormGroup>
@@ -1169,10 +1200,10 @@ const Vendor = (props) => {
                                             {
                                                 selectedSearchCol.indexOf("experience_year") > -1 &&
                                                 <Col md='3'>
-                                                        <FormGroup id='experience_yearInput'>
-                                                            <Label className="col-form-label-sm f-12" htmlFor='experience_year'>{'Experience year'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'experience_yearInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                                <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'experience_yearInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                            <Input className='form-control form-control-sm experience_yearInput mb-1' step="any" type='number' name='experience_year' required />
+                                                    <FormGroup id='experience_yearInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='experience_year'>{'Experience year'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'experience_yearInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'experience_yearInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm experience_yearInput mb-1' step="any" type='number' name='experience_year' required />
                                                     </FormGroup>
                                                 </Col>
                                             }
@@ -1181,10 +1212,10 @@ const Vendor = (props) => {
                                             {
                                                 selectedSearchCol.indexOf("bank_name") > -1 &&
                                                 <Col md='3'>
-                                                        <FormGroup id='bank_nameInput'>
-                                                            <Label className="col-form-label-sm f-12" htmlFor='bank_name'>{'Bank name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'bank_nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                                <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'bank_nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                            <Input className='form-control form-control-sm bank_nameInput mb-1' step="any" type='text' name='bank_name' required />
+                                                    <FormGroup id='bank_nameInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='bank_name'>{'Bank name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'bank_nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'bank_nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm bank_nameInput mb-1' step="any" type='text' name='bank_name' required />
                                                     </FormGroup>
                                                 </Col>
                                             }

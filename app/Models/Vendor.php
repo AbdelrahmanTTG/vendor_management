@@ -44,25 +44,25 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->hasMany(VendorFile::class, 'vendor_id');
     }
-     public function vendorSheet()
+     public function vendor_sheet()
     {
-        return $this->hasMany(VendorSheet::class, 'vendor');
+        return $this->belongsTo(VendorSheet::class,"id" ,'vendor');
     }
-      public function vendorEducation()
+      public function vendor_education()
     {
-        return $this->hasMany(VendorEducation::class, 'vendor_id');
+        return $this->belongsTo(VendorEducation::class, "id",'vendor_id');
     }
-      public function vendorTest()
+      public function vendor_test()
     {
-        return $this->hasMany(vendorTest::class, 'vendor_id');
+        return $this->belongsTo(vendorTest::class, "id",'vendor_id');
     }
-       public function vendorExperiences()
+       public function vendor_experiences()
     {
-        return $this->hasMany(Experience::class, 'vendor_id');
+        return $this->belongsTo(Experience::class,"id", 'vendor_id');
     }
-    public function bankDetails()
+    public function bank_details()
     {
-    return $this->hasManyThrough(
+    return $this->hasOneThrough(
         BankDetails::class,
         BillingData::class, 
         'vendor_id', 

@@ -8,30 +8,30 @@ class VendorTest extends Model
 {
     //
     protected $table = 'vendorTest';
-    protected $fillable = ['vendor_id', 'test_type', 'test_result', 'test_upload','source_lang','target_lang',	'MainSubject',	'SubSubject',	'service','created_at', 'updated_at'];
+    protected $fillable = ['vendor_id', 'test_type', 'test_result', 'test_upload','source_lang','target_lang',	'main_subject',	'sub_subject',	'service','created_at', 'updated_at'];
 
     public function vendor()
     {
         return $this->belongsTo(Vendor::class);
     }
-    public function sourceLanguage()
+    public function source_lang()
     {
         return $this->belongsTo(Language::class, 'source_lang');
     }
 
-    public function targetLanguage()
+    public function target_lang()
     {
         return $this->belongsTo(Language::class, 'target_lang');
     }
 
-    public function mainSubject()
+    public function main_subject()
     {
-        return $this->belongsTo(MainSubjectMatter::class, 'MainSubject');
+        return $this->belongsTo(MainSubjectMatter::class, 'main_subject');
     }
 
-    public function subSubject()
+    public function sub_subject()
     {
-        return $this->belongsTo(MainSubjectMatter::class, 'SubSubject');
+        return $this->belongsTo(MainSubjectMatter::class, 'sub_subject');
     }
 
     public function service()
