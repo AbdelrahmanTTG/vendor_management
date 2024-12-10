@@ -319,7 +319,7 @@ const Vendor = (props) => {
         const div = document.querySelector(["." + divID]);
         const container = document.getElementById(divID);
         container.appendChild(div.cloneNode(true));
-
+        document.querySelector(["." + divID+":last-child"]).value = '';
     };
 
     const delBtn = (event, divID) => {

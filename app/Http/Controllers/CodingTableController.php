@@ -19,14 +19,14 @@ use App\Models\Unit;
 use App\Models\UniversityDegree;
 use App\Models\Major;
 use App\Models\Skill;
-
+use App\Models\Vendor;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
 
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['MainSubjectMatter','regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major", "skills",'brand'];
+    protected static $validTables = ['MainSubjectMatter','regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major", "skills",'brand','vendors'];
 
     protected static $models = [
         'regions' => Regions::class,
@@ -45,7 +45,8 @@ class CodingTableController extends Controller
         "major" => Major::class,
         "skills" => Skill::class,
         "MainSubjectMatter"=> MainSubjectMatter::class,
-        "brand"=> Brand::class
+        "brand"=> Brand::class,
+        "vendors"=> Vendor::class,
     ];
     public function SelectDatatTable(Request $request)
     {

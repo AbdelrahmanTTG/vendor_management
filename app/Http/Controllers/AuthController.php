@@ -212,7 +212,7 @@ class AuthController extends Controller
     ->join('screen', 'permission.screen', '=', 'screen.id')
     ->where('permission.role', $role)
     ->where('screen.use_system', 'VM')
-    ->select('screen.url', 'permission.add as add','permission.edit as edit','permission.delete as delete') 
+    ->select('screen.url', 'permission.add as add','permission.edit as edit','permission.delete as delete','permission.view as view') 
     ->get();
                 return response()->json([
                     'allowedRoutes' => $allowedRoutes,

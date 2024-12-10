@@ -196,12 +196,12 @@ const AddInvoice = () => {
                                                                 <td><input type='checkbox' key={item.id} id={`custom-checkbox-${index}`} className='checkPo' value={item.id} onChange={() => handlePoOnChange(item.id)} selected={selectedCheckboxes.includes(item.id)} /></td>
                                                                 <td>{item.code}</td>
                                                                 <td>{item.subject}</td>
-                                                                <td>{item.task_type.name}</td>
+                                                                <td>{item.task_type}</td>
                                                                 <td>{item.rate}</td>
                                                                 <td>{item.count}</td>
-                                                                <td>{item.unit.name}</td>
+                                                                <td>{item.unit}</td>
                                                                 <td>{item.total_cost}</td>
-                                                                <td>{item.currency.name}</td>
+                                                                <td>{item.currency}</td>
                                                             </tr>
                                                         ))}
                                                     </tbody>

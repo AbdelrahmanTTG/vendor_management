@@ -145,7 +145,7 @@ const TicketsList = () => {
         const div = document.querySelector(["." + divID]);
         const container = document.getElementById(divID);
         container.appendChild(div.cloneNode(true));
-
+        document.querySelector(["." + divID + ":last-child"]).value = '';
     };
     const delBtn = (event, divID) => {
         event.preventDefault();
@@ -190,7 +190,7 @@ const TicketsList = () => {
                 setLoading(false);
             } catch (err) {
                 console.error(err);
-            }           
+            }
         };
         fetchData();
     }, [currentPage, queryParams]);
@@ -251,10 +251,10 @@ const TicketsList = () => {
                                 <Select onChange={e => handleSearchInputsOnChange(e)} options={options} className="js-example-placeholder-multiple col-sm-12" isMulti />
 
                             </div>
-                            <div className="search-panel pb-3 b-b-primary">
+                            <div className="search-panel">
                                 {selectedSearchCol.length > 0 &&
                                     <form onSubmit={searchTickets}>
-                                        <Row>
+                                        <Row className="pb-3">
                                             {selectedSearchCol.indexOf("id") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup id='idInput'>
@@ -381,7 +381,7 @@ const TicketsList = () => {
 
 
                                         </Row>
-                                        <Row>
+                                        <Row className='b-t-primary p-t-20'>
                                             <Col>
                                                 <div className="d-inline">
                                                     <Btn attrBtn={{ color: 'btn btn-primary-gradien', className: "btn-sm ", type: 'submit' }}><i className="fa fa-search me-1"></i> Search</Btn>
@@ -399,67 +399,76 @@ const TicketsList = () => {
                 <Card>
                     <CardBody className='pt-0 px-3'>
                         <div className="table-responsive">
-                        { loading ? (
-                                    <div className="loader-box" >
-                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                    </div>
-                                ) :
-                            <Table hover>
-                                <thead>
-                                    <tr>
-                                        <th scope="col" >{'Ticket Number'}</th>
-                                        <th scope="col" >{'Brand'}</th>
-                                        <th scope="col" >{'Request Type'}</th>
-                                        <th scope="col">{'Service'}</th>
-                                        <th scope="col">{'Task Type	'}</th>
-                                        <th scope="col">{'Rate'}</th>
-                                        <th scope="col">{'Count'}</th>
-                                        <th scope="col">{'Unit'}</th>
-                                        <th scope="col">{'Currency'}</th>
-                                        <th scope="col">{'Source Language'}</th>
-                                        <th scope="col">{'Target Language'}</th>
-                                        <th scope="col">{'Start Date'}</th>
-                                        <th scope="col">{'Delivery Date'}</th>
-                                        <th scope="col">{'Subject Matter'}</th>
-                                        <th scope="col">{'Software'}</th>
-                                        <th scope="col">{'Status'}</th>
-                                        <th scope="col">{'Created By'}</th>
-                                        <th scope="col">{'Created At'}</th>
-                                        <th scope="col">{'View Ticket'}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {tickets.map((item, index) => (
-                                        <tr key={index}>
-                                            <td scope="row">{item.id}</td>
-                                            <td scope="row">{item.brand}</td>
-                                            <td scope="row">{item.request_type}</td>
-                                            <td scope="row">{item.service}</td>
-                                            <td scope="row">{item.task_type}</td>
-                                            <td scope="row">{item.rate}</td>
-                                            <td scope="row">{item.count}</td>
-                                            <td scope="row">{item.unit}</td>
-                                            <td scope="row">{item.currency}</td>
-                                            <td scope="row">{item.source_lang}</td>
-                                            <td scope="row">{item.target_lang}</td>
-                                            <td scope="row">{item.start_date}</td>
-                                            <td scope="row">{item.delivery_date}</td>
-                                            <td scope="row">{item.subject}</td>
-                                            <td scope="row">{item.software}</td>
-                                            <td scope="row">{item.status}</td>
-                                            <td scope="row">{item.created_by}</td>
-                                            <td scope="row">{item.created_at}</td>
-
-                                            <td>
-                                                <button onClick={() => handleView(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
-                                                    <i className="icofont icofont-ui-edit"></i>
-                                                </button>
-                                            </td>
+                            {loading ? (
+                                <div className="loader-box" >
+                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                </div>
+                            ) :
+                                <Table hover>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" >{'Ticket Number'}</th>
+                                            <th scope="col" >{'Brand'}</th>
+                                            <th scope="col" >{'Request Type'}</th>
+                                            <th scope="col">{'Service'}</th>
+                                            <th scope="col">{'Task Type	'}</th>
+                                            <th scope="col">{'Rate'}</th>
+                                            <th scope="col">{'Count'}</th>
+                                            <th scope="col">{'Unit'}</th>
+                                            <th scope="col">{'Currency'}</th>
+                                            <th scope="col">{'Source Language'}</th>
+                                            <th scope="col">{'Target Language'}</th>
+                                            <th scope="col">{'Start Date'}</th>
+                                            <th scope="col">{'Delivery Date'}</th>
+                                            <th scope="col">{'Subject Matter'}</th>
+                                            <th scope="col">{'Software'}</th>
+                                            <th scope="col">{'Status'}</th>
+                                            <th scope="col">{'Created By'}</th>
+                                            <th scope="col">{'Created At'}</th>
+                                            <th scope="col">{'View Ticket'}</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </Table>
-                        }
+                                    </thead>
+                                    <tbody>
+                                        {tickets.length > 0 ? (
+                                            <>
+                                                {tickets.map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td scope="row">{item.id}</td>
+                                                        <td scope="row">{item.brand}</td>
+                                                        <td scope="row">{item.request_type}</td>
+                                                        <td scope="row">{item.service}</td>
+                                                        <td scope="row">{item.task_type}</td>
+                                                        <td scope="row">{item.rate}</td>
+                                                        <td scope="row">{item.count}</td>
+                                                        <td scope="row">{item.unit}</td>
+                                                        <td scope="row">{item.currency}</td>
+                                                        <td scope="row">{item.source_lang}</td>
+                                                        <td scope="row">{item.target_lang}</td>
+                                                        <td scope="row">{item.start_date}</td>
+                                                        <td scope="row">{item.delivery_date}</td>
+                                                        <td scope="row">{item.subject}</td>
+                                                        <td scope="row">{item.software}</td>
+                                                        <td scope="row">{item.status}</td>
+                                                        <td scope="row">{item.created_by}</td>
+                                                        <td scope="row">{item.created_at}</td>
+
+                                                        <td>
+                                                            <button onClick={() => handleView(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                                                <i className="icofont icofont-ui-edit"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </>
+                                        ) : (
+                                            <tr >
+                                                <td scope="row" colSpan={19} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                            </tr>
+                                        )
+                                        }
+                                    </tbody>
+                                </Table>
+                            }
                         </div>
                         {pageLinks && pageLinks.length > 3 && (
                             <div className="mt-5 ">

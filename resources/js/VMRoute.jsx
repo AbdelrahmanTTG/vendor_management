@@ -7,6 +7,7 @@ const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/V
 const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable/index'));
 const Tickets = React.lazy(() => import('./pages/VM/Tickets/index'));
 const ViewTicket = React.lazy(() => import('./pages/VM/Tickets/ViewTicket'));
+const AllTasks = React.lazy(() => import('./pages/VM/Reports/AllTasks'));
 const VmActivity = React.lazy(() => import('./pages/VM/Reports/VmActivity'));
 import axios from './pages/AxiosClint';
 const LazyWrapper = ({ children }) => (
@@ -54,7 +55,15 @@ export const VM = (allowedPermissions) => [
         path: 'reports/vmActivity',
         element: (
             <LazyWrapper>
-                <VmActivity />
+                <VmActivity permissions={allowedPermissions['reports/vmActivity']}/>
+            </LazyWrapper>
+        )
+    },
+    {
+        path: 'reports/allTasks',
+        element: (
+            <LazyWrapper>
+                <AllTasks />
             </LazyWrapper>
         )
     },
@@ -505,6 +514,7 @@ export const getAllowedRoutes = async () => {
             add: route?.add || null,
             edit: route?.edit || null,
             delete: route?.delete || null,
+            view: route?.view || null,
         };
         return acc;
     }, {});

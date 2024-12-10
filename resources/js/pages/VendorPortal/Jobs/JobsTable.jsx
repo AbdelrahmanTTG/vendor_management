@@ -29,6 +29,7 @@ const JobsTable = (props) => {
                             <th scope="col">{'Subject'}</th>
                             <th scope="col">{'Task Type'}</th>
                             <th scope="col">{'Rate'}</th>
+                            <th scope="col">{'Volume'}</th>
                             <th scope="col">{'Unit'}</th>
                             <th scope="col">{'Total Cost'}</th>
                             <th scope="col">{'Currency'}</th>
@@ -48,11 +49,12 @@ const JobsTable = (props) => {
                                         <th scope="row">{item.id}</th>
                                         <td>{item.code}</td>
                                         <td>{item.subject}</td>
-                                        <td>{item.task_type.name}</td>
+                                        <td>{item.task_type}</td>
                                         <td>{item.rate}</td>
                                         <td>{item.count}</td>
+                                        <td>{item.unit}</td>
                                         <td>{item.total_cost}</td>
-                                        <td>{item.currency.name}</td>
+                                        <td>{item.currency}</td>
                                         <td>{item.start_date}</td>
                                         <td>{item.delivery_date}</td>
                                         {viewStatus == "true" && (

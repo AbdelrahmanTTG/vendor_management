@@ -1,12 +1,13 @@
 import React, { Fragment, useEffect, useState, useRef } from 'react';
 import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../AxiosClint";
-import { Btn, H5, Spinner} from '../../../AbstractElements';
+import { Btn, H5, Spinner } from '../../../AbstractElements';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
+import { useStateContext } from '../../../pages/context/contextAuth';
 
-
-const Report = () => { 
+const Report = ( props) => {
+    const { user } = useStateContext();
     const [tickets, setTickets] = useState([]);
     const [pageLinks, setPageLinks] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -18,6 +19,7 @@ const Report = () => {
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
+    console.log(props.permissions);
 
     const handelingSelectUsers = async () => {
         try {
@@ -49,7 +51,7 @@ const Report = () => {
     const searchTickets = (event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        const data = {};           
+        const data = {};
         for (let keyValue of formData.entries()) {
             if (keyValue[0] == 'created_by')
                 data[keyValue[0]] = formData.getAll(keyValue[0]);
@@ -66,6 +68,8 @@ const Report = () => {
                 per_page: 10,
                 page: currentPage,
                 queryParams: queryParams,
+                permissions: props.permissions,
+                user: user.id,
             };
             try {
                 setLoading(true);
@@ -109,22 +113,23 @@ const Report = () => {
                     </CardHeader>
                     <Collapse isOpen={isOpen}>
                         <CardBody className='p-t-0'>
-                            <div className="search-panel pb-3 b-b-primary">
+                            <div className="search-panel">
                                 <form onSubmit={searchTickets}>
-                                    <Row>
+                                    <Row className="pb-3">
                                         <Col md='6'>
                                             <FormGroup>
                                                 <Label className="col-form-label-sm f-12" >{'Start Date'}</Label>
-                                                <Input className='form-control digits' type='date' defaultValue='' name='start_date' required/>
+                                                <Input className='form-control digits' type='date' defaultValue='' name='start_date' required />
                                             </FormGroup>
                                         </Col>
                                         <Col md='6'>
                                             <FormGroup>
                                                 <Label className="col-form-label-sm f-12" >{'End Date'}</Label>
-                                                <Input className='form-control digits' type='date' defaultValue='' name='end_date' required/>
+                                                <Input className='form-control digits' type='date' defaultValue='' name='end_date' required />
                                             </FormGroup>
                                         </Col>
                                     </Row>
+                                    {props.permissions?.view == 1 && 
                                     <Row>
                                         <Col md='12'>
                                             <FormGroup>
@@ -134,9 +139,9 @@ const Report = () => {
                                                     isMulti />
                                             </FormGroup>
                                         </Col>
-
                                     </Row>
-                                    <Row>
+                                    }
+                                    <Row className='b-t-primary p-t-20'>
                                         <Col>
                                             <div className="d-inline">
                                                 <Btn attrBtn={{ color: 'btn btn-primary-gradien', className: "btn-sm ", type: 'submit' }}><i className="fa fa-search me-1"></i> Search</Btn>
@@ -153,77 +158,87 @@ const Report = () => {
                 <Card>
                     <CardBody className='pt-0 px-3'>
                         <div className="table-responsive">
-                        { loading ? (
-                                    <div className="loader-box" >
-                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                    </div>
-                                ) :
-                            <Table hover>                           
-                                <thead>
-                                    <tr>
-                                        <th scope="col" >{'Ticket Number'}</th>
-                                        <th scope="col" >{'Brand'}</th>
-                                        <th scope="col" >{'Opened By'}</th>
-                                        <th scope="col" >{'Closed By'}</th>
-                                        <th scope="col">{'Requester Name'}</th>
-                                        <th scope="col">{'Number Of Rescource'}</th>
-                                        <th scope="col" >{'Request Type'}</th>
-                                        <th scope="col">{'Service'}</th>
-                                        <th scope="col">{'Task Type	'}</th>
-                                        <th scope="col">{'Rate'}</th>
-                                        <th scope="col">{'Count'}</th>
-                                        <th scope="col">{'Unit'}</th>
-                                        <th scope="col">{'Currency'}</th>
-                                        <th scope="col">{'Source Language'}</th>
-                                        <th scope="col">{'Target Language'}</th>
-                                        <th scope="col">{'Start Date'}</th>
-                                        <th scope="col">{'Delivery Date'}</th>
-                                        <th scope="col">{'Subject Matter'}</th>
-                                        <th scope="col">{'Software'}</th>
-                                        <th scope="col">{'Request Time'}</th>
-                                        <th scope="col">{'Time Of Opening'}</th>
-                                        <th scope="col">{'Time Of CLosing'}</th>
-                                        <th scope="col">{'Taken Time'}</th>
-                                        <th scope="col">{'New Vendors'}</th>                                       
-                                        <th scope="col">{'Existing Vendors'}</th>
-                                        <th scope="col">{'Existing Vendors with New Pairs'}</th>
-                                        <th scope="col">{'Status'}</th>                                  
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {tickets.map((item, index) => (
-                                        <tr key={index}>
-                                            <td scope="row">{item.id}</td>
-                                            <td scope="row">{item.brand}</td>
-                                            <td scope="row">{item.opened_by}</td>
-                                            <td scope="row">{item.closed_by}</td>
-                                            <td scope="row">{item.created_by}</td>
-                                            <td scope="row">{item.number_of_resource}</td>
-                                            <td scope="row">{item.request_type}</td>
-                                            <td scope="row">{item.service}</td>
-                                            <td scope="row">{item.task_type}</td>
-                                            <td scope="row">{item.rate}</td>
-                                            <td scope="row">{item.count}</td>
-                                            <td scope="row">{item.unit}</td>
-                                            <td scope="row">{item.currency}</td>
-                                            <td scope="row">{item.source_lang}</td>
-                                            <td scope="row">{item.target_lang}</td>
-                                            <td scope="row">{item.start_date}</td>
-                                            <td scope="row">{item.delivery_date}</td>
-                                            <td scope="row">{item.subject}</td>
-                                            <td scope="row">{item.software}</td>
-                                            <td scope="row">{item.created_at}</td>
-                                            <td scope="row">{item.time_of_opening}</td>
-                                            <td scope="row">{item.time_of_closing}</td>
-                                            <td scope="row">{item.TimeTaken}</td>
-                                            <td scope="row">{item.new}</td>
-                                            <td scope="row">{item.existing}</td>
-                                            <td scope="row">{item.existing_pair}</td>
-                                            <td scope="row">{item.status}</td>                                           
+                            {loading ? (
+                                <div className="loader-box" >
+                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                </div>
+                            ) :
+                                <Table hover>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" >{'Ticket Number'}</th>
+                                            <th scope="col" >{'Brand'}</th>
+                                            <th scope="col" >{'Opened By'}</th>
+                                            <th scope="col" >{'Closed By'}</th>
+                                            <th scope="col">{'Requester Name'}</th>
+                                            <th scope="col">{'Number Of Rescource'}</th>
+                                            <th scope="col" >{'Request Type'}</th>
+                                            <th scope="col">{'Service'}</th>
+                                            <th scope="col">{'Task Type	'}</th>
+                                            <th scope="col">{'Rate'}</th>
+                                            <th scope="col">{'Count'}</th>
+                                            <th scope="col">{'Unit'}</th>
+                                            <th scope="col">{'Currency'}</th>
+                                            <th scope="col">{'Source Language'}</th>
+                                            <th scope="col">{'Target Language'}</th>
+                                            <th scope="col">{'Start Date'}</th>
+                                            <th scope="col">{'Delivery Date'}</th>
+                                            <th scope="col">{'Subject Matter'}</th>
+                                            <th scope="col">{'Software'}</th>
+                                            <th scope="col">{'Request Time'}</th>
+                                            <th scope="col">{'Time Of Opening'}</th>
+                                            <th scope="col">{'Time Of CLosing'}</th>
+                                            <th scope="col">{'Taken Time'}</th>
+                                            <th scope="col">{'New Vendors'}</th>
+                                            <th scope="col">{'Existing Vendors'}</th>
+                                            <th scope="col">{'Existing Vendors with New Pairs'}</th>
+                                            <th scope="col">{'Status'}</th>
                                         </tr>
-                                    ))}
+                                    </thead>
+                                    <tbody>
+                                        {tickets.length > 0 ? (
+                                            <>
+                                                {tickets.map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td scope="row">{item.id}</td>
+                                                        <td scope="row">{item.brand}</td>
+                                                        <td scope="row">{item.opened_by}</td>
+                                                        <td scope="row">{item.closed_by}</td>
+                                                        <td scope="row">{item.created_by}</td>
+                                                        <td scope="row">{item.number_of_resource}</td>
+                                                        <td scope="row">{item.request_type}</td>
+                                                        <td scope="row">{item.service}</td>
+                                                        <td scope="row">{item.task_type}</td>
+                                                        <td scope="row">{item.rate}</td>
+                                                        <td scope="row">{item.count}</td>
+                                                        <td scope="row">{item.unit}</td>
+                                                        <td scope="row">{item.currency}</td>
+                                                        <td scope="row">{item.source_lang}</td>
+                                                        <td scope="row">{item.target_lang}</td>
+                                                        <td scope="row">{item.start_date}</td>
+                                                        <td scope="row">{item.delivery_date}</td>
+                                                        <td scope="row">{item.subject}</td>
+                                                        <td scope="row">{item.software}</td>
+                                                        <td scope="row">{item.created_at}</td>
+                                                        <td scope="row">{item.time_of_opening}</td>
+                                                        <td scope="row">{item.time_of_closing}</td>
+                                                        <td scope="row">{item.TimeTaken}</td>
+                                                        <td scope="row">{item.new}</td>
+                                                        <td scope="row">{item.existing}</td>
+                                                        <td scope="row">{item.existing_pair}</td>
+                                                        <td scope="row">{item.status}</td>
+                                                    </tr>
+                                                ))}
+
+                                            </>
+                                        ) : (
+                                            <tr >
+                                                <td scope="row" colSpan={27} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                            </tr>
+                                        )
+                                    }
                                 </tbody>
-                            </Table>
+                                </Table>
                             }
                         </div>
                         {pageLinks && pageLinks.length > 3 && (

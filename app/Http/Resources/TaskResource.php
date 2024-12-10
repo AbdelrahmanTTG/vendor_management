@@ -25,12 +25,12 @@ class TaskResource extends JsonResource
             'id' => $this->id,
             'code' => $this->code,
             'subject' => $this->subject,
-            'task_type' => $this->taskTypeName,
+            'task_type' => $this->taskTypeName?$this->taskTypeName->name:'',
             'rate' => $this->rate,
-            'count' => $this->count,
-            'total_cost' => $this->rate * $this->count,
-            'currency' => $this->currencyName,
-            'unit' => $this->unitName,
+            'count' => round($this->count,3),
+            'total_cost' => round($this->rate * $this->count,3),
+            'currency' => $this->currencyName?$this->currencyName->name:'',
+            'unit' => $this->unitName?$this->unitName->name:'',
             'start_date' => $this->start_date,
             'delivery_date' => $this->delivery_date,
             'status' => $this->status,          
@@ -43,6 +43,12 @@ class TaskResource extends JsonResource
             'job_file'=> $this->jobFile?$this->jobFile->job_file:null,
             'job_fileLink'=> "https://aixnexus.com/erp/assets/uploads/jobFile/$this->job_file",
             'insrtuctions'=>$this->insrtuctions,
+
+            'brandName'=> $this->whenAppended('created_by',$this->user->getBrand?$this->user->getBrand->name:null),
+            'created_by'=> $this->user?$this->user->user_name:null, 
+            'created_at'=> $this->whenAppended('created_at', $this->created_at), 
+            'closed_date'=> $this->whenAppended('closed_date', $this->closed_date), 
+            'vendor'=> $this->getVendor?$this->getVendor->name:null, 
             
                         
         ];

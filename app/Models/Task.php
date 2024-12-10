@@ -29,17 +29,17 @@ class Task extends Model
 
     public function taskTypeName()
     {
-        return  $this->belongsTo(TaskType::class, 'task_type')->select(['name']);
+        return  $this->belongsTo(TaskType::class, 'task_type');
     }
 
     public function currencyName()
     {
-        return  $this->belongsTo(Currency::class, 'currency')->select(['name']);
+        return  $this->belongsTo(Currency::class, 'currency');
     }
 
     public function unitName()
     {
-        return  $this->belongsTo(Unit::class, 'unit')->select(['name']);
+        return  $this->belongsTo(Unit::class, 'unit');
     }
 
     public function conversation()
@@ -74,4 +74,15 @@ class Task extends Model
         $data = $job->project->getcustomerBrand->brand;
         return $data;
     }
+
+    public function user()
+    {
+        return  $this->belongsTo(BrandUsers::class, 'created_by');
+    }
+
+    public function getVendor()
+    {
+        return  $this->belongsTo(Vendor::class, 'vendor');
+    }
+   
 }
