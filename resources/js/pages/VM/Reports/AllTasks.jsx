@@ -1,10 +1,12 @@
-import React, { Fragment, useEffect, useState, useRef } from 'react';
+import React, { Fragment, useEffect, useState, useCallback  } from 'react';
 import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../AxiosClint";
 import { Btn, H5, Spinner } from '../../../AbstractElements';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
-
+import FormatTable from "../Format";
+import SweetAlert from 'sweetalert2';
+import ExcelJS from 'exceljs';
 
 const Report = () => {
     const [Tasks, setTasks] = useState([]);
@@ -22,8 +24,14 @@ const Report = () => {
     const [optionsTY, setOptionsTY] = useState([]);
     const [initialOptions, setInitialOptions] = useState({});
     const [queryParams, setQueryParams] = useState(null);
+    const [fields, setFields] = useState([]);
+    const [formats, setFormats] = useState(null);
+    const [formatsChanged, setFormatsChanged] = useState(false);
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
+    }
+    const handleFormatsChanged = () => {
+        setFormatsChanged(!formatsChanged)
     }
     // start search
     const handelingSelectUsers = async () => {
@@ -144,32 +152,37 @@ const Report = () => {
             div && div.remove();
     };
     // end search
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const payload = {
-                per_page: 10,
-                page: currentPage,
-                queryParams: queryParams,
-            };
-            try {
-                setLoading(true);
-                await axiosClient.post("allTasks", payload)
-                    .then(({ data }) => {
-                        if (data.type == 'error') {
-                            toast.error(data.message);
-                        } else {
-                            setTasks(data?.Tasks);
-                            setPageLinks(data?.Links);
-                        }
-                        setLoading(false);
-                    });
-            } catch (err) {
-                console.error(err);
-            }
+    const fetchData = useCallback(async (ex) => {
+        const payload = {
+            per_page: 10,
+            page: currentPage,
+            queryParams: queryParams,
+            table: "job_task",           
+            export: ex,
         };
+        try {
+            setLoading(true);
+            await axiosClient.post("allTasks", payload)
+                .then(({ data }) => {
+                    if (data.type == 'error') {
+                        toast.error(data.message);
+                    } else {
+                        setTasks(data?.Tasks);
+                        setPageLinks(data?.Links);
+                        setFormats(data?.formats);
+                        setFields(data?.fields);
+                        if (data.AllTasks) { exportToExcel(data.AllTasks) }
+                    }
+                    setLoading(false);
+                });
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+    useEffect(() => {       
         fetchData();
-    }, [currentPage, queryParams]);
+    }, [currentPage, queryParams, formatsChanged]);
 
     const handlePageChange = (newPage) => {
         let tempPage = currentPage;
@@ -178,7 +191,139 @@ const Report = () => {
         }
         setCurrentPage(tempPage);
     };
+    const formatString = (input) => {
+        if (!input || typeof input !== 'string') return '';
+        return input.replace('_name', '')
+            .split(/[_-]/)
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    }
 
+    // export 
+    const EX = () => {
+
+        SweetAlert.fire({
+            title: 'Are you sure?',
+            text: `Do you want to export all tasks or just this table ?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Table',
+            denyButtonText: 'All Tasks',
+            showDenyButton: true,
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#28a745',
+            denyButtonColor: '#4d8de1',
+            cancelButtonColor: '#6c757d',
+
+        }).then((result) => {
+            if (result.isConfirmed) {
+                exportToExcel()
+            } else if (result.isDenied) {
+                fetchData(true)
+            }
+        });
+    };
+    const exportToExcel = async (exportEx) => {
+        let data = [];
+        if (exportEx) {
+            data = exportEx.map(item => {                
+                if (typeof item === 'object' && item !== null) {
+                    fields.map(key =>{
+                        if (item[key] === null || item[key] === undefined) {
+                            item[key] = '';
+                        } else if (typeof item[key] === 'number') {
+                            item[key] = item[key];
+                        } else {
+                            item[key] = String(item[key]);
+                        }
+                        if (key === 'status') {
+                            item[key] = String(item['statusData'].replace('Your', 'Vendor'));                          
+                        }                       
+                    })
+                    return item;
+                }                
+            });
+        } else {
+            const tableRows = document.querySelectorAll("table tbody tr");
+            tableRows.forEach(row => {
+                const rowData = [];
+                const cells = row.querySelectorAll("td");
+                const dataWithoutLastTwo = Array.from(cells);
+                dataWithoutLastTwo.forEach(cell => {
+                    rowData.push(cell.innerText);
+                });
+                data.push(rowData);
+            });
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sheet 1');
+        const headersArray = [...fields];
+
+        worksheet.columns = headersArray.map((key) => {
+            return {
+                header: key.replace('_name', '')
+                .split(/[_-]/)
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' '),
+                key: key,
+                width: 20,
+            };
+        });
+
+        worksheet.mergeCells('A1:' + String.fromCharCode(65 + headersArray.length - 1) + '1');
+        worksheet.getCell('A1').value = ' Tasks List';
+        worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell('A1').font = { bold: true };
+
+        const headerRow = worksheet.getRow(2);
+        headersArray.forEach((header, index) => {
+            headerRow.getCell(index + 1).value = header.replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        });
+
+        headerRow.eachCell((cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'D3D3D3' },
+            };
+            cell.font = { bold: true };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+
+        data.forEach(rowData => {
+            const row = worksheet.addRow(rowData);
+            row.eachCell((cell) => {                
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            });
+        });
+
+        workbook.xlsx.writeBuffer().then(buffer => {
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Tasks-List.xlsx';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+    };
+  
+   
     return (
         <Fragment >
             <Col>
@@ -344,6 +489,38 @@ const Report = () => {
             </Col>
             <Col sm="12">
                 <Card>
+                    <CardHeader className="px-3 d-flex justify-content-between align-items-center py-3">
+                        <div className="w-100 text-end">
+                            <ButtonGroup >
+                                <FormatTable title="Add Tasks table formatting"
+                                    Columns={[
+                                        { value: 'subject', label: 'Subject' },
+                                        { value: 'task_type', label: 'Task Type' },
+                                        { value: 'vendor', label: 'Vendor' },
+                                        { value: 'source_name', label: 'Source' },
+                                        { value: 'target_name', label: 'Target' },
+                                        { value: 'count', label: 'Count' },
+                                        { value: 'unit', label: 'Unit' },
+                                        { value: 'rate', label: 'Rate' },
+                                        { value: 'total_cost', label: 'Total Cost' },
+                                        { value: 'currency', label: 'Currency' },
+                                        { value: 'start_date', label: 'Start Date' },
+                                        { value: 'delivery_date', label: 'Delivery Date' },
+                                        { value: 'status', label: 'Status' },
+                                        { value: 'closed_date', label: 'Closed Date' },
+                                        { value: 'created_by', label: 'Created by' },
+                                        { value: 'created_at', label: 'Created at' },
+                                        { value: 'brand_name', label: 'Brand' },
+
+                                    ]} table="job_task"
+                                    formats={formats} FormatsChanged={handleFormatsChanged}
+                                />
+                                <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: EX }}  >Export to Excel</Btn>
+
+                            </ButtonGroup>
+
+                        </div>
+                    </CardHeader>
                     <CardBody className='pt-0 px-3'>
                         <div className="table-responsive">
                             {loading ? (
@@ -354,25 +531,11 @@ const Report = () => {
                                 <Table hover>
                                     <thead>
                                         <tr>
-                                            <th scope="col">{'Code'}</th>
-                                            <th scope="col">{'Subject'}</th>
-                                            <th scope="col">{'Task Type'}</th>
-                                            <th scope="col">{'Vendor'}</th>
-                                            <th scope="col">{'Source'}</th>
-                                            <th scope="col">{'Target'}</th>
-                                            <th scope="col">{'Count'}</th>
-                                            <th scope="col">{'Unit'}</th>
-                                            <th scope="col">{'Rate'}</th>
-                                            <th scope="col">{'Total Cost'}</th>
-                                            <th scope="col">{'Currency'}</th>
-                                            <th scope="col">{'Start Date'}</th>
-                                            <th scope="col">{'Delivery Date'}</th>
-                                            <th scope="col">{'Status'}</th>
-                                            <th scope="col">{'Closed Date'}</th>
-                                            <th scope="col">{'Created by'}</th>
-                                            <th scope="col">{'Created at'}</th>
-                                            <th scope="col">{'Brand'}</th>
-
+                                            {fields.map((field, fieldIndex) => (
+                                                <th key={fieldIndex}>
+                                                    {formatString(field)}
+                                                </th>
+                                            ))}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -380,25 +543,18 @@ const Report = () => {
                                             <>
                                                 {Tasks.map((item, index) => (
                                                     <tr key={index}>
-                                                        <td>{item.code}</td>
-                                                        <td>{item.subject}</td>
-                                                        <td>{item.task_type}</td>
-                                                        <td>{item.vendor}</td>
-                                                        <td>{item.jobPrice?.source_name}</td>
-                                                        <td>{item.jobPrice?.target_name}</td>
-                                                        <td>{item.count}</td>
-                                                        <td>{item.unit}</td>
-                                                        <td>{item.rate}</td>
-                                                        <td>{item.total_cost}</td>
-                                                        <td>{item.currency}</td>
-                                                        <td>{item.start_date}</td>
-                                                        <td>{item.delivery_date}</td>
-                                                        <td><span className='badge badge-info p-2'>{item.statusData.replace('Your', 'Vendor')}</span></td>
-                                                        <td>{item.closed_date}</td>
-                                                        <td>{item.created_by}</td>
-                                                        <td>{item.created_at}</td>
-                                                        <td>{item.brandName}</td>
+                                                        {fields.map((field, fieldIndex) => (
+                                                            <td key={fieldIndex}>
+                                                                {field == 'status' ?
+                                                                    <span className='badge badge-info p-2'>{item.statusData.replace('Your', 'Vendor')}</span>
+                                                                    :
+                                                                    <>
+                                                                        {item[field]}
+                                                                    </>
+                                                                }
 
+                                                            </td>
+                                                        ))}
                                                     </tr>
                                                 ))}
                                             </>

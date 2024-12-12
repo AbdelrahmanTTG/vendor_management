@@ -12,6 +12,8 @@ use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\VendorProfileController;
+use Illuminate\Support\Facades\DB;
 
 class ReportsController extends Controller
 {
@@ -83,8 +85,43 @@ class ReportsController extends Controller
 
     public function allTasks(Request $request)
     {
+        // start get data
         $tasks = Task::where('job_id', '<>', 0);
-        $perPage = $request->input('per_page', 10);
+        // default columns array to display
+        $tableColumns = DB::getSchemaBuilder()->getColumnListing('job_task');
+        $defaultArray = [
+            'code',
+            'subject',
+            'task_type',
+            'vendor',
+            'source_name',
+            'target_name',
+            'count',
+            'unit',
+            'rate',
+            'total_cost',
+            'currency',
+            'start_date',
+            'delivery_date',
+            'status',
+            'closed_date',
+            'created_by',
+            'created_at',
+            'brand_name'
+        ];
+        $renameArrayForSearch = ['job.priceList.source' => 'source_name', 'job.priceList.target' => 'target_name', 'brand' => 'brand_name'];
+        // check for special format
+        $formats = (new VendorProfileController)->format($request);
+        $filteredFormats = $formats->filter(function ($format) {
+            return $format->status == 1;
+        });
+        if ($filteredFormats->isNotEmpty()) {
+            $formatArray = $filteredFormats->pluck('format')->toArray();
+            $formatArray = array_merge(...array_map(function ($item) {
+                return explode(',', $item);
+            }, $formatArray));
+        }
+        // if filter exists
         if (!empty($request->queryParams)) {
             $validator = Validator::make($request->queryParams, [
                 'start_date' => 'date',
@@ -101,6 +138,7 @@ class ReportsController extends Controller
             } else {
                 if (!empty($request->queryParams)) {
                     foreach ($request->queryParams as $key => $val) {
+                        $formatArray[] = $renameArrayForSearch[$key] ?? $key;
                         if (!empty($val)) {
                             if (is_array($val)) {
                                 if (str_contains($key, '.')) {
@@ -159,9 +197,36 @@ class ReportsController extends Controller
                 }
             }
         }
-        $tasks = $tasks->orderBy('created_at', 'desc');
+        // if special format exists
+        if (isset($formatArray)) {
+            $selectArray = array_intersect($tableColumns, $formatArray);
+            $tasks = $tasks->select('id', 'job_id', 'code', 'status', 'rate', 'count', 'created_by')->addSelect(DB::raw(implode(',', $selectArray)));
+        }
+        // if sort exists 
+        if ($request->has('sortBy') && $request->has('sortDirection')) {
+            $sortBy = $request->input('sortBy');
+            $sortDirection = $request->input('sortDirection');
+            if (in_array($sortDirection, ['asc', 'desc'])) {
+                if (in_array($sortBy, $tableColumns)) {
+                    $tasks = $tasks->orderBy($sortBy, $sortDirection);
+                }
+            }
+        } else {
+            $tasks = $tasks->orderBy('created_at', 'desc');
+        }
+        // if export
+        if ($request->has('export') && $request->input('export') === true) {
+            $AllTasks = TaskResource::collection($tasks->get());
+        }
+        $perPage = $request->input('per_page', 10);
         $tasks = $tasks->paginate($perPage);
         $links = $tasks->linkCollection();
-        return response()->json(["Tasks" => TaskResource::collection($tasks), "Links" => $links]);
+        return response()->json([
+            "Tasks" => TaskResource::collection($tasks),
+            "Links" => $links,
+            "fields" => $formatArray ?? $defaultArray,
+            "formats" => $formats,
+            "AllTasks" => $AllTasks?? null,
+        ]);
     }
 }
