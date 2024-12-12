@@ -347,47 +347,12 @@ const Vendor = (props) => {
             sortDirection: sortConfig.direction,
             table: "vendors",
             export: ex,
-            // "queryParams": {
-            //     filters: [
-            //         {
-            //             "table": "vendor_sheet",
-            //             "columns": [
-            //                 {
-            //                     "column": "source_lang",
-            //                     "value": ["238"]
-            //                 },
-            //                 {
-            //                     "column": "target_lang",
-            //                     "value": ["400", "338"]
-            //                 },
-            //                 // {
-            //                 //     "column": "rate",
-            //                 //     "value": ["0.05"]
-            //                 // }
-            //             ]
-            //         },
-            //         // {
-            //         //     "table": "VendorEducation",
-            //         //     "columns": [
-            //         //         {
-            //         //             "column": "university_name",
-            //         //             "value": ["cairo", "giza"]
-            //         //         },
-            //         //         {
-            //         //             "column": "major",
-            //         //             "value": ["2", "3"]
-            //         //         },
-            //         //     ]
-            //         // }
-
-            //     ]
-            // }
 
         }
         try {
             setLoading2(true)
             const { data } = await axiosClient.post("Vendors", payload);
-            console.log(data)
+            // console.log(data)
             setVendors(data.vendors.data);
             setFields(data.fields)
             setFormats(data.formats)

@@ -44,6 +44,15 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->hasOne (Language::class, "id","target_lang");
     }
+    public function main_subject()
+    {
+        return $this->hasOne(MainSubjectMatter::class, 'main_subject');
+    }
+
+    public function sub_subject()
+    {
+        return $this->hasOne(MainSubjectMatter::class, 'sub_subject');
+    }
     public function region()
     {
         return $this->belongsTo(Regions::class, 'region');

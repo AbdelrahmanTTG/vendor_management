@@ -72,6 +72,12 @@ class VendorProfileController extends Controller
             'region' => ['id', 'name'],
             "timezone" => ['id', 'gmt'],
             "major" => ['id', 'name'],
+            "source_lang" => ['id', 'name'],
+            "target_lang" => ['id', 'name'],
+            "main_subject" => ['id', 'name'],
+            "sub_subject" => ['id', 'name'],
+
+            
         ];
   
         $vendorColumns = Schema::getColumnListing('vendor');
