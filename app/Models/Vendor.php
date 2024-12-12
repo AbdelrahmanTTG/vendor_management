@@ -32,6 +32,18 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->belongsTo(Countries::class, 'nationality'); 
     }
+   public function source_lang()
+    {
+        return $this->hasOne (Language::class, "id","source_lang");
+    }
+    public function major()
+    {
+        return $this->hasOne(Major::class, "id",'major');
+    }
+    public function target_lang()
+    {
+        return $this->hasOne (Language::class, "id","target_lang");
+    }
     public function region()
     {
         return $this->belongsTo(Regions::class, 'region');
@@ -44,10 +56,11 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->hasMany(VendorFile::class, 'vendor_id');
     }
-     public function vendor_sheet()
+    public function vendor_sheet()
     {
-        return $this->belongsTo(VendorSheet::class,"id" ,'vendor');
+        return $this->hasMany(VendorSheet::class, 'vendor', 'id');
     }
+
       public function vendor_education()
     {
         return $this->belongsTo(VendorEducation::class, "id",'vendor_id');
@@ -135,14 +148,12 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return [];
     }
-    
     public static function SelectData($searchTerm = null)
     {
         if ($searchTerm) {
             $query = self::where('name', 'like', '%' . $searchTerm . '%');
         } else {
             $query = self::select('id', 'name')->limit(5);
-
         }
         return $query->get();
     }

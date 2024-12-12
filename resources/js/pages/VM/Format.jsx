@@ -29,12 +29,12 @@ const Format = (props) => {
         const result = selectedOptions?.map(item => item.value).join(',');
         formData.format = result;
         formData.table = props.table;
-        // console.log(formData)
+        // console.log(result)
         if (edit) {
             formData.id = edit.id
             try {
                 const { data } = await axiosClient.post("updateFormat", formData);
-                console.log(data)
+                // console.log(data)
                 if (data.status) {props.FormatsChanged() }
                 setFormats(prevFormats => {
                     const updatedFormats = prevFormats.map(format =>
@@ -76,7 +76,7 @@ const Format = (props) => {
             })));
             setSelectedOptions(item.format.split(',').map(value => ({
                 value: value.trim(),
-                label: value.trim()
+                label: value.trim().replace(/\b[^.,]+\.(\w+)/g, '$1')
             })))
         }
     }
@@ -153,6 +153,16 @@ const Format = (props) => {
             return false
         }
     }
+    const customStyles = {
+        groupHeading: (provided) => ({
+            ...provided,
+            textAlign: "center",
+            fontSize: "13px",
+            fontWeight: "bold",
+            color: "black",
+            margin: "5px 0",
+        }),
+    };
     return (
         <Fragment>
             <UncontrolledDropdown>
@@ -278,6 +288,7 @@ const Format = (props) => {
                                         control={control}
                                         render={({ field }) => (
                                             <Select
+                                                styles={customStyles} 
                                                 {...field}
                                                 options={props.Columns} 
                                                 value={selectedOptions} 

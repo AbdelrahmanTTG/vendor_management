@@ -30,33 +30,35 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Schema;
 
 class VendorProfileController extends Controller
 {
-    public function format($request){
-            try {
-        $user = JWTAuth::parseToken()->authenticate();
-        $userId = $user->id;
-            } catch (JWTException $e) {
-        return response()->json(['error' => 'Token is invalid or expired'], 401);
-                }
-            $tableName = $request->input('table');
-            $formats = DB::table('formatsTable')
-                ->where('user_id', $userId)
-                ->where('table', $tableName)
-                ->get();
-                return $formats;
-            }
- public function Vendors(Request $request)
-{
-    // try {
+    public function format($request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            $userId = $user->id;
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+        $tableName = $request->input('table');
+        $formats = DB::table('formatsTable')
+            ->where('user_id', $userId)
+            ->where('table', $tableName)
+            ->get();
+        return $formats;
+    }
+    public function Vendors(Request $request)
+    {
+   
         $formats = $this->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
         });
 
         if ($filteredFormats->isEmpty()) {
-            $formatArray = ['name', 'email', 'status', 'type', 'country'];
+            $formatArray = ['name', 'email', 'status', "priceList", 'type', 'country', "source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target"];
         } else {
             $formatArray = $filteredFormats->pluck('format')->toArray();
             $formatArray = array_merge(...array_map(function ($item) {
@@ -69,125 +71,200 @@ class VendorProfileController extends Controller
             'nationality' => ['id', 'name'],
             'region' => ['id', 'name'],
             "timezone" => ['id', 'gmt'],
+            "major" => ['id', 'name'],
         ];
-     
-        $vendorsQuery = Vendor::select('id')->addSelect(DB::raw(implode(',', $formatArray)));
-
-        foreach ($relationships as $relation => $columns) {
-            if (in_array($relation, $formatArray)) {
-                $vendorsQuery->with([$relation => function ($query) use ($columns) {
-                    $query->select($columns);
-                }]);
-            }
-        }
-
-     if ($request->has('queryParams') && is_array($request->queryParams)) {
-    $queryParams = $request->queryParams;
-
-    foreach ($queryParams as $key => $val) {
-        if ($key !== 'filters' && !empty($val)) {
-            if (!in_array($key, $formatArray)) {
-                $vendorsQuery->addSelect($key);
-                $formatArray[] = $key;
-            }
-
-            if (is_array($val)) {
-                $vendorsQuery->where(function ($query) use ($key, $val) {
-                    foreach ($val as $k => $v) {
-                        if ($k == 0) {
-                            $query->where($key, "like", "%" . $v . "%");
-                        } else {
-                            $query->orWhere($key, "like", "%" . $v . "%");
+  
+        $vendorColumns = Schema::getColumnListing('vendor');
+        $vendorSheet = Schema::getColumnListing('vendor_sheet');
+        $relatedColumns = array_diff($formatArray, $vendorColumns);
+        $relatedColumns = array_diff($relatedColumns, $vendorSheet);
+        $relatedColumns = array_filter($relatedColumns, function ($column) {
+            return $column !== 'priceList';
+        });
+        $relatedColumns = array_values($relatedColumns);
+        $vendorsQuery = Vendor::select('vendor.id')->addSelect(DB::raw(implode(',', array_intersect($formatArray, $vendorColumns))));
+        if (in_array('priceList', $formatArray)) {
+            $vendorsQuery->addSelect(DB::raw("'' as `priceList`"))
+                ->with([
+                    'vendor_sheet' => function ($query) use ($formatArray, $vendorSheet) {
+                        $selectedColumns = array_intersect($formatArray, $vendorSheet);
+                        if (empty($selectedColumns)) {
+                            $selectedColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target"];
                         }
-                    }
-                });
-            } else {
-                $vendorsQuery->where($key, "like", "%" . $val . "%");
-            }
-
-            if (array_key_exists($key, $relationships)) {
-                $vendorsQuery->with([$key => function ($query) use ($key, $relationships) {
-                    $query->select($relationships[$key]);
-                }]);
-            }
-        }
-    }
-if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empty($queryParams['filters'])) {
-    foreach ($queryParams['filters'] as $filter) {
-        if (method_exists(Vendor::class, $filter['table'])) {
-            $table = $filter['table'];
-            $vendorsQuery->whereHas($table, function ($query) use ($filter) {
-                $query->where(function ($query) use ($filter) {
-                    foreach ($filter['columns'] as $columnFilter) {
-                        if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
-                            $column = $columnFilter['column'];
-                            $values = $columnFilter['value'];
-
-                            if (count($values) > 1) {
-                                $query->where(function ($query) use ($column, $values) {
-                                    foreach ($values as $value) {
-                                        $query->orWhere($column, '=', $value);
-                                    }
-                                });
-                            } else {
-                                $query->where($column, '=', $values[0]);
+                        $query->select(array_merge(['id', "vendor"], $selectedColumns));
+                        foreach ($selectedColumns as $relation) {
+                            if (method_exists($query->getModel(), $relation)) {
+                                $query->with([$relation]);
                             }
                         }
                     }
-                });
-            })
-           ->with([$table => function ($query) use ($filter,$table) {
-    $columns = [];
-     if ($table == 'vendor_sheet') { 
-        $columns[] = 'vendor';
-    }else{
-        $columns[] = 'vendor_id';
-
-    }
-    foreach ($filter['columns'] as $columnFilter) {
-        if (!empty($columnFilter['column'])) {
-            $columns[] = $columnFilter['column'];
+                ]);
         }
-    }
-    if (!empty($columns)) {
-        $query->select($columns);
-    }
-   foreach ($filter['columns'] as $columnFilter) {
-    if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
-        if (is_array($columnFilter['value'])) {
-            $query->whereIn($columnFilter['column'], $columnFilter['value']);
-        } else {
-            $query->where($columnFilter['column'], $columnFilter['operator'] ?? '=', $columnFilter['value']);
-        }
-    }
-}
-    $relationships2 = ['source_lang' => ['id', 'name'], 'target_lang' => ['id', 'name'],
-    'dialect' => ['id', 'dialect'] ,'service' => ['id', 'name'],'task_type' => ['id', 'name']
-    ,'unit' => ['id', 'name'],'currency' => ['id', 'name'],'subject' => ['id', 'name'],'sub_subject' => ['id', 'name']
-    ,'major' => ['id', 'name'],'main_subject' => ['id', 'name']
-];
-    foreach ($relationships2 as $relationship => $fields) {
-        if (in_array($relationship, $columns)) {
-            $query->with([$relationship => function ($query) use ($fields) {
-                $query->select($fields);
-            }]);
-        }
-    }
-    
-}]) ->first();
-
-            foreach ($filter['columns'] as $columnFilter) {
-                if (!empty($columnFilter['column'])) {
-                    $formatArray[] = $columnFilter['column'];
+        if (!empty($relatedColumns)) {
+            $joinCount = 0;
+            foreach ($relatedColumns as $relation) {
+                if (strpos($relation, '.') !== false) {
+                    list($table, $column) = explode('.', $relation);
+                    if ($table === 'bank_details') {
+                        // $vendorsQuery->with("bank_details");
+                        $aliasBilling = "billing_data_{$joinCount}";
+                        $aliasTarget = "{$table}_{$joinCount}";
+                        $vendorsQuery->leftJoin("billing_data as {$aliasBilling}", "{$aliasBilling}.vendor_id", '=', 'vendor.id');
+                        $vendorsQuery->leftJoin("{$table} as {$aliasTarget}", "{$aliasTarget}.billing_data_id", '=', "{$aliasBilling}.id");
+                        $vendorsQuery->addSelect("{$aliasTarget}.{$column} as {$column}");
+                    } else {
+                        $alias = "{$table}_{$joinCount}";
+                        $vendorsQuery->leftJoin("{$table} as {$alias}", "{$alias}.vendor_id", '=', 'vendor.id');
+                        $vendorsQuery->addSelect("{$alias}.{$column} as {$column}");
+                    }
+                    $joinCount++;
                 }
             }
-            
         }
-    }
-}
+        $diffFormatArray = $formatArray;
+        $formatArray = array_diff($formatArray, $vendorSheet);
+        $formatArray = array_values($formatArray);
+        if ($request->has('queryParams') && is_array($request->queryParams)) {
 
+            $queryParams = $request->queryParams;
 
-}
+            foreach ($queryParams as $key => $val) {
+                if ($key !== 'filters' && !empty($val)) {
+                    if (!in_array($key, $formatArray)) {
+                        $vendorsQuery->addSelect($key);
+                        $formatArray[] = $key;
+                    }
+
+                    if (is_array($val)) {
+                        $vendorsQuery->where(function ($query) use ($key, $val) {
+                            foreach ($val as $k => $v) {
+                                if ($k == 0) {
+                                    $query->where($key, "like", "%" . $v . "%");
+                                } else {
+                                    $query->orWhere($key, "like", "%" . $v . "%");
+                                }
+                            }
+                        });
+                    } else {
+                        $vendorsQuery->where($key, "like", "%" . $val . "%");
+                    }
+
+                    if (array_key_exists($key, $relationships)) {
+                        $vendorsQuery->with([$key => function ($query) use ($key, $relationships) {
+                            $query->select($relationships[$key]);
+                        }]);
+                    }
+                }
+            }
+            if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empty($queryParams['filters'])) {
+                foreach ($queryParams['filters'] as $filter) {
+                    if (method_exists(Vendor::class, $filter['table'])) {
+                        $table = $filter['table'];
+                        if ($table === 'vendor_sheet') {
+                            $vendorsQuery->whereHas('vendor_sheet', function ($query) use ($filter) {
+                                $query->where(function ($query) use ($filter) {
+                                    foreach ($filter['columns'] as $columnFilter) {
+                                        if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
+                                            $column = $columnFilter['column'];
+                                            $values = $columnFilter['value'];
+
+                                            if (count($values) > 1) {
+                                                $query->where(function ($query) use ($column, $values) {
+                                                    foreach ($values as $value) {
+                                                        $query->orWhere($column, '=', $value);
+                                                    }
+                                                });
+                                            } else {
+                                                $query->where($column, '=', $values[0]);
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+                            $selectedColumnsRow = array_intersect($diffFormatArray, $vendorSheet);
+                            if (empty($selectedColumnsRow)) {
+                                $selectedColumnsRow = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target"];
+                            }
+                            if (!in_array('priceList', $formatArray)) {
+                                $formatArray[] = 'priceList';
+                            }
+                            $selectedColumns = (array_merge(['id', "vendor"], $selectedColumnsRow));
+                            foreach ($filter['columns'] as $columnFilter) {
+                                if (!empty($columnFilter['column'])) {
+                                    $selectedColumns[] = $columnFilter['column'];
+                                }
+                            }
+                            $selectedColumns = array_unique($selectedColumns);
+                            $vendorsQuery->with(['vendor_sheet' => function ($query) use ($selectedColumns, $filter, $selectedColumnsRow) {
+                                $query->select($selectedColumns);
+                                $query->where(function ($query) use ($filter) {
+                                    foreach ($filter['columns'] as $columnFilter) {
+                                        if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
+                                            $column = $columnFilter['column'];
+                                            $values = $columnFilter['value'];
+                                            if (count($values) > 1) {
+                                                $query->where(function ($query) use ($column, $values) {
+                                                    foreach ($values as $value) {
+                                                        $query->orWhere($column, '=', $value)->with([$column]);
+                                                    }
+                                                });
+                                            } else {
+                                                $query->where($column, '=', $values[0])->with([$column]);
+                                            }
+                                        }
+                                    }
+                                });
+                                $relatedColumns = array_column($filter['columns'], 'column');
+                                $mergedColumns = array_unique(array_merge($relatedColumns, $selectedColumnsRow));
+                                $query->with($relatedColumns);
+                                foreach ($mergedColumns as $relation) {
+                                    if (method_exists($query->getModel(), $relation)) {
+                                        $query->with([$relation]);
+                                    }
+                                }
+                            }]);
+                        } else {
+                            $vendorsQuery->whereHas($table, function ($query) use ($filter) {
+                                $query->where(function ($query) use ($filter) {
+                                    foreach ($filter['columns'] as $columnFilter) {
+                                        if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
+                                            $column = $columnFilter['column'];
+                                            $values = $columnFilter['value'];
+
+                                            if (count($values) > 1) {
+                                                $query->where(function ($query) use ($column, $values) {
+                                                    foreach ($values as $value) {
+                                                        $query->orWhere($column, '=', $value);
+                                                    }
+                                                });
+                                            } else {
+                                                $query->where($column, '=', $values[0]);
+                                            }
+                                        }
+                                    }
+                                });
+                            })->with([$table => function ($query) use ($filter , $formatArray) {
+                                $columns = array_column($filter['columns'], 'column');
+                                if (!empty($columns)) {
+                                    $query->select(array_merge(["vendor_id"], $columns));
+                                    
+                                    foreach ($columns as $relation) {
+                                        if (method_exists($query->getModel(), $relation)) {
+                                            $query->with([$relation]);
+                                        }
+                                    }
+                                } 
+                            }]);
+                            foreach ($filter['columns'] as $columnFilter) {
+                                if (!empty($columnFilter['column'])) {
+                                    $formatArray[] = $columnFilter['column'];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         if ($request->has('sortBy') && $request->has('sortDirection')) {
             $sortBy = $request->input('sortBy');
@@ -201,49 +278,65 @@ if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empt
         if ($request->has('export') && $request->input('export') === true) {
             $AllVendors = $vendorsQuery->get();
         }
+        $formatArray = array_map(function ($column) {
+            if (strpos($column, '.') !== false) {
+                return explode('.', $column)[1];
+            }
+            return $column;
+        }, $formatArray);
+        
+        foreach ($relationships as $relation => $columns) {
+            if (in_array($relation, $formatArray)) {
+                $vendorsQuery->with([$relation => function ($query) use ($columns) {
+                    $query->select($columns);
+                }]);
+            }
+        }
+        $formatArray = array_unique(array_merge(['id'], $formatArray));
         $totalVendors = $vendorsQuery->count();
         $perPage = $request->input('per_page', 10);
         $vendors = $vendorsQuery->paginate($perPage);
         $tableKeys = array_column($queryParams['filters'] ?? [], 'table');
         $vendorsData = $vendors->toArray();
         $flattenedVendors = array_map(function ($vendor) use ($tableKeys) {
-        foreach ($tableKeys as $table) {
+            foreach ($tableKeys as $table) {
                 if (isset($vendor[$table])) {
                     unset($vendor[$table]['vendor']);
                     unset($vendor[$table]['vendor_id']);
-
                 }
-            }        return $this->flattenObject($vendor, $tableKeys);
-            }, $vendorsData['data']);
+            }
+            return $this->flattenObject($vendor, $tableKeys);
+        }, $vendorsData['data']);
+        $vendors->setCollection(collect($flattenedVendors));
 
-            $vendors->setCollection(collect($flattenedVendors));
-
-            return response()->json([
-                "vendors" => $vendors, 
-                "fields" => $formatArray,
-                "formats" => $formats,
-                "totalVendors" => $totalVendors,
-                "AllVendors" => $AllVendors ?? null,
-            ], 200);
- 
-}
-private function flattenObject($array, $tableKeys = null, $prefix = '')
-{
-    $flattened = [];
-
-    foreach ($array as $key => $value) {
-        $newKey = $prefix ? $prefix . '.' . $key : $key; 
-        $shouldFlatten = is_null($tableKeys) || (is_array($tableKeys) && in_array($key, $tableKeys));
-
-        if ($shouldFlatten && is_array($value)) {
-            $flattened += $this->flattenObject($value, $tableKeys, $newKey);
-        } else {
-            $flattened[$newKey] = $value;
-        }
+        return response()->json([
+            "vendors" => $vendors,
+            "fields" => $formatArray,
+            "formats" => $formats,
+            "totalVendors" => $totalVendors,
+            "AllVendors" => $AllVendors ?? null,
+           
+        ], 200);
     }
+    private function flattenObject($array, $tableKeys = null)
+    {
+        $flattened = [];
 
-    return $flattened;
-}
+        foreach ($array as $key => $value) {
+            if ($key === 'vendor_sheet') {
+                $flattened[$key] = $value;
+                continue;
+            }
+            $shouldFlatten = is_null($tableKeys) || (is_array($tableKeys) && in_array($key, $tableKeys));
+            if ($shouldFlatten && is_array($value)) {
+                $flattened += $this->flattenObject($value, $tableKeys);
+            } else {
+                $flattened[$key] = $value;
+            }
+        }
+
+        return $flattened;
+    }
 
 
 
@@ -446,77 +539,77 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
         return response()->json($BillingData, 200);
     }
 
- public function ModificationComplex(Request $request)
-{
-    try {
-        $id = $request->input('id');
-        $PersonalData = $BillingData = $VMNotes = $VendorExperience = $VendorFiles = $InstantMessaging = $priceList = $VendorTools = $VendorTestData = $EducationVendor = null;
+    public function ModificationComplex(Request $request)
+    {
+        try {
+            $id = $request->input('id');
+            $PersonalData = $BillingData = $VMNotes = $VendorExperience = $VendorFiles = $InstantMessaging = $priceList = $VendorTools = $VendorTestData = $EducationVendor = null;
 
-      if ($request->input('PersonalData')) {    
-            try {
-                $decID = Crypt::decrypt($id);
-            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-                $decID = $id;
-            }
-            $PersonalData = $this->PersonalData($decID);
-        }
-
-        if ($request->input('BillingData')) {
-            $InvoiceController = new InvoiceController();
-            $decID = Crypt::encrypt($id);
-            $BillingData = $InvoiceController->getVendorBillingData($decID);
-        }
-        if ($request->input('VMNotes')) {
-            $sender_email = app('decrypt')(base64_decode($request->input('VMNotes')['sender_email']));
-            if (isset($request->input('VMNotes')['receiver_email'])) {
-                 $receiver_email = $request->input('VMNotes')['receiver_email'];
-            } else {
-                $receiver_email = $PersonalData->email;
+            if ($request->input('PersonalData')) {
+                try {
+                    $decID = Crypt::decrypt($id);
+                } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                    $decID = $id;
                 }
-            $VMNotes = $this->VMNotes($sender_email, $receiver_email);
-        }
-        if ($request->input('Experience')) {
-            $VendorExperience = $this->getVendorExperience($id);
-        }
-        if ($request->input('VendorFiles')) {
-            $VendorFiles = $this->getVendorFiles($id);
-        }
-        if ($request->input('InstantMessaging')) {
-            $InstantMessaging = $this->getMessagesByVendorId($id);
-        }
-        if ($request->input('priceList')) {
-            $VendorTools = $this->getVendorTools($id);
-            $priceList = $this->getpriceListByVendorId($id);
-        }
-        if ($request->input('VendorTestData')) {
-            $VendorTestData = $this->getVendorTestData($id);
-        }
-        if ($request->input('EducationVendor')) {
-            $EducationVendor = $this->getEducationByVendorId($id);
-        }
+                $PersonalData = $this->PersonalData($decID);
+            }
 
-        return response()->json(
-               [
-                'Data' => $PersonalData ?? null,
-                "VMNotes" => $VMNotes ?? null,
-                "BillingData" => $BillingData ?? null,
-                "Experience" => $VendorExperience ?? null,
-                "VendorFiles" => $VendorFiles ?? null,
-                "InstantMessaging" => $InstantMessaging ?? null,
-                "priceList" => [$priceList ?? null, $VendorTools ?? null],
-                "VendorTestData" => $VendorTestData ?? null,
-                "EducationVendor" => $EducationVendor ?? null,
-            ],
-            200
-        );
-    } catch (\Exception $e) {
-        return response()->json([
-            // 'error' => "Server error"
-            'error' => $e->getMessage(),
-            // 'trace' => $e->getTraceAsString(),
-        ], 500);
+            if ($request->input('BillingData')) {
+                $InvoiceController = new InvoiceController();
+                $decID = Crypt::encrypt($id);
+                $BillingData = $InvoiceController->getVendorBillingData($decID);
+            }
+            if ($request->input('VMNotes')) {
+                $sender_email = app('decrypt')(base64_decode($request->input('VMNotes')['sender_email']));
+                if (isset($request->input('VMNotes')['receiver_email'])) {
+                    $receiver_email = $request->input('VMNotes')['receiver_email'];
+                } else {
+                    $receiver_email = $PersonalData->email;
+                }
+                $VMNotes = $this->VMNotes($sender_email, $receiver_email);
+            }
+            if ($request->input('Experience')) {
+                $VendorExperience = $this->getVendorExperience($id);
+            }
+            if ($request->input('VendorFiles')) {
+                $VendorFiles = $this->getVendorFiles($id);
+            }
+            if ($request->input('InstantMessaging')) {
+                $InstantMessaging = $this->getMessagesByVendorId($id);
+            }
+            if ($request->input('priceList')) {
+                $VendorTools = $this->getVendorTools($id);
+                $priceList = $this->getpriceListByVendorId($id);
+            }
+            if ($request->input('VendorTestData')) {
+                $VendorTestData = $this->getVendorTestData($id);
+            }
+            if ($request->input('EducationVendor')) {
+                $EducationVendor = $this->getEducationByVendorId($id);
+            }
+
+            return response()->json(
+                [
+                    'Data' => $PersonalData ?? null,
+                    "VMNotes" => $VMNotes ?? null,
+                    "BillingData" => $BillingData ?? null,
+                    "Experience" => $VendorExperience ?? null,
+                    "VendorFiles" => $VendorFiles ?? null,
+                    "InstantMessaging" => $InstantMessaging ?? null,
+                    "priceList" => [$priceList ?? null, $VendorTools ?? null],
+                    "VendorTestData" => $VendorTestData ?? null,
+                    "EducationVendor" => $EducationVendor ?? null,
+                ],
+                200
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                // 'error' => "Server error"
+                'error' => $e->getMessage(),
+                // 'trace' => $e->getTraceAsString(),
+            ], 500);
+        }
     }
-}
 
     public function PersonalData($id)
     {
@@ -524,7 +617,6 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
         if ($vendor) {
             return $vendor;
         }
-
     }
     public function VMNotes($sender_email, $receiver_email)
     {
@@ -532,39 +624,36 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
         if ($lastMessage) {
             return $lastMessage;
         }
-
     }
 
     public function Message_VM_to_Vendor(Request $request)
     {
-        try{
-       $validator = Validator::make($request->all(), [
-            'sender_id' => 'required|string|max:255',
-            'receiver_id' => 'required|string|max:255',
-            'content' => 'required|string',
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        try {
+            $validator = Validator::make($request->all(), [
+                'sender_id' => 'required|string|max:255',
+                'receiver_id' => 'required|string|max:255',
+                'content' => 'required|string',
+            ]);
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 422);
+            }
+            $sender_email = app('decrypt')(base64_decode($request->input('sender_id')));
+            $receiver_email = $request->input('receiver_id');
+            $content = $request->input('content');
+            $data = Messages::createMessage(
+                $sender_email,
+                $receiver_email,
+                $content
+            );
+            event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
+            return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "created_at" => $data->created_at]], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                // 'error' => "Server error",
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ], 500);
         }
-        $sender_email = app('decrypt')(base64_decode($request->input('sender_id')));
-        $receiver_email = $request->input('receiver_id');
-        $content = $request->input('content');
-        $data = Messages::createMessage(
-            $sender_email,
-            $receiver_email,
-            $content
-        );
-        event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
-        return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "created_at" => $data->created_at]], 200);
-
-        }catch (\Exception $e) {
-        return response()->json([
-            // 'error' => "Server error",
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ], 500);
-    }
- 
     }
     public function deleteWalletsPayment(Request $request)
     {
@@ -573,7 +662,6 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
     public function deleteSkill(Request $request)
     {
         return $this->deleteItem($request, VendorSkill::class);
-
     }
     public function updateBillingData(Request $request)
     {
@@ -627,7 +715,7 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
                     'billing_address' => $request->input('billing_address'),
                 ]);
             }
-        }else{
+        } else {
             $billingData = BillingData::create([
                 'vendor_id' => $request->input('vendor_id'),
                 'billing_legal_name' => $request->input('billing_legal_name'),
@@ -755,78 +843,78 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
             }
         }
 
-     $data = $this->getVendorExperience($request->input('vendor_id'));
+        $data = $this->getVendorExperience($request->input('vendor_id'));
         return response()->json($data, 201);
-        }
-  public function UpdateExperience(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'vendor_id' => 'required|integer',
-        'experience' => 'nullable|integer',
-        'started_working' => 'required|digits:4',
-        'experience_year' => 'required|integer',
-        'summary' => 'required|string|max:255',
-        'skills' => 'sometimes|required|array|min:1',
-        'skills.*.skill' => 'required',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json($validator->errors(), 422);
     }
-
-    $Experience = Experience::find($request->input("experience"));
-
-    if (!$Experience) {
-        $Experience = Experience::create([
-            'vendor_id' => $request->input('vendor_id'),
-            'started_working' => $request->input('started_working'),
-            'experience_year' => $request->input('experience_year'),
-            'summary' => $request->input('summary'),
+    public function UpdateExperience(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id' => 'required|integer',
+            'experience' => 'nullable|integer',
+            'started_working' => 'required|digits:4',
+            'experience_year' => 'required|integer',
+            'summary' => 'required|string|max:255',
+            'skills' => 'sometimes|required|array|min:1',
+            'skills.*.skill' => 'required',
         ]);
-    } else {
-        $Experience->update($request->only([
-            'started_working',
-            'experience_year',
-            'summary',
-        ]));
-    }
 
-    if ($request->has('skills')) {
-        foreach ($request['skills'] as $skill) {
-            if (isset($skill['id'])) {
-                $skillUpdate = VendorSkill::find($skill['id']);
-                $skillId = is_numeric($skill['skill']) 
-                    ? $skill['skill'] 
-                    : Skill::firstOrCreate(['name' => $skill['skill']])->id;
-                $skillUpdate->update([
-                    'skill_id' => $skillId,
-                ]);
-            } else {
-                $skillId = is_numeric($skill['skill']) 
-                    ? $skill['skill'] 
-                    : Skill::firstOrCreate(['name' => $skill['skill']])->id;
-                VendorSkill::create([
-                    'vendor_id' => $request->input('vendor_id'),
-                    'skill_id' => $skillId,
-                ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $Experience = Experience::find($request->input("experience"));
+
+        if (!$Experience) {
+            $Experience = Experience::create([
+                'vendor_id' => $request->input('vendor_id'),
+                'started_working' => $request->input('started_working'),
+                'experience_year' => $request->input('experience_year'),
+                'summary' => $request->input('summary'),
+            ]);
+        } else {
+            $Experience->update($request->only([
+                'started_working',
+                'experience_year',
+                'summary',
+            ]));
+        }
+
+        if ($request->has('skills')) {
+            foreach ($request['skills'] as $skill) {
+                if (isset($skill['id'])) {
+                    $skillUpdate = VendorSkill::find($skill['id']);
+                    $skillId = is_numeric($skill['skill'])
+                        ? $skill['skill']
+                        : Skill::firstOrCreate(['name' => $skill['skill']])->id;
+                    $skillUpdate->update([
+                        'skill_id' => $skillId,
+                    ]);
+                } else {
+                    $skillId = is_numeric($skill['skill'])
+                        ? $skill['skill']
+                        : Skill::firstOrCreate(['name' => $skill['skill']])->id;
+                    VendorSkill::create([
+                        'vendor_id' => $request->input('vendor_id'),
+                        'skill_id' => $skillId,
+                    ]);
+                }
             }
         }
+
+        $VendorSkill = VendorSkill::where('vendor_id', $request->input("vendor_id"))
+            ->with('skill')
+            ->get();
+
+        return response()->json([
+            'skills' => $VendorSkill->map(function ($vendorSkill) {
+                return [
+                    "skill_id" => $vendorSkill->skill->id,
+                    'id' => $vendorSkill->id,
+                    'name' => $vendorSkill->skill->name,
+                ];
+            })
+        ], 200);
     }
-
-    $VendorSkill = VendorSkill::where('vendor_id', $request->input("vendor_id"))
-        ->with('skill')
-        ->get();
-
-    return response()->json([
-        'skills' => $VendorSkill->map(function ($vendorSkill) {
-            return [
-                "skill_id" => $vendorSkill->skill->id,
-                'id' => $vendorSkill->id,
-                'name' => $vendorSkill->skill->name,
-            ];
-        })
-    ], 200);
-}
 
     public function getVendorExperience($vendor_id)
     {
@@ -937,7 +1025,6 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
             return response()->json([
                 'message' => 'Files uploaded and vendor updated successfully.'
             ], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Storage::delete([$cvFilePath, $ndaFilePath]);
@@ -947,7 +1034,7 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
 
             return response()->json([
                 'error' => 'An error occurred while processing the request.',
-             
+
             ], 500);
         }
     }
@@ -1104,7 +1191,6 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
                 'message' => 'Files updated and vendor information saved successfully.',
                 'additional_files' => $vendorFiles
             ], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
             if ($cvFilePath)
@@ -1189,7 +1275,6 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
     public function deleteMessagesByVendorId(Request $request)
     {
         return $this->deleteItem($request, InstantMessaging::class);
-
     }
     public function AddPriceList(Request $request)
     {
@@ -1226,8 +1311,6 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
             'sub_subject:id,name'
         ]);
         return response()->json($vendorSheet, 201);
-
-
     }
     public function getpriceListByVendorId($vendorId)
     {
@@ -1250,12 +1333,10 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
             ], 404);
         }
         return $vendorData;
-
     }
     public function deletePricelist(Request $request)
     {
         return $this->deleteItem($request, VendorSheet::class);
-
     }
     public function UpdatePriceList(Request $request)
     {
@@ -1334,7 +1415,6 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
         if ($vendorTools) {
             return $vendorTools;
         }
-
     }
     public function AddVendorTest(Request $request)
     {
@@ -1411,9 +1491,7 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
 
         if ($vendorTest) {
             return $vendorTest;
-
         }
-
     }
 
 
@@ -1504,10 +1582,9 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
         if ($education) {
             return $education;
         }
-
     }
 
-  public function AddFormate(Request $request)
+    public function AddFormate(Request $request)
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
@@ -1534,62 +1611,64 @@ private function flattenObject($array, $tableKeys = null, $prefix = '')
             'data' => $format
         ], 201);
     }
-     public function changeFormat(Request $request){ try {
+    public function changeFormat(Request $request)
+    {
+        try {
 
-                $user = JWTAuth::parseToken()->authenticate();
-                $userId = $user->id;
-                    } catch (JWTException $e) {
-                return response()->json(['error' => 'Token is invalid or expired'], 401);
-                        }
-                    $tableName = $request->input('table');
-                    $formatId = $request->input('id');
-                    if (isset($formatId)) {
-                        DB::table('formatsTable')
-                        ->where('table', $tableName)
-                        ->where('user_id', $userId)
-                        ->update(['status' => 0]);
-                    DB::table('formatsTable')
-                        ->where('user_id', $userId)
-                        ->where('table', $tableName)
-                        ->where('id', $formatId)  
-                        ->update(['status' => 1]);
-                    }else{
-                        DB::table('formatsTable')
-                        ->where('table', $tableName)
-                        ->where('user_id', $userId)
-                        ->update(['status' => 0]);
-                    }
-                    return response()->json([
-                    'message' => 'The format has been changed.'
-                ], 201);
-                
-            }
-
-          public function updateFormat(Request $request) {
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',     
-                'id' => 'required|integer|exists:formatsTable,id', 
-                'format' => 'required|string',                
-            ]);
-                $formatExists = DB::table('formatsTable')->where('id', $request->input('id'))->exists();
-
-            if (!$formatExists) {
-                return response()->json(['error' => 'Format not found.'], 404);
-            }
-
-            DB::table('formatsTable')
-                ->where('id', $request->input('id'))
-                ->update([
-                    'name' => $request->input('name'),
-                    'format' => $request->input('format'), 
-                ]);
-            $updatedFormat = DB::table('formatsTable')->where('id', $request->input('id'))->first();
-
-            return response()->json( $updatedFormat, 200);
-}
-
-public function deleteFormat(Request $request){
-        return $this->deleteItem($request, Formatstable::class);
-
-}
+            $user = JWTAuth::parseToken()->authenticate();
+            $userId = $user->id;
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
         }
+        $tableName = $request->input('table');
+        $formatId = $request->input('id');
+        if (isset($formatId)) {
+            DB::table('formatsTable')
+                ->where('table', $tableName)
+                ->where('user_id', $userId)
+                ->update(['status' => 0]);
+            DB::table('formatsTable')
+                ->where('user_id', $userId)
+                ->where('table', $tableName)
+                ->where('id', $formatId)
+                ->update(['status' => 1]);
+        } else {
+            DB::table('formatsTable')
+                ->where('table', $tableName)
+                ->where('user_id', $userId)
+                ->update(['status' => 0]);
+        }
+        return response()->json([
+            'message' => 'The format has been changed.'
+        ], 201);
+    }
+
+    public function updateFormat(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'id' => 'required|integer|exists:formatsTable,id',
+            'format' => 'required|string',
+        ]);
+        $formatExists = DB::table('formatsTable')->where('id', $request->input('id'))->exists();
+
+        if (!$formatExists) {
+            return response()->json(['error' => 'Format not found.'], 404);
+        }
+
+        DB::table('formatsTable')
+            ->where('id', $request->input('id'))
+            ->update([
+                'name' => $request->input('name'),
+                'format' => $request->input('format'),
+            ]);
+        $updatedFormat = DB::table('formatsTable')->where('id', $request->input('id'))->first();
+
+        return response()->json($updatedFormat, 200);
+    }
+
+    public function deleteFormat(Request $request)
+    {
+        return $this->deleteItem($request, Formatstable::class);
+    }
+}

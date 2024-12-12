@@ -156,8 +156,8 @@ const Test = (props) => {
                 const data = props.VendorTestData.VendorTestData
                 setSelectedOption(data?.test_type)
                 setTestResult(data?.test_result)
-                setValue("source_lang", renameKeys(data?.source_language, { id: "value", name: "label" }))
-                setValue("target_lang", renameKeys(data?.target_language, { id: "value", name: "label" }))
+                setValue("source_lang", renameKeys(data?.source_lang, { id: "value", name: "label" }))
+                setValue("target_lang", renameKeys(data?.target_lang, { id: "value", name: "label" }))
                 setValue("main_subject", renameKeys(data?.main_subject, { id: "value", name: "label" }))
                 setValue("sub_subject", renameKeys(data?.sub_subject, { id: "value", name: "label" }))
                 setValue("service", renameKeys(data?.service, { id: "value", name: "label" }))

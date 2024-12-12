@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState, useCallback } from 'react';
-import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
+import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, Button, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../../../pages/AxiosClint";
 import { useNavigate } from 'react-router-dom';
 import { Previous, Next } from '../../../../Constant';
@@ -163,6 +163,7 @@ const Vendor = (props) => {
             label: "Price List",
             options: [
                 { value: 'source_lang', label: 'Source language' },
+                { value: 'target_lang', label: 'Target language' },
                 { value: 'rate', label: 'rate' },
                 { value: 'special_rate', label: 'Special rate' },
                 { value: 'subject', label: 'Main-Subject Matter' },
@@ -170,7 +171,6 @@ const Vendor = (props) => {
                 { value: 'currency', label: 'Currency' },
                 { value: 'task_type', label: ' Task type' },
                 { value: 'unit', label: 'Unit' },
-                { value: 'target_lang', label: 'Target language' },
                 { value: 'service', label: 'Service' },
             ],
         },
@@ -193,7 +193,7 @@ const Vendor = (props) => {
                 { value: 'target_lang2', label: 'Target language' },
                 { value: 'main_subject', label: 'Main-Subject Matter' },
                 { value: 'sub_subject2', label: 'Sub–Subject Matter' },
-                { value: 'testType', label: 'Test Type' },
+                { value: 'test_type', label: 'Test Type' },
                 { value: 'test_result', label: 'Test result' },
             ],
         },
@@ -319,7 +319,7 @@ const Vendor = (props) => {
         const div = document.querySelector(["." + divID]);
         const container = document.getElementById(divID);
         container.appendChild(div.cloneNode(true));
-        document.querySelector(["." + divID+":last-child"]).value = '';
+        document.querySelector(["." + divID + ":last-child"]).value = '';
     };
 
     const delBtn = (event, divID) => {
@@ -354,11 +354,11 @@ const Vendor = (props) => {
             //             "columns": [
             //                 {
             //                     "column": "source_lang",
-            //                     "value": ["371", "338"]
+            //                     "value": ["238"]
             //                 },
             //                 {
             //                     "column": "target_lang",
-            //                     "value": ["400", "510"]
+            //                     "value": ["400", "338"]
             //                 },
             //                 // {
             //                 //     "column": "rate",
@@ -382,6 +382,7 @@ const Vendor = (props) => {
 
             //     ]
             // }
+
         }
         try {
             setLoading2(true)
@@ -649,6 +650,21 @@ const Vendor = (props) => {
         }
 
 
+    };
+    const [expandedRows, setExpandedRows] = useState([]);
+    const [visibleItems, setVisibleItems] = useState({});
+    const toggleRow = (id) => {
+        if (expandedRows.includes(id)) {
+            setExpandedRows(expandedRows.filter(rowId => rowId !== id));
+            setVisibleItems(prev => ({ ...prev, [id]: 5 }));
+        } else {
+            setExpandedRows([...expandedRows, id]);
+            setVisibleItems(prev => ({ ...prev, [id]: 5 }));
+        }
+    };
+
+    const handleShowMore = (id) => {
+        setVisibleItems(prev => ({ ...prev, [id]: prev[id] + 5 }));
     };
 
     return (
@@ -1103,7 +1119,7 @@ const Vendor = (props) => {
                                                 <Col md='3'>
                                                     <FormGroup>
                                                         <Label className="col-form-label-sm f-12" htmlFor='name'>{'Main-Subject Matter (test)'}</Label>
-                                                            <Select name='main_subject' id='main_subject' required
+                                                        <Select name='main_subject' id='main_subject' required
                                                             options={optionsMain} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
                                                                 handleInputChange(inputValue, "MainSubjectMatter", "main_subject", setOptionsMain, optionsMain)
@@ -1246,31 +1262,96 @@ const Vendor = (props) => {
                                 )}
                                 <FormatTable title="Add vendors table formatting"
                                     Columns={[
-                                        { value: 'name', label: 'Name' },
-                                        { value: 'contact_name', label: 'Contact name' },
-                                        { value: 'legal_Name', label: 'Legal name' },
-                                        { value: 'prfx_name', label: 'prefix name' },
-                                        { value: 'email', label: 'Email' },
-                                        { value: 'phone_number', label: 'Phone number' },
-                                        { value: 'Anothernumber', label: 'Another number' },
-                                        { value: 'country', label: 'Country' },
-                                        { value: 'cv', label: 'CV' },
-                                        { value: 'NDA', label: 'NDA' },
-                                        { value: 'type', label: 'Type' },
-                                        { value: 'status', label: 'Status' },
-                                        { value: 'contact_linked_in', label: 'linked In' },
-                                        { value: 'contact_ProZ', label: 'ProZ' },
-                                        { value: 'contact_other1', label: 'Contact other 1' },
-                                        { value: 'contact_other2', label: 'Contact other 2' },
-                                        { value: 'contact_other3', label: 'Contact other 3' },
-                                        { value: 'nationality', label: 'Nationality' },
-                                        { value: 'region', label: 'Region' },
-                                        { value: 'timezone', label: 'Time zone' },
-                                        { value: 'reject_reason', label: 'Reject reason' },
-                                        { value: 'city', label: 'City' },
-                                        { value: 'street', label: 'Street' },
-                                        { value: 'address', label: 'Address' },
-                                        { value: 'note', label: 'Note' },
+                                        {
+                                            label: "Personal information",
+                                            options: [
+                                                { value: 'name', label: 'Name' },
+                                                { value: 'contact_name', label: 'Contact name' },
+                                                { value: 'legal_Name', label: 'Legal name' },
+                                                { value: 'prfx_name', label: 'prefix name' },
+                                                { value: 'email', label: 'Email' },
+                                                { value: 'phone_number', label: 'Phone number' },
+                                                { value: 'Anothernumber', label: 'Another number' },
+                                                { value: 'country', label: 'Country' },
+                                                { value: 'cv', label: 'CV' },
+                                                { value: 'NDA', label: 'NDA' },
+                                                { value: 'type', label: 'Type' },
+                                                { value: 'status', label: 'Status' },
+                                                { value: 'contact_linked_in', label: 'linked In' },
+                                                { value: 'contact_ProZ', label: 'ProZ' },
+                                                { value: 'contact_other1', label: 'Contact other 1' },
+                                                { value: 'contact_other2', label: 'Contact other 2' },
+                                                { value: 'contact_other3', label: 'Contact other 3' },
+                                                { value: 'nationality', label: 'Nationality' },
+                                                { value: 'region', label: 'Region' },
+                                                { value: 'timezone', label: 'Time zone' },
+                                                { value: 'reject_reason', label: 'Reject reason' },
+                                                { value: 'city', label: 'City' },
+                                                { value: 'street', label: 'Street' },
+                                                { value: 'address', label: 'Address' },
+                                                { value: 'note', label: 'Note' },
+                                            ]
+                                        },
+                                        {
+                                            label: "Price List",
+                                            options: [
+                                                { value: 'priceList', label: 'price List' },
+                                                { value: 'source_lang', label: 'Source language' },
+                                                { value: 'target_lang', label: 'target language' },
+                                                { value: 'dialect', label: 'Dialect' },
+                                                { value: 'dialect_target', label: 'Dialect target' },
+                                                { value: 'service', label: 'Service' },
+                                                { value: 'task_type', label: 'Task type' },
+                                                { value: 'unit', label: 'Unit' },
+                                                { value: 'currency', label: 'Currency' },
+                                                { value: 'subject', label: 'Main-Subject Matter' },
+                                                { value: 'sub_subject', label: 'Sub–Subject Matter' },
+                                                { value: 'rate', label: 'Rate' },
+                                                { value: 'special_rate', label: 'Special rate' },
+                                            ]
+                                        },
+                                        {
+                                            label: "Test",
+                                            options: [
+                                                { value: 'vendorTest.source_lang', label: 'Source language' },
+                                                { value: 'vendorTest.target_lang', label: 'Target language' },
+                                                { value: 'vendorTest.main_subject', label: 'Main-Subject Matter' },
+                                                { value: 'vendorTest.sub_subject', label: 'Sub–Subject Matter' },
+                                                { value: 'vendorTest.test_type', label: 'Test Type' },
+                                                { value: 'vendorTest.test_result', label: 'Test result' },
+                                            ],
+                                        },
+                                        {
+                                            label: "Education",
+                                            options: [
+                                                { value: 'vendor_education.university_name', label: 'University name' },
+                                                { value: 'vendor_education.latest_degree', label: 'last degree' },
+                                                { value: 'vendor_education.major', label: 'Major' },
+                                                { value: 'vendor_education.year_of_graduation', label: 'Year of graduation' },
+
+
+
+                                            ],
+                                        },
+                                        {
+                                            label: "experiences",
+                                            options: [
+                                                { value: 'experiences.experience_year', label: 'Experience year' },
+
+                                            ],
+                                        },
+                                        {
+                                            label: "Bank",
+                                            options: [
+                                                { value: 'bank_details.bank_name', label: 'Bank name' },
+
+                                            ],
+                                        },
+                                        
+
+
+
+
                                     ]} table="vendors"
                                     formats={formats} FormatsChanged={handleFormatsChanged}
                                 />
@@ -1291,126 +1372,294 @@ const Vendor = (props) => {
                                     </div>
                                 ) :
                                     <Table hover>
-
-
                                         <thead>
                                             <tr>
-
-                                                {/* <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
-                                        <th scope="col" onClick={() => handleSort('name')}>{'Name'} {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
-                                        <th scope="col" onClick={() => handleSort('email')}>{'Email'} {sortConfig.key === 'email' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
-                                        <th scope="col" onClick={() => handleSort('legal_Name')}>{'Legal Name'} {sortConfig.key === 'legal_Name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
-                                        <th scope="col" onClick={() => handleSort('phone_number')}>{'Phone Number'} {sortConfig.key === 'phone_number' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
-                                        <th scope="col" onClick={() => handleSort('country')}>{'Country'} {sortConfig.key === 'country' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
-                                        <th scope="col" onClick={() => handleSort('nationality')}>{'Nationality'} {sortConfig.key === 'nationality' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th> */}
-                                                <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                                {/* <th scope="col" onClick={() => handleSort('id')}>
+                                                    {'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                                </th> */}
                                                 {fields.map((field, fieldIndex) => (
-                                                    <th key={fieldIndex} onClick={() => handleSort(field)} >
+                                                    <th key={fieldIndex} onClick={() => handleSort(field)}>
                                                         {formatString(field)}{sortConfig.key === field && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                                                     </th>
                                                 ))}
-                                                {props.permissions?.edit == 1 && (
-                                                    <th scope="col">{'Edit'}</th>
-                                                )}
-                                                {props.permissions?.delete == 1 && (
-                                                    <th scope="col">{'Delete'}</th>
-                                                )}
+                                                {props.permissions?.edit == 1 && <th scope="col">{'Edit'}</th>}
+                                                {props.permissions?.delete == 1 && <th scope="col">{'Delete'}</th>}
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {vendors?.map((item, index) => (
-                                                <tr key={index}>
-                                                    {Object.keys(item).map((key) => (
-                                                        <td key={key}>
+                                            {vendors?.map((item) => {
+                                                const rowData = fields.map((field) => item[field] || '');
 
-                                                            {key === 'status' || key === 'type' || key === 'cv' || key === "NDA" ? (
-                                                                <div>
-                                                                    {key === 'cv' && (
+                                                return (
+                                                    <Fragment key={item.id}>
+                                                        <tr>
+                                                            {rowData.map((value, index) => (
+                                                                <td key={index}>
+                                                                    {fields[index] === 'status' || fields[index] === 'type' || fields[index] === 'cv' || fields[index] === 'NDA' || fields[index] === 'priceList' ? (
                                                                         <div>
-                                                                            {item[key] ? (
-                                                                                <Btn
-                                                                                    attrBtn={{
-                                                                                        className: "btn btn-pill btn-air-primary",
-                                                                                        color: "warning-gradien",
-                                                                                        onClick: () => handleDownload(item[key])
-                                                                                    }}
-                                                                                >
-                                                                                    <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
-                                                                                </Btn>
-
-
-                                                                            ) : (
-                                                                                <></>
+                                                                            {fields[index] === 'cv' && (
+                                                                                <div>
+                                                                                    {value && (
+                                                                                        <Btn
+                                                                                            attrBtn={{
+                                                                                                className: "btn btn-pill btn-air-primary",
+                                                                                                color: "warning-gradien",
+                                                                                                onClick: () => handleDownload(value)
+                                                                                            }}
+                                                                                        >
+                                                                                            <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
+                                                                                        </Btn>
+                                                                                    )}
+                                                                                </div>
                                                                             )}
-                                                                        </div>
-                                                                    )}
-                                                                    {key === 'NDA' && (
-                                                                        <div>
-                                                                            {item[key] ? (
-                                                                                <Btn
-                                                                                    attrBtn={{
-                                                                                        className: "btn btn-pill btn-air-primary",
-                                                                                        color: "secondary-gradien",
-                                                                                        onClick: () => handleDownload(item[key])
-                                                                                    }}
-                                                                                >
-                                                                                    <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
-                                                                                </Btn>
-
-
-                                                                            ) : (
-                                                                                <></>
+                                                                            {fields[index] === 'NDA' && (
+                                                                                <div>
+                                                                                    {value && (
+                                                                                        <Btn
+                                                                                            attrBtn={{
+                                                                                                className: "btn btn-pill btn-air-primary",
+                                                                                                color: "secondary-gradien",
+                                                                                                onClick: () => handleDownload(value)
+                                                                                            }}
+                                                                                        >
+                                                                                            <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
+                                                                                        </Btn>
+                                                                                    )}
+                                                                                </div>
                                                                             )}
+                                                                            {fields[index] === 'status' && (
+                                                                                <div>
+                                                                                    {value == 0 && <span style={{ color: 'green' }}> Active</span>}
+                                                                                    {value == 1 && <span style={{ color: 'blue' }}> Inactive</span>}
+                                                                                    {value == 2 && <span style={{ color: 'gray' }}> Wait for Approval</span>}
+                                                                                    {value == 3 && <span style={{ color: 'red' }}> Rejected</span>}
+                                                                                    {(value < 0 || value > 3) && <span>Status: Unknown</span>}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'type' && (
+                                                                                <div>
+                                                                                    {value == 0 && <span style={{ color: 'green' }}> Freelance</span>}
+                                                                                    {value == 1 && <span style={{ color: 'blue' }}> In House</span>}
+                                                                                    {value == 2 && <span style={{ color: 'gray' }}> Agency</span>}
+                                                                                    {value == 3 && <span style={{ color: 'red' }}> Contractor</span>}
+                                                                                    {(value < 0 || value > 3) && <span>Type: Unknown</span>}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'priceList' && (
+                                                                                <div>
+                                                                                    <span>
+                                                                                        <i
+                                                                                            className={expandedRows.includes(item.id) ? "fa fa-minus-square" : "fa fa-plus-square"}
+                                                                                            onClick={() => toggleRow(item.id)}
+                                                                                        ></i>
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+
                                                                         </div>
+                                                                    ) : (
+                                                                        value && typeof value === 'object' && value !== null ? (
+                                                                            value.name || value.gmt
+                                                                        ) : (
+                                                                            value || ''
+                                                                        )
                                                                     )}
-                                                                    {key === 'status' && (
-                                                                        <div>
-                                                                            {item[key] == 0 && <span style={{ color: 'green' }}> Active</span>}
-                                                                            {item[key] == 1 && <span style={{ color: 'blue' }}> Inactive</span>}
-                                                                            {item[key] == 2 && <span style={{ color: 'gray' }}> Wait for Approval</span>}
-                                                                            {item[key] == 3 && <span style={{ color: 'red' }}> Rejected</span>}
-                                                                            {(item[key] < 0 || item[key] > 3) && <span>Status: Unknown</span>}
-                                                                        </div>
-                                                                    )}
-                                                                    {key === 'type' && (
-                                                                        <div>
-                                                                            {item[key] == 0 && <span style={{ color: 'green' }}> Freelance</span>}
-                                                                            {item[key] == 1 && <span style={{ color: 'blue' }}> In House</span>}
-                                                                            {item[key] == 2 && <span style={{ color: 'gray' }}> Agency</span>}
-                                                                            {item[key] == 3 && <span style={{ color: 'red' }}> Contractor</span>}
-                                                                            {(item[key] < 0 || item[key] > 3) && <span>Status: Unknown</span>}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            ) : (
-                                                                item[key] && typeof item[key] === 'object' && item[key]?.name || item[key]?.gmt ? (
-                                                                    item[key].name || item[key].gmt
-                                                                ) : (
-                                                                    item[key] || ''
-                                                                )
+                                                                </td>
+                                                            ))}
+                                                            {props.permissions?.edit == 1 && (
+                                                                <td>
+                                                                    <button
+                                                                        onClick={() => handleEdit(item)}
+                                                                        style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}
+                                                                    >
+                                                                        <i className="icofont icofont-ui-edit"></i>
+                                                                    </button>
+                                                                </td>
                                                             )}
-                                                        </td>
-                                                    ))}
+                                                            {props.permissions?.delete == 1 && (
+                                                                <td>
+                                                                    <i className="icofont icofont-ui-delete"></i>
+                                                                </td>
+                                                            )}
+                                                        </tr>
+                                                        {expandedRows.includes(item.id) && (
+                                                            <tr>
+                                                                <td colSpan="100%">
+                                                                    <Table bordered>
+                                                                        <thead>
+                                                                            <tr>
+                                                                                {Object.keys(item.vendor_sheet[0] || {})
+                                                                                    .filter((key) => key !== 'vendor')
+                                                                                    .map((key) => (
+                                                                                        <th key={key}>{key}</th>
+                                                                                    ))}
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {item.vendor_sheet.slice(0, visibleItems[item.id] || 5).map((detail, index) => (
+                                                                                <tr key={index}>
+                                                                                    {Object.keys(detail)
+                                                                                        .filter((key) => key !== 'vendor')
+                                                                                        .map((key, i) => (
+                                                                                            <td key={i}>
+                                                                                                {typeof detail[key] === 'object' && detail[key] !== null
+                                                                                                    ? detail[key]?.name || detail[key]?.dialect
 
-                                                    {props.permissions?.edit == 1 && (
-
-                                                        <td>
-                                                            <button onClick={() => handleEdit(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
-                                                                <i className="icofont icofont-ui-edit"></i>
-                                                            </button>
-                                                        </td>
-                                                    )}
-                                                    {props.permissions?.delete == 1 && (
-
-                                                        <td>
-                                                            <i className="icofont icofont-ui-delete"></i>
-                                                        </td>
-                                                    )}
-                                                </tr>
-                                            ))}
+                                                                                                    : detail[key]}
+                                                                                            </td>
+                                                                                        ))}
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                        <tfoot>
+                                                                            <tr>
+                                                                                <td colSpan="100%" style={{ textAlign: "center" }}>
+                                                                                    {visibleItems[item.id] < item.vendor_sheet.length && (
+                                                                                        <Btn
+                                                                                            attrBtn={{ color: 'btn btn-primary-light', onClick: () => handleShowMore(item.id) }}
+                                                                                            className="me-2 w-100"
+                                                                                        >
+                                                                                            Show More ...
+                                                                                        </Btn>
+                                                                                    )}
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tfoot>
+                                                                    </Table>
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </Fragment>
+                                                );
+                                            })}
                                         </tbody>
-
                                     </Table>
+
+                                // <Table hover>
+
+                                //     <thead>
+                                //         <tr>
+                                //            <th scope="col" onClick={() => handleSort('id')}>{'ID'} {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                //             {fields.map((field, fieldIndex) => (
+                                //                 <th key={fieldIndex} onClick={() => handleSort(field)} >
+                                //                     {formatString(field)}{sortConfig.key === field && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                //                 </th>
+                                //             ))}
+                                //             {props.permissions?.edit == 1 && (
+                                //                 <th scope="col">{'Edit'}</th>
+                                //             )}
+                                //             {props.permissions?.delete == 1 && (
+                                //                 <th scope="col">{'Delete'}</th>
+                                //             )}
+                                //         </tr>
+                                //     </thead>
+                                //     <tbody>
+                                //         {vendors?.map((item, index) => (
+                                //             <tr key={index}>
+                                //                 {Object.keys(item).map((key) => (
+                                //                     <td key={key}>
+                                //                         {key === 'status' || key === 'type' || key === 'cv' || key === "NDA" ? (
+                                //                             <div>
+                                //                                 {key === 'cv' && (
+                                //                                     <div>
+                                //                                         {item[key] ? (
+                                //                                             <Btn
+                                //                                                 attrBtn={{
+                                //                                                     className: "btn btn-pill btn-air-primary",
+                                //                                                     color: "warning-gradien",
+                                //                                                     onClick: () => handleDownload(item[key])
+                                //                                                 }}
+                                //                                             >
+                                //                                                 <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
+                                //                                             </Btn>
+                                //                                         ) : null}
+                                //                                     </div>
+                                //                                 )}
+                                //                                 {key === 'NDA' && (
+                                //                                     <div>
+                                //                                         {item[key] ? (
+                                //                                             <Btn
+                                //                                                 attrBtn={{
+                                //                                                     className: "btn btn-pill btn-air-primary",
+                                //                                                     color: "secondary-gradien",
+                                //                                                     onClick: () => handleDownload(item[key])
+                                //                                                 }}
+                                //                                             >
+                                //                                                 <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
+                                //                                             </Btn>
+                                //                                         ) : null}
+                                //                                     </div>
+                                //                                 )}
+                                //                                 {key === 'status' && (
+                                //                                     <div>
+                                //                                         {item[key] == 0 && <span style={{ color: 'green' }}> Active</span>}
+                                //                                         {item[key] == 1 && <span style={{ color: 'blue' }}> Inactive</span>}
+                                //                                         {item[key] == 2 && <span style={{ color: 'gray' }}> Wait for Approval</span>}
+                                //                                         {item[key] == 3 && <span style={{ color: 'red' }}> Rejected</span>}
+                                //                                         {(item[key] < 0 || item[key] > 3) && <span>Status: Unknown</span>}
+                                //                                     </div>
+                                //                                 )}
+                                //                                 {key === 'type' && (
+                                //                                     <div>
+                                //                                         {item[key] == 0 && <span style={{ color: 'green' }}> Freelance</span>}
+                                //                                         {item[key] == 1 && <span style={{ color: 'blue' }}> In House</span>}
+                                //                                         {item[key] == 2 && <span style={{ color: 'gray' }}> Agency</span>}
+                                //                                         {item[key] == 3 && <span style={{ color: 'red' }}> Contractor</span>}
+                                //                                         {(item[key] < 0 || item[key] > 3) && <span>Status: Unknown</span>}
+                                //                                     </div>
+                                //                                 )}
+                                //                             </div>
+                                //                         ) : (
+                                //                             Array.isArray(item[key]) ? (
+                                //                                 <Table bordered>
+                                //                                     <thead>
+                                //                                         <tr>
+                                //                                             {Object.keys(item[key][0] || {}).map((nestedKey) => (
+                                //                                                 <th key={nestedKey}>{nestedKey}</th>
+                                //                                             ))}
+                                //                                         </tr>
+                                //                                     </thead>
+                                //                                     <tbody>
+                                //                                         {item[key].map((nestedItem, index) => (
+                                //                                             <tr key={index}>
+                                //                                                 {Object.values(nestedItem).map((value, i) => (
+                                //                                                     <td key={i}>{value}</td>
+                                //                                                 ))}
+                                //                                             </tr>
+                                //                                         ))}
+                                //                                     </tbody>
+                                //                                 </Table>
+                                //                             ) : (
+                                //                                 item[key] && typeof item[key] === 'object' && item[key]?.name || item[key]?.gmt ? (
+                                //                                     item[key].name || item[key].gmt
+                                //                                 ) : (
+                                //                                     item[key] || ''
+                                //                                 )
+                                //                             )
+                                //                         )}
+                                //                     </td>
+                                //                 ))}
+
+
+                                //                 {props.permissions?.edit == 1 && (
+
+                                //                     <td>
+                                //                         <button onClick={() => handleEdit(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                //                             <i className="icofont icofont-ui-edit"></i>
+                                //                         </button>
+                                //                     </td>
+                                //                 )}
+                                //                 {props.permissions?.delete == 1 && (
+
+                                //                     <td>
+                                //                         <i className="icofont icofont-ui-delete"></i>
+                                //                     </td>
+                                //                 )}
+                                //             </tr>
+                                //         ))}
+                                //     </tbody>
+
+                                // </Table>
                             }
 
                             {totalPages > 1 &&

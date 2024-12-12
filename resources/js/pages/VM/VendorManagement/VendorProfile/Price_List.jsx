@@ -27,16 +27,16 @@ const PriceList = (props) => {
     const [tools, setTools] = useState(null);
 
     const getData = (newData) => {
-        setdataPrice(prevData => {
-            if (!prevData) return [newData];
-            const index = prevData.findIndex(item => item.id === newData.id);
-
+        setdataPrice((prevData) => {
+            const validData = Array.isArray(prevData) ? prevData : [];
+            const index = validData.findIndex((item) => item.id === newData.id);
             if (index !== -1) {
-                return prevData.map((item, i) => (i === index ? newData : item));
+                return validData.map((item, i) => (i === index ? newData : item));
             } else {
-                return [...prevData, newData];
+                return [...validData, newData];
             }
         });
+
     };
 
     const removeDataById = (id) => {
@@ -273,7 +273,7 @@ const PriceList = (props) => {
                                         <td>{item?.sub_subject?.name}</td>
                                         <td>{item?.service?.name}</td>
                                         <td>{item?.task_type?.name}</td>
-                                        <td>{item?.source_language?.name} - {item?.target_language?.name}</td>
+                                        <td>{item?.source_lang?.name} - {item?.target_lang?.name}</td>
                                         <td>{item?.unit?.name}</td>
                                         <td>{item?.rate}</td>
                                         <td>{item?.currency?.name}</td>

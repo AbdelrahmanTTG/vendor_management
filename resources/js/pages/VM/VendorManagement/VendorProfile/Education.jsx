@@ -190,7 +190,7 @@ const Education = (props) => {
 
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Latest Degree</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">last Degree</Label>
                                     <Col sm="9">
                                         <Controller
                                             name="latest_degree"
