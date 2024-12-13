@@ -70,14 +70,8 @@ const Format = (props) => {
             toggle()
             setEdit(item) 
             setValue("name", item.name)
-            setValue("format", item.format.split(',').map(value => ({
-                value: value.trim(),  
-                label: value.trim()
-            })));
-            setSelectedOptions(item.format.split(',').map(value => ({
-                value: value.trim(),
-                label: value.trim().replace(/\b[^.,]+\.(\w+)/g, '$1')
-            })))
+            setValue("format", item.format);
+            setSelectedOptions(item.format)
         }
     }
     useEffect(() => {

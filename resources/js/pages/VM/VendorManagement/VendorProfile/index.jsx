@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState, useCallback } from 'react';
+import React, { Fragment, useEffect, useState, useCallback, Suspense } from 'react';
 import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, Button, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../../../pages/AxiosClint";
 import { useNavigate } from 'react-router-dom';
@@ -8,8 +8,32 @@ import Select from 'react-select';
 import ExcelJS from 'exceljs';
 import FormatTable from "../../Format";
 import SweetAlert from 'sweetalert2'
+const ModelEdit = React.lazy(() => import('./models/modelEditPriceList'));
 
 const Vendor = (props) => {
+    const LazyWrapper = ({ children }) => (
+        <Suspense fallback={<div>Loading...</div>}>
+            {children}
+        </Suspense>
+    );
+    const getData = (newData) => {
+        setVendors((prevData) => {
+            const validData = Array.isArray(prevData) ? prevData : [];
+            const updatedVendors = validData.map((vendor) => {
+                const validVendorSheet = Array.isArray(vendor.vendor_sheet) ? vendor.vendor_sheet : [];
+                const index = validVendorSheet.findIndex((item) => item.id === newData.id);
+                if (index !== -1) {
+                    const updatedVendorSheet = validVendorSheet.map((item, i) => (i === index ? newData : item));
+                    return { ...vendor, vendor_sheet: updatedVendorSheet };
+                } else {
+                    return { ...vendor, vendor_sheet: [...validVendorSheet, newData] };
+                }
+            });
+
+            return updatedVendors;
+        });
+    };
+
     const [isOpen, setIsOpen] = useState(true);
     const [vendors, setVendors] = useState([]);
     const [fields, setFields] = useState([]);
@@ -40,6 +64,7 @@ const Vendor = (props) => {
     const [formats, setFormats] = useState(null);
     const [formatsChanged, setFormatsChanged] = useState(false);
     const [totalVendors, setTotalVendors] = useState(null);
+    const [price, setPrice] = useState(null);
 
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
@@ -352,7 +377,6 @@ const Vendor = (props) => {
         try {
             setLoading2(true)
             const { data } = await axiosClient.post("Vendors", payload);
-            // console.log(data)
             setVendors(data.vendors.data);
             setFields(data.fields)
             setFormats(data.formats)
@@ -365,9 +389,13 @@ const Vendor = (props) => {
             setLoading2(false)
         }
     });
+   
     useEffect(() => {
         fetchData();
     }, [currentPage, queryParams, sortConfig, formatsChanged]);
+    useEffect(() => {
+        formatData(formats);
+    }, [formats]);
     const EX = () => {
 
         SweetAlert.fire({
@@ -460,7 +488,73 @@ const Vendor = (props) => {
     const Add = () => {
         navigate('/vm/vendors/profiletest');
     }
+    const formatData = (format) => {
 
+        const labelMapping = {
+            'name': 'Name',
+            'contact_name': 'Contact name',
+            'legal_Name': 'Legal name',
+            'prfx_name': 'prefix name',
+            'email': 'Email',
+            'phone_number': 'Phone number',
+            'Anothernumber': 'Another number',
+            'country': 'Country',
+            'cv': 'CV',
+            'NDA': 'NDA',
+            'type': 'Type',
+            'status': 'Status',
+            'contact_linked_in': 'linked In',
+            'contact_ProZ': 'ProZ',
+            'contact_other1': 'Contact other 1',
+            'contact_other2': 'Contact other 2',
+            'contact_other3': 'Contact other 3',
+            'nationality': 'Nationality',
+            'region': 'Region',
+            'timezone': 'Time zone',
+            'reject_reason': 'Reject reason',
+            'city': 'City',
+            'street': 'Street',
+            'address': 'Address',
+            'note': 'Note',
+            'vendorTest.source_lang': 'Source language ( test )',
+            'vendorTest.target_lang': 'Target language ( test )',
+            'vendorTest.main_subject': 'Main-Subject Matter ( test )',
+            'vendorTest.sub_subject': 'Sub–Subject Matter ( test )',
+            'vendorTest.test_type': 'Test Type ( test )',
+            'vendorTest.test_result': 'Test result ( test )',
+            'priceList': 'price List',
+            'source_lang': 'Source language',
+            'target_lang': 'target language',
+            'dialect': 'Dialect',
+            'dialect_target': 'Dialect target',
+            'service': 'Service',
+            'task_type': 'Task type',
+            'unit': 'Unit',
+            'currency': 'Currency',
+            'subject': 'Main-Subject Matter',
+            'sub_subject': 'Sub–Subject Matter',
+            'rate': 'Rate',
+            'special_rate': 'Special rate',
+            'vendor_education.university_name': 'University name',
+            'vendor_education.latest_degree': 'Last degree',
+            'vendor_education.major': 'Major',
+            'vendor_education.year_of_graduation': 'Year of graduation',
+            'experiences.experience_year': 'Experience year',
+            'bank_details.bank_name': 'Bank name'
+
+        };
+        format?.flatMap(element =>
+            element.format = element.format.split(',').map(value => {
+                const trimmedValue = value.trim();
+                return {
+                    value: trimmedValue,
+                    label: labelMapping[trimmedValue] || trimmedValue
+                };
+            })
+        );
+        // return data;
+
+    }
     const exportToExcel = async (exportEx) => {
         let data = [];
         if (exportEx) {
@@ -589,11 +683,62 @@ const Vendor = (props) => {
     const formatString = (input) => {
         if (!input || typeof input !== 'string') return '';
 
-        return input
-            .split(/[_-]/)
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ');
+        const mapping = {
+            'name': 'Name',
+            'contact_name': 'Contact name',
+            'legal_Name': 'Legal name',
+            'prfx_name': 'Prefix name',
+            'email': 'Email',
+            'phone_number': 'Phone number',
+            'Anothernumber': 'Another number',
+            'country': 'Country',
+            'cv': 'CV',
+            'nda': 'NDA',
+            'type': 'Type',
+            'status': 'Status',
+            'contact_linked_in': 'Linked In',
+            'contact_ProZ': 'ProZ',
+            'contact_other1': 'Contact other 1',
+            'contact_other2': 'Contact other 2',
+            'contact_other3': 'Contact other 3',
+            'nationality': 'Nationality',
+            'region': 'Region',
+            'timezone': 'Time zone',
+            'reject_reason': 'Reject reason',
+            'city': 'City',
+            'street': 'Street',
+            'address': 'Address',
+            'source_lang': 'Source language',
+            'target_lang': 'Target language',
+            'main_subject': 'Main-Subject Matter',
+            'sub_subject': 'Sub–Subject Matter',
+            'test_type': 'Test Type',
+            'test_result': 'Test result',
+            'university_name': 'University name',
+            'latest_degree': 'last degree',
+            'major': 'Major',
+            'year_of_graduation': 'Year of graduation',
+            'experience_year': 'Experience year',
+            'bank_name': 'Bank name',
+            'priceList': 'Price List',
+            'dialect': 'Dialect',
+            'dialect_target': 'Dialect target',
+            'service': 'Service',
+            'task_type': 'Task type',
+            'unit': 'Unit',
+            'currency': 'Currency',
+            'subject': 'Main-Subject Matter',
+            'rate': 'Rate',
+            'special_rate': 'Special rate',
+
+
+
+            
+        };
+
+        return mapping[input] || input;
     }
+
     const handleDownload = async (filename) => {
         try {
             const response = await axiosClient.post("download", { filename }, { responseType: 'blob' });
@@ -631,6 +776,20 @@ const Vendor = (props) => {
     const handleShowMore = (id) => {
         setVisibleItems(prev => ({ ...prev, [id]: prev[id] + 5 }));
     };
+    function renderValue(value) {
+        if (value && typeof value === 'object' && value !== null) {
+            return value.name || value.gmt;
+        }
+        if (typeof value === 'string') {
+            if (/^(https?:\/\/)/.test(value)) {
+                return <a href={value} target="_blank" rel="noopener noreferrer">{value}</a>;
+            }
+
+            return <span dangerouslySetInnerHTML={{ __html: value }} />;
+        }
+
+        return value || '';
+    }
 
     return (
         <Fragment >
@@ -1312,7 +1471,7 @@ const Vendor = (props) => {
 
                                             ],
                                         },
-                                        
+
 
 
 
@@ -1423,11 +1582,7 @@ const Vendor = (props) => {
 
                                                                         </div>
                                                                     ) : (
-                                                                        value && typeof value === 'object' && value !== null ? (
-                                                                            value.name || value.gmt
-                                                                        ) : (
-                                                                            value || ''
-                                                                        )
+                                                                            renderValue(value)
                                                                     )}
                                                                 </td>
                                                             ))}
@@ -1456,8 +1611,11 @@ const Vendor = (props) => {
                                                                                 {Object.keys(item.vendor_sheet[0] || {})
                                                                                     .filter((key) => key !== 'vendor')
                                                                                     .map((key) => (
-                                                                                        <th key={key}>{key}</th>
+                                                                                        <th key={key}> {formatString(key)}</th>
+                                                                                        
                                                                                     ))}
+                                                                                <th cope="col">{'Edit'}</th>
+                                                                                <th cope="col">{'Delete'}</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
@@ -1473,6 +1631,9 @@ const Vendor = (props) => {
                                                                                                     : detail[key]}
                                                                                             </td>
                                                                                         ))}
+                                                                                    <td><LazyWrapper><ModelEdit  id={detail.id} getData={getData} /></LazyWrapper></td>
+                                                                                    <td><Btn attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(item?.id) }} className="me-2" ><i className="icofont icofont-ui-delete"></i></Btn></td>
+
                                                                                 </tr>
                                                                             ))}
                                                                         </tbody>

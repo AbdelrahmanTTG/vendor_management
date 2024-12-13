@@ -51,7 +51,7 @@ class VendorProfileController extends Controller
     }
     public function Vendors(Request $request)
     {
-   
+        // try {
         $formats = $this->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
@@ -76,10 +76,8 @@ class VendorProfileController extends Controller
             "target_lang" => ['id', 'name'],
             "main_subject" => ['id', 'name'],
             "sub_subject" => ['id', 'name'],
-
-            
         ];
-  
+
         $vendorColumns = Schema::getColumnListing('vendor');
         $vendorSheet = Schema::getColumnListing('vendor_sheet');
         $relatedColumns = array_diff($formatArray, $vendorColumns);
@@ -88,7 +86,13 @@ class VendorProfileController extends Controller
             return $column !== 'priceList';
         });
         $relatedColumns = array_values($relatedColumns);
-        $vendorsQuery = Vendor::select('vendor.id')->addSelect(DB::raw(implode(',', array_intersect($formatArray, $vendorColumns))));
+        $intersectColumns = array_intersect($formatArray, $vendorColumns);
+        if (!empty($intersectColumns)) {
+            $vendorsQuery = Vendor::select('vendor.id')
+                ->addSelect(DB::raw(implode(',', $intersectColumns)));
+        } else {
+            $vendorsQuery = Vendor::select('vendor.id');
+        }
         if (in_array('priceList', $formatArray)) {
             $vendorsQuery->addSelect(DB::raw("'' as `priceList`"))
                 ->with([
@@ -249,17 +253,17 @@ class VendorProfileController extends Controller
                                         }
                                     }
                                 });
-                            })->with([$table => function ($query) use ($filter , $formatArray) {
+                            })->with([$table => function ($query) use ($filter, $formatArray) {
                                 $columns = array_column($filter['columns'], 'column');
                                 if (!empty($columns)) {
                                     $query->select(array_merge(["vendor_id"], $columns));
-                                    
+
                                     foreach ($columns as $relation) {
                                         if (method_exists($query->getModel(), $relation)) {
                                             $query->with([$relation]);
                                         }
                                     }
-                                } 
+                                }
                             }]);
                             foreach ($filter['columns'] as $columnFilter) {
                                 if (!empty($columnFilter['column'])) {
@@ -290,7 +294,7 @@ class VendorProfileController extends Controller
             }
             return $column;
         }, $formatArray);
-        
+
         foreach ($relationships as $relation => $columns) {
             if (in_array($relation, $formatArray)) {
                 $vendorsQuery->with([$relation => function ($query) use ($columns) {
@@ -321,8 +325,15 @@ class VendorProfileController extends Controller
             "formats" => $formats,
             "totalVendors" => $totalVendors,
             "AllVendors" => $AllVendors ?? null,
-           
+
         ], 200);
+        //   } catch (\Exception $e) {
+        //     return response()->json([
+        //         // 'error' => "Server error"
+        //         'error' => $e->getMessage(),
+        //         'trace' => $e->getTraceAsString(),
+        //     ], 500);
+        // }
     }
     private function flattenObject($array, $tableKeys = null)
     {
@@ -1346,6 +1357,7 @@ class VendorProfileController extends Controller
     }
     public function UpdatePriceList(Request $request)
     {
+        
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer',
             'subject' => 'required|integer',
@@ -1382,6 +1394,7 @@ class VendorProfileController extends Controller
             'sub_subject:id,name'
         ]);
         return response()->json($vendorSheet, 200);
+
     }
     public function AddVendorstools(Request $request)
     {
@@ -1499,6 +1512,7 @@ class VendorProfileController extends Controller
             return $vendorTest;
         }
     }
+
 
 
 
@@ -1677,4 +1691,26 @@ class VendorProfileController extends Controller
     {
         return $this->deleteItem($request, Formatstable::class);
     }
+    public function getPriceListById(Request $request){
+        $id = $request->input("id");
+        $vendorData = VendorSheet::with([
+            'source_lang:id,name',
+            'target_lang:id,name',
+            'dialect:id,dialect',
+            'dialect_target:id,dialect',
+            'service:id,name',
+            'task_type:id,name',
+            'unit:id,name',
+            'currency:id,name',
+            'subject:id,name',
+            'sub_subject:id,name'
+        ])->where('id', $id)->get(['id',  'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency']);
+
+        if ($vendorData->isEmpty()) {
+            return response()->json([
+                'message' => 'No data found for the given  ID.'
+            ], 404);
+        }
+        return response()->json($vendorData, 200); 
+       }
 }

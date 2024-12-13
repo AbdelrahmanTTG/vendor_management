@@ -54,6 +54,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/changeFormat', [VendorProfileController::class, 'changeFormat']);
     Route::post('/updateFormat', [VendorProfileController::class, 'updateFormat']);
     Route::delete('/deleteFormat', [VendorProfileController::class, 'deleteFormat']);
+    Route::post('/getPriceList', [VendorProfileController::class, 'getPriceListById']);
+
     Route::post('/getTickets', [TicketsController::class, 'index']);
     Route::post('/getTicketsTotal', [TicketsController::class, 'getTicketsTotal']);
     Route::post('/getPMSalesData', [TicketsController::class, 'getPMSalesData']);

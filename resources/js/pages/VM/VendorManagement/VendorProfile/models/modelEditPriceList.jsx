@@ -47,6 +47,7 @@ const EditNewBtn = (props) => {
     const [initialOptions, setInitialOptions] = useState({});
     const [loading, setLoading] = useState(false);
     const [optionsC, setOptionsC] = useState([]);
+    const [priceList, setPriceList] = useState([]);
 
     const onSubmit = async (data) => {
         // const keys = Object.keys(data);
@@ -65,12 +66,12 @@ const EditNewBtn = (props) => {
                 return [key, value];
             })
         );
-        formDate['id'] = props?.data?.id;
+        formDate['id'] = props?.data?.id || props?.id;
 
         try {
             const response = await axiosClient.post("UpdatePriceList", formDate);
             toggle()
-            props.getData(response.data)
+            props?.getData(response.data)
             reset()
             setValue("rate", '')
             setValue("special_rate", '')
@@ -91,24 +92,42 @@ const EditNewBtn = (props) => {
         }
     };
     useEffect(() => {
-        if (props?.data) {
-            setValue("subject", renameKeys(props?.data?.subject, { id: "value", name: "label" }))
-            setValue("sub_subject", renameKeys(props?.data?.sub_subject, { id: "value", name: "label" }))
-            setValue("service", renameKeys(props?.data?.service, { id: "value", name: "label" }))
-            setValue("task_type", renameKeys(props?.data?.task_type, { id: "value", name: "label" }))
-            setValue("source_lang", renameKeys(props?.data?.source_lang, { id: "value", name: "label" }))
-            setValue("target_lang", renameKeys(props?.data?.target_lang, { id: "value", name: "label" }))
-            setValue("dialect", renameKeys(props?.data?.dialect, { id: "value", dialect: "label" }))
-            setValue("dialect_target", renameKeys(props?.data?.dialect_target, { id: "value", dialect: "label" }))
-            setValue("unit", renameKeys(props?.data?.unit, { id: "value", name: "label" }))
-            setValue("rate", props?.data?.rate)
-            setValue("special_rate", props?.data?.special_rate)
-            setValue("Status", { value: props?.data?.Status || "", label: props?.data?.Status || "" })
-            setValue("currency", renameKeys(props?.data?.currency, { id: "value", name: "label" }))
-            handelingSelectTasks(props?.data?.service?.id)
+        const fetchData = async (id) => {
+            const payload = { id: id,}
+            try {
+                const { data } = await axiosClient.post("getPriceList", payload);
+                setPriceList(data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+            }            
+        };
+        if (props?.id) {
+            fetchData(props?.id);
+        }
+    }, [ props?.id]);
+    useEffect(() => {
+        if (props?.data || priceList?.length) {
+            var data = props?.data || priceList[0];
+        }
+        if (data) {
+            setValue("subject", renameKeys(data?.subject, { id: "value", name: "label" }))
+            setValue("sub_subject", renameKeys(data?.sub_subject, { id: "value", name: "label" }))
+            setValue("service", renameKeys(data?.service, { id: "value", name: "label" }))
+            setValue("task_type", renameKeys(data?.task_type, { id: "value", name: "label" }))
+            setValue("source_lang", renameKeys(data?.source_lang, { id: "value", name: "label" }))
+            setValue("target_lang", renameKeys(data?.target_lang, { id: "value", name: "label" }))
+            setValue("dialect", renameKeys(data?.dialect, { id: "value", dialect: "label" }))
+            setValue("dialect_target", renameKeys(data?.dialect_target, { id: "value", dialect: "label" }))
+            setValue("unit", renameKeys(data?.unit, { id: "value", name: "label" }))
+            setValue("rate", data?.rate)
+            setValue("special_rate", data?.special_rate)
+            setValue("Status", { value: data?.Status || "", label: data?.Status || "" })
+            setValue("currency", renameKeys(data?.currency, { id: "value", name: "label" }))
+            handelingSelectTasks(data?.service?.id)
         }
 
-    }, [props?.data])
+    }, [props?.data, priceList, props?.id])
     const renameKeys = (obj, keysMap) => {
         if (!obj) { return }
         return Object?.keys(obj)?.reduce((acc, key) => {
@@ -594,7 +613,7 @@ const EditNewBtn = (props) => {
                                         <Select
                                             {...field}
                                             isDisabled
-                                            value={renameKeys(props?.data?.currency, { id: "value", name: "label" })}
+                                            value={renameKeys(props?.data?.currency, { id: "value", name: "label" }) || renameKeys(priceList[0]?.currency, { id: "value", name: "label" })}
                                             className="js-example-basic-single col-sm-12"
                                             onChange={(option) => {
                                                 field.onChange(option);
