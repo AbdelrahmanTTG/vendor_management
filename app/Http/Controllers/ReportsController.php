@@ -21,54 +21,126 @@ class ReportsController extends Controller
     {
         $permissions = $request->permissions;
         $user = Crypt::decrypt($request->user);
-        $validator = Validator::make($request->queryParams, [
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-        ]);
-        if ($validator->fails()) {
-            $msg['type'] = "error";
-            $message = "";
-            foreach ($validator->errors()->all() as $err) {
-                $message .= $err;
-            }
-            $msg['message'] = $message;
-            return response()->json($msg);
-        } else {
-            $perPage = $request->input('per_page', 10);
-            $start_date = $request->queryParams['start_date'];
-            $end_date = $request->queryParams['end_date'];
-            $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
-                ->leftJoin('vm_ticket_time as t', function (JoinClause $join) {
-                    $join->on('t.ticket', '=', 'vm_ticket.id')
-                        ->where('t.status', 2);
-                })
-                ->leftJoin('vm_ticket_time as t2', function (JoinClause $join) {
-                    $join->on('t2.ticket', '=', 'vm_ticket.id')
-                        ->where('t2.status', 5);
-                })
-                ->leftJoin('vm_ticket_time as t3', function (JoinClause $join) {
-                    $join->on('t3.ticket', '=', 'vm_ticket.id')
-                        ->where('t3.status', 4);
-                })
-                ->leftJoin('vm_ticket_resource as r1', function (JoinClause $join) {
-                    $join->on('r1.ticket', '=', 'vm_ticket.id')
-                        ->where('r1.type', 2);
-                })
-                ->select('vm_ticket.*', 'users.brand AS brand', 't.created_by AS opened_by', 't.created_at AS open_time', 't2.created_by AS closed_by', 't3.created_at AS closed_time')
-                ->orderBy('vm_ticket.id', 'desc')
-                ->groupBy('vm_ticket.id')
-                ->whereBetween('vm_ticket.created_at', [$start_date, $end_date]);
-
-            if ($permissions['view'] == 2)
-                $tickets->where('t.created_by', $user);
-            else {
-                $created_by = $request->queryParams['created_by'];
-                $tickets->whereIn('t.created_by', $created_by);
-            }
-            $tickets = $tickets->paginate($perPage);
-            $links = $tickets->linkCollection();
-            return response()->json(["Tickets" => TicketResource::collection($tickets), "Links" => $links]);
+        // default columns array to display       
+        $defaultArray = [
+            'id',
+            'brand',
+            'opened_by',
+            'closed_by',
+            'created_by',
+            'number_of_resource',
+            'request_type',
+            'service',
+            'task_type',
+            'rate',
+            'count',
+            'unit',
+            'currency',
+            'source_lang',
+            'target_lang',
+            'start_date',
+            'delivery_date',
+            'subject',
+            'software',
+            'created_at',
+            'time_of_opening',
+            'time_of_closing',
+            'TimeTaken',
+            'new',
+            'existing',
+            'existing_pair',
+            'status',
+        ];
+        // check for special format
+        $formats = (new VendorProfileController)->format($request);
+        $filteredFormats = $formats->filter(function ($format) {
+            return $format->status == 1;
+        });
+        if ($filteredFormats->isNotEmpty()) {
+            $formatArray = $filteredFormats->pluck('format')->toArray();
+            $formatArray = array_merge(...array_map(function ($item) {
+                return explode(',', $item);
+            }, $formatArray));
+            array_unshift($formatArray, "id");
         }
+        $renameArrayForDisplay = [
+            'id' => 'Ticket Number',
+            'created_by' => 'Requester Name',
+            'source_lang' => 'Source Language',
+            'target_lang' => 'Target Language',
+            'created_at' => 'Request Time',
+            'Timetaken' => 'Taken Time',
+            'new' => 'New Vendors',
+            'existing' => 'Existing Vendors',
+            'existing_pair' => 'Existing Vendors with New Pairs'
+        ];
+        foreach ($formatArray??$defaultArray as $f) {
+            $headerFormatArray[] = $renameArrayForDisplay[$f] ?? $f;
+        }
+        // start get data
+        if (!empty($request->queryParams)) {
+            $validator = Validator::make($request->queryParams, [
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
+            ]);
+            if ($validator->fails()) {
+                $msg['type'] = "error";
+                $message = "";
+                foreach ($validator->errors()->all() as $err) {
+                    $message .= $err;
+                }
+                $msg['message'] = $message;
+                return response()->json($msg);
+            } else {
+                $perPage = $request->input('per_page', 10);
+                $start_date = $request->queryParams['start_date'];
+                $end_date = $request->queryParams['end_date'];
+                $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
+                    ->leftJoin('vm_ticket_time as t', function (JoinClause $join) {
+                        $join->on('t.ticket', '=', 'vm_ticket.id')
+                            ->where('t.status', 2);
+                    })
+                    ->leftJoin('vm_ticket_time as t2', function (JoinClause $join) {
+                        $join->on('t2.ticket', '=', 'vm_ticket.id')
+                            ->where('t2.status', 5);
+                    })
+                    ->leftJoin('vm_ticket_time as t3', function (JoinClause $join) {
+                        $join->on('t3.ticket', '=', 'vm_ticket.id')
+                            ->where('t3.status', 4);
+                    })
+                    ->leftJoin('vm_ticket_resource as r1', function (JoinClause $join) {
+                        $join->on('r1.ticket', '=', 'vm_ticket.id')
+                            ->where('r1.type', 2);
+                    })
+                    ->select('vm_ticket.*', 'users.brand AS brand', 't.created_by AS opened_by', 't.created_at AS open_time', 't2.created_by AS closed_by', 't3.created_at AS closed_time')
+                    ->orderBy('vm_ticket.id', 'desc')
+                    ->groupBy('vm_ticket.id')
+                    ->whereBetween('vm_ticket.created_at', [$start_date, $end_date]);
+
+                if ($permissions['view'] == 2)
+                    $tickets->where('t.created_by', $user);
+                else {
+                    $created_by = $request->queryParams['created_by'];
+                    $tickets->whereIn('t.created_by', $created_by);
+                }
+                // if export
+                if ($request->has('export') && $request->input('export') === true) {
+                    $AllTickets = TicketResource::collection($tickets->get());
+                }
+                $tickets = $tickets->paginate($perPage);
+                $links = $tickets->linkCollection();
+            }
+        }
+
+        return response()->json([
+            "Tickets" => isset($tickets)?TicketResource::collection($tickets):[],
+            "AllTickets" => $AllTickets ?? null,
+            "Links" => $links?? [],
+            "fields" => $formatArray ?? $defaultArray,
+            "headerFields" => $headerFormatArray,
+            "formats" => $formats,
+        ]);
+        
     }
 
     public function getVmData()
@@ -138,7 +210,9 @@ class ReportsController extends Controller
             } else {
                 if (!empty($request->queryParams)) {
                     foreach ($request->queryParams as $key => $val) {
-                        $formatArray[] = $renameArrayForSearch[$key] ?? $key;
+                        if (!in_array($key, $formatArray)) {                    
+                            $formatArray[] = $renameArrayForSearch[$key] ?? $key;
+                        }                           
                         if (!empty($val)) {
                             if (is_array($val)) {
                                 if (str_contains($key, '.')) {
@@ -202,18 +276,7 @@ class ReportsController extends Controller
             $selectArray = array_intersect($tableColumns, $formatArray);
             $tasks = $tasks->select('id', 'job_id', 'code', 'status', 'rate', 'count', 'created_by')->addSelect(DB::raw(implode(',', $selectArray)));
         }
-        // if sort exists 
-        if ($request->has('sortBy') && $request->has('sortDirection')) {
-            $sortBy = $request->input('sortBy');
-            $sortDirection = $request->input('sortDirection');
-            if (in_array($sortDirection, ['asc', 'desc'])) {
-                if (in_array($sortBy, $tableColumns)) {
-                    $tasks = $tasks->orderBy($sortBy, $sortDirection);
-                }
-            }
-        } else {
-            $tasks = $tasks->orderBy('created_at', 'desc');
-        }
+        $tasks = $tasks->orderBy('created_at', 'desc');
         // if export
         if ($request->has('export') && $request->input('export') === true) {
             $AllTasks = TaskResource::collection($tasks->get());
@@ -226,7 +289,7 @@ class ReportsController extends Controller
             "Links" => $links,
             "fields" => $formatArray ?? $defaultArray,
             "formats" => $formats,
-            "AllTasks" => $AllTasks?? null,
+            "AllTasks" => $AllTasks ?? null,
         ]);
     }
 }

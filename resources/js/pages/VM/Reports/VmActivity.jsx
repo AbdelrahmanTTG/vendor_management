@@ -1,12 +1,15 @@
-import React, { Fragment, useEffect, useState, useRef } from 'react';
+import React, { Fragment, useEffect, useState, useCallback } from 'react';
 import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../AxiosClint";
 import { Btn, H5, Spinner } from '../../../AbstractElements';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
 import { useStateContext } from '../../../pages/context/contextAuth';
+import FormatTable from "../Format";
+import SweetAlert from 'sweetalert2';
+import ExcelJS from 'exceljs';
 
-const Report = ( props) => {
+const Report = (props) => {
     const { user } = useStateContext();
     const [tickets, setTickets] = useState([]);
     const [pageLinks, setPageLinks] = useState([]);
@@ -16,11 +19,16 @@ const Report = ( props) => {
     const [errorMessage, setErrorMessage] = useState(null);
     const [optionsU, setOptionsU] = useState([]);
     const [queryParams, setQueryParams] = useState(null);
+    const [fields, setFields] = useState([]);
+    const [headerFields, setHeaderFields] = useState([]);
+    const [formats, setFormats] = useState(null);
+    const [formatsChanged, setFormatsChanged] = useState(false);
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
-    console.log(props.permissions);
-
+    const handleFormatsChanged = () => {
+        setFormatsChanged(!formatsChanged)
+    }
     const handelingSelectUsers = async () => {
         try {
             setLoading(true);
@@ -62,34 +70,40 @@ const Report = ( props) => {
         setCurrentPage(1);
     }
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const payload = {
-                per_page: 10,
-                page: currentPage,
-                queryParams: queryParams,
-                permissions: props.permissions,
-                user: user.id,
-            };
-            try {
-                setLoading(true);
-                await axiosClient.post("vmActivity", payload)
-                    .then(({ data }) => {
-                        if (data.type == 'error') {
-                            toast.error(data.message);
-                        } else {
-                            setTickets(data?.Tickets);
-                            setPageLinks(data?.Links);
-                        }
-                        setLoading(false);
-                    });
-            } catch (err) {
-                console.error(err);
-            }
+    const fetchData = useCallback(async (ex) => {
+        const payload = {
+            per_page: 10,
+            page: currentPage,
+            queryParams: queryParams,
+            permissions: props.permissions,
+            user: user.id,
+            table: "vm_activity",
+            export: ex,
         };
-        if (queryParams != null)
-            fetchData();
-    }, [currentPage, queryParams]);
+        try {
+            setLoading(true);
+            await axiosClient.post("vmActivity", payload)
+                .then(({ data }) => {
+                    if (data.type == 'error') {
+                        toast.error(data.message);
+                    } else {
+                        setTickets(data?.Tickets);
+                        setPageLinks(data?.Links);
+                        setFormats(data?.formats);
+                        setFields(data?.fields);
+                        setHeaderFields(data?.headerFields);
+                        if (data.AllTickets) { exportToExcel(data.AllTickets) }
+                    }
+                    setLoading(false);
+                });
+        } catch (err) {
+            console.error(err);
+        }
+    });
+    useEffect(() => {
+        // if (queryParams != null)
+        fetchData();
+    }, [currentPage, queryParams, formatsChanged]);
 
     const handlePageChange = (newPage) => {
         let tempPage = currentPage;
@@ -98,7 +112,133 @@ const Report = ( props) => {
         }
         setCurrentPage(tempPage);
     };
+    const formatString = (input) => {
+        if (!input || typeof input !== 'string') return '';
+        return input
+            .split(/[_-]/)
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    }
+    // export 
+    const EX = () => {
+        SweetAlert.fire({
+            title: 'Are you sure?',
+            text: `Do you want to export all Data or just this table ?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Table',
+            denyButtonText: 'All Data',
+            showDenyButton: true,
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#28a745',
+            denyButtonColor: '#4d8de1',
+            cancelButtonColor: '#6c757d',
 
+        }).then((result) => {
+            if (result.isConfirmed) {
+                exportToExcel()
+            } else if (result.isDenied) {
+                fetchData(true)
+            }
+        });
+    };
+    const exportToExcel = async (exportEx) => {
+        let data = [];
+        if (exportEx) {
+            data = exportEx.map(item => {
+                if (typeof item === 'object' && item !== null) {
+                    fields.map(key => {
+                        if (item[key] === null || item[key] === undefined) {
+                            item[key] = '';
+                        } else if (typeof item[key] === 'number') {
+                            item[key] = item[key];
+                        } else {
+                            item[key] = String(item[key]);
+                        }
+                    })
+                    return item;
+                }
+            });
+        } else {
+            const tableRows = document.querySelectorAll("table tbody tr");
+            tableRows.forEach(row => {
+                const rowData = [];
+                const cells = row.querySelectorAll("td");
+                Array.from(cells).forEach(cell => {
+                    rowData.push(cell.innerText);
+                });
+                data.push(rowData);
+            });
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sheet 1');
+        const headersArray = [...fields];
+        worksheet.columns = headersArray.map((key) => {
+            return {
+                header: key
+                    .split(/[_-]/)
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' '),
+                key: key,
+                width: 20,
+            };
+        });
+        if (headersArray.length >= 26) {
+            worksheet.mergeCells('A1:' + String.fromCharCode(64 + (headersArray.length) / 26, 64 + (headersArray.length) % 26) + '1');
+        } else {
+            worksheet.mergeCells('A1:' + String.fromCharCode(65 + headersArray.length - 1) + '1');
+        }
+        worksheet.getCell('A1').value = ' Vm Activity';
+        worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell('A1').font = { bold: true };
+
+        const headerRow = worksheet.getRow(2);
+        headersArray.forEach((header, index) => {
+            headerRow.getCell(index + 1).value = headerFields[index].replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        });
+
+        headerRow.eachCell((cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'D3D3D3' },
+            };
+            cell.font = { bold: true };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+
+        data.forEach(rowData => {
+            const row = worksheet.addRow(rowData);
+            row.eachCell((cell) => {
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            });
+        });
+
+        workbook.xlsx.writeBuffer().then(buffer => {
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'vm_activity_report.xlsx';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+    };
     return (
         <Fragment >
             <Col>
@@ -129,17 +269,17 @@ const Report = ( props) => {
                                             </FormGroup>
                                         </Col>
                                     </Row>
-                                    {props.permissions?.view == 1 && 
-                                    <Row>
-                                        <Col md='12'>
-                                            <FormGroup>
-                                                <Label className="col-form-label-sm f-12" >{'VM Name'}</Label>
-                                                <Select name='created_by' id='created_by' required
-                                                    options={optionsU} className="js-example-basic-single "
-                                                    isMulti />
-                                            </FormGroup>
-                                        </Col>
-                                    </Row>
+                                    {props.permissions?.view == 1 &&
+                                        <Row>
+                                            <Col md='12'>
+                                                <FormGroup>
+                                                    <Label className="col-form-label-sm f-12" >{'VM Name'}</Label>
+                                                    <Select name='created_by' id='created_by' required
+                                                        options={optionsU} className="js-example-basic-single "
+                                                        isMulti />
+                                                </FormGroup>
+                                            </Col>
+                                        </Row>
                                     }
                                     <Row className='b-t-primary p-t-20'>
                                         <Col>
@@ -156,6 +296,47 @@ const Report = ( props) => {
             </Col>
             <Col sm="12">
                 <Card>
+                    <CardHeader className="px-3 d-flex justify-content-between align-items-center py-3">
+                        <div className="w-100 text-end">
+                            <ButtonGroup >
+                                <FormatTable title="Add Tasks table formatting"
+                                    Columns={[
+                                        { value: 'brand', label: 'Brand' },
+                                        { value: 'opened_by', label: 'Opened By' },
+                                        { value: 'closed_by', label: 'Closed By' },
+                                        { value: 'created_by', label: 'Requester Name' },
+                                        { value: 'number_of_resource', label: 'Number Of Rescource' },
+                                        { value: 'request_type', label: 'Request Type' },
+                                        { value: 'service', label: 'Service' },
+                                        { value: 'task_type', label: 'Task Type' },
+                                        { value: 'rate', label: 'Rate' },
+                                        { value: 'count', label: 'Count' },
+                                        { value: 'unit', label: 'Unit' },
+                                        { value: 'currency', label: 'Currency' },
+                                        { value: 'source_lang', label: 'Source Language' },
+                                        { value: 'target_lang', label: 'Target Language' },
+                                        { value: 'start_date', label: 'Start Date' },
+                                        { value: 'delivery_date', label: 'Delivery Date' },
+                                        { value: 'subject', label: 'Subject Matter' },
+                                        { value: 'software', label: 'Software' },
+                                        { value: 'created_at', label: 'Request Time' },
+                                        { value: 'time_of_opening', label: 'Time Of Opening' },
+                                        { value: 'time_of_closing', label: 'Time Of CLosing' },
+                                        { value: 'TimeTaken', label: 'Taken Time' },
+                                        { value: 'new', label: 'New Vendors' },
+                                        { value: 'existing', label: 'Existing Vendors' },
+                                        { value: 'existing_pair', label: 'Existing Vendors with New Pairs' },
+                                        { value: 'status', label: 'Status' },
+
+                                    ]} table="vm_activity"
+                                    formats={formats} FormatsChanged={handleFormatsChanged}
+                                />
+                                {queryParams != null && tickets.length > 0 &&
+                                    <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: EX }}  >Export to Excel</Btn>
+                                }
+                            </ButtonGroup>
+                        </div>
+                    </CardHeader>
                     <CardBody className='pt-0 px-3'>
                         <div className="table-responsive">
                             {loading ? (
@@ -166,33 +347,11 @@ const Report = ( props) => {
                                 <Table hover>
                                     <thead>
                                         <tr>
-                                            <th scope="col" >{'Ticket Number'}</th>
-                                            <th scope="col" >{'Brand'}</th>
-                                            <th scope="col" >{'Opened By'}</th>
-                                            <th scope="col" >{'Closed By'}</th>
-                                            <th scope="col">{'Requester Name'}</th>
-                                            <th scope="col">{'Number Of Rescource'}</th>
-                                            <th scope="col" >{'Request Type'}</th>
-                                            <th scope="col">{'Service'}</th>
-                                            <th scope="col">{'Task Type	'}</th>
-                                            <th scope="col">{'Rate'}</th>
-                                            <th scope="col">{'Count'}</th>
-                                            <th scope="col">{'Unit'}</th>
-                                            <th scope="col">{'Currency'}</th>
-                                            <th scope="col">{'Source Language'}</th>
-                                            <th scope="col">{'Target Language'}</th>
-                                            <th scope="col">{'Start Date'}</th>
-                                            <th scope="col">{'Delivery Date'}</th>
-                                            <th scope="col">{'Subject Matter'}</th>
-                                            <th scope="col">{'Software'}</th>
-                                            <th scope="col">{'Request Time'}</th>
-                                            <th scope="col">{'Time Of Opening'}</th>
-                                            <th scope="col">{'Time Of CLosing'}</th>
-                                            <th scope="col">{'Taken Time'}</th>
-                                            <th scope="col">{'New Vendors'}</th>
-                                            <th scope="col">{'Existing Vendors'}</th>
-                                            <th scope="col">{'Existing Vendors with New Pairs'}</th>
-                                            <th scope="col">{'Status'}</th>
+                                            {headerFields.map((field, fieldIndex) => (
+                                                <th key={fieldIndex}>
+                                                    {formatString(field)}
+                                                </th>
+                                            ))}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -200,44 +359,21 @@ const Report = ( props) => {
                                             <>
                                                 {tickets.map((item, index) => (
                                                     <tr key={index}>
-                                                        <td scope="row">{item.id}</td>
-                                                        <td scope="row">{item.brand}</td>
-                                                        <td scope="row">{item.opened_by}</td>
-                                                        <td scope="row">{item.closed_by}</td>
-                                                        <td scope="row">{item.created_by}</td>
-                                                        <td scope="row">{item.number_of_resource}</td>
-                                                        <td scope="row">{item.request_type}</td>
-                                                        <td scope="row">{item.service}</td>
-                                                        <td scope="row">{item.task_type}</td>
-                                                        <td scope="row">{item.rate}</td>
-                                                        <td scope="row">{item.count}</td>
-                                                        <td scope="row">{item.unit}</td>
-                                                        <td scope="row">{item.currency}</td>
-                                                        <td scope="row">{item.source_lang}</td>
-                                                        <td scope="row">{item.target_lang}</td>
-                                                        <td scope="row">{item.start_date}</td>
-                                                        <td scope="row">{item.delivery_date}</td>
-                                                        <td scope="row">{item.subject}</td>
-                                                        <td scope="row">{item.software}</td>
-                                                        <td scope="row">{item.created_at}</td>
-                                                        <td scope="row">{item.time_of_opening}</td>
-                                                        <td scope="row">{item.time_of_closing}</td>
-                                                        <td scope="row">{item.TimeTaken}</td>
-                                                        <td scope="row">{item.new}</td>
-                                                        <td scope="row">{item.existing}</td>
-                                                        <td scope="row">{item.existing_pair}</td>
-                                                        <td scope="row">{item.status}</td>
+                                                        {fields.map((field, fieldIndex) => (
+                                                            <td key={fieldIndex}>
+                                                                {item[field]}
+                                                            </td>
+                                                        ))}
                                                     </tr>
                                                 ))}
-
                                             </>
                                         ) : (
                                             <tr >
-                                                <td scope="row" colSpan={27} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                                <td scope="row" colSpan={(fields.length) ?? '27'} className='text-center bg-light f-14' >{'No Data Available'}</td>
                                             </tr>
                                         )
-                                    }
-                                </tbody>
+                                        }
+                                    </tbody>
                                 </Table>
                             }
                         </div>

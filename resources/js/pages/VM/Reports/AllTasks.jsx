@@ -560,7 +560,7 @@ const Report = () => {
                                             </>
                                         ) : (
                                             <tr >
-                                                <td scope="row" colSpan={18} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                                <td scope="row" colSpan={fields.length??'18'} className='text-center bg-light f-14' >{'No Data Available'}</td>
                                             </tr>
                                         )
                                         }

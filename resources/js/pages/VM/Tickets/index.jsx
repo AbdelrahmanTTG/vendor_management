@@ -1,16 +1,16 @@
-import React, { Fragment, useEffect, useState, useRef } from 'react';
+import React, { Fragment, useEffect, useState, useCallback } from 'react';
 import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../../pages/AxiosClint";
 import { useNavigate } from 'react-router-dom';
-import { useStateContext } from '../../../pages/context/contextAuth';
 import { Btn, H4, H5, P, Image, Spinner } from '../../../AbstractElements';
 import Select from 'react-select';
 import CountUp from 'react-countup';
 import countImage from '../../../assets/images/dashboard/safari.png';
+import FormatTable from "../Format";
+import SweetAlert from 'sweetalert2';
+import ExcelJS from 'exceljs';
 
-
-const TicketsList = () => {
-    const { user } = useStateContext();
+const TicketsList = () => {   
     const [tickets, setTickets] = useState([]);
     const [pageLinks, setPageLinks] = useState([]);
     const [totalCount, setTotalCount] = useState([]);
@@ -28,8 +28,15 @@ const TicketsList = () => {
     const [optionsU, setOptionsU] = useState([]);
     const [optionsB, setOptionsB] = useState([]);
     const [queryParams, setQueryParams] = useState(null);
+    const [fields, setFields] = useState([]);
+    const [headerFields, setHeaderFields] = useState([]);
+    const [formats, setFormats] = useState(null);
+    const [formatsChanged, setFormatsChanged] = useState(false);
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
+    }
+    const handleFormatsChanged = () => {
+        setFormatsChanged(!formatsChanged)
     }
     const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
         if (inputValue.length === 0) {
@@ -109,6 +116,13 @@ const TicketsList = () => {
         handelingSelect("tools", setOptionsT, "software");
         handelingSelect("brand", setOptionsB, "brand");
         handelingSelectUsers();
+        try {
+            axiosClient.post("getTicketsTotal").then(({ data }) => {
+                setTotalCount(data?.Total);
+            });
+        } catch (err) {
+            console.error(err);
+        }
     }, []);
 
     // search 
@@ -162,38 +176,32 @@ const TicketsList = () => {
             setLoading(false);
         }, 10);
     };
-
-    useEffect(() => {
+    
+    const fetchData = useCallback(async (ex) => {
+        const payload = {
+            per_page: 10,
+            page: currentPage,
+            queryParams: queryParams,
+            table: "vm_tickets",
+            export: ex,
+        };
         try {
-            axiosClient.post("getTicketsTotal").then(({ data }) => {
-                setTotalCount(data?.Total);
-            });
-
+            setLoading(true);
+            const { data } = await axiosClient.post("getTickets", payload);
+            setTickets(data?.Tickets);
+            setPageLinks(data?.Links);
+            setFormats(data?.formats);
+            setFields(data?.fields);
+            setHeaderFields(data?.headerFields);
+            if (data.AllTickets) { exportToExcel(data.AllTickets) }
+            setLoading(false);
         } catch (err) {
             console.error(err);
         }
-
-    }, []);
-
+    });
     useEffect(() => {
-        const fetchData = async () => {
-            const payload = {
-                per_page: 10,
-                page: currentPage,
-                queryParams: queryParams,
-            };
-            try {
-                setLoading(true);
-                const { data } = await axiosClient.post("getTickets", payload);
-                setTickets(data?.Tickets);
-                setPageLinks(data?.Links);
-                setLoading(false);
-            } catch (err) {
-                console.error(err);
-            }
-        };
         fetchData();
-    }, [currentPage, queryParams]);
+    }, [currentPage, queryParams, formatsChanged]);
 
     const handlePageChange = (newPage) => {
         let tempPage = currentPage;
@@ -202,7 +210,134 @@ const TicketsList = () => {
         }
         setCurrentPage(tempPage);
     };
+    const formatString = (input) => {
+        if (!input || typeof input !== 'string') return '';
+        return input
+            .split(/[_-]/)
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    }
+    // export 
+    const EX = () => {
+        SweetAlert.fire({
+            title: 'Are you sure?',
+            text: `Do you want to export all Data or just this table ?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Table',
+            denyButtonText: 'All Data',
+            showDenyButton: true,
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#28a745',
+            denyButtonColor: '#4d8de1',
+            cancelButtonColor: '#6c757d',
 
+        }).then((result) => {
+            if (result.isConfirmed) {
+                exportToExcel()
+            } else if (result.isDenied) {
+                fetchData(true)
+            }
+        });
+    };
+    const exportToExcel = async (exportEx) => {
+        let data = [];
+        if (exportEx) {
+            data = exportEx.map(item => {
+                if (typeof item === 'object' && item !== null) {
+                    fields.map(key => {
+                        if (item[key] === null || item[key] === undefined) {
+                            item[key] = '';
+                        } else if (typeof item[key] === 'number') {
+                            item[key] = item[key];
+                        } else {
+                            item[key] = String(item[key]);
+                        }
+                    })
+                    return item;
+                }
+            });
+        } else {
+            const tableRows = document.querySelectorAll("table tbody tr");
+            tableRows.forEach(row => {
+                const rowData = [];
+                const cells = row.querySelectorAll("td");
+                const dataWithoutLastOne = Array.from(cells).slice(0, -1);
+                dataWithoutLastOne.forEach(cell => {
+                    rowData.push(cell.innerText);
+                });
+                data.push(rowData);
+            });
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sheet 1');
+        const headersArray = [...fields];
+        worksheet.columns = headersArray.map((key) => {
+            return {
+                header: key
+                    .split(/[_-]/)
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' '),
+                key: key,
+                width: 20,
+            };
+        });
+        if (headersArray.length >= 26) {
+            worksheet.mergeCells('A1:' + String.fromCharCode(64 + (headersArray.length) / 26, 64 + (headersArray.length) % 26) + '1');
+        } else {
+            worksheet.mergeCells('A1:' + String.fromCharCode(65 + headersArray.length - 1) + '1');
+        }
+        worksheet.getCell('A1').value = ' Tickets List';
+        worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell('A1').font = { bold: true };
+
+        const headerRow = worksheet.getRow(2);
+        headersArray.forEach((header, index) => {
+            headerRow.getCell(index + 1).value = headerFields[index].replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        });
+
+        headerRow.eachCell((cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'D3D3D3' },
+            };
+            cell.font = { bold: true };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+
+        data.forEach(rowData => {
+            const row = worksheet.addRow(rowData);
+            row.eachCell((cell) => {
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            });
+        });
+
+        workbook.xlsx.writeBuffer().then(buffer => {
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tickets.xlsx';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+    };
     return (
         <Fragment >
             <Row>
@@ -397,6 +532,38 @@ const TicketsList = () => {
             </Col>
             <Col sm="12">
                 <Card>
+                    <CardHeader className="px-3 d-flex justify-content-between align-items-center py-3">
+                        <div className="w-100 text-end">
+                            <ButtonGroup >
+                                <FormatTable title="Add Tasks table formatting"
+                                    Columns={[
+                                        { value: 'brand', label: 'Brand' },
+                                        { value: 'request_type', label: 'Request Type' },
+                                        { value: 'service', label: 'Service' },
+                                        { value: 'task_type', label: 'Task Type' },
+                                        { value: 'rate', label: 'Rate' },
+                                        { value: 'count', label: 'Count' },
+                                        { value: 'unit', label: 'Unit' },
+                                        { value: 'currency', label: 'Currency' },
+                                        { value: 'source_lang', label: 'Source Language' },
+                                        { value: 'target_lang', label: 'Target Language' },
+                                        { value: 'start_date', label: 'Start Date' },
+                                        { value: 'delivery_date', label: 'Delivery Date' },
+                                        { value: 'subject', label: 'Subject Matter' },
+                                        { value: 'software', label: 'Software' },
+                                        { value: 'status', label: 'Status' },
+                                        { value: 'created_by', label: 'Created By' },
+                                        { value: 'created_at', label: 'Created At' },
+
+                                    ]} table="vm_tickets"
+                                    formats={formats} FormatsChanged={handleFormatsChanged}
+                                />
+                                {tickets.length > 0 &&
+                                    <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: EX }}  >Export to Excel</Btn>
+                                }
+                            </ButtonGroup>
+                        </div>
+                    </CardHeader>
                     <CardBody className='pt-0 px-3'>
                         <div className="table-responsive">
                             {loading ? (
@@ -407,24 +574,11 @@ const TicketsList = () => {
                                 <Table hover>
                                     <thead>
                                         <tr>
-                                            <th scope="col" >{'Ticket Number'}</th>
-                                            <th scope="col" >{'Brand'}</th>
-                                            <th scope="col" >{'Request Type'}</th>
-                                            <th scope="col">{'Service'}</th>
-                                            <th scope="col">{'Task Type	'}</th>
-                                            <th scope="col">{'Rate'}</th>
-                                            <th scope="col">{'Count'}</th>
-                                            <th scope="col">{'Unit'}</th>
-                                            <th scope="col">{'Currency'}</th>
-                                            <th scope="col">{'Source Language'}</th>
-                                            <th scope="col">{'Target Language'}</th>
-                                            <th scope="col">{'Start Date'}</th>
-                                            <th scope="col">{'Delivery Date'}</th>
-                                            <th scope="col">{'Subject Matter'}</th>
-                                            <th scope="col">{'Software'}</th>
-                                            <th scope="col">{'Status'}</th>
-                                            <th scope="col">{'Created By'}</th>
-                                            <th scope="col">{'Created At'}</th>
+                                            {headerFields.map((field, fieldIndex) => (
+                                                <th key={fieldIndex}>
+                                                    {formatString(field)}
+                                                </th>
+                                            ))}                                           
                                             <th scope="col">{'View Ticket'}</th>
                                         </tr>
                                     </thead>
@@ -433,25 +587,11 @@ const TicketsList = () => {
                                             <>
                                                 {tickets.map((item, index) => (
                                                     <tr key={index}>
-                                                        <td scope="row">{item.id}</td>
-                                                        <td scope="row">{item.brand}</td>
-                                                        <td scope="row">{item.request_type}</td>
-                                                        <td scope="row">{item.service}</td>
-                                                        <td scope="row">{item.task_type}</td>
-                                                        <td scope="row">{item.rate}</td>
-                                                        <td scope="row">{item.count}</td>
-                                                        <td scope="row">{item.unit}</td>
-                                                        <td scope="row">{item.currency}</td>
-                                                        <td scope="row">{item.source_lang}</td>
-                                                        <td scope="row">{item.target_lang}</td>
-                                                        <td scope="row">{item.start_date}</td>
-                                                        <td scope="row">{item.delivery_date}</td>
-                                                        <td scope="row">{item.subject}</td>
-                                                        <td scope="row">{item.software}</td>
-                                                        <td scope="row">{item.status}</td>
-                                                        <td scope="row">{item.created_by}</td>
-                                                        <td scope="row">{item.created_at}</td>
-
+                                                        {fields.map((field, fieldIndex) => (
+                                                            <td key={fieldIndex}>
+                                                                {item[field]}
+                                                            </td>
+                                                        ))}                                                       
                                                         <td>
                                                             <button onClick={() => handleView(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
                                                                 <i className="icofont icofont-ui-edit"></i>
@@ -462,7 +602,7 @@ const TicketsList = () => {
                                             </>
                                         ) : (
                                             <tr >
-                                                <td scope="row" colSpan={19} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                                <td scope="row" colSpan={(fields.length) ? (fields.length) + 1 : '19'} className='text-center bg-light f-14' >{'No Data Available'}</td>
                                             </tr>
                                         )
                                         }

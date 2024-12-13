@@ -17,20 +17,57 @@ class TicketsController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 10);        
+        // default columns array to display        
+        $defaultArray = [
+            'id',
+            'brand',
+            'request_type',
+            'service',
+            'task_type',
+            'rate',
+            'count',
+            'unit',
+            'currency',
+            'source_lang',
+            'target_lang',
+            'start_date',
+            'delivery_date',
+            'subject',
+            'software',
+            'status',
+            'created_by',
+            'created_at',
+        ];
+        // check for special format
+        $formats = (new VendorProfileController)->format($request);
+        $filteredFormats = $formats->filter(function ($format) {
+            return $format->status == 1;
+        });
+        if ($filteredFormats->isNotEmpty()) {
+            $formatArray = $filteredFormats->pluck('format')->toArray();
+            $formatArray = array_merge(...array_map(function ($item) {
+                return explode(',', $item);
+            }, $formatArray));
+            array_unshift($formatArray, "id");
+        }       
+        // start get data    
         $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
             ->select('vm_ticket.*', 'users.brand AS brand')
-            ->orderBy('vm_ticket.id', 'desc');           
+            ->orderBy('vm_ticket.id', 'desc');
+        // if filter exists         
         if (!empty($request->queryParams)) {
             foreach ($request->queryParams as $key => $val) {
+                if (!in_array($key, $formatArray)) {                    
+                    $formatArray[] = $key;
+                }               
                 if (!empty($val)) {
                     if (count($val) >= 1) {
-                        $tickets->where(function ($query) use ($key, $val) {   
-                            if($key!='brand')
+                        $tickets->where(function ($query) use ($key, $val) {
+                            if ($key != 'brand')
                                 $key = 'vm_ticket.' . $key;
                             foreach ($val as $k => $v) {
                                 if ($k == 0) {
-                                    $query->where($key ,  $v);
+                                    $query->where($key,  $v);
                                 } else {
                                     $query->orWhere($key,  $v);
                                 }
@@ -42,14 +79,35 @@ class TicketsController extends Controller
                 }
             }
         }
+        // customize header display
+        $renameArrayForDisplay = [
+            'id' => 'Ticket Number',
+            'source_lang' => 'Source Language',
+            'target_lang' => 'Target Language',
+        ];
+        foreach ($formatArray ?? $defaultArray as $f) {
+            $headerFormatArray[] = $renameArrayForDisplay[$f] ?? $f;
+        }
+        // if export
+        if ($request->has('export') && $request->input('export') === true) {
+            $AllTickets = TicketResource::collection($tickets->get());
+        }
+        $perPage = $request->input('per_page', 10);
         $tickets = $tickets->paginate($perPage);
         $links = $tickets->linkCollection();
-        return response()->json(["Tickets" => TicketResource::collection($tickets), "Links" => $links]);
+        return response()->json([
+            "Tickets" => TicketResource::collection($tickets),
+            "Links" => $links,
+            "AllTickets" => $AllTickets ?? null,
+            "fields" => $formatArray ?? $defaultArray,
+            "headerFields" => $headerFormatArray,
+            "formats" => $formats,
+        ]);
     }
 
     public function getTicketsTotal()
     {
-       
+
         $total['new'] =  VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')->where('vm_ticket.status', 1)->get()->count();
         $total['opened'] =  VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')->where('vm_ticket.status', 2)->get()->count();
         $total['part_closed'] =  VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')->where('vm_ticket.status', 3)->get()->count();
@@ -58,7 +116,7 @@ class TicketsController extends Controller
     }
 
     public function getPMSalesData()
-    {       
+    {
         $users = BrandUsers::SelectPMSalesData();
         return response()->json($users);
     }
@@ -92,7 +150,7 @@ class TicketsController extends Controller
     public function sendTicketResponse(Request $request)
     {
         $data['created_by'] = Crypt::decrypt($request->user);
-        $data['response'] = $request->comment ;
+        $data['response'] = $request->comment;
         $data['ticket'] = $request->id;
         $data['created_at'] = date("Y-m-d H:i:s");
         $ticket = VmTicket::find($data['ticket']);
@@ -122,11 +180,11 @@ class TicketsController extends Controller
     public function sendTicketVmResponse(Request $request)
     {
         $data['created_by'] = Crypt::decrypt($request->user);
-        $data['response'] = $request->comment ;
+        $data['response'] = $request->comment;
         $data['ticket'] = $request->id;
         $data['created_at'] = date("Y-m-d H:i:s");
         $ticket = VmTicket::find($data['ticket']);
-        if ($ticket) {          
+        if ($ticket) {
             if (VmTicketTeamResponse::create($data)) {
                 $msg['type'] = "success";
                 $message = "Ticket Reply Added Successfully";
