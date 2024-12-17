@@ -377,7 +377,6 @@ const Vendor = (props) => {
         try {
             setLoading2(true)
             const { data } = await axiosClient.post("Vendors", payload);
-            console.log(data)
             setVendors(data.vendors.data);
             setFields(data.fields)
             setFormats(data.formats)
@@ -1509,7 +1508,7 @@ const Vendor = (props) => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {vendors?.map((item) => {
+                                            {/* {vendors?.map((item) => {
                                                 const rowData = fields.map((field) => item[field] || '');
 
                                                 return (
@@ -1619,18 +1618,18 @@ const Vendor = (props) => {
                                                                     <Table bordered>
                                                                         <thead>
                                                                             <tr>
-                                                                                {/* {Object.keys(item?.vendor_sheet[0] || {})
+                                                                                {Object.keys(item?.vendor_sheet[0] || {})
                                                                                     .filter((key) => key !== 'vendor')
                                                                                     .map((key) => (
                                                                                         <th key={key}> {formatString(key)}</th>
                                                                                         
-                                                                                    ))} */}
+                                                                                    ))}
                                                                                 <th cope="col">{'Edit'}</th>
                                                                                 <th cope="col">{'Delete'}</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
-                                                                            {/* {item.vendor_sheet?.length > 0 &&
+                                                                            {item.vendor_sheet?.length > 0 &&
                                                                                 item.vendor_sheet.slice(0, visibleItems[item.id] || 5).map((detail, index) => (
                                                                                     <tr key={index}>
                                                                                         {Object.keys(detail || {})
@@ -1656,20 +1655,20 @@ const Vendor = (props) => {
                                                                                             </Btn>
                                                                                         </td>
                                                                                     </tr>
-                                                                                ))} */}
+                                                                                ))}
 
                                                                         </tbody>
                                                                         <tfoot>
                                                                             <tr>
                                                                                 <td colSpan="100%" style={{ textAlign: "center" }}>
-                                                                                    {/* {visibleItems[item.id] < item.vendor_sheet.length && (
+                                                                                    {visibleItems[item.id] < item.vendor_sheet.length && (
                                                                                         <Btn
                                                                                             attrBtn={{ color: 'btn btn-primary-light', onClick: () => handleShowMore(item.id) }}
                                                                                             className="me-2 w-100"
                                                                                         >
                                                                                             Show More ...
                                                                                         </Btn>
-                                                                                    )} */}
+                                                                                    )}
                                                                                 </td>
                                                                             </tr>
                                                                         </tfoot>
@@ -1679,7 +1678,7 @@ const Vendor = (props) => {
                                                         )}
                                                     </Fragment>
                                                 );
-                                            })}
+                                            })} */}
                                         </tbody>
                                     </Table>
 
