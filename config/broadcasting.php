@@ -36,7 +36,7 @@ return [
             'app_id' => "897670",
             'options' => [
                 'host' => "127.0.0.1",
-                'port' => "6001",
+                'port' => 6001,
                 'scheme' => env('REVERB_SCHEME', 'https'),
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
