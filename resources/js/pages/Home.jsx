@@ -23,7 +23,7 @@ const ChartComponent = () => {
         const formData = {
           content: "Test",
           sender_id: "TEd5cVI2T055cVFhd2FSRS9lRWJWYnRjM2NrQTJLeGU2Qm5TVnQ2UVd5dkFOa1Iwb08wYS9lTE9SRTc1d0U2NA==",
-          receiver_id: "mennaashour.95@gmail.com"
+          receiver_id: "menna.ashour@thetranslationgate.com"
         };
         const response = await axios.post('/SendMessage', formData);
         console.log(response.data)
