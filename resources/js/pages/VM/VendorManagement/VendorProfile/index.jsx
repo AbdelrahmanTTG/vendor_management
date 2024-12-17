@@ -1633,7 +1633,7 @@ const Vendor = (props) => {
                                                                             {item.vendor_sheet?.length > 0 &&
                                                                                 item.vendor_sheet.slice(0, visibleItems[item.id] || 5).map((detail, index) => (
                                                                                     <tr key={index}>
-                                                                                        {Object.keys(detail || {})
+                                                                                        {/* {Object.keys(detail || {})
                                                                                             .filter((key) => key !== 'vendor')
                                                                                             .map((key, i) => (
                                                                                                 <td key={i}>
@@ -1641,7 +1641,7 @@ const Vendor = (props) => {
                                                                                                         ? detail[key]?.name || detail[key]?.dialect || "N/A"
                                                                                                         : detail[key] || "N/A"}
                                                                                                 </td>
-                                                                                            ))}
+                                                                                            ))} */}
                                                                                         <td>
                                                                                             <LazyWrapper>
                                                                                                 <ModelEdit id={detail.id} getData={getData} />

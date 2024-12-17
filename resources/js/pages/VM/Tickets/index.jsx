@@ -18,6 +18,8 @@ const TicketsList = () => {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(false);
+
     const [initialOptions, setInitialOptions] = useState({});
     const [errorMessage, setErrorMessage] = useState(null);
     const [selectedSearchCol, setSelectedSearchCol] = useState([]);
@@ -186,7 +188,7 @@ const TicketsList = () => {
             export: ex,
         };
         try {
-            setLoading(true);
+            setLoading2(true);
             const { data } = await axiosClient.post("getTickets", payload);
             setTickets(data?.Tickets);
             setPageLinks(data?.Links);
@@ -194,9 +196,11 @@ const TicketsList = () => {
             setFields(data?.fields);
             setHeaderFields(data?.headerFields);
             if (data.AllTickets) { exportToExcel(data.AllTickets) }
-            setLoading(false);
         } catch (err) {
             console.error(err);
+        } finally {
+            setLoading2(false);
+
         }
     });
     useEffect(() => {
@@ -566,7 +570,7 @@ const TicketsList = () => {
                     </CardHeader>
                     <CardBody className='pt-0 px-3'>
                         <div className="table-responsive">
-                            {loading ? (
+                            {loading2 ? (
                                 <div className="loader-box" >
                                     <Spinner attrSpinner={{ className: 'loader-6' }} />
                                 </div>
