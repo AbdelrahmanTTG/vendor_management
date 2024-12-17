@@ -1639,17 +1639,23 @@ const Vendor = (props) => {
                                                                                                 </td>
                                                                                             ))}
                                                                                         <td>
-                                                                                            <LazyWrapper>
-                                                                                                <ModelEdit id={detail.id} getData={getData} />
-                                                                                            </LazyWrapper>
+                                                                                            {props.permissions?.edit == 1 && (
+                                                                                                <LazyWrapper>
+                                                                                                    <ModelEdit id={detail.id} getData={getData} />
+                                                                                                </LazyWrapper>
+                                                                                            )}
+                                                                                            
                                                                                         </td>
                                                                                         <td>
-                                                                                            <Btn
-                                                                                                attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(item?.id) }}
-                                                                                                className="me-2"
-                                                                                            >
-                                                                                                <i className="icofont icofont-ui-delete"></i>
-                                                                                            </Btn>
+                                                                                            {props.permissions?.delete == 1 && (
+                                                                                                <Btn
+                                                                                                    attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(item?.id) }}
+                                                                                                    className="me-2"
+                                                                                                >
+                                                                                                    <i className="icofont icofont-ui-delete"></i>
+                                                                                                </Btn>
+                                                                                            )}
+                                                                                           
                                                                                         </td>
                                                                                     </tr>
                                                                                 ))}
