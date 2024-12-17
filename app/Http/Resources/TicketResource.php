@@ -35,7 +35,7 @@ class TicketResource extends JsonResource
             'start_date' => $this->start_date,
             'delivery_date' => $this->delivery_date,
             'subject' => $this->SubjectName->name,
-            'software' => $this->SoftwareName->name,
+            'software' => $this->SoftwareName->name ?? null,
             'status' => $this->getTicketStatus(),          
             'statusVal' => $this->status,          
             'created_by' => $this->user?$this->user->user_name:$this->created_by,         

@@ -1630,23 +1630,34 @@ const Vendor = (props) => {
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
-                                                                            {item.vendor_sheet.slice(0, visibleItems[item.id] || 5).map((detail, index) => (
-                                                                                <tr key={index}>
-                                                                                    {Object.keys(detail)
-                                                                                        .filter((key) => key !== 'vendor')
-                                                                                        .map((key, i) => (
-                                                                                            <td key={i}>
-                                                                                                {typeof detail[key] === 'object' && detail[key] !== null
-                                                                                                    ? detail[key]?.name || detail[key]?.dialect
+                                                                            {item.vendor_sheet?.length > 0 &&
+                                                                                item.vendor_sheet.slice(0, visibleItems[item.id] || 5).map((detail, index) => (
+                                                                                    <tr key={index}>
+                                                                                        {Object.keys(detail || {})
+                                                                                            .filter((key) => key !== 'vendor')
+                                                                                            .map((key, i) => (
+                                                                                                <td key={i}>
+                                                                                                    {typeof detail[key] === 'object' && detail[key] !== null
+                                                                                                        ? detail[key]?.name || detail[key]?.dialect || "N/A"
+                                                                                                        : detail[key] || "N/A"}
+                                                                                                </td>
+                                                                                            ))}
+                                                                                        <td>
+                                                                                            <LazyWrapper>
+                                                                                                <ModelEdit id={detail.id} getData={getData} />
+                                                                                            </LazyWrapper>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <Btn
+                                                                                                attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(item?.id) }}
+                                                                                                className="me-2"
+                                                                                            >
+                                                                                                <i className="icofont icofont-ui-delete"></i>
+                                                                                            </Btn>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                ))}
 
-                                                                                                    : detail[key]}
-                                                                                            </td>
-                                                                                        ))}
-                                                                                    <td><LazyWrapper><ModelEdit  id={detail.id} getData={getData} /></LazyWrapper></td>
-                                                                                    <td><Btn attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(item?.id) }} className="me-2" ><i className="icofont icofont-ui-delete"></i></Btn></td>
-
-                                                                                </tr>
-                                                                            ))}
                                                                         </tbody>
                                                                         <tfoot>
                                                                             <tr>
