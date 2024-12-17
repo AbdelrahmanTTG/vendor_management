@@ -7,7 +7,7 @@ const createEcho = () => {
     return new Echo({
         broadcaster: 'reverb',
         key: "qm42aq7xixjvpowejavl",
-        wsHost:"127.0.0.1",
+        wsHost:"dev.aixnexus.com",
         wsPort: 6001,
         wssPort:  6001,
         forceTLS: true,
