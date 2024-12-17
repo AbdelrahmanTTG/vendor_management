@@ -28,12 +28,12 @@ class VendorSheet extends Model
     ];
     public function source_lang()
     {
-        return $this->belongsTo(Language::class, 'source_lang');
+        return $this->belongsTo(Language::class, 'source_lang')->select('id', 'name');
     }
 
     public function target_lang()
     {
-        return $this->belongsTo(Language::class, 'target_lang');
+        return $this->belongsTo(Language::class, 'target_lang')->select('id', 'name');
     }
 
     public function dialect()
@@ -46,32 +46,32 @@ class VendorSheet extends Model
     }
     public function service()
     {
-        return $this->belongsTo(Service::class, 'service');
+        return $this->belongsTo(Service::class, 'service')->select('id', 'name');
     }
 
     public function task_type()
     {
-        return $this->belongsTo(TaskType::class, 'task_type');
+        return $this->belongsTo(TaskType::class, 'task_type')->select('id', 'name');
     }
 
     public function unit()
     {
-        return $this->belongsTo(Unit::class, 'unit');
+        return $this->belongsTo(Unit::class, 'unit')->select('id', 'name');
     }
 
     public function currency()
     {
-        return $this->belongsTo(Currency::class, 'currency');
+        return $this->belongsTo(Currency::class, 'currency')->select('id', 'name');
     }
 
     public function subject()
     {
-        return $this->belongsTo(MainSubjectMatter::class, 'subject');
+        return $this->belongsTo(MainSubjectMatter::class, 'subject')->select('id', 'name');
     }
 
  public function sub_subject()
 {
-    return $this->belongsTo(MainSubjectMatter::class, 'sub_subject');
+    return $this->belongsTo(MainSubjectMatter::class, 'sub_subject')->select('id', 'name');
 }
 
 

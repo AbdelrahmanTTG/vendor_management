@@ -377,6 +377,7 @@ const Vendor = (props) => {
         try {
             setLoading2(true)
             const { data } = await axiosClient.post("Vendors", payload);
+            console.log(data)
             setVendors(data.vendors.data);
             setFields(data.fields)
             setFormats(data.formats)
@@ -397,27 +398,26 @@ const Vendor = (props) => {
         formatData(formats);
     }, [formats]);
     const EX = () => {
+        if (queryParams) {
+            fetchData(true)
+        } else {
+            SweetAlert.fire({
+                title: 'Are you sure?',
+                text: `Do you want to export all vendors ?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Export',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
 
-        SweetAlert.fire({
-            title: 'Are you sure?',
-            text: `Do you want to export all vendors or just the table ?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Table',
-            denyButtonText: 'All vendors',
-            showDenyButton: true,
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#28a745',
-            denyButtonColor: '#4d8de1',
-            cancelButtonColor: '#6c757d',
-
-        }).then((result) => {
-            if (result.isConfirmed) {
-                exportToExcel()
-            } else if (result.isDenied) {
-                fetchData(true)
-            }
-        });
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetchData(true)
+                }
+            }); 
+        }
+   
 
 
     };
@@ -558,12 +558,12 @@ const Vendor = (props) => {
     const exportToExcel = async (exportEx) => {
         let data = [];
         if (exportEx) {
-            data = exportEx.map(item => {
+            data = exportEx[1].map(item => {
                 if (typeof item === 'object' && item !== null) {
                     const processedItem = { ...item };
                     for (const key in processedItem) {
                         if (typeof processedItem[key] === 'object' && processedItem[key] !== null) {
-                            processedItem[key] = String(processedItem[key]?.name || processedItem[key]?.gmt || '');
+                            processedItem[key] = String(processedItem[key]?.name || processedItem[key]?.gmt || processedItem[key]?.dialect || '');
                         } else if (processedItem[key] === null || processedItem[key] === undefined) {
                             processedItem[key] = '';
                         } else if (typeof processedItem[key] === 'number') {
@@ -574,8 +574,8 @@ const Vendor = (props) => {
                         if (key === 'status') {
                             processedItem[key] == 0 ? processedItem[key] = 'Active' : "";
                             processedItem[key] == 1 ? processedItem[key] = 'Inactive' : "";
-                            processedItem[key] == 2 ? processedItem[key] = ' Wait for Approval ' : "";
-                            processedItem[key] == 3 ? processedItem[key] = ' Rejected' : "";
+                            processedItem[key] == 2 ? processedItem[key] = 'Wait for Approval' : "";
+                            processedItem[key] == 3 ? processedItem[key] = 'Rejected' : "";
                         }
                         if (key === 'type') {
                             processedItem[key] == 0 ? processedItem[key] = 'Freelance' : "";
@@ -583,27 +583,24 @@ const Vendor = (props) => {
                             processedItem[key] == 2 ? processedItem[key] = 'Agency' : "";
                             processedItem[key] == 3 ? processedItem[key] = 'Contractor' : "";
                         }
+                        if (key === 'test_type') {
+                            processedItem[key] === "0" ? processedItem[key] = 'On boarding test' : "";
+                            processedItem[key] === "1" ? processedItem[key] = 'Client Test' : "";
+                        }
+                        if (key === 'test_result') {
+                            processedItem[key] === "0" ? processedItem[key] = 'Fail' : "";
+                            processedItem[key] === "1" ? processedItem[key] = 'Pass' : "";
+                        }
                     }
-                    return Object.values(processedItem);
+                    return processedItem;  
                 }
-                return item;
-            });
-        } else {
-            const tableRows = document.querySelectorAll("table tbody tr");
-            tableRows.forEach(row => {
-                const rowData = [];
-                const cells = row.querySelectorAll("td");
-                const dataWithoutLastTwo = Array.from(cells).slice(0, -2);
-                dataWithoutLastTwo.forEach(cell => {
-                    rowData.push(cell.innerText);
-                });
-                data.push(rowData);
+                return item; 
             });
         }
 
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sheet 1');
-        const headersArray = ['id', ...fields];
+        const headersArray = ['id', ...exportEx[0]];
 
         worksheet.columns = headersArray.map((key) => {
             return {
@@ -617,18 +614,14 @@ const Vendor = (props) => {
         });
 
         worksheet.mergeCells('A1:' + String.fromCharCode(65 + headersArray.length - 1) + '1');
-        worksheet.getCell('A1').value = ' Vendor List';
+        worksheet.getCell('A1').value = 'Vendor List';
         worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell('A1').font = { bold: true };
 
         const headerRow = worksheet.getRow(2);
         headersArray.forEach((header, index) => {
-            headerRow.getCell(index + 1).value = header.replace(/_/g, ' ')
-                .split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
+            headerRow.getCell(index + 1).value = formatString(header);
         });
-
         headerRow.eachCell((cell) => {
             cell.fill = {
                 type: 'pattern',
@@ -646,7 +639,7 @@ const Vendor = (props) => {
         });
 
         data.forEach(rowData => {
-            const row = worksheet.addRow(rowData);
+            const row = worksheet.addRow(headersArray.map(header => rowData[header] ?? '')); 
             row.eachCell((cell) => {
                 if (typeof cell.value === 'number') {
                     cell.numFmt = '0';
@@ -662,6 +655,7 @@ const Vendor = (props) => {
             });
         });
 
+
         workbook.xlsx.writeBuffer().then(buffer => {
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             const url = window.URL.createObjectURL(blob);
@@ -672,6 +666,7 @@ const Vendor = (props) => {
             window.URL.revokeObjectURL(url);
         });
     };
+
     function removeLastIfNumber(str) {
         if (/\d$/.test(str)) {
             return str.slice(0, -1);
@@ -730,7 +725,10 @@ const Vendor = (props) => {
             'subject': 'Main-Subject Matter',
             'rate': 'Rate',
             'special_rate': 'Special rate',
-
+            'vendorTest.source_lang': 'Source language',
+            'vendorTest.target_lang': 'Target language',
+            'vendorTest.main_subject': 'Main-Subject Matter',
+            'vendorTest.sub_subject': 'Sub–Subject Matter',
 
 
             
@@ -1264,7 +1262,7 @@ const Vendor = (props) => {
                                                             isMulti />
                                                     </FormGroup>
                                                 </Col>
-                                            }{selectedSearchCol.indexOf("testType") > -1 &&
+                                            }{selectedSearchCol.indexOf("test_type") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup id='testStatusInput'>
                                                         <Label className="col-form-label-sm f-12" htmlFor='testType'>
@@ -1519,7 +1517,7 @@ const Vendor = (props) => {
                                                         <tr>
                                                             {rowData.map((value, index) => (
                                                                 <td key={index}>
-                                                                    {fields[index] === 'status' || fields[index] === 'type' || fields[index] === 'cv' || fields[index] === 'NDA' || fields[index] === 'priceList' ? (
+                                                                    {fields[index] === 'status' || fields[index] === 'test_result' || fields[index] === 'test_type' || fields[index] === 'type' || fields[index] === 'cv' || fields[index] === 'NDA' || fields[index] === 'priceList' ? (
                                                                         <div>
                                                                             {fields[index] === 'cv' && (
                                                                                 <div>
@@ -1579,7 +1577,20 @@ const Vendor = (props) => {
                                                                                     </span>
                                                                                 </div>
                                                                             )}
-
+                                                                            {fields[index] === 'test_type' && (
+                                                                                <div>
+                                                                                    {value === "0" && <span style={{ color: 'green' }}> On boarding test</span>}
+                                                                                    {value === "1" && <span style={{ color: 'blue' }}> Client Test</span>}
+                                                                                    {(value < 0 || value > 3) && <span>Type: Unknown</span>}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'test_result' && (
+                                                                                <div>
+                                                                                    {value === "0" && <span style={{ color: 'red' }}> Fill</span>}
+                                                                                    {value === "1" && <span style={{ color: 'green' }}> Pass</span>}
+                                                                                    {(value < 0 || value > 3) && <span>Type: Unknown</span>}
+                                                                                </div>
+                                                                            )}
                                                                         </div>
                                                                     ) : (
                                                                             renderValue(value)
@@ -1608,7 +1619,7 @@ const Vendor = (props) => {
                                                                     <Table bordered>
                                                                         <thead>
                                                                             <tr>
-                                                                                {Object.keys(item.vendor_sheet[0] || {})
+                                                                                {Object.keys(item?.vendor_sheet[0] || {})
                                                                                     .filter((key) => key !== 'vendor')
                                                                                     .map((key) => (
                                                                                         <th key={key}> {formatString(key)}</th>

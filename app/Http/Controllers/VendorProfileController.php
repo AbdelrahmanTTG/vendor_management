@@ -51,7 +51,7 @@ class VendorProfileController extends Controller
     }
     public function Vendors(Request $request)
     {
-        // try {
+        ini_set('memory_limit', '3024M');
         $formats = $this->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
@@ -80,6 +80,7 @@ class VendorProfileController extends Controller
 
         $vendorColumns = Schema::getColumnListing('vendor');
         $vendorSheet = Schema::getColumnListing('vendor_sheet');
+
         $relatedColumns = array_diff($formatArray, $vendorColumns);
         $relatedColumns = array_diff($relatedColumns, $vendorSheet);
         $relatedColumns = array_filter($relatedColumns, function ($column) {
@@ -87,13 +88,23 @@ class VendorProfileController extends Controller
         });
         $relatedColumns = array_values($relatedColumns);
         $intersectColumns = array_intersect($formatArray, $vendorColumns);
+        $intersectColumnsVendorSheet = array_intersect($formatArray, $vendorSheet);
+
         if (!empty($intersectColumns)) {
             $vendorsQuery = Vendor::select('vendor.id')
                 ->addSelect(DB::raw(implode(',', $intersectColumns)));
         } else {
             $vendorsQuery = Vendor::select('vendor.id');
         }
-        if (in_array('priceList', $formatArray)) {
+        if (in_array('priceList', $formatArray) || !empty($intersectColumnsVendorSheet) ) {
+            if (!in_array('priceList', $formatArray)) {
+                $middleIndex = intval(count($formatArray) / 2);
+                $formatArray = array_merge(
+                    array_slice($formatArray, 0, $middleIndex),
+                    ['priceList'],
+                    array_slice($formatArray, $middleIndex)
+                );
+            }
             $vendorsQuery->addSelect(DB::raw("'' as `priceList`"))
                 ->with([
                     'vendor_sheet' => function ($query) use ($formatArray, $vendorSheet) {
@@ -197,6 +208,7 @@ class VendorProfileController extends Controller
                             }
                             if (!in_array('priceList', $formatArray)) {
                                 $formatArray[] = 'priceList';
+                                $diffFormatArray[] = 'priceList';
                             }
                             $selectedColumns = (array_merge(['id', "vendor"], $selectedColumnsRow));
                             foreach ($filter['columns'] as $columnFilter) {
@@ -285,9 +297,7 @@ class VendorProfileController extends Controller
             }
         }
 
-        if ($request->has('export') && $request->input('export') === true) {
-            $AllVendors = $vendorsQuery->get();
-        }
+      
         $formatArray = array_map(function ($column) {
             if (strpos($column, '.') !== false) {
                 return explode('.', $column)[1];
@@ -301,6 +311,27 @@ class VendorProfileController extends Controller
                     $query->select($columns);
                 }]);
             }
+        }
+        if ($request->has('export') && $request->input('export') === true) {
+            $AllVendors = $vendorsQuery->get()->toArray();
+            $AllVendors = $this->flattenVendorsWithSheets($AllVendors);
+            $diffFormatArrayEx = [];
+            $diffFormatArrayEx = array_merge($diffFormatArrayEx, $diffFormatArray);
+            if (empty(array_intersect($diffFormatArray, $vendorSheet)) && in_array('priceList', $diffFormatArray)) {
+                $diffFormatArrayEx = array_merge($diffFormatArrayEx, ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target"]);
+            }
+            $diffFormatArrayEx = array_map(function ($column) use ($diffFormatArrayEx) {
+                if (strpos($column, '.') !== false) {
+                    $splitParts = explode('.', $column);
+                    $secondPart = $splitParts[1];
+                    if (in_array($secondPart, $diffFormatArrayEx)) {
+                        return $column;
+                    }
+                    return $secondPart;
+                }
+                return $column;
+            }, $diffFormatArrayEx);
+            $diffFormatArrayEx = array_values(array_diff($diffFormatArrayEx, ['priceList']));
         }
         $formatArray = array_unique(array_merge(['id'], $formatArray));
         $totalVendors = $vendorsQuery->count();
@@ -318,23 +349,60 @@ class VendorProfileController extends Controller
             return $this->flattenObject($vendor, $tableKeys);
         }, $vendorsData['data']);
         $vendors->setCollection(collect($flattenedVendors));
-
+       
+     
+      
         return response()->json([
             "vendors" => $vendors,
             "fields" => $formatArray,
             "formats" => $formats,
             "totalVendors" => $totalVendors,
-            "AllVendors" => $AllVendors ?? null,
+            "AllVendors" => !empty($AllVendors) ? [$diffFormatArrayEx, $AllVendors] : null,
 
         ], 200);
-        //   } catch (\Exception $e) {
-        //     return response()->json([
-        //         // 'error' => "Server error"
-        //         'error' => $e->getMessage(),
-        //         'trace' => $e->getTraceAsString(),
-        //     ], 500);
-        // }
+      
     }
+    function flattenVendorsWithSheets($vendors)
+    {
+        $flattenedVendors = [];
+
+        foreach ($vendors as $vendor) {
+            $vendorData = $vendor;
+            $vendorId = $vendor['id'];
+            unset($vendorData['vendor_sheet'], $vendorData['id']); 
+
+            if (isset($vendorData['priceList'])) {
+                unset($vendorData['priceList']);
+            }
+            if (!empty($vendor['vendor_sheet']) && is_array($vendor['vendor_sheet'])) {
+                foreach ($vendor['vendor_sheet'] as $sheet) {
+                    unset($sheet['id'], $sheet['vendor']);
+
+                    $adjustedVendorData = [];
+                    foreach ($vendorData as $key => $value) {
+                        if (array_key_exists($key, $sheet)) {
+                            $adjustedVendorData["vendorTest.{$key}"] = $value;
+                        } else {
+                            $adjustedVendorData[$key] = $value;
+                        }
+                    }
+                    $flattenedVendors[] = array_merge(
+                        ['id' => $vendorId], 
+                        $adjustedVendorData, 
+                        $sheet 
+                    );
+                }
+            } else {
+                $flattenedVendors[] = ['id' => $vendorId] + $vendorData;
+            }
+        }
+
+        return $flattenedVendors;
+    }
+
+
+
+
     private function flattenObject($array, $tableKeys = null)
     {
         $flattened = [];
@@ -1357,7 +1425,7 @@ class VendorProfileController extends Controller
     }
     public function UpdatePriceList(Request $request)
     {
-        
+
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer',
             'subject' => 'required|integer',
