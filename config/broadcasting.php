@@ -16,8 +16,8 @@ return [
     */
 
     /* 'default' => env('BROADCAST_CONNECTION', 'reverb'),*/
-    'default' => env('reverb'),
-    /*
+    'default' => env('BROADCAST_DRIVER', 'reverb'),
+        /*
     |--------------------------------------------------------------------------
     | Broadcast Connections
     |--------------------------------------------------------------------------
@@ -36,7 +36,7 @@ return [
             'app_id' => env('REVERB_APP_ID', "897670"),
             'options' => [
                 'host' => env('REVERB_HOST', "127.0.0.1"),
-                'port' => env('REVERB_PORT', 443),
+                'port' => env('REVERB_PORT', 6001),
                 'scheme' => env('REVERB_SCHEME', 'https'),
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
