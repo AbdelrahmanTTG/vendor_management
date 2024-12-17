@@ -1619,12 +1619,12 @@ const Vendor = (props) => {
                                                                     <Table bordered>
                                                                         <thead>
                                                                             <tr>
-                                                                                {Object.keys(item?.vendor_sheet[0] || {})
+                                                                                {/* {Object.keys(item?.vendor_sheet[0] || {})
                                                                                     .filter((key) => key !== 'vendor')
                                                                                     .map((key) => (
                                                                                         <th key={key}> {formatString(key)}</th>
                                                                                         
-                                                                                    ))}
+                                                                                    ))} */}
                                                                                 <th cope="col">{'Edit'}</th>
                                                                                 <th cope="col">{'Delete'}</th>
                                                                             </tr>
@@ -1662,14 +1662,14 @@ const Vendor = (props) => {
                                                                         <tfoot>
                                                                             <tr>
                                                                                 <td colSpan="100%" style={{ textAlign: "center" }}>
-                                                                                    {visibleItems[item.id] < item.vendor_sheet.length && (
+                                                                                    {/* {visibleItems[item.id] < item.vendor_sheet.length && (
                                                                                         <Btn
                                                                                             attrBtn={{ color: 'btn btn-primary-light', onClick: () => handleShowMore(item.id) }}
                                                                                             className="me-2 w-100"
                                                                                         >
                                                                                             Show More ...
                                                                                         </Btn>
-                                                                                    )}
+                                                                                    )} */}
                                                                                 </td>
                                                                             </tr>
                                                                         </tfoot>
