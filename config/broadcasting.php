@@ -16,7 +16,7 @@ return [
     */
 
     /* 'default' => env('BROADCAST_CONNECTION', 'reverb'),*/
-    'default' => env('BROADCAST_DRIVER', 'reverb'),
+    'default' =>  'reverb',
     /*
     |--------------------------------------------------------------------------
     | Broadcast Connections
