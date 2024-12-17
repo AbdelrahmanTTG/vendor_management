@@ -36,7 +36,7 @@ return [
             'secret' => "pbcycd8psvfrxkv2qkuf",
             'app_id' => "897670",
             'options' => [
-                'host' => "dev.aixnexus.com",
+                'host' => "127.0.0.1",
                 'port' => 6001,
                 'scheme' => 'https',
                 'useTLS' => true, 

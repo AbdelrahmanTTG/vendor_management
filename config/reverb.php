@@ -31,7 +31,7 @@ return [
         'reverb' => [
             'host' =>  '0.0.0.0',
             'port' =>  6001,
-            'hostname' =>  "dev.aixnexus.com",
+            'hostname' =>  "127.0.0.1",
             'options' => [
                 'tls' => ['cert' =>  "/etc/letsencrypt/live/dev.aixnexus.com/fullchain.pem", 'key' => "/etc/letsencrypt/live/dev.aixnexus.com/privkey.pem"],
             ],
@@ -75,7 +75,7 @@ return [
                 'secret' =>  "pbcycd8psvfrxkv2qkuf",
                 'app_id' =>  "897670",
                 'options' => [
-                    'host' =>  "dev.aixnexus.com",
+                    'host' =>  "127.0.0.1",
                     'port' =>  6001,
                     'scheme' =>  'https',
                     'useTLS' => true,
