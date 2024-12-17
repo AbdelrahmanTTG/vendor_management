@@ -6,10 +6,10 @@ window.Pusher = Pusher;
 const createEcho = () => {
     return new Echo({
         broadcaster: 'reverb',
-        key:  "qm42aq7xixjvpowejavl",
-        wsHost:  "dev.aixnexus.com",
-        wsPort:  80,
-        wssPort:  443,
+        key:"qm42aq7xixjvpowejavl",
+        wsHost:"127.0.0.1",
+        wsPort:  6001,
+        wssPort:  6001,
         forceTLS:  'https',
         enabledTransports: ['ws', 'wss'],
         auth: {
@@ -21,3 +21,4 @@ const createEcho = () => {
 };
 
 export const echo = createEcho();
+

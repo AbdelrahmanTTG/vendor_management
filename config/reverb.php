@@ -33,7 +33,7 @@ return [
             'port' => env('REVERB_SERVER_PORT', 6001),
             'hostname' => env('REVERB_HOST'),
             'options' => [
-                'tls' => [],
+                'tls' => ['cert' => env('REVERB_SSL_CERT' , "/etc/letsencrypt/live/dev.aixnexus.com/fullchain.pem"), 'key' => env('REVERB_SSL_KEY', "/etc/letsencrypt/live/dev.aixnexus.com/privkey.pem"),],
             ],
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
             'scaling' => [
