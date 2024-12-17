@@ -10,7 +10,7 @@ const createEcho = () => {
         wsHost:"127.0.0.1",
         wsPort: 6001,
         wssPort:  6001,
-        forceTLS: false,
+        forceTLS: true,
         enabledTransports: ['ws', 'wss'],
         auth: {
             headers: {
