@@ -6,7 +6,7 @@ const ProfileIndex = React.lazy(() => import('./pages/VM/VendorManagement/Vendor
 const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/EditProfile'));
 const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable/index'));
 const Tickets = React.lazy(() => import('./pages/VM/Tickets/index'));
-const ViewTicket = React.lazy(() => import('./pages/VM/Tickets/ViewTicket'));
+const ViewTicket = React.lazy(() => import('./pages/VM/Tickets/viewTicket'));
 const AllTasks = React.lazy(() => import('./pages/VM/Reports/AllTasks'));
 const VmActivity = React.lazy(() => import('./pages/VM/Reports/VmActivity'));
 import axios from './pages/AxiosClint';

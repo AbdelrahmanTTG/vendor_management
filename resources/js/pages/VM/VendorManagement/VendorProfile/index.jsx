@@ -377,7 +377,6 @@ const Vendor = (props) => {
         try {
             setLoading2(true)
             const { data } = await axiosClient.post("Vendors", payload);
-            console.log(data)
             setVendors(data.vendors.data);
             setFields(data.fields)
             setFormats(data.formats)
@@ -1494,8 +1493,191 @@ const Vendor = (props) => {
                                     </div>
                                 ) :
                                     <Table hover>
-                                     
+                                        <thead>
+                                            <tr>
+                                                {fields.map((field, fieldIndex) => (
+                                                    <th key={fieldIndex} onClick={() => handleSort(field)}>
+                                                        {formatString(field)}{sortConfig.key === field && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                                    </th>
+                                                ))}
+                                                {props.permissions?.edit == 1 && <th scope="col">{'Edit'}</th>}
+                                                {props.permissions?.delete == 1 && <th scope="col">{'Delete'}</th>}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {vendors?.map((item) => {
+                                                // التحقق من وجود الحقول قبل محاولة استخدامها
+                                                const rowData = fields.map((field) => (item && field in item ? item[field] : ''));
+
+                                                return (
+                                                    <Fragment key={item?.id || Math.random()}>
+                                                        <tr>
+                                                            {rowData.map((value, index) => (
+                                                                <td key={index}>
+                                                                    {fields[index] === 'status' || fields[index] === 'test_result' || fields[index] === 'test_type' || fields[index] === 'type' || fields[index] === 'cv' || fields[index] === 'NDA' || fields[index] === 'priceList' ? (
+                                                                        <div>
+                                                                            {fields[index] === 'cv' && (
+                                                                                <div>
+                                                                                    {value && (
+                                                                                        <Btn
+                                                                                            attrBtn={{
+                                                                                                className: "btn btn-pill btn-air-primary",
+                                                                                                color: "warning-gradien",
+                                                                                                onClick: () => handleDownload(value)
+                                                                                            }}
+                                                                                        >
+                                                                                            <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
+                                                                                        </Btn>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'NDA' && (
+                                                                                <div>
+                                                                                    {value && (
+                                                                                        <Btn
+                                                                                            attrBtn={{
+                                                                                                className: "btn btn-pill btn-air-primary",
+                                                                                                color: "secondary-gradien",
+                                                                                                onClick: () => handleDownload(value)
+                                                                                            }}
+                                                                                        >
+                                                                                            <i className="icon-zip" style={{ color: "black", fontSize: "18px" }}></i>
+                                                                                        </Btn>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'status' && (
+                                                                                <div>
+                                                                                    {value == 0 && <span style={{ color: 'green' }}> Active</span>}
+                                                                                    {value == 1 && <span style={{ color: 'blue' }}> Inactive</span>}
+                                                                                    {value == 2 && <span style={{ color: 'gray' }}> Wait for Approval</span>}
+                                                                                    {value == 3 && <span style={{ color: 'red' }}> Rejected</span>}
+                                                                                    {(value < 0 || value > 3 || value == null) && <span>Status: Unknown</span>}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'type' && (
+                                                                                <div>
+                                                                                    {value == 0 && <span style={{ color: 'green' }}> Freelance</span>}
+                                                                                    {value == 1 && <span style={{ color: 'blue' }}> In House</span>}
+                                                                                    {value == 2 && <span style={{ color: 'gray' }}> Agency</span>}
+                                                                                    {value == 3 && <span style={{ color: 'red' }}> Contractor</span>}
+                                                                                    {(value < 0 || value > 3 || value == null) && <span>Type: Unknown</span>}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'priceList' && (
+                                                                                <div>
+                                                                                    <span>
+                                                                                        <i
+                                                                                            className={expandedRows.includes(item.id) ? "fa fa-minus-square" : "fa fa-plus-square"}
+                                                                                            onClick={() => toggleRow(item.id)}
+                                                                                        ></i>
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'test_type' && (
+                                                                                <div>
+                                                                                    {value === "0" && <span style={{ color: 'green' }}> On boarding test</span>}
+                                                                                    {value === "1" && <span style={{ color: 'blue' }}> Client Test</span>}
+                                                                                    {(value < 0 || value > 3 || value == null) && <span>Type: Unknown</span>}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'test_result' && (
+                                                                                <div>
+                                                                                    {value === "0" && <span style={{ color: 'red' }}> Fill</span>}
+                                                                                    {value === "1" && <span style={{ color: 'green' }}> Pass</span>}
+                                                                                    {(value < 0 || value > 3 || value == null) && <span>Type: Unknown</span>}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    ) : (
+                                                                        renderValue(value)
+                                                                    )}
+                                                                </td>
+                                                            ))}
+                                                            {props.permissions?.edit == 1 && (
+                                                                <td>
+                                                                    <button
+                                                                        onClick={() => handleEdit(item)}
+                                                                        style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}
+                                                                    >
+                                                                        <i className="icofont icofont-ui-edit"></i>
+                                                                    </button>
+                                                                </td>
+                                                            )}
+                                                            {props.permissions?.delete == 1 && (
+                                                                <td>
+                                                                    <i className="icofont icofont-ui-delete"></i>
+                                                                </td>
+                                                            )}
+                                                        </tr>
+                                                        {expandedRows.includes(item?.id) && (
+                                                            <tr>
+                                                                <td colSpan="100%">
+                                                                    <Table bordered>
+                                                                        <thead>
+                                                                            <tr>
+                                                                                {Object.keys(item?.vendor_sheet?.[0] || {})
+                                                                                    .filter((key) => key !== 'vendor')
+                                                                                    .map((key) => (
+                                                                                        <th key={key}> {formatString(key)}</th>
+                                                                                    ))}
+                                                                                <th cope="col">{'Edit'}</th>
+                                                                                <th cope="col">{'Delete'}</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {item?.vendor_sheet?.length > 0 &&
+                                                                                item.vendor_sheet.slice(0, visibleItems[item.id] || 5).map((detail, index) => (
+                                                                                    <tr key={index}>
+                                                                                        {Object.keys(detail || {})
+                                                                                            .filter((key) => key !== 'vendor')
+                                                                                            .map((key, i) => (
+                                                                                                <td key={i}>
+                                                                                                    {typeof detail[key] === 'object' && detail[key] !== null
+                                                                                                        ? detail[key]?.name || detail[key]?.dialect || "N/A"
+                                                                                                        : detail[key] || "N/A"}
+                                                                                                </td>
+                                                                                            ))}
+                                                                                        <td>
+                                                                                            <LazyWrapper>
+                                                                                                <ModelEdit id={detail.id} getData={getData} />
+                                                                                            </LazyWrapper>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <Btn
+                                                                                                attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(item?.id) }}
+                                                                                                className="me-2"
+                                                                                            >
+                                                                                                <i className="icofont icofont-ui-delete"></i>
+                                                                                            </Btn>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                        </tbody>
+                                                                        <tfoot>
+                                                                            <tr>
+                                                                                <td colSpan="100%" style={{ textAlign: "center" }}>
+                                                                                    {visibleItems[item.id] < (item?.vendor_sheet?.length || 0) && (
+                                                                                        <Btn
+                                                                                            attrBtn={{ color: 'btn btn-primary-light', onClick: () => handleShowMore(item.id) }}
+                                                                                            className="me-2 w-100"
+                                                                                        >
+                                                                                            Show More ...
+                                                                                        </Btn>
+                                                                                    )}
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tfoot>
+                                                                    </Table>
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </Fragment>
+                                                );
+                                            })}
+                                        </tbody>
                                     </Table>
+
 
                                 // <Table hover>
 
