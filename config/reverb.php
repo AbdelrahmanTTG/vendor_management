@@ -31,7 +31,7 @@ return [
         'reverb' => [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
             'port' => env('REVERB_SERVER_PORT', 6001),
-            'hostname' => env('REVERB_HOST'),
+            'hostname' => env('REVERB_HOST',"127.0.0.1"),
             'options' => [
                 'tls' => ['cert' => env('REVERB_SSL_CERT' , "/etc/letsencrypt/live/dev.aixnexus.com/fullchain.pem"), 'key' => env('REVERB_SSL_KEY', "/etc/letsencrypt/live/dev.aixnexus.com/privkey.pem"),],
             ],
@@ -71,12 +71,12 @@ return [
 
         'apps' => [
             [
-                'key' => env('REVERB_APP_KEY'),
-                'secret' => env('REVERB_APP_SECRET'),
-                'app_id' => env('REVERB_APP_ID'),
+                'key' => env('REVERB_APP_KEY', "qm42aq7xixjvpowejavl"),
+                'secret' => env('REVERB_APP_SECRET', "pbcycd8psvfrxkv2qkuf"),
+                'app_id' => env('REVERB_APP_ID', "897670"),
                 'options' => [
-                    'host' => env('REVERB_HOST'),
-                    'port' => env('REVERB_PORT', 443),
+                    'host' => env('REVERB_HOST', "127.0.0.1"),
+                    'port' => env('REVERB_PORT', 6001),
                     'scheme' => env('REVERB_SCHEME', 'https'),
                     'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
                 ],
