@@ -20,7 +20,7 @@ import Portal_User from "./Portal_User"
 import {  Navigate } from 'react-router-dom';
 import axiosClient from "../../../../pages/AxiosClint";
 
-const EditProfile = () => {
+const EditProfile = (props) => {
     const [id, setId] = useState('');
     const location = useLocation();
     const { vendor } = location.state || {};

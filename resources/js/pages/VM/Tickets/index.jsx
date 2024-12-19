@@ -225,21 +225,16 @@ const TicketsList = () => {
     const EX = () => {
         SweetAlert.fire({
             title: 'Are you sure?',
-            text: `Do you want to export all Data or just this table ?`,
+            text: `Do you want to export all Data ?`,
             icon: 'warning',
+            confirmButtonText: 'Export',
             showCancelButton: true,
-            confirmButtonText: 'Table',
-            denyButtonText: 'All Data',
-            showDenyButton: true,
             cancelButtonText: 'Cancel',
             confirmButtonColor: '#28a745',
-            denyButtonColor: '#4d8de1',
             cancelButtonColor: '#6c757d',
 
         }).then((result) => {
             if (result.isConfirmed) {
-                exportToExcel()
-            } else if (result.isDenied) {
                 fetchData(true)
             }
         });
@@ -261,18 +256,19 @@ const TicketsList = () => {
                     return item;
                 }
             });
-        } else {
-            const tableRows = document.querySelectorAll("table tbody tr");
-            tableRows.forEach(row => {
-                const rowData = [];
-                const cells = row.querySelectorAll("td");
-                const dataWithoutLastOne = Array.from(cells).slice(0, -1);
-                dataWithoutLastOne.forEach(cell => {
-                    rowData.push(cell.innerText);
-                });
-                data.push(rowData);
-            });
         }
+        // else {
+        //     const tableRows = document.querySelectorAll("table tbody tr");
+        //     tableRows.forEach(row => {
+        //         const rowData = [];
+        //         const cells = row.querySelectorAll("td");
+        //         const dataWithoutLastOne = Array.from(cells).slice(0, -1);
+        //         dataWithoutLastOne.forEach(cell => {
+        //             rowData.push(cell.innerText);
+        //         });
+        //         data.push(rowData);
+        //     });
+        // }
 
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sheet 1');

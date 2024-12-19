@@ -25,6 +25,7 @@ const Billing = (props) => {
     const [BillingData_id, setBillingData_id] = useState("");
     const [BankData_id, setBankData_id] = useState("");
     const [dataB, setdataB] = useState();
+    const [add, setAdd] = useState(false);
 
 
 
@@ -256,7 +257,9 @@ const Billing = (props) => {
                 if (props.BillingData?.BillingData || dataB) {
                     if (!dataB) { setdataB(props.BillingData.BillingData) }
                     const data = dataB;
+                 
                     if (data?.billingData) {
+                        setAdd(false)
                         setBillingData_id(data.billingData.id)
                         setValue("billing_legal_name", data.billingData.billing_legal_name)
                         setValue("city", data.billingData.city)
@@ -270,6 +273,19 @@ const Billing = (props) => {
                         setValue("billing_currency", billing_currency.value);
                         setValue("street", data.billingData.street)
                         setValue("billing_address", data.billingData.billing_address)
+                        if (data.billingData?.billing_status !== null && data.billingData?.billing_status !== undefined ) {
+                            const vendorTypeOption = {
+                                value:"",
+                                // value: props.permission?.status !== "disable"? data.billingData.status:null,
+                                label:
+                                    data.billingData.billing_status == 0 ? "Inactive" :
+                                        data.billingData.billing_status == 1 ? "Active" :
+                                            data.billingData.billing_status == 2 ? "Pending" :
+                                                    "Unknown"
+                            };
+                            setValue("billing_status", vendorTypeOption);
+                        }
+
                     }
                     if (data?.bankData) {
                         setBankData_id(data.bankData.id)
@@ -289,11 +305,13 @@ const Billing = (props) => {
 
                     }
                     setLoading(false);
+                } else {
+                    setAdd(true)
                 }
 
-            }
+            } 
 
-        }
+        } 
         
     }, [props.BillingData, setValue , dataB])
   
@@ -353,6 +371,7 @@ const Billing = (props) => {
             method: formData.method[row.id]?.value,
             account: formData.account[row.id],
         }));
+        formData.billing_status = formData?.billing_status?.value
         const newFormData = {
             ...formData,
         };
@@ -371,10 +390,10 @@ const Billing = (props) => {
             basictoaster("successToast", "Updated successfully !");
             props.Currancy(selectedOptionC)
 
-            // response.data.forEach(element => {
-            //     editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
-            //     setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
-            // });
+            response.data.forEach(element => {
+                editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
+                setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
+            });
 
         } catch (err) {
             const response = err.response;
@@ -443,6 +462,7 @@ const Billing = (props) => {
         }
 
     }
+  
     return (
         <Fragment>
             <Card>
@@ -573,6 +593,34 @@ const Billing = (props) => {
                                                                 {...register('billing_address', { required: true })}
                                                             />
 
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                                < Col md="6" id="status-wrapper" >
+                                                    <FormGroup className="row" >
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01" > Status </Label>
+                                                        < Col sm="9" >
+                                                            <Controller
+                                                                name="billing_status"
+                                                                control={control}
+                                                                rules={{ required: false }}
+                                                                render={({ field }) => (
+                                                                    <Select
+                                                                        id='status'
+                                                                        {...field}
+                                                                        value={field.value}
+                                                                        options={
+                                                                            [
+                                                                                { value: '1', label: 'Active' },
+                                                                                { value: '0', label: 'Inactive' },
+                                                                                { value: '2', label: 'Pending' },
+                                                                            ]} className="js-example-basic-single col-sm-12"
+                                                                        onChange={(option) => {
+                                                                            field.onChange(option);
+                                                                        }}
+                                                                        isDisabled={(props.permission && props.permission.billing_status === "disable" || add)}
+                                                                    />
+                                                                )} />
                                                         </Col>
                                                     </FormGroup>
                                                 </Col>

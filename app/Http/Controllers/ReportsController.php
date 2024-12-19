@@ -161,26 +161,7 @@ class ReportsController extends Controller
         $tasks = Task::where('job_id', '<>', 0);
         // default columns array to display
         $tableColumns = DB::getSchemaBuilder()->getColumnListing('job_task');
-        $defaultArray = [
-            'code',
-            'subject',
-            'task_type',
-            'vendor',
-            'source_name',
-            'target_name',
-            'count',
-            'unit',
-            'rate',
-            'total_cost',
-            'currency',
-            'start_date',
-            'delivery_date',
-            'status',
-            'closed_date',
-            'created_by',
-            'created_at',
-            'brand_name'
-        ];
+      
         $renameArrayForSearch = ['job.priceList.source' => 'source_name', 'job.priceList.target' => 'target_name', 'brand' => 'brand_name'];
         // check for special format
         $formats = (new VendorProfileController)->format($request);
@@ -192,6 +173,27 @@ class ReportsController extends Controller
             $formatArray = array_merge(...array_map(function ($item) {
                 return explode(',', $item);
             }, $formatArray));
+        }else{
+            $formatArray = [
+                'code',
+                'subject',
+                'task_type',
+                'vendor',
+                'source_name',
+                'target_name',
+                'count',
+                'unit',
+                'rate',
+                'total_cost',
+                'currency',
+                'start_date',
+                'delivery_date',
+                'status',
+                'closed_date',
+                'created_by',
+                'created_at',
+                'brand_name'
+            ];
         }
         // if filter exists
         if (!empty($request->queryParams)) {
@@ -279,7 +281,11 @@ class ReportsController extends Controller
         $tasks = $tasks->orderBy('created_at', 'desc');
         // if export
         if ($request->has('export') && $request->input('export') === true) {
-            $AllTasks = TaskResource::collection($tasks->get());
+            // $AllTasks = TaskResource::collection($tasks->get());
+            $AllTasks = collect();
+            $tasks->chunk(100, function ($chunk) use (&$AllTasks) {
+                $AllTasks = $AllTasks->merge(TicketResource::collection($chunk));
+            });
         }
         $perPage = $request->input('per_page', 10);
         $tasks = $tasks->paginate($perPage);
@@ -287,7 +293,7 @@ class ReportsController extends Controller
         return response()->json([
             "Tasks" => TaskResource::collection($tasks),
             "Links" => $links,
-            "fields" => $formatArray ?? $defaultArray,
+            "fields" => $formatArray,
             "formats" => $formats,
             "AllTasks" => $AllTasks ?? null,
         ]);

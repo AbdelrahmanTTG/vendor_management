@@ -18,26 +18,7 @@ class TicketsController extends Controller
     public function index(Request $request)
     {
         // default columns array to display        
-        $defaultArray = [
-            'id',
-            'brand',
-            'request_type',
-            'service',
-            'task_type',
-            'rate',
-            'count',
-            'unit',
-            'currency',
-            'source_lang',
-            'target_lang',
-            'start_date',
-            'delivery_date',
-            'subject',
-            'software',
-            'status',
-            'created_by',
-            'created_at',
-        ];
+       
         // check for special format
         $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
@@ -49,7 +30,28 @@ class TicketsController extends Controller
                 return explode(',', $item);
             }, $formatArray));
             array_unshift($formatArray, "id");
-        }       
+        }else{
+            $formatArray = [
+                'id',
+                'brand',
+                'request_type',
+                'service',
+                'task_type',
+                'rate',
+                'count',
+                'unit',
+                'currency',
+                'source_lang',
+                'target_lang',
+                'start_date',
+                'delivery_date',
+                'subject',
+                'software',
+                'status',
+                'created_by',
+                'created_at',
+            ];
+        }
         // start get data    
         $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
             ->select('vm_ticket.*', 'users.brand AS brand')
@@ -85,12 +87,17 @@ class TicketsController extends Controller
             'source_lang' => 'Source Language',
             'target_lang' => 'Target Language',
         ];
-        foreach ($formatArray ?? $defaultArray as $f) {
+        foreach ($formatArray  as $f) {
             $headerFormatArray[] = $renameArrayForDisplay[$f] ?? $f;
         }
         // if export
         if ($request->has('export') && $request->input('export') === true) {
-            $AllTickets = TicketResource::collection($tickets->get());
+            // $AllTickets = TicketResource::collection($tickets->get());
+            $AllTickets = collect();
+            $tickets->chunk(100, function ($chunk) use (&$AllTickets) {
+                $AllTickets = $AllTickets->merge(TicketResource::collection($chunk));
+            });
+
         }
         $perPage = $request->input('per_page', 10);
         $tickets = $tickets->paginate($perPage);
@@ -99,7 +106,7 @@ class TicketsController extends Controller
             "Tickets" => TicketResource::collection($tickets),
             "Links" => $links,
             "AllTickets" => $AllTickets ?? null,
-            "fields" => $formatArray ?? $defaultArray,
+            "fields" => $formatArray,
             "headerFields" => $headerFormatArray,
             "formats" => $formats,
         ]);

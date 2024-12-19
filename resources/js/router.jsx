@@ -21,6 +21,7 @@ import Portal_Notes from "./pages/VendorPortal/Notes";
 import NotFound from "./NotFound";
 import { getAllowedRoutes } from './VMRoute'
 import { useStateContext } from "./pages/context/contextAuth";
+
 const LazyWrapper = ({ children }) => (
     <Suspense fallback={<div>Loading...</div>}>
         {children}
@@ -46,7 +47,11 @@ const AppRouter = () => {
     }, [user]);
 
     if (loading) {
-        return <div>Loading...</div>; 
+        return <div className={`loader-wrapper`}>
+            <div className="theme-loader">
+                <div className="loader-p"></div>
+            </div>
+        </div>; 
     }
     const router = createBrowserRouter([
         {

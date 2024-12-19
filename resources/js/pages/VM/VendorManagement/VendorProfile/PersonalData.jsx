@@ -365,7 +365,7 @@ const PersonalData = (props) => {
             const vendorTypeOption = {
               value: data.type,
               label:
-                data.type ==0 ? "Freelance" :
+                data.type == 0 ? "Freelance" :
                   data.type == 1 ? "In House" :
                     data.type == 2 ? "Agency" :
                       data.type == 3 ? "Contractor" :
@@ -726,7 +726,7 @@ const PersonalData = (props) => {
                   </Col>
                   < Col md="6" >
                     <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Country of region </Label>
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Country of residence</Label>
                       < Col sm="9" >
                         <Controller
                           name="country"

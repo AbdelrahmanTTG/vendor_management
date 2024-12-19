@@ -33,7 +33,7 @@ const AppLayout = ({ children, classNames, ...rest }) => {
   };
   return (
     <Fragment>
-      <Loader />
+      {/* <Loader /> */}
       <Taptop />
       <div className={`page-wrapper ${sidebar_types1} ${settings1}`} id='pageWrapper'>
         <Header />

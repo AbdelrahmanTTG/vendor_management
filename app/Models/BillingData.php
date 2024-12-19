@@ -17,7 +17,8 @@ class BillingData extends Model
         'billing_currency',
         'city',
         'street',
-        'billing_address'
+        'billing_address',
+        'billing_status'
     ];
     public function bankDetail()
     {

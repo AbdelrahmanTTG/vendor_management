@@ -16,12 +16,11 @@ import NavBar from './NavBar';
 import History from "./History"
 import Portal_User from "./Portal_User"
 import Steps from "./Steps"
-const AddProfile = () => {
+const AddProfile = (props) => {
     const [data, setdata] = useState([]);
     const [Currancydata, setCurrancy] = useState([]);
     const [progressValue, setProgressValue] = useState(20);
     const [marginBottom, setMarginBottom] = useState('18vh');
-
     const handleProgressValue = (data) => {
         setProgressValue(progressValue + data)
     }
@@ -48,6 +47,10 @@ const AddProfile = () => {
             window.removeEventListener('resize', updateMargin);
         };
     }, []);
+    useEffect(() => {
+        // console.log(props.permissions)
+
+    }, [props.permissions]);
     return (
         <Fragment >
 

@@ -82,6 +82,10 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->belongsTo(Experience::class,"id", 'vendor_id');
     }
+    public function billing_data()
+    {
+        return $this->belongsTo(BillingData::class, "id", 'vendor_id');
+    }
     public function bank_details()
     {
     return $this->hasOneThrough(
@@ -92,6 +96,17 @@ class Vendor extends Authenticatable  implements JWTSubject
         'id', 
         'id' 
     );
+    }
+    public function wallets_payment_methods()
+    {
+        return $this->hasOneThrough(
+            WalletsPaymentMethods::class,
+            BillingData::class,
+            'vendor_id',
+            'billing_data_id',
+            'id',
+            'id'
+        );
     }
       public function vendorBillingData()
     {

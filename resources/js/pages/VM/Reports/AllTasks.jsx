@@ -204,21 +204,16 @@ const Report = () => {
 
         SweetAlert.fire({
             title: 'Are you sure?',
-            text: `Do you want to export all tasks or just this table ?`,
+            text: `Do you want to export all tasks ?`,
             icon: 'warning',
+            confirmButtonText: 'Export',
             showCancelButton: true,
-            confirmButtonText: 'Table',
-            denyButtonText: 'All Tasks',
-            showDenyButton: true,
             cancelButtonText: 'Cancel',
             confirmButtonColor: '#28a745',
-            denyButtonColor: '#4d8de1',
             cancelButtonColor: '#6c757d',
 
         }).then((result) => {
             if (result.isConfirmed) {
-                exportToExcel()
-            } else if (result.isDenied) {
                 fetchData(true)
             }
         });
@@ -243,18 +238,19 @@ const Report = () => {
                     return item;
                 }                
             });
-        } else {
-            const tableRows = document.querySelectorAll("table tbody tr");
-            tableRows.forEach(row => {
-                const rowData = [];
-                const cells = row.querySelectorAll("td");
-                const dataWithoutLastTwo = Array.from(cells);
-                dataWithoutLastTwo.forEach(cell => {
-                    rowData.push(cell.innerText);
-                });
-                data.push(rowData);
-            });
         }
+        // else {
+        //     const tableRows = document.querySelectorAll("table tbody tr");
+        //     tableRows.forEach(row => {
+        //         const rowData = [];
+        //         const cells = row.querySelectorAll("td");
+        //         const dataWithoutLastTwo = Array.from(cells);
+        //         dataWithoutLastTwo.forEach(cell => {
+        //             rowData.push(cell.innerText);
+        //         });
+        //         data.push(rowData);
+        //     });
+        // }
 
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sheet 1');

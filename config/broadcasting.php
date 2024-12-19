@@ -44,7 +44,6 @@ return [
             'client_options' => [
                 'cert' => '/etc/letsencrypt/live/dev.aixnexus.com/fullchain.pem', 
                 'key' => '/etc/letsencrypt/live/dev.aixnexus.com/privkey.pem', 
-                    // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
             ],
         ],
 

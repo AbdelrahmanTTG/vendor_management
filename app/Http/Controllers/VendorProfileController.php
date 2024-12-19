@@ -51,7 +51,6 @@ class VendorProfileController extends Controller
     }
     public function Vendors(Request $request)
     {
-        ini_set('memory_limit', '3024M');
         $formats = $this->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
@@ -126,14 +125,16 @@ class VendorProfileController extends Controller
             foreach ($relatedColumns as $relation) {
                 if (strpos($relation, '.') !== false) {
                     list($table, $column) = explode('.', $relation);
-                    if ($table === 'bank_details') {
-                        // $vendorsQuery->with("bank_details");
+                    if ($table === 'bank_details' || $table === 'wallets_payment_methods') {
                         $aliasBilling = "billing_data_{$joinCount}";
                         $aliasTarget = "{$table}_{$joinCount}";
                         $vendorsQuery->leftJoin("billing_data as {$aliasBilling}", "{$aliasBilling}.vendor_id", '=', 'vendor.id');
                         $vendorsQuery->leftJoin("{$table} as {$aliasTarget}", "{$aliasTarget}.billing_data_id", '=', "{$aliasBilling}.id");
                         $vendorsQuery->addSelect("{$aliasTarget}.{$column} as {$column}");
-                    } else {
+                        $vendorsQuery->distinct()->limit(1);
+
+                    } 
+                    else {
                         $alias = "{$table}_{$joinCount}";
                         $vendorsQuery->leftJoin("{$table} as {$alias}", "{$alias}.vendor_id", '=', 'vendor.id');
                         $vendorsQuery->addSelect("{$alias}.{$column} as {$column}");
@@ -313,8 +314,13 @@ class VendorProfileController extends Controller
             }
         }
         if ($request->has('export') && $request->input('export') === true) {
-            $AllVendors = $vendorsQuery->get()->toArray();
-            $AllVendors = $this->flattenVendorsWithSheets($AllVendors);
+            // $AllVendors = $vendorsQuery->get()->toArray();
+            // $AllVendors = $this->flattenVendorsWithSheets($AllVendors);
+            $AllVendors = [];
+            $vendorsQuery->chunk(1000, function ($vendorsChunk) use (&$AllVendors) {
+                $flattenedVendors = $this->flattenVendorsWithSheets($vendorsChunk->toArray());
+                $AllVendors = array_merge($AllVendors, $flattenedVendors);
+            });
             $diffFormatArrayEx = [];
             $diffFormatArrayEx = array_merge($diffFormatArrayEx, $diffFormatArray);
             if (empty(array_intersect($diffFormatArray, $vendorSheet)) && in_array('priceList', $diffFormatArray)) {
@@ -585,6 +591,7 @@ class VendorProfileController extends Controller
             'city' => $request['city'],
             'street' => $request['street'],
             'billing_address' => $request['billing_address'],
+            'billing_status'=> "2"
         ]);
 
         if (
@@ -757,6 +764,7 @@ class VendorProfileController extends Controller
             'vendor_id' => 'required|integer',
             'BillingData_id' => 'nullable|integer',
             'BankData_id' => 'nullable|integer',
+            'billing_status' => 'nullable|string|max:1',
             'billing_legal_name' => 'required|string|max:255',
             'billing_currency' => 'required|integer',
             'city' => 'required|string|max:255',
@@ -783,13 +791,18 @@ class VendorProfileController extends Controller
         if ($request->filled('BillingData_id')) {
             $billingData = BillingData::find($request->input('BillingData_id'));
             if ($billingData) {
-                $billingData->update($request->only([
+                $requestData = $request->only([
                     'billing_legal_name',
                     'billing_currency',
                     'city',
                     'street',
                     'billing_address',
-                ]));
+                    'billing_status'
+                ]);
+                if (empty($requestData['billing_status'])) {
+                    $requestData['billing_status'] = '2'; 
+                }
+                $billingData->update($requestData);
             } else {
                 $billingData = BillingData::create([
                     'vendor_id' => $request->input('vendor_id'),
@@ -798,6 +811,7 @@ class VendorProfileController extends Controller
                     'city' => $request->input('city'),
                     'street' => $request->input('street'),
                     'billing_address' => $request->input('billing_address'),
+                    'billing_status' => "2"
                 ]);
             }
         } else {
@@ -808,6 +822,7 @@ class VendorProfileController extends Controller
                 'city' => $request->input('city'),
                 'street' => $request->input('street'),
                 'billing_address' => $request->input('billing_address'),
+                'billing_status' => "2"
             ]);
         }
 

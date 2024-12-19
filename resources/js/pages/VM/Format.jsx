@@ -70,8 +70,21 @@ const Format = (props) => {
             toggle()
             setEdit(item) 
             setValue("name", item.name)
-            setValue("format", item.format);
-            setSelectedOptions(item.format)
+            if (!Array.isArray(item.format)) {
+                setValue("format", item.format.split(',').map(value => ({
+                    value: value.trim(),
+                    label: value.trim()
+                })));
+                setSelectedOptions(item.format.split(',').map(value => ({
+                    value: value.trim(),
+                    label: value.trim()
+                })))
+            } else {
+                setValue("format", item.format);
+                setSelectedOptions(item.format)
+            }
+           
+           
         }
     }
     useEffect(() => {

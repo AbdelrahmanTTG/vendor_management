@@ -233,6 +233,9 @@ const Vendor = (props) => {
             label: "Bank",
             options: [
                 { value: 'bank_name', label: 'Bank name' },
+                { value: 'billing_status', label: 'Billing status' },
+                { value: 'method', label: 'Wallet payment method' },
+
 
             ],
         },
@@ -261,6 +264,9 @@ const Vendor = (props) => {
         const TestArr = ['source_lang2', "target_lang2", "main_subject", "sub_subject2", "test_type", 'test_result'];
         const ExpArr = ["experience_year"]
         const BankArr = ["bank_name"]
+        const BillingArr = ["billing_status"]
+        const WalletArr = ["method"]
+
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const priceList = [];
@@ -268,15 +274,36 @@ const Vendor = (props) => {
         const Test = []
         const Exp = []
         const Bank = []
+        const Billing = []
+        const Wallet = []
+
         const data = {};
         const keysToDelete = [];
         for (let [key, value] of formData.entries()) {
+            if (WalletArr.includes(key)) {
+                const existingFilter = Wallet.find(filter => filter.column === key);
+                if (existingFilter) {
+                    existingFilter.value.push(value);
+                } else {
+                    Wallet.push({ column: key, value: [value] });
+                }
+                keysToDelete.push(key);
+            }
             if (priceListArr.includes(key)) {
                 const existingFilter = priceList.find(filter => filter.column === key);
                 if (existingFilter) {
                     existingFilter.value.push(value);
                 } else {
                     priceList.push({ column: key, value: [value] });
+                }
+                keysToDelete.push(key);
+            }
+            if (BillingArr.includes(key)) {
+                const existingFilter = Billing.find(filter => filter.column === key);
+                if (existingFilter) {
+                    existingFilter.value.push(value);
+                } else {
+                    Billing.push({ column: key, value: [value] });
                 }
                 keysToDelete.push(key);
             }
@@ -331,6 +358,9 @@ const Vendor = (props) => {
                 Test.length > 0 ? { table: "vendor_test", columns: Test, } : undefined,
                 Exp.length > 0 ? { table: "vendor_experiences", columns: Exp, } : undefined,
                 Bank.length > 0 ? { table: "bank_details", columns: Bank, } : undefined,
+                Billing.length > 0 ? { table: "billing_data", columns: Billing, } : undefined,
+                Wallet.length > 0 ? { table: "wallets_payment_methods", columns: Wallet, } : undefined,
+
             ].filter(Boolean),
         };
 
@@ -539,8 +569,9 @@ const Vendor = (props) => {
             'vendor_education.major': 'Major',
             'vendor_education.year_of_graduation': 'Year of graduation',
             'experiences.experience_year': 'Experience year',
-            'bank_details.bank_name': 'Bank name'
-
+            'bank_details.bank_name': 'Bank name',
+            'billing_data.billing_status': 'Billing status',
+            "wallets_payment_methods.method":'Wallet payment method'
         };
         format?.flatMap(element =>
             element.format = element.format.split(',').map(value => {
@@ -589,6 +620,15 @@ const Vendor = (props) => {
                         if (key === 'test_result') {
                             processedItem[key] === "0" ? processedItem[key] = 'Fail' : "";
                             processedItem[key] === "1" ? processedItem[key] = 'Pass' : "";
+                        }
+                        if (key === 'billing_status') {
+                            processedItem[key] == 0 ? processedItem[key] = 'Inactive' : "";
+                            processedItem[key] == 1 ? processedItem[key] = 'Active' : "";
+                            processedItem[key] == 2 ? processedItem[key] = 'Pending' : "";
+                         
+                        }
+                        if (key === 'method') {
+                            processedItem[key] == 4 ? processedItem[key] = 'Other' : "";
                         }
                     }
                     return processedItem;  
@@ -714,6 +754,8 @@ const Vendor = (props) => {
             'year_of_graduation': 'Year of graduation',
             'experience_year': 'Experience year',
             'bank_name': 'Bank name',
+            'billing_status': 'Billing  status',
+
             'priceList': 'Price List',
             'dialect': 'Dialect',
             'dialect_target': 'Dialect target',
@@ -728,7 +770,9 @@ const Vendor = (props) => {
             'vendorTest.target_lang': 'Target language',
             'vendorTest.main_subject': 'Main-Subject Matter',
             'vendorTest.sub_subject': 'Sub–Subject Matter',
+       
 
+            
 
             
         };
@@ -1355,6 +1399,38 @@ const Vendor = (props) => {
                                                         <Input className='form-control form-control-sm bank_nameInput mb-1' step="any" type='text' name='bank_name' required />
                                                     </FormGroup>
                                                 </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("billing_status") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Billing status'}</Label>
+                                                            <Select id='billing_status' required
+                                                                name='billing_status'
+                                                            options={
+                                                                [
+                                                                    { value: 1, label: 'Active' },
+                                                                    { value: 0, label: 'Inactive' },
+                                                                    { value: 2, label: 'Pending' },
+                                                                
+                                                                ]} className="js-example-basic-multiple prefixInput mb-1" isMulti
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("method") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Wallet payment method'}</Label>
+                                                            <Select id='method' required
+                                                                name='method'
+                                                            options={
+                                                                [
+                                                                    { value: 4, label: 'Other' },
+                                                                ]} className="js-example-basic-multiple prefixInput mb-1" isMulti
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
                                             }
                                         </Row>
                                         <Row>
@@ -1465,7 +1541,8 @@ const Vendor = (props) => {
                                             label: "Bank",
                                             options: [
                                                 { value: 'bank_details.bank_name', label: 'Bank name' },
-
+                                                { value: 'wallets_payment_methods.method', label: 'Wallet payment method' },
+                                                { value: 'billing_data.billing_status', label: 'Billing status' },
                                             ],
                                         },
 
@@ -1506,15 +1583,13 @@ const Vendor = (props) => {
                                         </thead>
                                         <tbody>
                                             {vendors?.map((item) => {
-                                                // التحقق من وجود الحقول قبل محاولة استخدامها
                                                 const rowData = fields.map((field) => (item && field in item ? item[field] : ''));
-
                                                 return (
                                                     <Fragment key={item?.id || Math.random()}>
                                                         <tr>
                                                             {rowData.map((value, index) => (
                                                                 <td key={index}>
-                                                                    {fields[index] === 'status' || fields[index] === 'test_result' || fields[index] === 'test_type' || fields[index] === 'type' || fields[index] === 'cv' || fields[index] === 'NDA' || fields[index] === 'priceList' ? (
+                                                                    {fields[index] === 'status' || fields[index] === 'method' || fields[index] === 'billing_status' || fields[index] === 'test_result' || fields[index] === 'test_type' || fields[index] === 'type' || fields[index] === 'cv' || fields[index] === 'NDA' || fields[index] === 'priceList' ? (
                                                                         <div>
                                                                             {fields[index] === 'cv' && (
                                                                                 <div>
@@ -1586,6 +1661,21 @@ const Vendor = (props) => {
                                                                                     {value === "0" && <span style={{ color: 'red' }}> Fill</span>}
                                                                                     {value === "1" && <span style={{ color: 'green' }}> Pass</span>}
                                                                                     {(value < 0 || value > 3 || value == null) && <span>Type: Unknown</span>}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'billing_status' && (
+                                                                                <div>
+                                                                                    {value == 1 && <span style={{ color: 'green' }}> Active</span>}
+                                                                                    {value == 0 && <span style={{ color: 'red' }}> Inactive</span>}
+                                                                                    {value == 2 && <span style={{ color: 'blue' }}> Pending </span>}
+                                                                                    {(value < 0 || value > 3 || value == null) && <span></span>}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'method' && (
+                                                                                <div>
+                                                                                    {value == 4 && <span style={{ color: 'black' }}> Other</span>}
+                                                                                 
+                                                                                    {(value < 0 || value > 3 || value == null) && <span></span>}
                                                                                 </div>
                                                                             )}
                                                                         </div>

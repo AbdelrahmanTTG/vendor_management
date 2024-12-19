@@ -10,8 +10,28 @@ const ViewTicket = React.lazy(() => import('./pages/VM/Tickets/viewTicket'));
 const AllTasks = React.lazy(() => import('./pages/VM/Reports/AllTasks'));
 const VmActivity = React.lazy(() => import('./pages/VM/Reports/VmActivity'));
 import axios from './pages/AxiosClint';
+import { Spinner } from './AbstractElements';
+
 const LazyWrapper = ({ children }) => (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+        <div
+            className="loader-box"
+            style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                width: '100%',
+                position: 'fixed',
+                top: 0,
+                left: "10vw",
+            }}
+        >
+            <Spinner attrSpinner={{ className: 'loader-6' }} />
+        </div>
+
+
+    }>
         {children}
     </Suspense>
 );
@@ -55,7 +75,7 @@ export const VM = (allowedPermissions) => [
         path: 'reports/vmActivity',
         element: (
             <LazyWrapper>
-                <VmActivity permissions={allowedPermissions['reports/vmActivity']}/>
+                <VmActivity permissions={allowedPermissions['reports/vmActivity']} />
             </LazyWrapper>
         )
     },
@@ -79,7 +99,14 @@ export const VM = (allowedPermissions) => [
         path: 'vendors/profiletest',
         element: (
             <LazyWrapper>
-                <VendorProfile permissions={allowedPermissions['vendors/profiletest']} />
+                <VendorProfile
+                    permissions={{
+                        Profile: allowedPermissions['vendors/Profiletest'],
+                        PersonalData: allowedPermissions['PersonalData'],
+
+                        
+                }} 
+                     />
             </LazyWrapper>
         )
     },
@@ -87,7 +114,7 @@ export const VM = (allowedPermissions) => [
         path: 'vendors/Editprofiletest',
         element: (
             <LazyWrapper>
-                <EditVendorProfile permissions={allowedPermissions['vendors/Editprofiletest']} />
+                <EditVendorProfile permissions={allowedPermissions['vendors/editprofiletest']} />
             </LazyWrapper>
         )
     },
