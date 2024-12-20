@@ -38,7 +38,9 @@ const Simple = (props) => {
         </div>
                  <Collapse isOpen={isOpen} navbar>
 
-          <Nav className="border-tab flex-wrap " tabs style={{margin:0}}>
+          {/* <Nav className="border-tab flex-wrap " tabs style={{ margin: 0 }}>
+            {props.permissions?.PersonalData?.view == 1 && (
+
             <NavItem className="fw-bold" style={{ margin: 0 }}>
               <NavLink
                 style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
@@ -48,8 +50,7 @@ const Simple = (props) => {
                 <i className="icofont icofont-list"></i> Vendor Details
               </NavLink>
             </NavItem>
-
-
+            )}
             <NavItem className="fw-bold">
               <NavLink
                 style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
@@ -195,8 +196,46 @@ const Simple = (props) => {
                 <i className="icofont icofont-time"></i> History
               </NavLink>
             </NavItem>
-                </Nav>
-                
+                </Nav> */}
+          <Nav className="border-tab flex-wrap" tabs style={{ margin: 0 }}>
+            {[
+              { key: 'VendorDetails', permission: props.permissions?.PersonalData?.view, icon: 'icofont-list', label: 'Vendor Details', scrollTo: 'personal-data' },
+              { key: 'InstantMessaging', permission: props.permissions?.Messaging?.view, icon: 'icofont-ui-messaging', label: 'Instant Messaging', scrollTo: 'messaging' },
+              { key: 'VM-Notes', permission: props.permissions?.VMnote?.view, icon: 'icofont-contacts', label: 'VM Notes', scrollTo: 'VM-Notes' },
+              { key: 'Files-Certificate', permission: props.permissions?.FilesCertificate?.view, icon: 'icofont-files', label: 'Files & Certificate', scrollTo: 'Files-Certificate' },
+              { key: 'Education', permission: props.permissions?.Education?.view, icon: 'icofont-hat-alt', label: 'Education', scrollTo: 'Education' },
+              { key: 'Experience', permission: props.permissions?.Experience?.view, icon: 'icofont-stock-search', label: 'Experience', scrollTo: 'Experience' },
+              { key: 'Test', permission: props.permissions?.Test?.view, icon: 'icofont-paper', label: 'Test', scrollTo: 'Test' },
+              { key: 'Billing', permission: props.permissions?.Billing?.view, icon: 'icofont-credit-card', label: 'Billing', scrollTo: 'Billing' },
+              { key: 'Portal_User', permission: props.permissions?.Portal_User?.view, icon: 'icofont-credit-card', label: 'Portal User', scrollTo: 'Portal_User' },
+              { key: 'Price List', permission: props.permissions?.Price_List?.view, icon: 'icofont-coins', label: 'Price List', scrollTo: 'Price_List' },
+              { key: 'Evaluation', permission: props.permissions?.Evaluation?.view, icon: 'icofont-star-shape', label: 'Evaluation', scrollTo: 'Evaluation' },
+              { key: 'Feedback', permission: props.permissions?.Feedback?.view, icon: 'icofont-read-book', label: 'Feedback', scrollTo: 'Feedback' },
+              { key: 'Vacation', permission: props.permissions?.Vacation?.view, icon: 'icofont-travelling', label: 'Vacation', scrollTo: 'Vacation' },
+              { key: 'History', permission: props.permissions?.History?.view, icon: 'icofont-time', label: 'History', scrollTo: 'History' }
+            ]
+              .sort((a, b) => (b.permission ? 1 : 0) - (a.permission ? 1 : 0))
+              .map((item, index) => (
+              <NavItem key={index} className="fw-bold">
+                {item.permission ? (
+                  <NavLink
+                    style={{ fontSize: '13px', paddingLeft: "10px", paddingRight: "10px", margin: 0 }}
+                    className={BasicLineTab === item.key ? 'active' : ''}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setBasicLineTab(item.key);
+                      handleScroll(item.scrollTo);
+                    }}
+                  >
+                    <i className={`icofont ${item.icon}`}></i> {item.label}
+                  </NavLink>
+                ) : (
+                  <div style={{ visibility: 'hidden', width: '100px' }}>{""}</div>
+                )}
+              </NavItem>
+            ))}
+          </Nav>
+
         </Collapse>
         <div style={{ position: 'relative' }}>
           <Progress value={props.value} color="success" style={{

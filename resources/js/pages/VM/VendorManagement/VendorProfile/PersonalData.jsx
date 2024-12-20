@@ -172,6 +172,10 @@ const PersonalData = (props) => {
     "other3": "contact_other3",
   };
   const onSubmit = async (data) => {
+    if (!props.backPermissions?.add) {
+      basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
+      return;
+    }
     const formData = { ...data };
     const contacts = formData.contacts || [];
 
@@ -208,6 +212,10 @@ const PersonalData = (props) => {
     }
   }
   const Update = async (formData) => {
+    if (!props.backPermissions?.edit) {
+      basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
+      return;
+    }
     const contacts = formData.contacts || [];
     contacts.forEach(({ label, value }) => {
       const dbKey = columnMapping[label];

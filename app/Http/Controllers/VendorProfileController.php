@@ -313,6 +313,8 @@ class VendorProfileController extends Controller
                 }]);
             }
         }
+        $totalVendors = $vendorsQuery->count();
+
         if ($request->has('export') && $request->input('export') === true) {
             // $AllVendors = $vendorsQuery->get()->toArray();
             // $AllVendors = $this->flattenVendorsWithSheets($AllVendors);
@@ -340,7 +342,6 @@ class VendorProfileController extends Controller
             $diffFormatArrayEx = array_values(array_diff($diffFormatArrayEx, ['priceList']));
         }
         $formatArray = array_unique(array_merge(['id'], $formatArray));
-        $totalVendors = $vendorsQuery->count();
         $perPage = $request->input('per_page', 10);
         $vendors = $vendorsQuery->paginate($perPage);
         $tableKeys = array_column($queryParams['filters'] ?? [], 'table');

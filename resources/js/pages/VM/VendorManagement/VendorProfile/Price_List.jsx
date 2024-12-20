@@ -44,13 +44,13 @@ const PriceList = (props) => {
     };
     useEffect(() => {
         if (props.priceList?.priceList && props.priceList?.priceList.length > 0) {
-            setdataPrice(props.priceList.priceList[0]); 
+            setdataPrice(props.priceList.priceList[0]);
             const transformedArray = props.priceList.priceList[1]?.map(item => ({
                 value: item.id,
-                label: item.name 
+                label: item.name
             }));
             setValue("tool", transformedArray)
-        } 
+        }
 
     }, [props.priceList]);
 
@@ -92,6 +92,10 @@ const PriceList = (props) => {
         }
     };
     const onDelete = async (id) => {
+        if (!props.backPermissions?.delete) {
+            basictoaster("dangerToast", " Oops! You are not authorized to delete this section .");
+            return;
+        }
         try {
             const payload = {
                 id: id,
@@ -164,6 +168,10 @@ const PriceList = (props) => {
     //     }
     // };
     const onSubmit = async (data) => {
+        if (!props.backPermissions?.add) {
+            basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
+            return;
+        }
         const formDate = Object.entries(data?.tool).map(([key, value]) => {
             if (typeof value === 'object' && value !== null) {
                 return { tool: value.value };
@@ -171,9 +179,9 @@ const PriceList = (props) => {
             return { tool: value };
         });
 
-       const newData = {
+        const newData = {
             tool: formDate,
-           vendor_id : props?.id
+            vendor_id: props?.id
 
         }
         try {
@@ -244,9 +252,12 @@ const PriceList = (props) => {
 
                         </Row>
                         <Col md="12" className="d-flex justify-content-end mb-3">
-                            <LazyWrapper>
-                                <Model currency={props.Currency} id={props.id} getData={getData} />
-                            </LazyWrapper>
+                            {props.backPermissions?.add == 1 && (
+                                <LazyWrapper>
+                                    <Model currency={props.Currency} id={props.id} getData={getData} />
+                                </LazyWrapper>
+                            )}
+
                         </Col>
                         <Table hover>
                             <thead>
@@ -261,8 +272,12 @@ const PriceList = (props) => {
                                     <th cope="col">{'Rate'}</th>
                                     <th cope="col">{'Currency'}</th>
                                     <th cope="col">{'Status'} </th>
-                                    <th cope="col">{'Edit'}</th>
-                                    <th cope="col">{'Delete'}</th>
+                                    {props.backPermissions?.edit == 1 && (
+                                        <th cope="col">{'Edit'}</th>
+                                    )}
+                                    {props.backPermissions?.delete == 1 && (
+                                        <th cope="col">{'Delete'}</th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody>
@@ -278,9 +293,14 @@ const PriceList = (props) => {
                                         <td>{item?.rate}</td>
                                         <td>{item?.currency?.name}</td>
                                         <td>{item?.Status}</td>
-                                        <td><LazyWrapper><ModelEdit data={item} getData={getData} /></LazyWrapper></td>
-                                        <td><Btn attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(item?.id) }} className="me-2" ><i className="icofont icofont-ui-delete"></i></Btn></td>
-                                    </tr>
+                                        {props.backPermissions?.edit == 1 && (
+                                            <td><LazyWrapper><ModelEdit data={item} getData={getData} /></LazyWrapper></td>
+                                        )}
+                                        {props.backPermissions?.delete == 1 && (
+
+                                            <td><Btn attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(item?.id) }} className="me-2" ><i className="icofont icofont-ui-delete"></i></Btn></td>
+                                        )}
+                                        </tr>
                                 )) : (
                                     <tr>
                                         <td colSpan="11" className="text-center">No data available</td>

@@ -42,6 +42,10 @@ const VMnote = (props) => {
     };
 
     const onSubmit = async (data) => {
+        if (!props.backPermissions?.add) {
+            basictoaster("dangerToast", " Oops! You are not authorized to send .");
+            return;
+        }
         if (!props.email) {
             showToast('error', "Make sure to send your personal information first.");
             document.getElementById("personal-data")?.scrollIntoView({ behavior: 'smooth' });

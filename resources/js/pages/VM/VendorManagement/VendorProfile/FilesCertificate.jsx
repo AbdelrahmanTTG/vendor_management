@@ -109,6 +109,10 @@ const FilesCertificate = (props) => {
         }
     }, [rowIdToDelete]);
     const onDelete = async (id) => {
+        if (!props.backPermissions?.delete) {
+            basictoaster("dangerToast", " Oops! You are not authorized to delete this section .");
+            return;
+        }
         try {
             const payload = {
                 id: id,
@@ -126,6 +130,10 @@ const FilesCertificate = (props) => {
         }
     };
     const onSubmit = async () => {
+        if (!props.backPermissions?.add) {
+            basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
+            return;
+        }
         if (!props.id) {
             basictoaster("dangerToast", "Make sure to send your personal information first.");
             const section = document.getElementById("personal-data");
@@ -215,6 +223,10 @@ const FilesCertificate = (props) => {
         }
     };
     const Update = async () => {
+        if (!props.backPermissions?.edit) {
+            basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
+            return;
+        }
         if (!cvFileName || !ndaFileName) { return }
         const formData = new FormData();
 

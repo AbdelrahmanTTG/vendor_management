@@ -295,3 +295,20 @@ ALTER TABLE `vm_ticket` ADD `brand_id` INT(11) NULL AFTER `created_at`;
 
 INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '7', 'VM Activity Sheet', 'reports/vmActivity', '1', 'VM'); 
 INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '271', '32', '1', '1', '1', '1', '1', '0') ;
+
+INSERT INTO screen (groups, name, url, menu, use_system)
+VALUES
+('5', 'Personal Data', 'PersonalData', '0', 'VM'),
+('5', 'Messaging', 'Messaging', '0', 'VM'),
+('5', 'VM note', 'VMnote', '0', 'VM'),
+('5', 'Files Certificate', 'FilesCertificate', '0', 'VM'),
+('5', 'Education', 'Education', '0', 'VM'),
+('5', 'Experience', 'Experience', '0', 'VM'),
+('5', 'Test', 'Test', '0', 'VM'),
+('5', 'Billing', 'Billing', '0', 'VM'),
+('5', 'Portal User', 'Portal_User', '0', 'VM'),
+('5', 'Price List', 'Price_List', '0', 'VM'),
+('5', 'Evaluation', 'Evaluation', '0', 'VM'),
+('5', 'Feedback', 'Feedback', '0', 'VM'),
+('5', 'Vacation', 'Vacation', '0', 'VM'),
+('5', 'History', 'History', '0', 'VM');

@@ -1,23 +1,23 @@
-import React, { Fragment, useEffect, useState, useRef } from 'react';
+import React, { Fragment, useEffect, useState, useRef, Suspense } from 'react';
 import { Card } from 'reactstrap';
 import { useLocation } from 'react-router-dom';
-
-import PersonalData from './PersonalData'
-import Messaging from './Messaging'
-import VMnote from "./VMnote"
-import FilesCertificate from "./FilesCertificate"
-import Education from "./Education"
-import Experience from "./Experience"
-import Price_List from "./Price_List"
-import Evaluation from "./Evaluation"
-import Feedback from "./Feedback"
-import Vacation from "./Vacation"
-import Test from "./Test"
-import Billing from "./Billing"
+import { Spinner } from '../../../../AbstractElements';
+const PersonalData = React.lazy(() => import('./PersonalData'));
+const Messaging = React.lazy(() => import('./Messaging'));
+const VMnote = React.lazy(() => import('./VMnote'));
+const FilesCertificate = React.lazy(() => import('./FilesCertificate'));
+const Education = React.lazy(() => import('./Education'));
+const Experience = React.lazy(() => import('./Experience'));
+const Price_List = React.lazy(() => import('./Price_List'));
+const Evaluation = React.lazy(() => import('./Evaluation'));
+const Feedback = React.lazy(() => import('./Feedback'));
+const Vacation = React.lazy(() => import('./Vacation'));
+const Test = React.lazy(() => import('./Test'));
+const Billing = React.lazy(() => import('./Billing'));
+const History = React.lazy(() => import('./History'));
+const Portal_User = React.lazy(() => import('./Portal_User'));
 import NavBar from './NavBar';
-import History from "./History"
-import Portal_User from "./Portal_User"
-import {  Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import axiosClient from "../../../../pages/AxiosClint";
 
 const EditProfile = (props) => {
@@ -31,14 +31,10 @@ const EditProfile = (props) => {
     const [VendorExperience, setExperience] = useState([]);
     const [VendorFiles, setVendorFiles] = useState([]);
     const [InstantMessaging, setInstantMessaging] = useState([]);
-    const [priceList, setpriceList] = useState([]); 
+    const [priceList, setpriceList] = useState([]);
     const [VendorTestData, setVendorTestData] = useState([]);
     const [EducationVendor, setEducationVendor] = useState([]);
     const [marginBottom, setMarginBottom] = useState('18vh');
-
-
-
-
     const [permissions, setPermissions] = useState({
         // type: 'hide',
         // name: 'disable',
@@ -47,6 +43,15 @@ const EditProfile = (props) => {
         // address: "disable",
         // contact:"disable"
     });
+    const LazyWrapper = ({ children }) => (
+        <Suspense fallback={
+            <div className="loader-box"  >
+                <Spinner attrSpinner={{ className: 'loader-6' }} />
+            </div>
+        }>
+            {children}
+        </Suspense>
+    );
     useEffect(() => {
         const updateMargin = () => {
             if (window.innerWidth < 768) {
@@ -64,28 +69,25 @@ const EditProfile = (props) => {
         };
     }, []);
     useEffect(() => {
-        if (!vendor) { 
+        if (!vendor) {
             setRedirect(true);
         } else {
             const fetchVendor = async () => {
                 try {
                     const user = JSON.parse(localStorage.getItem('USER'));
-                    const data = await axiosClient.post("EditVendor", {
+                    const payload = {
                         id: vendor.id,
-                        PersonalData: "Personal Data",
-                        VMNotes: {
-                            sender_email: user.email,
-                            receiver_email: vendor.email
-                        },
-                        BillingData: "BillingData",
-                        Experience: "VendorExperience",
-                        VendorFiles: "VendorFiles",
-                        InstantMessaging: "InstantMessaging", 
-                        priceList: "priceList",
-                        VendorTestData: "VendorTestData",
-                        EducationVendor:"EducationVendor"
-
-                    });
+                        ...(props.permissions?.PersonalData?.view && { PersonalData: "PersonalData" }),
+                        ...(props.permissions?.VMnote?.view && { VMNotes: { sender_email: user.email, receiver_email: vendor.email } }),
+                        ...(props.permissions?.Billing?.view && { BillingData: "BillingData" }),
+                        ...(props.permissions?.Experience?.view && { Experience: "VendorExperience" }),
+                        ...(props.permissions?.FilesCertificate?.view && { VendorFiles: "VendorFiles" }),
+                        ...(props.permissions?.Messaging?.view && { InstantMessaging: "InstantMessaging" }),
+                        ...(props.permissions?.Price_List?.view && { priceList: "priceList" }),
+                        ...(props.permissions?.Test?.view && { VendorTestData: "VendorTestData" }),
+                        ...(props.permissions?.Evaluation?.view && { EducationVendor: "EducationVendor" }) 
+                    }
+                    const data = await axiosClient.post("EditVendor", payload);
                     setPersonalData({ PersonalData: data.data.Data });
                     setlastMessage({ VMNotes: data.data.VMNotes })
                     setBillingData({ BillingData: data.data.BillingData })
@@ -112,55 +114,123 @@ const EditProfile = (props) => {
             <div
                 id="nav-componant" className="position-relative" style={{ marginBottom }}>
                 <div className=" position-fixed" style={{ zIndex: "2", top: "8.4vh" }}>
-                    <NavBar  />
+                    <NavBar permissions={props.permissions} />
                 </div>
             </div>
 
             <div className=" mt-5 mt-sm-6 mt-md-8 mt-lg-10 mt-xl-12 py-3 py-md-5">
-                <div id="personal-data">
-                    <PersonalData  onSubmit="onUpdate" mode="edit"
-                        permission={permissions} vendorPersonalData={vendorPersonalData}
-                    />
-                </div>
-                <div id="messaging">
-                    <Messaging id={vendor?.id} mode="edit" onSubmit="onUpdate" InstantMessaging={InstantMessaging} />
-                </div>
-                <div id='VM-Notes'>
-                    <VMnote email={vendor?.email || vendorPersonalData?.PersonalData?.email} lastMessage={lastMessage} />
-                </div>
-                <div id='Files-Certificate'>
-                    <FilesCertificate id={vendor?.id} mode="edit" VendorFiles={VendorFiles} onSubmit="onUpdate"  />
-                </div>
-                <div id='Education'>
-                    <Education id={vendor?.id} EducationVendor={EducationVendor} mode="edit" />
-                </div>
-                <div id='Experience'>
-                    <Experience id={vendor?.id} Experience={VendorExperience} mode="edit" onSubmit="onUpdate" />
-                </div>
-                <div id='Test'>
-                    <Test id={vendor?.id} VendorTestData={VendorTestData} />
-                </div>
-                <div id='Billing'>
-                    <Billing id={vendor?.id} BillingData={BillingData} onSubmit="onUpdate" mode="edit"  />
-                </div>
-                <div id='Portal_User' >
-                    <Portal_User email={vendor?.email || vendorPersonalData?.PersonalData?.email} onSubmit="onUpdate" mode="edit" />
-                </div>
-                <div id='Price_List'>
-                    <Price_List Currency={BillingData?.BillingData?.billingData?.billing_currency} id={vendor?.id} priceList={priceList} />
-                </div>
-                <div id='Evaluation'>
-                    <Evaluation />
-                </div>
-                <div id='Feedback'>
-                    <Feedback />
-                </div>
-                <div id='Vacation'>
-                    <Vacation />
-                </div>
-                <div id='History'>
-                    <History />
-                </div>
+                {props.permissions?.PersonalData?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id="personal-data">
+                            <PersonalData onSubmit="onUpdate" mode="edit"
+                                permission={permissions} backPermissions={props.permissions?.PersonalData} vendorPersonalData={vendorPersonalData}
+                            />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.Messaging?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id="messaging">
+                            <Messaging id={vendor?.id} backPermissions={props.permissions?.Messaging} mode="edit" onSubmit="onUpdate" InstantMessaging={InstantMessaging} />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.VMnote?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id='VM-Notes'>
+                            <VMnote email={vendor?.email || vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.VMnote} lastMessage={lastMessage} />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.FilesCertificate?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id='Files-Certificate'>
+                            <FilesCertificate id={vendor?.id} mode="edit" backPermissions={props.permissions?.FilesCertificate} VendorFiles={VendorFiles} onSubmit="onUpdate" />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.Education?.view == 1 && (
+                    <LazyWrapper>
+                        <div id='Education'>
+                            <Education id={vendor?.id} EducationVendor={EducationVendor} backPermissions={props.permissions?.Education} mode="edit" />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.Experience?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id='Experience'>
+                            <Experience id={vendor?.id} Experience={VendorExperience} backPermissions={props.permissions?.Experience} mode="edit" onSubmit="onUpdate" />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.Test?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id='Test'>
+                            <Test id={vendor?.id} VendorTestData={VendorTestData} backPermissions={props.permissions?.Test} mode="edit" />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.Billing?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id='Billing'>
+                            <Billing id={vendor?.id} BillingData={BillingData} onSubmit="onUpdate" backPermissions={props.permissions?.Billing} mode="edit" />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.Portal_User?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id='Portal_User' >
+                            <Portal_User email={vendor?.email || vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.Portal_User} onSubmit="onUpdate" mode="edit" />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.Price_List?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id='Price_List'>
+                            <Price_List Currency={BillingData?.BillingData?.billingData?.billing_currency} backPermissions={props.permissions?.Price_List} id={vendor?.id} priceList={priceList} />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.Evaluation?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id='Evaluation'>
+                            <Evaluation backPermissions={props.permissions?.Evaluation} />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.Feedback?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id='Feedback'>
+                            <Feedback backPermissions={props.permissions?.Feedback} />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.Vacation?.view == 1 && (
+                    <LazyWrapper>
+
+                        <div id='Vacation'>
+                            <Vacation backPermissions={props.permissions?.Vacation} />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.History?.view == 1 && (
+                    <LazyWrapper>
+                        <div id='History'>
+                            <History backPermissions={props.permissions?.History} />
+                        </div>
+                    </LazyWrapper>
+                )}
 
             </div>
 

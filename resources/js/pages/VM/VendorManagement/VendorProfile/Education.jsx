@@ -82,6 +82,14 @@ const Education = (props) => {
 
     };
     const onSubmit = async (data) => {
+        if (props?.mode == "edit" && !props.backPermissions?.edit) {
+            basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
+            return;
+        }
+        if (!props.backPermissions?.add) {
+            basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
+            return;
+        }
         if (props.id) {
             const formDate = Object.fromEntries(
                 Object.entries(data).map(([key, value]) => {

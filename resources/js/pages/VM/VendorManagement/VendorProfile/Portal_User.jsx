@@ -43,7 +43,7 @@ const Portal_User = (props) => {
         password += lowercaseLetters[Math.floor(Math.random() * lowercaseLetters.length)];
         password += numbers[Math.floor(Math.random() * numbers.length)];
         password += symbols[Math.floor(Math.random() * symbols.length)];
-        for (let i = password.length; i < 12; i++) {
+        for (let i = password.length; i < 8; i++) {
             password += allCharacters[Math.floor(Math.random() * allCharacters.length)];
         }
         password = password.split('').sort(() => Math.random() - 0.5).join('');
@@ -52,6 +52,14 @@ const Portal_User = (props) => {
 
  
     const onSubmit = async (data) => {
+        if (props?.mode == "edit" && !props.backPermissions?.edit) {
+            basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
+            return;
+        }
+        if (!props.backPermissions?.add) {
+            basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
+            return;
+        }
         if (!props.email) {
             basictoaster("dangerToast", "Make sure to send your personal information first.");
             const section = document.getElementById("personal-data");

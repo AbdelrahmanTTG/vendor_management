@@ -103,10 +103,21 @@ export const VM = (allowedPermissions) => [
                     permissions={{
                         Profile: allowedPermissions['vendors/Profiletest'],
                         PersonalData: allowedPermissions['PersonalData'],
-
-                        
-                }} 
-                     />
+                        messaging: allowedPermissions['messaging'],
+                        VMnote: allowedPermissions['VMnote'],
+                        FilesCertificate: allowedPermissions['FilesCertificate'],
+                        Education: allowedPermissions['Education'],
+                        Experience: allowedPermissions['Experience'],
+                        Test: allowedPermissions['Test'],
+                        Billing: allowedPermissions['Billing'],
+                        Portal_User: allowedPermissions['Portal_User'],
+                        Price_List: allowedPermissions['Price_List'],
+                        Evaluation: allowedPermissions['Test'],
+                        Feedback: allowedPermissions['Feedback'],
+                        Vacation: allowedPermissions['Vacation'],
+                        History: allowedPermissions['History'],
+                    }}
+                />
             </LazyWrapper>
         )
     },
@@ -114,7 +125,25 @@ export const VM = (allowedPermissions) => [
         path: 'vendors/Editprofiletest',
         element: (
             <LazyWrapper>
-                <EditVendorProfile permissions={allowedPermissions['vendors/editprofiletest']} />
+                <EditVendorProfile permissions={
+                    {
+                        allowedPermissions: ['vendors/editprofiletest'],
+                        PersonalData: allowedPermissions['PersonalData'],
+                        messaging: allowedPermissions['messaging'],
+                        VMnote: allowedPermissions['VMnote'],
+                        FilesCertificate: allowedPermissions['FilesCertificate'],
+                        Education: allowedPermissions['Education'],
+                        Experience: allowedPermissions['Experience'],
+                        Test: allowedPermissions['Test'],
+                        Billing: allowedPermissions['Billing'],
+                        Portal_User: allowedPermissions['Portal_User'],
+                        Price_List: allowedPermissions['Price_List'],
+                        Evaluation: allowedPermissions['Test'],
+                        Feedback: allowedPermissions['Feedback'],
+                        Vacation: allowedPermissions['Vacation'],
+                        History: allowedPermissions['History'],
+                    }
+                } />
             </LazyWrapper>
         )
     },

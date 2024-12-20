@@ -831,6 +831,76 @@ const Vendor = (props) => {
 
         return value || '';
     }
+    const deleteRow = (id) => {
+        if (id) {
+            SweetAlert.fire({
+                title: 'Are you sure?',
+                text: `Do you want to delete that price list ?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const success = await onDelete(id);
+                    if (success) {
+                        SweetAlert.fire(
+                            'Deleted!',
+                            `This price list has been deleted..`,
+                            'success'
+                        );
+                    } else {
+                        SweetAlert.fire(
+                            'Ooops !',
+                            ' An error occurred while deleting. :)',
+                            'error'
+                        );
+                    }
+
+                } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
+                    SweetAlert.fire(
+                        'Cancelled',
+                        'Your item is safe :)',
+                        'info'
+                    );
+                }
+            });
+        }
+    };
+    const onDelete = async (id) => {
+        if (!props.permissions?.delete) {
+            basictoaster("dangerToast", " Oops! You are not authorized to delete this section .");
+            return;
+        }
+        try {
+            const payload = {
+                id: id,
+            }
+            const { data } = await axiosClient.delete("deletePricelist", { data: payload });
+            removeDataById(id)
+            return data
+        } catch (err) {
+            const response = err.response;
+            if (response && response.data) {
+                setErrorMessage(response.data.message || "An unexpected error occurred.");
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+            return false
+        }
+    };
+    const removeDataById = (id) => {
+        setVendors((prevData) => {
+            const updatedVendors = prevData.map((vendor) => {
+                const validVendorSheet = Array.isArray(vendor.vendor_sheet) ? vendor.vendor_sheet : [];
+                const updatedVendorSheet = validVendorSheet.filter(item => item.id !== id);
+                return { ...vendor, vendor_sheet: updatedVendorSheet };
+            });
+
+            return updatedVendors;
+        });
+    };
 
     return (
         <Fragment >
@@ -1739,7 +1809,7 @@ const Vendor = (props) => {
                                                                                         <td>
                                                                                             {props.permissions?.delete == 1 && (
                                                                                                 <Btn
-                                                                                                    attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(item?.id) }}
+                                                                                                    attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(detail?.id) }}
                                                                                                     className="me-2"
                                                                                                 >
                                                                                                     <i className="icofont icofont-ui-delete"></i>
