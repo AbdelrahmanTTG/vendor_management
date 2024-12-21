@@ -42,9 +42,6 @@ return [
                 'useTLS' =>  true,
             ],
             'client_options' => [
-                'curl_options' => [
-                   CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2, 
-                ],
             ],
         ],
 
