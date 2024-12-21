@@ -42,8 +42,8 @@ return [
                 'useTLS' => true, 
             ],
             'client_options' => [
-                'cert' => '/etc/letsencrypt/live/dev.aixnexus.com/fullchain.pem', 
-                'key' => '/etc/letsencrypt/live/dev.aixnexus.com/privkey.pem', 
+                // 'cert' => '/etc/letsencrypt/live/dev.aixnexus.com/fullchain.pem', 
+                // 'key' => '/etc/letsencrypt/live/dev.aixnexus.com/privkey.pem', 
             ],
         ],
 
