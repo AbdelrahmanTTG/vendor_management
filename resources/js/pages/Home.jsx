@@ -18,23 +18,23 @@ import axios from "../pages/AxiosClint";
 
 
 const ChartComponent = () => {
-  // const test = async () => {
-  //     try {
-  //       const formData = {
-  //         content: "Test",
-  //         sender_id: "TEd5cVI2T055cVFhd2FSRS9lRWJWYnRjM2NrQTJLeGU2Qm5TVnQ2UVd5dkFOa1Iwb08wYS9lTE9SRTc1d0U2NA==",
-  //         receiver_id: "menna.ashour@thetranslationgate.com"
-  //       };
-  //       const response = await axios.post('/SendMessage', formData);
-  //       console.log(response.data)
-  //     } catch (error) {
-  //       console.error('Failed to send message:', error);
-  //     } 
+  const test = async () => {
+      try {
+        const formData = {
+          content: "Test",
+          sender_id: "TEd5cVI2T055cVFhd2FSRS9lRWJWYnRjM2NrQTJLeGU2Qm5TVnQ2UVd5dkFOa1Iwb08wYS9lTE9SRTc1d0U2NA==",
+          receiver_id: "menna.ashour@thetranslationgate.com"
+        };
+        const response = await axios.post('/SendMessage', formData);
+        console.log(response.data)
+      } catch (error) {
+        console.error('Failed to send message:', error);
+      } 
  
-  // }
+  }
   return (
     <Fragment>
-      {/* <button className='btn-info' onClick={test}>{"Test"}</button> */}
+      <button className='btn-info' onClick={test}>{"Test"}</button>
       {/* <Breadcrumbs mainTitle="Chart" parent="Widgets" title="Chart" /> */}
       <Container fluid={true} className="chart-widget">
         <Charts />
