@@ -43,8 +43,8 @@ return [
             ],
             'client_options' => [
                 'curl_options' => [
-                    CURLOPT_SSL_VERIFYHOST => 0,
-                    CURLOPT_SSL_VERIFYPEER => 0,
+                    'cert' =>  "/etc/letsencrypt/live/dev.aixnexus.com/fullchain.pem",
+                    'key' => "/etc/letsencrypt/live/dev.aixnexus.com/privkey.pem"
                 ],
             ],
         ],
