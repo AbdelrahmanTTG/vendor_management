@@ -121,7 +121,7 @@ return [
         'reverb' => [
             'host' =>  '0.0.0.0',
             'port' =>  6001,
-            'hostname' =>  "127.0.0.1",
+            'hostname' =>  "dev.aixnexus.com",
             'options' => [
                 'tls' => [
                     'cert' =>  "/etc/letsencrypt/live/dev.aixnexus.com/fullchain.pem",
@@ -131,16 +131,9 @@ return [
             'scaling' => [
                 'enabled' => env('REVERB_SCALING_ENABLED', false),
                 'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
-                'server' => [
-                    'url' => env('REDIS_URL'),
-                    'host' => env('REDIS_HOST', '127.0.0.1'),
-                    'port' => env('REDIS_PORT', '6379'),
-                    'username' => env('REDIS_USERNAME'),
-                    'password' => env('REDIS_PASSWORD'),
-                    'database' => env('REDIS_DB', '0'),
-                ],
             ],
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
+            'pulse_ingest_interval' =>  15,
         ],
 
     ],
@@ -170,6 +163,8 @@ return [
                     'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
                 ],
                 'allowed_origins' => ['*'],
+                'ping_interval' =>  60,
+                'max_message_size' =>  10_000,
             ],
         ],
     ],
