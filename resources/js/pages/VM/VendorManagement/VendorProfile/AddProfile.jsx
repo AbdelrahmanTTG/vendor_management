@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState, Suspense } from 'react';
-import { Card } from 'reactstrap';
+import { Card, CardBody } from 'reactstrap';
 const PersonalData = React.lazy(() => import('./PersonalData'));
 const Messaging = React.lazy(() => import('./Messaging'));
 const VMnote = React.lazy(() => import('./VMnote'));
@@ -58,10 +58,14 @@ const AddProfile = (props) => {
             window.removeEventListener('resize', updateMargin);
         };
     }, []);
-    useEffect(() => {
-        // console.log(props.permissions)
+   
+    const isPermissionsEmpty = (permissions) => {
+        return Object.entries(permissions)
+            .filter(([key]) => key !== 'Profile') 
+            .every(([, value]) => value === null || value === undefined); 
+    }
+    const isEmpty = isPermissionsEmpty(props.permissions);
 
-    }, [props.permissions]);
     return (
         <Fragment >
 
@@ -82,7 +86,6 @@ const AddProfile = (props) => {
                         </div>
                     </LazyWrapper>
                 )}
-
                 {props.permissions?.Messaging?.view == 1 && (
                     <LazyWrapper>
 
@@ -213,6 +216,18 @@ const AddProfile = (props) => {
                         </div>
                     </LazyWrapper>
                 )}
+                <Fragment>
+                    {isEmpty && (
+                        <Card>
+                            <CardBody>
+                                <div style={{ textAlign: 'center' }}>
+                                    <h5>Oops !!</h5>
+                                    <h6>You are not allowed to see any sections here ):</h6>
+                                </div>
+                            </CardBody>
+                        </Card>
+                    )}
+                </Fragment>
 
             </div>
 

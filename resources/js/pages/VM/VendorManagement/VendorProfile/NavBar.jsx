@@ -21,7 +21,12 @@ const Simple = (props) => {
   };
   
   const [isOpen, setIsOpen] = useState(false);
-
+  const isPermissionsEmpty = (permissions) => {
+    return Object.entries(permissions)
+      .filter(([key]) => key !== 'Profile')
+      .every(([, value]) => value === null || value === undefined);
+  }
+  const isEmpty = isPermissionsEmpty(props.permissions);
   const toggle = () => setIsOpen(!isOpen);
   return (
     // <Col sm="9" xl="3" className="xl-100">
@@ -237,24 +242,26 @@ const Simple = (props) => {
           </Nav>
 
         </Collapse>
-        <div style={{ position: 'relative' }}>
-          <Progress value={props.value} color="success" style={{
-            height: '10px', position: 'relative', borderRadius: '0'
-          }}>
-            <span style={{
-              position: 'absolute',
-              width: '100%',
-              textAlign: 'center',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'white',
-              fontWeight: 'bold',
-
+        {!isEmpty && (
+          <div style={{ position: 'relative' }}>
+            <Progress value={props.value} color="success" style={{
+              height: '10px', position: 'relative', borderRadius: '0'
             }}>
-              {props.value}%
-            </span>
-          </Progress>
-        </div>
+              <span style={{
+                position: 'absolute',
+                width: '100%',
+                textAlign: 'center',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'white',
+                fontWeight: 'bold',
+
+              }}>
+                {props.value}%
+              </span>
+            </Progress>
+          </div>
+        )}
               </div>
           </Navbar>
 

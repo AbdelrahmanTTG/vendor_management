@@ -19,7 +19,7 @@ const Offers = () => {
       };
       axiosClient.post(baseURL + "/allJobOffers", payload)
         .then(({ data }) => {
-          console.log(data);
+          // console.log(data);
           const [Tasks] = [(data?.Tasks)];
           setPageTasks(Tasks);
         });

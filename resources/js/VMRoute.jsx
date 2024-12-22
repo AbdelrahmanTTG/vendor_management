@@ -127,7 +127,7 @@ export const VM = (allowedPermissions) => [
             <LazyWrapper>
                 <EditVendorProfile permissions={
                     {
-                        allowedPermissions: ['vendors/editprofiletest'],
+                        Profile: allowedPermissions['vendors/editprofiletest'],
                         PersonalData: allowedPermissions['PersonalData'],
                         messaging: allowedPermissions['messaging'],
                         VMnote: allowedPermissions['VMnote'],

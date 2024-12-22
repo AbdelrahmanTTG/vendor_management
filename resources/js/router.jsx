@@ -1,23 +1,36 @@
 import React, { Suspense, useEffect, useState } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from './pages/Home'
-import About from './pages/About'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Dashboard_p from './pages/Dashboard_P'
-import Portal_Dashboard from "./pages/VendorPortal/Dashboard";
-import Portal_Jobs_All from "./pages/VendorPortal/Jobs/AllJobs";
-import Portal_Jobs_Closed from "./pages/VendorPortal/Jobs/ClosedJobs";
-import Portal_Jobs_Offers from "./pages/VendorPortal/Jobs/Offers";
-import Portal_Jobs_Notifications from "./pages/VendorPortal/Jobs/Notifications";
-import Portal_Invoices_All from "./pages/VendorPortal/Invoices/AllInvoices";
-import Portal_Invoices_Verified from "./pages/VendorPortal/Invoices/VerifiedInvoices";
-import Portal_Add_Invoice from "./pages/VendorPortal/Invoices/AddInvoice";
-import Portal_ViewOffer from "./pages/VendorPortal/Jobs/ViewOffer";
-import Portal_ViewJob from "./pages/VendorPortal/Jobs/ViewJob";
-import Portal_Admin from "./pages/VendorPortal/Admin";
-import Portal_Profile from "./pages/VendorPortal/Profile";
-import Portal_Notes from "./pages/VendorPortal/Notes";
+// import Portal_Dashboard from "./pages/VendorPortal/Dashboard";
+const Portal_Dashboard = React.lazy(() => import('./pages/VendorPortal/Dashboard'));
+const Portal_Jobs_All = React.lazy(() => import('./pages/VendorPortal/Jobs/AllJobs'));
+const Portal_Jobs_Closed = React.lazy(() => import('./pages/VendorPortal/Jobs/ClosedJobs'));
+const Portal_Jobs_Offers = React.lazy(() => import('./pages/VendorPortal/Jobs/Offers'));
+const Portal_Jobs_Notifications = React.lazy(() => import('./pages/VendorPortal/Jobs/Notifications'));
+const Portal_Invoices_All = React.lazy(() => import('./pages/VendorPortal/Invoices/AllInvoices'));
+const Portal_Invoices_Verified = React.lazy(() => import('./pages/VendorPortal/Invoices/VerifiedInvoices'));
+const Portal_Add_Invoice = React.lazy(() => import('./pages/VendorPortal/Invoices/AddInvoice'));
+const Portal_ViewOffer = React.lazy(() => import('./pages/VendorPortal/Jobs/ViewOffer'));
+const Portal_ViewJob = React.lazy(() => import('./pages/VendorPortal/Jobs/ViewJob'));
+// import Portal_Jobs_All from "./pages/VendorPortal/Jobs/AllJobs";
+// import Portal_Jobs_Closed from "./pages/VendorPortal/Jobs/ClosedJobs";
+// import Portal_Jobs_Offers from "./pages/VendorPortal/Jobs/Offers";
+// import Portal_Jobs_Notifications from "./pages/VendorPortal/Jobs/Notifications";
+// import Portal_Invoices_All from "./pages/VendorPortal/Invoices/AllInvoices";
+// import Portal_Invoices_Verified from "./pages/VendorPortal/Invoices/VerifiedInvoices";
+// import Portal_Add_Invoice from "./pages/VendorPortal/Invoices/AddInvoice";
+// import Portal_ViewOffer from "./pages/VendorPortal/Jobs/ViewOffer";
+// import Portal_ViewJob from "./pages/VendorPortal/Jobs/ViewJob";
+const Portal_Admin = React.lazy(() => import('./pages/VendorPortal/Admin'));
+const Portal_Profile = React.lazy(() => import('./pages/VendorPortal/Profile'));
+const Portal_Notes = React.lazy(() => import('./pages/VendorPortal/Notes'));
+
+// import Portal_Admin from "./pages/VendorPortal/Admin";
+// import Portal_Profile from "./pages/VendorPortal/Profile";
+// import Portal_Notes from "./pages/VendorPortal/Notes";
 import NotFound from "./NotFound";
 import { getAllowedRoutes } from './VMRoute'
 import { useStateContext } from "./pages/context/contextAuth";
@@ -74,67 +87,116 @@ const AppRouter = () => {
             children: [
                 {
                     path: '',
-                    element: <Portal_Dashboard />
+                    element: (
+                        <LazyWrapper>
+                            <Portal_Dashboard />
+                        </LazyWrapper>
+                    )
                 },
                 {
                     path: 'Notes',
-                    element: <Portal_Notes />
+                    element: (
+                        <LazyWrapper>
+                            <Portal_Notes />
+                        </LazyWrapper>
+                    ),
                 },
                 {
                     path: 'Jobs',
                     children: [
                         {
                             path: '',
-                            element: <Portal_Jobs_All />
-                        }
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Jobs_All />
+                                </LazyWrapper>
+                            ),                        }
                         ,
                         {
                             path: 'Offers',
-                            element: <Portal_Jobs_Offers />
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Jobs_Offers />
+                                </LazyWrapper>
+                            ),
                         },
                         {
                             path: 'Closed',
-                            element: <Portal_Jobs_Closed />
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Jobs_Closed />
+                                </LazyWrapper>
+                            ),
                         },
                         {
                             path: 'Notifications',
-                            element: <Portal_Jobs_Notifications />
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Jobs_Notifications />
+                                </LazyWrapper>
+                            ),
                         },
                         {
                             path: 'ViewOffer/:type/:id',
-                            element: <Portal_ViewOffer />
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_ViewOffer />
+                                </LazyWrapper>
+                            ),
                         },
                         {
                             path: 'ViewJob/:id',
-                            element: <Portal_ViewJob />
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_ViewJob />
+                                </LazyWrapper>
+                            ),
                         },
-                    ]
+                    ],
                 },
                 {
-
                     path: 'Invoices',
                     children: [
                         {
                             path: '',
-                            element: <Portal_Invoices_All />
-                        }
-                        ,
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Invoices_All />
+                                </LazyWrapper>
+                            ),
+                        },
                         {
                             path: 'Verified',
-                            element: <Portal_Invoices_Verified />
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Invoices_Verified />
+                                </LazyWrapper>
+                            ),
                         },
                         {
                             path: 'addInvoice',
-                            element: <Portal_Add_Invoice />
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Add_Invoice />
+                                </LazyWrapper>
+                            ),
                         },
-                    ]
+                    ],
                 },
                 {
                     path: 'Admin',
-                    element: <Portal_Admin />
+                    element: (
+                        <LazyWrapper>
+                            <Portal_Admin />
+                        </LazyWrapper>
+                    ),
                 }, {
                     path: 'Profile',
-                    element: <Portal_Profile />
+                    element: (
+                        <LazyWrapper>
+                            <Portal_Profile />
+                        </LazyWrapper>
+                    ),
                 },
 
             ]

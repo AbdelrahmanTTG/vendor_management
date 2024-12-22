@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState, useRef, Suspense } from 'react';
-import { Card } from 'reactstrap';
+import { Card, CardBody } from 'reactstrap';
 import { useLocation } from 'react-router-dom';
 import { Spinner } from '../../../../AbstractElements';
 const PersonalData = React.lazy(() => import('./PersonalData'));
@@ -109,6 +109,12 @@ const EditProfile = (props) => {
     if (redirect) {
         return <Navigate to='*' />;
     }
+    const isPermissionsEmpty = (permissions) => {
+        return Object.entries(permissions)
+            .filter(([key]) => key !== 'Profile')
+            .every(([, value]) => value === null || value === undefined);
+    }
+    const isEmpty = isPermissionsEmpty(props.permissions);
     return (
         <Fragment >
             <div
@@ -231,7 +237,18 @@ const EditProfile = (props) => {
                         </div>
                     </LazyWrapper>
                 )}
-
+                <Fragment>
+                    {isEmpty && (
+                        <Card>
+                            <CardBody>
+                                <div style={{ textAlign: 'center' }}>
+                                    <h5>Oops !!</h5>
+                                    <h6>You are not allowed to see any sections here ):</h6>
+                                </div>
+                            </CardBody>
+                        </Card>
+                    )}
+                </Fragment>
             </div>
 
 

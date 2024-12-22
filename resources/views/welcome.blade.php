@@ -8,7 +8,7 @@
 
   <title>lingo talents</title>
   <!-- <title>{{ env('APP_NAME', 'Laravel') }}</title> -->
-  <!-- <link rel="icon" href="{{ asset('build/images/app_icon.png') }}" type="image/png"> -->
+  <link rel="icon" href="{{ asset('Lingotalents_icon.png') }}" type="image/png"> 
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.bunny.net">
