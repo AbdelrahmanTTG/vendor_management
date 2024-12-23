@@ -208,7 +208,8 @@ export const VM = (allowedPermissions) => [
                     key="Country"
                     permissions={allowedPermissions['Country']}
 
-                    table="Country" dataTable="countries" header={["id", " Name", "Region", "Active", "Edit", "Delete"]} related={{
+                    table="Country" dataTable="countries" header={["id", " Name", "Region", "Active", "Edit", "Delete"]}
+                    related={{
                         'table': 'regions',
                         'foreign_key': 'region',
                         'primary_key': 'id',
@@ -279,13 +280,13 @@ export const VM = (allowedPermissions) => [
         )
     },
     {
-        path: 'Sub–Subject Matter',
+        path: 'Sub-Subject Matter',
         element: (
             <LazyWrapper>
                 <CodeTable
-                    permissions={allowedPermissions['Sub–Subject Matter']}
-                    key="Sub–Subject Matter"
-                    table="Sub–Subject Matter"
+                    permissions={allowedPermissions['Sub-Subject Matter']}
+                    key="Sub-Subject Matter"
+                    table="Sub-Subject Matter"
                     dataTable="fields"
                     columns={["id", "name", "Active"]}
                     header={["id", " name", "Active", "Edit", "Delete"]}
