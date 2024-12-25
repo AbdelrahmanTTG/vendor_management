@@ -93,8 +93,7 @@ class AuthController extends Controller
                 'error' => 'Invalid data provided',
                 'messages' => $validator->errors(),
             ], 422);
-        }
-        ;
+        };
         try {
             $role = Crypt::decrypt($request->input('role'));
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
@@ -193,7 +192,7 @@ class AuthController extends Controller
     }
     public function routes(Request $request)
     {
-   $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'role' => 'required|string',
         ]);
         if ($validator->fails()) {
@@ -201,21 +200,20 @@ class AuthController extends Controller
                 'error' => 'Invalid data provided',
                 'messages' => $validator->errors(),
             ], 401);
-        }
-        ;
+        };
         try {
             $role = Crypt::decrypt($request->input('role'));
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Failed to decrypt role'], 400);
         }
-      $allowedRoutes = DB::table('permission')
-    ->join('screen', 'permission.screen', '=', 'screen.id')
-    ->where('permission.role', $role)
-    ->where('screen.use_system', 'VM')
-    ->select('screen.url', 'permission.add as add','permission.edit as edit','permission.delete as delete','permission.view as view') 
-    ->get();
-                return response()->json([
-                    'allowedRoutes' => $allowedRoutes,
-                ], 200);
+        $allowedRoutes = DB::table('permission')
+            ->join('screen', 'permission.screen', '=', 'screen.id')
+            ->where('permission.role', $role)
+            ->whereIn('screen.use_system', ['VM', 'ERP,VM'])
+            ->select('screen.url', 'permission.add as add', 'permission.edit as edit', 'permission.delete as delete', 'permission.view as view')
+            ->get();
+        return response()->json([
+            'allowedRoutes' => $allowedRoutes,
+        ], 200);
     }
 }
