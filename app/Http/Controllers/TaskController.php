@@ -6,6 +6,7 @@ use App\Http\Resources\TaskHistoryResource;
 use App\Http\Resources\TaskNotesResource;
 use Illuminate\Http\Request;
 use App\Http\Resources\TaskResource;
+use App\Models\BrandUsers;
 use App\Models\Logger;
 use App\Models\OfferList;
 use App\Models\Task;
@@ -15,7 +16,9 @@ use App\Models\VendorInvoice;
 use App\Models\VmSetup;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PortalMail;
+use App\Models\Vendor;
 
 class TaskController extends Controller
 {
@@ -90,7 +93,7 @@ class TaskController extends Controller
      * List All Jobs 
      */
     public function allJobs(Request $request)
-    {       
+    {
         $request['id'] = Crypt::decrypt($request->id);
         $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', '!=', 6);
         $tasks = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
@@ -182,7 +185,17 @@ class TaskController extends Controller
         $task = Task::find($request->task_id);
         // echo $message;
         if (TaskConversation::create($data)) {
-            //   $this->admin_model->sendVendorMessageMail($data['task'], $this->user, $data['message']);
+            // get config & pm email
+            $vmConfig = VmSetup::first();
+            $pmEmail = BrandUsers::select('email')->where('id', $task->created_by)->get();
+            $mailData = [
+                'subject' => $vmConfig->pe_message_subject,
+                'title' => 'Task New Reply',
+                'body' =>  $vmConfig->pe_message_body,
+                'data' =>  $request->message,
+                'taskDetails' => $task,
+            ];
+            Mail::to($pmEmail)->send(new PortalMail($mailData));
             $msg['type'] = "success";
             $message = "Your Message Send Successfully";
         } else {
@@ -201,11 +214,20 @@ class TaskController extends Controller
         $data['status'] = 3;
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($task) {
-             Logger::addToLoggerUpdate('job_task', 'id', $request->id, $request->vendor);
+            Logger::addToLoggerUpdate('job_task', 'id', $request->id, $request->vendor);
             if ($task->update($data)) {
                 //  add to task log
                 $this->addToTaskLogger($request->id, 2, $request->vendor);
-                //  $this->admin_model->sendVendorRejectionMail($data['id'], $this->user);
+                // send Rejection Mail          
+                $pmEmail = BrandUsers::select('email')->where('id', $task->created_by)->get();
+                $mailData = [
+                    'subject' => 'Task Rejected',
+                    'title' => 'Task Rejected',
+                    'body' =>  'Hello, Task rejected in Lingo Talents',
+                    'taskDetails' => $task,
+                    'showMoreDetails' => 1,
+                ];
+                Mail::to($pmEmail)->send(new PortalMail($mailData));
                 $msg['type'] = "success";
                 $message = "Your Offer Rejected Successfully";
             } else {
@@ -229,12 +251,20 @@ class TaskController extends Controller
         $data['status'] = 0;
         $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($task) {
-            Logger::addToLoggerUpdate('job_task', 'id', $request->id, $request->vendor);            
+            Logger::addToLoggerUpdate('job_task', 'id', $request->id, $request->vendor);
             if ($task->update($data)) {
                 // add to task log
                 $this->addToTaskLogger($request->id, 1, $request->vendor);
-                //    $this->admin_model->addToTaskLogger($data['id'], 1);
-                //    $this->admin_model->sendVendorAcceptanceMail($data['id'], $this->user);
+                // send Acceptance Mail          
+                $pmEmail = BrandUsers::select('email')->where('id', $task->created_by)->get();
+                $mailData = [
+                    'subject' => 'Task Accepted',
+                    'title' => 'Task Accepted',
+                    'body' =>  'Hello, Task accepted in Lingo Talents',
+                    'taskDetails' => $task,
+                    'showMoreDetails' => 1,
+                ];
+                Mail::to($pmEmail)->send(new PortalMail($mailData));
                 $msg['type'] = "success";
                 $message = "Your Offer Accepted Successfully";
             } else {
@@ -257,7 +287,7 @@ class TaskController extends Controller
         $offer = OfferList::where('vendor_list', 'Like', "%$request->vendor,%")->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
         if ($offer) {
             $data['status'] = 0;
-            Logger::addToLoggerUpdate('job_offer_list', 'id', $request->id, $request->vendor);            
+            Logger::addToLoggerUpdate('job_offer_list', 'id', $request->id, $request->vendor);
             if ($offer->update($data)) {
                 $job_data['job_id'] = $offer->job_id;
                 $job_data['subject'] = $offer->subject;
@@ -287,11 +317,32 @@ class TaskController extends Controller
                     // add to task log
                     $this->addToTaskLogger($insert_id, 1, $request->vendor);
                     $data['task_id'] = $insert_id;
-                    Logger::addToLoggerUpdate('job_offer_list', 'id', $request->id, $request->vendor);                    
+                    Logger::addToLoggerUpdate('job_offer_list', 'id', $request->id, $request->vendor);
                     $offer->update($data);
-                    //    $this->admin_model->sendVendorAcceptanceMail($insert_id, $this->user);
+                    // send Acceptance Mail          
+                    $pmEmail = BrandUsers::select('email')->where('id', $task->created_by)->get();
+                    $mailData = [
+                        'subject' => 'Task Accepted',
+                        'title' => 'Task Accepted',
+                        'body' =>  'Hello, Task accepted in Lingo Talents',
+                        'taskDetails' => $task,
+                        'showMoreDetails' => 1,
+                    ];
+                    Mail::to($pmEmail)->send(new PortalMail($mailData));
                     // send to other vendors emails --
-                    //   $this->admin_model->SendVendorTaskAlreadyAcceptedEmail($data['id']);
+                    $mailData2 = [
+                        'subject' => 'Job Offer',
+                        'title' => 'WE HAVE IMPORTANT INFORMATION FOR YOU',
+                        'body' =>  'Hello, this job offer is no longer available in Lingo Talents',
+                        'taskDetails' => $task,
+                    ];
+                    $vendor_list =  explode(', ', $offer->vendor_list);
+                    foreach ($vendor_list as $val) {
+                        if ($val == $request->vendor)
+                            continue;
+                        $vendorEmail = Vendor::select('email')->where('id', $val)->get();
+                        Mail::to($vendorEmail)->send(new PortalMail($mailData2));
+                    }
 
                     $msg['type'] = "success";
                     $message = "Your Offer Accepted Successfully";
@@ -330,7 +381,7 @@ class TaskController extends Controller
                     $data['vendor_attachment'] = $file->hashName();
                 }
             }
-            Logger::addToLoggerUpdate('job_task', 'id', $request->task_id, $request->vendor);               
+            Logger::addToLoggerUpdate('job_task', 'id', $request->task_id, $request->vendor);
             if ($offer->update($data)) {
                 $evaluation = VmSetup::first();
                 if ($evaluation->enable_evaluation == 1) {
@@ -362,17 +413,41 @@ class TaskController extends Controller
                         // do edit 
                         if ($task_ev->vendor_ev_type == null)
                             $dataEV['vendor_ev_created_at'] = date("Y-m-d H:i:s");
-                            Logger::addToLoggerUpdate('task_evaluation', 'task_id', $request->task_id, $request->vendor);
-                        
+                        Logger::addToLoggerUpdate('task_evaluation', 'task_id', $request->task_id, $request->vendor);
+
                         DB::table('task_evaluation')->where('task_id', $request->task_id)
                             ->update($dataEV);
                     }
                 }
                 // add to task log
                 $this->addToTaskLogger($request->task_id, 3, $request->vendor);
-
-                //  $this->admin_model->sendVendorFinishMail($data['id'], $this->user);
-                //  $this->admin_model->sendFinishMailForPm($data['id']);
+                //send Vendor Finish Mail         
+                $pmEmail = BrandUsers::select('email')->where('id', $offer->created_by)->get();
+                $vendorEmail = Vendor::select('email')->where('id', $request->vendor)->get();
+                $mailData = [
+                    'subject' => 'Task Finished -' . $offer->subject,
+                    'title' => 'Task Finished',
+                    'body' =>  'Hello,  Task Finished in Lingo Talents',
+                    'taskDetails' => $offer,
+                    'showMoreDetails' => 1,
+                ];
+                Mail::to($pmEmail)->cc($vendorEmail)->send(new PortalMail($mailData));
+                //send Confirm Task Mail To Pm        
+                $pmEmail = BrandUsers::select('email')->where('id', $offer->created_by)->get();
+                $encodeId = base64_encode($offer->id);
+                $confirmLink = "<strong>Confirm Task : </strong>
+                 <a href='https://aixnexus.com/erp/projectManagment/pmDirectConfirmExternalLink?task_id='.$encodeId>
+                                                                Click Here To Confirm
+                                                            </a>";
+                $mailData2 = [
+                    'subject' => 'Confirm Task -' . $offer->subject,
+                    'title' => 'Confirm Task',
+                    'body' =>  'Hello,  Task Finished in Lingo Talents',
+                    'taskDetails' => $offer,
+                    'showMoreDetails' => 1,
+                    'data' =>  $confirmLink,
+                ];
+                Mail::to($pmEmail)->send(new PortalMail($mailData2));               
                 $msg['type'] = "success";
                 $message = "Your data has been successfully transmitted.";
             }
@@ -393,14 +468,30 @@ class TaskController extends Controller
         if ($offer) {
             $status = $data['status'] = $request->status;
             $data['plan_comment'] = $request->note ?? '';
-            Logger::addToLoggerUpdate('job_task', 'id', $request->task_id, $request->vendor);           
+            Logger::addToLoggerUpdate('job_task', 'id', $request->task_id, $request->vendor);
 
             if ($offer->update($data)) {
                 // add to task log
                 $this->addToTaskLogger($request->task_id, $status + 1, $request->vendor);
-
-                // $this->admin_model->sendVendorPlanMail($data['id'], $this->user);
-
+                // send Mail          
+                $pmEmail = BrandUsers::select('email')->where('id', $offer->created_by)->get();
+                if ($status == 8) {
+                    $subject = "Heads-up Request has been Accepted";
+                    $title = "Task Accepted";
+                    $body = "Hello, Heads-up Request has been Accepted in Lingo Talents";
+                } elseif ($status == 9) {
+                    $subject = "Heads-up Request has been Rejected";
+                    $title = "Task Rejected";
+                    $body = "Hello, Heads-up Request has been Rejected in Lingo Talents";
+                }
+                $mailData = [
+                    'subject' => $subject,
+                    'title' => $title,
+                    'body' =>  $body,
+                    'taskDetails' => $offer,
+                    'showMoreDetails' => 1,
+                ];
+                Mail::to($pmEmail)->send(new PortalMail($mailData));
                 $msg['type'] = "success";
                 $message = "Your Reply sent Successfully";
             } else {

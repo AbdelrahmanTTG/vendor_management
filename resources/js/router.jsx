@@ -27,6 +27,8 @@ const Portal_ViewJob = React.lazy(() => import('./pages/VendorPortal/Jobs/ViewJo
 const Portal_Admin = React.lazy(() => import('./pages/VendorPortal/Admin'));
 const Portal_Profile = React.lazy(() => import('./pages/VendorPortal/Profile'));
 const Portal_Notes = React.lazy(() => import('./pages/VendorPortal/Notes'));
+const Portal_Availability = React.lazy(() => import('./pages/VendorPortal/Availability'));
+const Portal_Availability_Details = React.lazy(() => import('./pages/VendorPortal/Availability/ViewDetails'));
 
 // import Portal_Admin from "./pages/VendorPortal/Admin";
 // import Portal_Profile from "./pages/VendorPortal/Profile";
@@ -42,7 +44,7 @@ const LazyWrapper = ({ children }) => (
 );
 const AppRouter = () => {
     const [routes, setRoutes] = useState([]);
-    const [loading, setLoading] = useState(true); 
+    const [loading, setLoading] = useState(true);
     const { user } = useStateContext();
     useEffect(() => {
         if (user?.role) {
@@ -51,7 +53,7 @@ const AppRouter = () => {
                 setRoutes(allowedRoutes);
                 setLoading(false);
             };
-            fetchRoutes();   
+            fetchRoutes();
         } else {
             setLoading(false);
 
@@ -64,7 +66,7 @@ const AppRouter = () => {
             <div className="theme-loader">
                 <div className="loader-p"></div>
             </div>
-        </div>; 
+        </div>;
     }
     const router = createBrowserRouter([
         {
@@ -80,7 +82,7 @@ const AppRouter = () => {
             element: <Dashboard />,
             children: routes,
 
-        },        
+        },
         {
             path: '/Vendor',
             element: <Dashboard_p />,
@@ -110,7 +112,8 @@ const AppRouter = () => {
                                 <LazyWrapper>
                                     <Portal_Jobs_All />
                                 </LazyWrapper>
-                            ),                        }
+                            ),
+                        }
                         ,
                         {
                             path: 'Offers',
@@ -137,7 +140,7 @@ const AppRouter = () => {
                             ),
                         },
                         {
-                            path: 'ViewOffer/:type/:id',
+                            path: 'ViewOffer',
                             element: (
                                 <LazyWrapper>
                                     <Portal_ViewOffer />
@@ -145,7 +148,7 @@ const AppRouter = () => {
                             ),
                         },
                         {
-                            path: 'ViewJob/:id',
+                            path: 'ViewJob',
                             element: (
                                 <LazyWrapper>
                                     <Portal_ViewJob />
@@ -197,6 +200,25 @@ const AppRouter = () => {
                             <Portal_Profile />
                         </LazyWrapper>
                     ),
+                }, {
+                    path: 'Availability',
+                    children: [
+                        {
+                            path: '',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Availability />
+                                </LazyWrapper>
+                            ),
+                        },
+                        {
+                            path: 'ViewDetails',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Availability_Details />
+                                </LazyWrapper>
+                            ),
+                        }],
                 },
 
             ]

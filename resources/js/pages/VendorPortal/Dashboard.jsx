@@ -4,7 +4,6 @@ import { Card, CardBody, CardHeader, Col, Row } from 'reactstrap';
 import { Btn, H4, H5 } from '../../AbstractElements';
 import { useStateContext } from '../../pages/context/contextAuth';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import axiosClient from '../AxiosClint';
 import Clock from 'react-clock';
 import 'react-clock/dist/Clock.css';

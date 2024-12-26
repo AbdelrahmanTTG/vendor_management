@@ -1,11 +1,11 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody, Table, TabContent, TabPane, Nav, NavItem, NavLink } from 'reactstrap';
-import { BreadcrumbsPortal, H5, Btn, LI, P, UL, H4 } from '../../../AbstractElements';
-import axios from 'axios';
+import { BreadcrumbsPortal, Btn, P } from '../../../AbstractElements';
 import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../context/contextAuth';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import SweetAlert from 'sweetalert2';
 
 const ViewOffer = () => {
     const navigate = useNavigate();
@@ -13,13 +13,17 @@ const ViewOffer = () => {
     const [pageTask, setPageTask] = useState([]);
     const [activeTab, setActiveTab] = useState('1');
     const { user } = useStateContext();
-    const { id, type } = useParams();
+    const [redirect, setRedirect] = useState(false);
+    const location = useLocation();
+    const { id, type } = location.state;
     const vendorRes = {
         'vendor': user.id,
         'id': pageTask.id,
     };
     useEffect(() => {
-        if (user) {
+        if (!id || !type) {
+            setRedirect(true);
+        } else {
             const payload = {
                 'vendor': user.id,
                 'id': id,
@@ -34,58 +38,89 @@ const ViewOffer = () => {
         }
     }, [user]);
 
-    const rejectOffer = (task) => {
-        if (!window.confirm("Are you sure you want to reject the offer?")) {
-            return;
-        }
-        axiosClient.post(baseURL + "cancelOffer", vendorRes)
-            .then(({ data }) => {
-                switch (data.type) {
-                    case 'success':
-                        toast.success(data.message);
-                        break;
-                    case 'error':
-                        toast.error(data.message);
-                        break;
-                }
-                navigate("/Vendor/Jobs", { replace: true });
-            });
+    const rejectOffer = () => {
+        SweetAlert.fire({
+            title: 'Are you sure you want to reject the offer?',
+            icon: 'warning',
+            confirmButtonText: 'Yes,Reject',
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axiosClient.post(baseURL + "cancelOffer", vendorRes)
+                    .then(({ data }) => {
+                        switch (data.type) {
+                            case 'success':
+                                toast.success(data.message);
+                                break;
+                            case 'error':
+                                toast.error(data.message);
+                                break;
+                        }
+                        navigate("/Vendor/Jobs", { replace: true });
+                    });
+            }
+        });
     };
 
     const acceptOffer = () => {
-        if (!window.confirm("Are you sure you want to accept the offer?")) {
-            return;
-        }
-        axiosClient.post(baseURL + "acceptOffer", vendorRes)
-            .then(({ data }) => {
-                switch (data.type) {
-                    case 'success':
-                        toast.success(data.message);
-                        break;
-                    case 'error':
-                        toast.error(data.message);
-                        break;
-                }
-                navigate("/Vendor/Jobs", { replace: true });
-            });
+        SweetAlert.fire({
+            title: 'Are you sure you want to accept the offer?',
+            icon: 'success',
+            confirmButtonText: 'Accept',
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axiosClient.post(baseURL + "acceptOffer", vendorRes)
+                    .then(({ data }) => {
+                        switch (data.type) {
+                            case 'success':
+                                toast.success(data.message);
+                                break;
+                            case 'error':
+                                toast.error(data.message);
+                                break;
+                        }
+                        navigate("/Vendor/Jobs", { replace: true });
+                    });
+            }
+        });
     };
     const acceptOfferList = () => {
-        if (!window.confirm("Are you sure you want to accept the offer?")) {
-            return;
-        }
-        axiosClient.post(baseURL + "acceptOfferList", vendorRes)
-            .then(({ data }) => {
-                switch (data.type) {
-                    case 'success':
-                        toast.success(data.message);
-                        break;
-                    case 'error':
-                        toast.error(data.message);
-                        break;
-                }
-                navigate("/Vendor/Jobs", { replace: true });
-            });
+        SweetAlert.fire({
+            title: 'Are you sure you want to accept the offer?',
+            icon: 'success',
+            confirmButtonText: 'Accept',
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axiosClient.post(baseURL + "acceptOfferList", vendorRes)
+                    .then(({ data }) => {
+                        switch (data.type) {
+                            case 'success':
+                                toast.success(data.message);
+                                break;
+                            case 'error':
+                                toast.error(data.message);
+                                break;
+                        }
+                        navigate("/Vendor/Jobs", { replace: true });
+                    });
+            }
+        });
     };
+    if (redirect) {
+        return <Navigate to='/Vendor/' />;
+    }
     return (
         <Fragment>
             <BreadcrumbsPortal mainTitle={pageTask.code} parent="My Jobs" title="Offer Details" />
@@ -110,19 +145,19 @@ const ViewOffer = () => {
                                 </div>
                                 <Nav tabs className="border-tab">
                                     <NavItem id="myTab" role="tablist">
-                                        <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} onClick={() => setActiveTab('1')}>
+                                        <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('1') }}>
                                             {'Details'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
-                                        <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} onClick={() => setActiveTab('2')}>
+                                        <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('2') }}>
                                             {'Files'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
-                                        <NavLink href="#javascript" className={activeTab === '3' ? 'active' : ''} onClick={() => setActiveTab('3')}>
+                                        <NavLink href="#javascript" className={activeTab === '3' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('3') }}>
                                             {'Instruction'}
                                         </NavLink>
                                         <div className="material-border"></div>

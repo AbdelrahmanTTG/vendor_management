@@ -37,9 +37,11 @@ export const MENUITEMS = [
        
         ],
       },
-      { path: `http://127.0.0.1:8000/app/faq`, icon: HelpCircle, type: "link", active: false, title: "FAQ" },
+      { path: `/Vendor/Availability`, icon: Mail, type: "link", active: true, title: "Availability" },
+      
+      // { path: `http://127.0.0.1:8000/app/faq`, icon: HelpCircle, type: "link", active: false, title: "FAQ" },
  
-      { path: `/Vendor/Admin`, icon: Users, type: "link", active: true, title: "Admin Page" },
+      // { path: `/Vendor/Admin`, icon: Users, type: "link", active: true, title: "Admin Page" },
       { path: `/Vendor/Profile`, icon: User, type: "link", active: true, title: "My Profile" },
     ],
   },

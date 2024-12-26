@@ -1,11 +1,10 @@
-import axios from 'axios';
 import axiosClient from '../../AxiosClint';
 import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardBody, Table, TabContent, TabPane, Nav, NavItem, NavLink, InputGroup, Input } from 'reactstrap';
 import { BreadcrumbsPortal, Btn, LI, P, UL, H6, Image } from '../../../AbstractElements';
 import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
 import { useStateContext } from '../../context/contextAuth';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import comment from '../../../assets/images/user/user.png';
 import { toast } from 'react-toastify';
 import { Edit } from 'react-feather';
@@ -13,9 +12,11 @@ import FinishModal from './FinishModal';
 import PlanModal from './PlanModal';
 
 const ViewJob = () => {
-    const baseURL = "/Portal/Vendor";    
+    const baseURL = "/Portal/Vendor";
     const { user } = useStateContext();
-    const { id } = useParams();
+    const [redirect, setRedirect] = useState(false);
+    const location = useLocation();
+    const id = location.state;
     const [pageTask, setPageTask] = useState([]);
     const [notes, setNotes] = useState([]);
     const [history, setHistory] = useState([]);
@@ -28,13 +29,15 @@ const ViewJob = () => {
     const toggle2 = () => setModal2(!modal2);
 
     useEffect(() => {
-        if (user) {
+        if (!id) {
+            setRedirect(true);
+        } else {
             const payload = {
                 'vendor': user.id,
                 'id': id,
             };
             axiosClient.post(baseURL + "/viewJob", payload)
-                .then(({ data }) => {                    
+                .then(({ data }) => {
                     const [Task] = [(data?.Task)];
                     const [Notes] = [(data?.Notes)];
                     const [History] = [(data?.History)];
@@ -73,9 +76,12 @@ const ViewJob = () => {
     // end send message
     const vendorRes = {
         'vendor': user.id,
-        'id': pageTask.id,        
-        
+        'id': pageTask.id,
+
     };
+    if (redirect) {
+         return <Navigate to='/Vendor/' />;
+    }
     return (
         <Fragment>
             <BreadcrumbsPortal mainTitle={pageTask.code} parent="My Jobs" title="Job Details" />
@@ -83,15 +89,15 @@ const ViewJob = () => {
                 <Row>
                     <Col sm="12">
                         <Card>
-                            <CardBody className='b-t-primary'>  
-                                <FinishModal isOpen={modal} title={'Finish and Send File'} toggler={toggle} fromInuts ={vendorRes} vmConfig ={vmConfig} ></FinishModal>
-                                <PlanModal isOpen={modal2} title={'Send Reply'} toggler={toggle2} fromInuts ={vendorRes} ></PlanModal>
+                            <CardBody className='b-t-primary'>
+                                <FinishModal isOpen={modal} title={'Finish and Send File'} toggler={toggle} fromInuts={vendorRes} vmConfig={vmConfig} ></FinishModal>
+                                <PlanModal isOpen={modal2} title={'Send Reply'} toggler={toggle2} fromInuts={vendorRes} ></PlanModal>
 
                                 <div className="pro-group pb-0" style={{ textAlign: 'right' }}>
                                     {pageTask.status == 0 && (
                                         <div className="pro-shop">
                                             <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle }}><i className="icofont icofont-check-circled me-2"></i> {'Finished This Job'}</Btn>
-                                        </div>   
+                                        </div>
                                     )}
                                     {pageTask.status == 7 && (
                                         <div className="pro-shop ">
@@ -101,31 +107,31 @@ const ViewJob = () => {
                                 </div>
                                 <Nav tabs className="border-tab">
                                     <NavItem id="myTab" role="tablist">
-                                        <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} onClick={() => setActiveTab('1')}>
+                                        <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} onClick={(e) => {e.preventDefault(); setActiveTab('1')}}>
                                             <i className="icofont icofont-list me-1"></i>{'Details'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
-                                        <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} onClick={() => setActiveTab('2')}>
+                                        <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} onClick={(e) => {e.preventDefault(); setActiveTab('2')}}>
                                             <i className="icofont icofont-clip me-1"></i>{'Files'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
-                                        <NavLink href="#javascript" className={activeTab === '3' ? 'active' : ''} onClick={() => setActiveTab('3')}>
+                                        <NavLink href="#javascript" className={activeTab === '3' ? 'active' : ''} onClick={(e) => {e.preventDefault(); setActiveTab('3')}}>
                                             <i className="icofont icofont-file-document me-1"></i>{'Instruction'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
-                                        <NavLink href="#javascript" className={activeTab === '4' ? 'active' : ''} onClick={() => setActiveTab('4')}>
+                                        <NavLink href="#javascript" className={activeTab === '4' ? 'active' : ''} onClick={(e) => {e.preventDefault(); setActiveTab('4')}}>
                                             <i className="icofont icofont-ui-messaging me-1"></i>{'Notes'}
                                         </NavLink>
                                         <div className="material-border"></div>
                                     </NavItem>
                                     <NavItem id="myTab" role="tablist">
-                                        <NavLink href="#javascript" className={activeTab === '5' ? 'active' : ''} onClick={() => setActiveTab('5')}>
+                                        <NavLink href="#javascript" className={activeTab === '5' ? 'active' : ''} onClick={(e) => {e.preventDefault();setActiveTab('5')}}>
                                             <i className="icofont icofont-history me-1"></i>{'Job history'}
                                         </NavLink>
                                         <div className="material-border"></div>

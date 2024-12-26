@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\VmCodeTableController;
 use App\Http\Controllers\CodingTableController;
 use App\Http\Controllers\InvoiceController;
@@ -92,6 +93,10 @@ Route::middleware(['auth:vendor'])->prefix('Portal')->group(function () {
         Route::post('saveInvoice', [InvoiceController::class, 'saveInvoice'])->name('Portal.saveInvoice');
         Route::post('getVendorBillingData', [InvoiceController::class, 'getVendorBillingData'])->name('Portal.getVendorBillingData');
         Route::post('dashboardData', [TaskController::class, 'index'])->name('Portal.dashboardData');
+        Route::post('getAvailabilityList', [AvailabilityController::class, 'index'])->name('Portal.getAvailabilityList');
+        Route::post('viewAvailabilityCheck', [AvailabilityController::class, 'viewAvailabilityCheck'])->name('Portal.viewAvailabilityCheck');
+        Route::post('acceptAvailability', [AvailabilityController::class, 'acceptAvailability'])->name('Portal.acceptAvailability');
+        Route::post('rejectAvailability', [AvailabilityController::class, 'rejectAvailability'])->name('Portal.rejectAvailability');
     });
     Route::group(['prefix' => 'Admin'], function () {
         Route::post('settingsData', [PortalAdminController::class, 'getSettingsData'])->name('Portal.getSettingsData');

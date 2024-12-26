@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment } from 'react';
 import { Pagination, PaginationItem, PaginationLink, Table } from 'reactstrap';
 import { Btn } from '../../../AbstractElements';
 import { Link } from 'react-router-dom';
@@ -38,6 +38,7 @@ const JobsTable = (props) => {
                             {viewStatus == "true" && (
                                 <th scope="col">{'Status'}</th>
                             )}
+                            <th scope="col">{'Brand'}</th>
                             <th scope="col">{'Actions'}</th>
                         </tr>
                     </thead>
@@ -60,16 +61,17 @@ const JobsTable = (props) => {
                                         {viewStatus == "true" && (
                                             <td>{item.statusData}</td>
                                         )}
+                                        <td>{item.brand_name}</td>
                                         <td>
                                             {item.type == 'job_offer' ? (
-                                                <Link to={`/Vendor/Jobs/viewOffer/${item.offer_type}/${item.id}`}>
+                                                <Link to={`/Vendor/Jobs/viewOffer`} state={{id:item.id,type: item.offer_type}}>
                                                     <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
                                                         {'View Offer'}
                                                     </Btn>
                                                 </Link>
                                             ) :
                                                 (
-                                                    <Link to={`/Vendor/Jobs/viewJob/${item.id}`}>
+                                                    <Link to={`/Vendor/Jobs/viewJob`} state= { item.id }>
                                                         <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
                                                             {'View Job'}
                                                         </Btn>
@@ -82,7 +84,7 @@ const JobsTable = (props) => {
                             </>
                         ) : (
                             <tr >
-                                <td scope="row" colSpan={12} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                <td scope="row" colSpan={viewStatus == "true"?14:13} className='text-center bg-light f-14' >{'No Data Available'}</td>
                             </tr>
                         )
                         }

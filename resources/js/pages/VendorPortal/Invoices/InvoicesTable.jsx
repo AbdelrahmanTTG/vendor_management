@@ -20,6 +20,7 @@ const InvoicesTable = (props) => {
                             <th scope="col">{'Invoice Date'}</th>
                             <th scope="col">{'Total'}</th>
                             <th scope="col">{'Payment Method'}</th>
+                            <th scope="col">{'Brand'}</th>
                             <th scope="col">{'Status'}</th>
 
                         </tr>
@@ -34,6 +35,7 @@ const InvoicesTable = (props) => {
                                         <td>{item.invoice_date}</td>
                                         <td>{item.total}</td>
                                         <td>{item.payment_method}</td>
+                                        <td>{item.brand_name}</td>
                                         <td>{item.statusData}</td>
                                     </tr>
                                 ))
@@ -41,7 +43,7 @@ const InvoicesTable = (props) => {
                             </>
                         ) : (
                             <tr >
-                                <td scope="row" colSpan={6} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                <td scope="row" colSpan={7} className='text-center bg-light f-14' >{'No Data Available'}</td>
                             </tr>
                         )
                         }

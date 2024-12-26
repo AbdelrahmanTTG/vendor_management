@@ -1,8 +1,7 @@
 
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody, Label, FormGroup, Input, CardFooter, Table, Nav, NavItem, TabContent, TabPane, NavLink, Media } from 'reactstrap';
-import { BreadcrumbsPortal, H5, Btn, H6, P, } from '../../AbstractElements';
-import axios from 'axios';
+import { BreadcrumbsPortal, H5, Btn, H6 } from '../../AbstractElements';
 import axiosClient from '../AxiosClint';
 import { useStateContext } from '../../pages/context/contextAuth';
 import { toast } from 'react-toastify';
@@ -161,7 +160,7 @@ const Admin = () => {
                               <FormGroup className="row  ">
                                 <Label className="col-sm-3 col-form-label">{'Email (Body)'}</Label>
                                 <Col sm="9">
-                                  <textarea name="pe_invoice_body" rows={10} className="form-control">{pageData.pe_invoice_body}</textarea>
+                                  <textarea name="pe_invoice_body" rows={10} className="form-control" defaultValue={pageData.pe_invoice_body}>{pageData.pe_invoice_body}</textarea>
                                 </Col>
                               </FormGroup>
                             </CardBody>
@@ -179,7 +178,7 @@ const Admin = () => {
                               <FormGroup className="row  ">
                                 <Label className="col-sm-3 col-form-label">{'Email (Body)'}</Label>
                                 <Col sm="9">
-                                  <textarea name="pe_message_body" rows={10} className="form-control">{pageData.pe_message_body}</textarea>
+                                  <textarea name="pe_message_body" rows={10} className="form-control" defaultValue={pageData.pe_message_body}>{pageData.pe_message_body}</textarea>
                                 </Col>
                               </FormGroup>
                             </CardBody>

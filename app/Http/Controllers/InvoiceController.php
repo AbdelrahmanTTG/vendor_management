@@ -4,14 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\InvoiceResource;
 use App\Http\Resources\TaskResource;
+use App\Mail\PortalMail;
 use App\Models\BankDetails;
 use App\Models\BillingData;
 use App\Models\Logger;
 use App\Models\Task;
+use App\Models\Vendor;
 use App\Models\VendorInvoice;
+use App\Models\VmSetup;
 use App\Models\WalletsPaymentMethods;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -151,7 +155,18 @@ class InvoiceController extends Controller
                     }
                 }
                 if ($msg['type'] = "success") {
-                    // $this->admin_model->sendVPOMail($jobs, $this->user);
+                    // get config & vendor email
+                    $tasks = Task::whereIn('id', $jobs)->get();
+                    $vmConfig = VmSetup::first();
+                    $vendorEmail = Vendor::select('email')->where('id', $request->vendor)->get();
+                    $mailData = [
+                        'subject' => $vmConfig->pe_invoice_subject,
+                        'title' => 'New Invoice',
+                        'body' =>  $vmConfig->pe_invoice_body,                        
+                        'taskDetails' => $tasks,
+                       
+                    ];                 
+                    Mail::to($vendorEmail)->cc($vmConfig->accounting_email)->send(new PortalMail($mailData));                       
                 }
             }
         }

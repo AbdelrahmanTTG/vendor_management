@@ -1,7 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody, Label, FormGroup, Input, Table, CardFooter } from 'reactstrap';
 import { BreadcrumbsPortal, H5, Btn, H6 } from '../../../AbstractElements';
-import axios from 'axios';
 import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import { toast } from 'react-toastify';

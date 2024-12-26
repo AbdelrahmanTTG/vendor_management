@@ -9,7 +9,7 @@ class VendorInvoice extends Model
 {
     use HasFactory;
     protected $table = 'vendor_invoices';
-    
+
     protected $fillable = [
         'vendor_id',
         'vpo_file',
@@ -41,5 +41,10 @@ class VendorInvoice extends Model
     {
         $verifiedArray = array("", "Verified", "Rejected", "Waiting Accounting Confirmation");
         return $verifiedArray[$this->verified];
+    }
+    
+    public function brand()
+    {
+        return  $this->belongsTo(Brand::class, 'brand_id');
     }
 }

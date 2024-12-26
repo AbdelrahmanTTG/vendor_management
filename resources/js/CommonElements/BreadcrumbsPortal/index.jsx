@@ -17,7 +17,7 @@ const Breadcrumbs = (props) => {
                 {/* <li className="breadcrumb-item">Home</li> */}
                 <li className="breadcrumb-item">{props.parent}</li>
                 {props.subParent ? <li className="breadcrumb-item">{props.subParent}</li> : ''}
-                <li className="breadcrumb-item active">{props.title}</li>
+                {props.title ?<li className="breadcrumb-item active">{props.title}</li> : ''}
               </ol>
             </Col>
             <Col sm="6" className='text-end'>
