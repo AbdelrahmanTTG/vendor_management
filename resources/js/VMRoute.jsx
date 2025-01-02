@@ -280,13 +280,13 @@ export const VM = (allowedPermissions) => [
         )
     },
     {
-        path: 'Sub–Subject Matter',
+        path: 'Sub-Subject Matter',
         element: (
             <LazyWrapper>
                 <CodeTable
-                    permissions={allowedPermissions['Sub–Subject Matter']}
-                    key="Sub–Subject Matter"
-                    table="Sub–Subject Matter"
+                    permissions={allowedPermissions['Sub-Subject Matter']}
+                    key="Sub-Subject Matter"
+                    table="Sub-Subject Matter"
                     dataTable="fields"
                     columns={["id", "name", "Active"]}
                     header={["id", " name", "Active", "Edit", "Delete"]}

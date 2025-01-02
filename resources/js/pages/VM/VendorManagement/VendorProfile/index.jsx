@@ -169,7 +169,7 @@ const Vendor = (props) => {
                 { value: 'contact_name', label: 'Contact Name' },
                 { value: 'email', label: 'Email' },
                 { value: 'phone_number', label: 'Phone Number' },
-                { value: 'anotherNumber', label: 'Another Number' },
+                { value: 'AnotherNumber', label: 'Another Number' },
                 { value: 'status', label: 'Status' },
                 { value: 'type', label: 'Type' },
                 { value: 'region', label: 'Region' },
