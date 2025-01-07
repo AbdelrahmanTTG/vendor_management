@@ -14,7 +14,7 @@ return new class extends Migration
         try {
             Schema::create('vendorTest', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('vendor_id');
+                $table->integer('vendor_id');
                 $table->boolean('test_type');
                 $table->boolean('test_result');
                 $table->string('test_upload');

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('wallets_payment_methods', function (Blueprint $table) {
             $table->id(); 
-            $table->unsignedBigInteger('bank_details_id');
+            $table->integer('bank_details_id');
             $table->string('method');    
             $table->string('account'); 
             $table->timestamps();

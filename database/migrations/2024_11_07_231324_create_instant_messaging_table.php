@@ -11,8 +11,8 @@ return new class extends Migration
         try {
             Schema::create('instant_messaging', function (Blueprint $table) {
                 $table->id(); 
-                $table->unsignedInteger('vendor_id'); 
-                $table->unsignedBigInteger('messaging_type_id'); 
+                $table->integer('vendor_id'); 
+                $table->integer('messaging_type_id'); 
                 $table->string('contact'); 
                 $table->timestamps(); 
 

@@ -13,7 +13,7 @@ return new class extends Migration
     {
          Schema::create('formatsTable', function (Blueprint $table) {
             $table->id(); 
-            $table->unsignedBigInteger('user_id');  
+            $table->integer('user_id');  
             $table->string('name');  
             $table->string('table');  
             $table->text('format'); 

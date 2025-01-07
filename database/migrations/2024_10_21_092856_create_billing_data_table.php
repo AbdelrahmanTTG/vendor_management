@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('billing_data', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('vendor_id');
+            $table->integer('vendor_id');
             $table->string('billing_legal_name');
             $table->string('city');
             $table->string('street');

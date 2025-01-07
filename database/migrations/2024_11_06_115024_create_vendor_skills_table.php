@@ -10,8 +10,8 @@ return new class extends Migration {
         try {
             Schema::create('vendor_skill', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('vendor_id');
-                $table->unsignedBigInteger('skill_id');
+                $table->integer('vendor_id');
+                $table->integer('skill_id');
                 $table->timestamps();
             });
         } catch (\Exception $e) {

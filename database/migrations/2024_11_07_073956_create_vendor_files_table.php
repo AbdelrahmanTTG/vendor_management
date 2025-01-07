@@ -11,7 +11,7 @@ return new class extends Migration
         try {
             Schema::create('vendor_files', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('vendor_id');
+                $table->integer('vendor_id');
                 $table->string('file_path');
                 $table->string('file_title');
                 $table->text('file_content');

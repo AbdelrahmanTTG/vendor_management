@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bank_details', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('billing_data_id');  
+            $table->integer('billing_data_id');  
             $table->string('bank_name');
             $table->string('account_holder');
             $table->string('swift_bic'); 
@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('payment_terms');  
             $table->text('bank_address');
             $table->timestamps(); 
-            // $table->foreign('billing_data_id')->references('id')->on('billing_data')->onDelete('cascade');
         });
     }
 

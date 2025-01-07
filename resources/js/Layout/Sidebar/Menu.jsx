@@ -32,7 +32,6 @@ export const Menu = () => {
         });
     }
   }, [user]);
-
   return menuItems;
 };
 

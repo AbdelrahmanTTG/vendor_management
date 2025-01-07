@@ -57,6 +57,7 @@ class AuthController extends Controller
                 'id' => Crypt::encrypt($userAccount->id),
                 'email' => base64_encode(app('encrypt')($userAccount->email)),
                 'username' => $userAccount->user_name,
+                // "userType" $user->use_type,
                 'role' => Crypt::encrypt($userAccount->role),
                 'brand' => Crypt::encrypt($userAccount->brand),
                 'emp_id' => Crypt::encrypt($userAccount->employees_id),
@@ -64,8 +65,10 @@ class AuthController extends Controller
                 'loggedin' => 1,
             ];
 
-            $token = JWTAuth::fromUser($user, ['exp' => now()->addHour()->timestamp]);
-
+            $token = JWTAuth::claims([
+                'exp' => now()->addHour()->timestamp,
+                'piv' => 1250,
+            ])->fromUser($user);
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $loginData,
@@ -99,32 +102,62 @@ class AuthController extends Controller
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Failed to decrypt role'], 400);
         }
-        $Permissions = Permission::getGroupByRole($role);
         $permissionsWithScreens = [];
-        foreach ($Permissions as $permission) {
-            $groups = [];
-            $screens = Permission::getScreenByGroupAndRole($permission->groups, $role);
-            foreach ($screens as $key) {
+        $gro = [];
+        $user = JWTAuth::parseToken()->authenticate();
+        if ($user->use_type == 0) {
+            $Permissions = DB::table('screen')
+                ->whereIn('screen.use_system', ['VM', 'ERP,VM'])
+                ->where('menu', 1)
+                ->select('groups', 'name', 'url', 'menu')
+                ->get();
+            $groupedPermissions = $Permissions->groupBy('groups');
 
-                $screen = Screen::getScreen($key->screen);
-                $screen->type = 'link';
-                $groups[] = $screen;
-            }
-            $newData = [];
-            if (count($groups) > 0) {
-                $group = Group::getGroup($permission->groups);
-                $newData = [
-                    'title' => $group->name,
-                    'type' => "sub",
-                    'active' => false
+            foreach ($groupedPermissions as $key => $value) {
+                foreach($value as $key2 => $value2){
+                    $value2->type = "link";
+                    unset($value2->groups);
+                    unset($value2->menu);
+                }
+                $gro = [
+                    'title' => Group::getGroup($key)->name,     
+                    'type' => "sub",      
+                    'active' => false,    
+                    'children' => $value   
                 ];
 
-                $screen = array_merge(['children' => $groups], $newData);
-                $permissionsWithScreens[$permission->groups] = $screen;
+                $permissionsWithScreens[$key] = $gro;
+            }
+        } else {
+            $Permissions = Permission::getGroupByRole($role);
+
+            foreach ($Permissions as $permission) {
+                $groups = [];
+                $screens = Permission::getScreenByGroupAndRole($permission->groups, $role);
+                foreach ($screens as $key) {
+
+                    $screen = Screen::getScreen($key->screen);
+                    $screen->type = 'link';
+                    $groups[] = $screen;
+                }
+                $newData = [];
+                if (count($groups) > 0) {
+                    $group = Group::getGroup($permission->groups);
+                    $newData = [
+                        'title' => $group->name,
+                        'type' => "sub",
+                        'active' => false
+                    ];
+
+                    $screen = array_merge(['children' => $groups], $newData);
+                    $permissionsWithScreens[$permission->groups] = $screen;
+                }
             }
         }
 
-        return response()->json(["Items" => $permissionsWithScreens], 200);
+
+        return response()->json([
+            "Items" => $permissionsWithScreens], 200);
     }
     public function RegenrateToken(Request $request)
     {
@@ -192,26 +225,42 @@ class AuthController extends Controller
     }
     public function routes(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'role' => 'required|string',
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => 'Invalid data provided',
-                'messages' => $validator->errors(),
-            ], 401);
-        };
-        try {
-            $role = Crypt::decrypt($request->input('role'));
-        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            return response()->json(['error' => 'Failed to decrypt role'], 400);
+        $user = JWTAuth::parseToken()->authenticate();
+        if ($user->use_type == 0) {
+            $allowedRoutes = DB::table('screen')
+                ->whereIn('screen.use_system', ['VM', 'ERP,VM'])
+                ->select(
+                    'screen.url',
+                    DB::raw('1 as `add`'),
+                    DB::raw('1 as `edit`'),
+                    DB::raw('1 as `delete`'),
+                    DB::raw('1 as `view`')
+                )
+                ->get();
+        } else {
+
+            $validator = Validator::make($request->all(), [
+                'role' => 'required|string',
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'error' => 'Invalid data provided',
+                    'messages' => $validator->errors(),
+                ], 401);
+            };
+            try {
+                $role = Crypt::decrypt($request->input('role'));
+            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                return response()->json(['error' => 'Failed to decrypt role'], 400);
+            }
+            $allowedRoutes = DB::table('permission')
+                ->join('screen', 'permission.screen', '=', 'screen.id')
+                ->where('permission.role', $role)
+                ->whereIn('screen.use_system', ['VM', 'ERP,VM'])
+                ->select('screen.url', 'permission.add as add', 'permission.edit as edit', 'permission.delete as delete', 'permission.view as view')
+                ->get();
         }
-        $allowedRoutes = DB::table('permission')
-            ->join('screen', 'permission.screen', '=', 'screen.id')
-            ->where('permission.role', $role)
-            ->whereIn('screen.use_system', ['VM', 'ERP,VM'])
-            ->select('screen.url', 'permission.add as add', 'permission.edit as edit', 'permission.delete as delete', 'permission.view as view')
-            ->get();
+
         return response()->json([
             'allowedRoutes' => $allowedRoutes,
         ], 200);

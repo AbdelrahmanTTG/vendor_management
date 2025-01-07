@@ -14,7 +14,7 @@ return new class extends Migration
         try {
             Schema::create('vendor_education', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('vendor_id');
+                $table->integer('vendor_id');
                 $table->string('university_name');
                 $table->string('latest_degree');
                 $table->year('year_of_graduation');
