@@ -57,7 +57,7 @@ class AuthController extends Controller
                 'id' => Crypt::encrypt($userAccount->id),
                 'email' => base64_encode(app('encrypt')($userAccount->email)),
                 'username' => $userAccount->user_name,
-                "userType" => $user->use_type == 0 ?"admin": "user",
+                "userType" => $user->use_type == 2 ?"admin": "user",
                 'role' => Crypt::encrypt($userAccount->role),
                 'brand' => Crypt::encrypt($userAccount->brand),
                 'emp_id' => Crypt::encrypt($userAccount->employees_id),
@@ -67,7 +67,7 @@ class AuthController extends Controller
 
             $token = JWTAuth::claims([
                 'exp' => now()->addHour()->timestamp,
-                'access_vendor'=> $user->use_type == 0 ? true : false,
+                'access_vendor'=> $user->use_type == 2 ? true : false,
                 'piv' => 1250,
             ])->fromUser($user);
             return response()->json([
@@ -106,7 +106,7 @@ class AuthController extends Controller
         $permissionsWithScreens = [];
         $gro = [];
         $user = JWTAuth::parseToken()->authenticate();
-        if ($user->use_type == 0) {
+        if ($user->use_type == 2) {
             $Permissions = DB::table('screen')
                 ->whereIn('screen.use_system', ['VM', 'ERP,VM'])
                 ->where('menu', 1)
@@ -227,8 +227,8 @@ class AuthController extends Controller
     public function routes(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $r = $this->getEmployeeHierarchy($user->id);
-        if ($user->use_type == 0) {
+        // $r = $this->getEmployeeHierarchy($user->id);
+        if ($user->use_type == 2) {
             $allowedRoutes = DB::table('screen')
                 ->whereIn('screen.use_system', ['VM', 'ERP,VM'])
                 ->select(

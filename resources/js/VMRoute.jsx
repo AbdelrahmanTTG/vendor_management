@@ -44,7 +44,7 @@ const fetchAllowedRoutes = async () => {
             role: JSON.parse(localStorage.getItem('USER')).role
         }
         const response = await axios.get('perm', { params: payload });
-        console.log(response)
+        // console.log(response)
         response.data.allowedRoutes.push({ url: "" });
         return response.data.allowedRoutes || [];
     } catch (error) {
@@ -174,14 +174,14 @@ export const VM = (allowedPermissions) => [
         )
     },
     {
-        path: 'Regain',
+        path: 'Region',
         element: (
             <LazyWrapper>
                 <CodeTable
-                    permissions={allowedPermissions['Regain']}
+                    permissions={allowedPermissions['Region']}
 
-                    key="Regain"
-                    table="Regain"
+                    key="Region"
+                    table="Region"
                     dataTable="regions"
                     columns={["id", "name", "abbreviations", "Active"]}
                     header={['ID', 'name', 'abbreviations', "Active", "Edit", "Delete"]}
