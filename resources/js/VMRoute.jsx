@@ -305,11 +305,11 @@ export const VM = (allowedPermissions) => [
         )
     },
     {
-        path: 'Service',
+        path: 'services',
         element: (
             <LazyWrapper>
                 <CodeTable
-                    permissions={allowedPermissions['Service']}
+                    permissions={allowedPermissions['services']}
                     key="Service"
                     table="Service"
                     dataTable="services"
@@ -330,12 +330,12 @@ export const VM = (allowedPermissions) => [
         )
     },
     {
-        path: 'Task Type',
+        path: 'task_type',
         element: (
             <LazyWrapper>
                 <CodeTable
                     key="Task Type"
-                    permissions={allowedPermissions['Task Type']}
+                    permissions={allowedPermissions['task_type']}
                     table="Task Type"
                     dataTable="task_type"
                     header={["id", " name", "Service", "Active", "Edit", "Delete"]}
@@ -435,12 +435,12 @@ export const VM = (allowedPermissions) => [
         )
     },
     {
-        path: 'language',
+        path: 'languages',
         element: (
             <LazyWrapper>
                 <CodeTable
-                    key="Language"
-                    permissions={allowedPermissions['language']}
+                    key="Languages"
+                    permissions={allowedPermissions['languages']}
                     table="Languages"
                     dataTable="languages"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
