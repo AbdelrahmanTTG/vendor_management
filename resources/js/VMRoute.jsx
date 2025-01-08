@@ -91,7 +91,7 @@ export const VM = (allowedPermissions) => [
         path: 'vendors/Profile',
         element: (
             <LazyWrapper>
-                <ProfileIndex permissions={allowedPermissions['vendors/profile']} />
+                <ProfileIndex permissions={allowedPermissions['vendors/Profile']} />
             </LazyWrapper>
         )
     },
