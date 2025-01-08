@@ -72,8 +72,8 @@ Route::middleware(['auth:api'])->group(function () {
 
 
 });
-Route::middleware(['auth:vendor'])->prefix('Portal')->group(function () {
-    Route::group(['prefix' => 'Vendor'], function () {
+Route::middleware([App\Http\Middleware\AdminAuth::class])->prefix('Portal')->group(function () {
+        Route::group(['prefix' => 'Vendor'], function () {
         Route::post('allJobs', [TaskController::class, 'allJobs'])->name('Portal.allJobs');
         Route::post('allJobOffers', [TaskController::class, 'allJobOffers'])->name('Portal.allJobOffers');
         Route::post('allClosedJobs', [TaskController::class, 'allClosedJobs'])->name('Portal.allClosedJobs');

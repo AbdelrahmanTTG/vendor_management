@@ -23,10 +23,10 @@ const LogoutClass = () => {
     <Fragment>
       <LI attrLI={{ className: "onhover-dropdown p-0", onClick: Logout }}>
         <Btn attrBtn={{ as: Card.Header, className: "btn btn-primary-light", color: "default" }}>
-          <Link to={`http://127.0.0.1:8000/login`}>
+          {/* <Link to={`http://127.0.0.1:8000/login`}> */}
             <LogOut />
             Log out
-          </Link>
+          {/* </Link> */}
         </Btn>
       </LI>
     </Fragment>

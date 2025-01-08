@@ -57,7 +57,7 @@ class AuthController extends Controller
                 'id' => Crypt::encrypt($userAccount->id),
                 'email' => base64_encode(app('encrypt')($userAccount->email)),
                 'username' => $userAccount->user_name,
-                // "userType" $user->use_type,
+                "userType" => $user->use_type == 0 ?"admin": "user",
                 'role' => Crypt::encrypt($userAccount->role),
                 'brand' => Crypt::encrypt($userAccount->brand),
                 'emp_id' => Crypt::encrypt($userAccount->employees_id),
@@ -67,6 +67,7 @@ class AuthController extends Controller
 
             $token = JWTAuth::claims([
                 'exp' => now()->addHour()->timestamp,
+                'access_vendor'=> $user->use_type == 0 ? true : false,
                 'piv' => 1250,
             ])->fromUser($user);
             return response()->json([
@@ -226,6 +227,7 @@ class AuthController extends Controller
     public function routes(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
+        $r = $this->getEmployeeHierarchy($user->id);
         if ($user->use_type == 0) {
             $allowedRoutes = DB::table('screen')
                 ->whereIn('screen.use_system', ['VM', 'ERP,VM'])
@@ -264,5 +266,43 @@ class AuthController extends Controller
         return response()->json([
             'allowedRoutes' => $allowedRoutes,
         ], 200);
+    }
+    public function getEmployeeHierarchy($managerId)
+    {
+        // Fetch direct subordinates
+        $subordinates = DB::table('employees')
+        ->select('employees.id as id', 'employees.name', 'users.id as userid')
+        ->leftJoin('users', 'users.employees_id', '=', 'employees.id')
+        ->where('employees.manager', $managerId)
+            // ->where('users.brand', $brand)
+            ->get();
+        // Initialize the result array
+        $result = [];
+
+        // Loop through direct subordinates
+        foreach ($subordinates as $subordinate) {
+            // Add the current subordinate to the result
+            $result[] = [
+                'id' => $subordinate->userid,
+                'name' => $subordinate->name,
+                // Recursive call for subordinates (if necessary)
+                'subordinates' => $this->extractIdsAsString($subordinate->id),
+            ];
+        }
+
+        return $subordinates;
+    }
+
+    public function extractIdsAsString($array, &$ids = [])
+    {
+        foreach ($array as $element) {
+            if (isset($element['id'])) {
+                $ids[] = $element['id'];
+            }
+            if (isset($element['subordinates']) && is_array($element['subordinates'])) {
+                $this->extractIdsAsString($element['subordinates'], $ids);
+            }
+        }
+        return implode(", ", $ids);
     }
 }

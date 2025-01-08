@@ -44,6 +44,7 @@ const fetchAllowedRoutes = async () => {
             role: JSON.parse(localStorage.getItem('USER')).role
         }
         const response = await axios.get('perm', { params: payload });
+        console.log(response)
         response.data.allowedRoutes.push({ url: "" });
         return response.data.allowedRoutes || [];
     } catch (error) {
@@ -122,7 +123,7 @@ export const VM = (allowedPermissions) => [
         )
     },
     {
-        path: 'vendors/Editprofiletest',
+        path: 'vendors/editprofiletest',
         element: (
             <LazyWrapper>
                 <EditVendorProfile permissions={
