@@ -5,6 +5,8 @@ import { Btn, H4, P } from "../AbstractElements";
 import { toast } from "react-toastify";
 import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
+import { Image } from '../AbstractElements';
+import Logo from '../assets/images/logo/1-400x141.png';
 
 const Login = () => {
  
@@ -65,11 +67,17 @@ const Login = () => {
       <div className="p-0 container-fluid">
         <div id="boxed-wrapper">
           <div id="wrapper" className="fusion-wrapper">
-            <main id="main" className="clearfix width-100" style={{ padding: "0", backgroundColor:"#0d1267" }}>
+            <main id="main" className="clearfix width-100" style={{ padding: "0", backgroundColor: "#0d1267" }}>
+              
               <div className="fusion-row" style={{ maxWidth: "100%" }}>
                 <section id="content" className="full-width">
+                  
                   <div id="post-1079" className="post-1079 page type-page status-publish hentry">
+                    
                     <div className="post-content">
+                      <div className="entry-content" style={{position:"fixed" ,right:"38vw"}}>
+                        <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
+                      </div>
                       <div
                         className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container fusion-parallax-none hundred-percent-fullwidth non-hundred-percent-height-scrolling lazyload"
                         style={{
@@ -92,6 +100,7 @@ const Login = () => {
                           backgroundAttachment: "fixed", 
                         }}
                       >
+                        
                         <Row>
                           <Col className="col-12">
                             <div className="login-card" style={{ backgroundColor:"rgb(0,0,0,0%)"}}>
