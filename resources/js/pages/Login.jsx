@@ -69,7 +69,7 @@ const Login = () => {
           <div id="wrapper" className="fusion-wrapper">
             <main id="main" className="clearfix width-100" style={{ padding: "0", backgroundColor: "#0d1267" }}>
               
-              <div className="fusion-row" style={{ maxWidth: "100%" }}>
+              <div className="fusion-row" style={{ maxWidth: "100%", maxHeight: "100vh", overflow: "hidden" }}>
                 <section id="content" className="full-width">
                   
                   <div id="post-1079" className="post-1079 page type-page status-publish hentry">
@@ -107,10 +107,10 @@ const Login = () => {
                         </div>
                         <Row>
                           <Col className="col-12">
-                            <div className="text-center mb-3">
+                            <div className="text-center " style={{ marginTop: '15vh' }}>
                               <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
                             </div>
-                            <div className="login-card" style={{ backgroundColor: "rgb(0,0,0,0%)", position:"relative" , top:"-20vh"}}>
+                            <div className="login-card" style={{ backgroundColor: "rgb(0,0,0,0%)", position:"relative" , top:"-28vh"}}>
                               <div className="login-main login-tab">
                                 <Form className="theme-form" onSubmit={Submit}>
                                   <H4>Sign</H4>
