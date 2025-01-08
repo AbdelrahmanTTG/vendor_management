@@ -75,9 +75,7 @@ const Login = () => {
                   <div id="post-1079" className="post-1079 page type-page status-publish hentry">
                     
                     <div className="post-content">
-                      <div className="entry-content" style={{position:"fixed" ,right:"38vw"}}>
-                        <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
-                      </div>
+                     
                       <div
                         className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container fusion-parallax-none hundred-percent-fullwidth non-hundred-percent-height-scrolling lazyload"
                         style={{
@@ -101,12 +99,21 @@ const Login = () => {
                         }}
                       >
                         
+                        {/* <div className="entry-content" style={{ position: "fixed", right: "38vw" }}>
+                          <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
+                        </div> */}
+                        <div>
+                          
+                        </div>
                         <Row>
                           <Col className="col-12">
-                            <div className="login-card" style={{ backgroundColor:"rgb(0,0,0,0%)"}}>
-                              <div className="login-main login-tab" >
-                                <Form className="theme-form" onSubmit={Submit} >
-                                  <H4>Sign </H4>
+                            <div className="text-center mb-3">
+                              <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
+                            </div>
+                            <div className="login-card" style={{ backgroundColor: "rgb(0,0,0,0%)", position:"relative" , top:"-20vh"}}>
+                              <div className="login-main login-tab">
+                                <Form className="theme-form" onSubmit={Submit}>
+                                  <H4>Sign</H4>
                                   <P>{"Enter your email & password to login"}</P>
                                   {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
                                   <FormGroup>
@@ -115,28 +122,27 @@ const Login = () => {
                                   </FormGroup>
                                   <FormGroup className="position-relative">
                                     <Label className="col-form-label">Password</Label>
-                                    <Input className="form-control" type={togglePassword ? "text" : "password"} required onChange={(e) => setPassword(e.target.value)} />
+                                    <Input
+                                      className="form-control"
+                                      type={togglePassword ? "text" : "password"}
+                                      required
+                                      onChange={(e) => setPassword(e.target.value)}
+                                    />
                                     <div className="show-hide" onClick={() => setTogglePassword(!togglePassword)}>
                                       <span className={togglePassword ? "" : "show"}></span>
                                     </div>
                                   </FormGroup>
                                   <div className="form-group mb-0">
-                                    {/* <div className="checkbox ms-3">
-                                      <Input id="checkbox1" type="checkbox" />
-                                      <Label className="text-muted" htmlFor="checkbox1">
-                                        Remember Password
-                                      </Label>
-                                    </div>
-                                    <a className="link" href="#javascript">
-                                      Forgot Password
-                                    </a> */}
-                                    <Btn attrBtn={{ color: "primary", className: "btn-block", disabled: loading ? loading : loading }}>Login</Btn>
+                                    <Btn attrBtn={{ color: "primary", className: "btn-block", disabled: loading ? loading : loading }}>
+                                      Login
+                                    </Btn>
                                   </div>
                                 </Form>
                               </div>
                             </div>
                           </Col>
                         </Row>
+
                       </div>
                     </div>
                   </div>
