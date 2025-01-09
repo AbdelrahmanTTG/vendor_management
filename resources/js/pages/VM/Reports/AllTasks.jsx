@@ -370,7 +370,7 @@ const Report = () => {
                                                         <Label className="col-form-label-sm f-12" htmlFor='name'>{'Task Type'}</Label>
                                                         <Select id='task_type' required
                                                             name='task_type'
-                                                            options={optionsV} className="js-example-basic-single "
+                                                            options={optionsTY} className="js-example-basic-single "
                                                             onInputChange={(inputValue) =>
                                                                 handleInputChange(inputValue, "task_type", "task_type", setOptionsTY, optionsTY)
                                                             }

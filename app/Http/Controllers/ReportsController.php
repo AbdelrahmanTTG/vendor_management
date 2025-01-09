@@ -162,7 +162,7 @@ class ReportsController extends Controller
         // default columns array to display
         $tableColumns = DB::getSchemaBuilder()->getColumnListing('job_task');
       
-        $renameArrayForSearch = ['job.priceList.source' => 'source_name', 'job.priceList.target' => 'target_name', 'brand' => 'brand_name'];
+        $renameArrayForSearch = ['job.priceList.source' => 'source_name', 'job.priceList.target' => 'target_name', 'user.brand' => 'brand_name','brand'=> 'brand_name'];
         // check for special format
         $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
@@ -212,9 +212,11 @@ class ReportsController extends Controller
             } else {
                 if (!empty($request->queryParams)) {
                     foreach ($request->queryParams as $key => $val) {
-                        if (!in_array($key, $formatArray)) {                    
+                        if (!in_array($key, $formatArray) && ($key != 'start_date' && $key != 'end_date')){
+                         if(isset($renameArrayForSearch[$key]) && !in_array($renameArrayForSearch[$key],$formatArray)) { 
                             $formatArray[] = $renameArrayForSearch[$key] ?? $key;
-                        }                           
+                            }         
+                        }                  
                         if (!empty($val)) {
                             if (is_array($val)) {
                                 if (str_contains($key, '.')) {
@@ -284,7 +286,7 @@ class ReportsController extends Controller
             // $AllTasks = TaskResource::collection($tasks->get());
             $AllTasks = collect();
             $tasks->chunk(100, function ($chunk) use (&$AllTasks) {
-                $AllTasks = $AllTasks->merge(TicketResource::collection($chunk));
+                $AllTasks = $AllTasks->merge(TaskResource::collection($chunk));
             });
         }
         $perPage = $request->input('per_page', 10);

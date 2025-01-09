@@ -194,7 +194,7 @@ const ViewTicket = () => {
                         <Col sm="3">
                             {ticketData.statusVal != 4 && (
                                 <>
-                                    <VmResponseModal isOpen={modal2} title={'Add Comment'} toggler={toggle} fromInuts={res} sendDataToParent={toggle2} changeTicketData={changeData}></VmResponseModal>
+                                    <VmResponseModal isOpen={modal2} title={'Add Comment'} toggler={toggle2} fromInuts={res} sendDataToParent={toggle2} changeTicketData={changeData}></VmResponseModal>
                                     <div className="pro-shop text-end">
                                         <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle2 }}><i className="icofont icofont-ui-messaging me-2"></i> {'Add Comment'}</Btn>
                                     </div>

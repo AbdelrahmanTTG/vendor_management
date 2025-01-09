@@ -10,7 +10,7 @@ import FormatTable from "../Format";
 import SweetAlert from 'sweetalert2';
 import ExcelJS from 'exceljs';
 
-const TicketsList = () => {   
+const TicketsList = () => {
     const [tickets, setTickets] = useState([]);
     const [pageLinks, setPageLinks] = useState([]);
     const [totalCount, setTotalCount] = useState([]);
@@ -29,6 +29,8 @@ const TicketsList = () => {
     const [optionsS, setOptionsS] = useState([]);
     const [optionsU, setOptionsU] = useState([]);
     const [optionsB, setOptionsB] = useState([]);
+    const [optionsTY, setOptionsTY] = useState([]);
+    const [optionsMain, setOptionsMain] = useState([]);
     const [queryParams, setQueryParams] = useState(null);
     const [fields, setFields] = useState([]);
     const [headerFields, setHeaderFields] = useState([]);
@@ -117,6 +119,7 @@ const TicketsList = () => {
         handelingSelect("languages", setOptionsTL, "target_lang");
         handelingSelect("tools", setOptionsT, "software");
         handelingSelect("brand", setOptionsB, "brand");
+        handelingSelect("task_type", setOptionsTY, "task_type");
         handelingSelectUsers();
         try {
             axiosClient.post("getTicketsTotal").then(({ data }) => {
@@ -132,12 +135,15 @@ const TicketsList = () => {
         { value: 'brand', label: 'Brand' },
         { value: 'id', label: 'Ticket Number' },
         { value: 'request_type', label: 'Ticket Type' },
-        { value: 'status', label: 'Status' },
         { value: 'service', label: 'Service' },
+        { value: 'task_type', label: 'Task Type' },
         { value: 'source_lang', label: 'Source' },
         { value: 'target_lang', label: 'Target' },
+        { value: 'subject', label: 'Subject' },
         { value: 'software', label: 'Software' },
+        { value: 'status', label: 'Status' },
         { value: 'created_by', label: 'Requester Name' },
+        { value: 'date', label: 'Date' },
 
     ];
     const handleSearchInputsOnChange = (values) => {
@@ -151,7 +157,10 @@ const TicketsList = () => {
         const formData = new FormData(event.currentTarget);
         const data = {};
         for (let keyValue of formData.entries()) {
-            data[keyValue[0]] = formData.getAll(keyValue[0]);
+            if (keyValue[0] == 'start_date' || keyValue[0] == 'end_date')
+                data[keyValue[0]] = formData.get(keyValue[0]);
+            else
+                data[keyValue[0]] = formData.getAll(keyValue[0]);
         }
         setQueryParams(data);
         setCurrentPage(1);
@@ -178,7 +187,7 @@ const TicketsList = () => {
             setLoading(false);
         }, 10);
     };
-    
+
     const fetchData = useCallback(async (ex) => {
         const payload = {
             per_page: 10,
@@ -417,25 +426,6 @@ const TicketsList = () => {
                                                     </FormGroup>
                                                 </Col>
                                             }{
-                                                selectedSearchCol.indexOf("status") > -1 &&
-                                                <Col md='3'>
-                                                    <FormGroup>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Status'}</Label>
-                                                        <Select id='status' required
-                                                            name='status'
-                                                            options={
-                                                                [
-                                                                    { value: '0', label: 'Rejected' },
-                                                                    { value: '1', label: 'New' },
-                                                                    { value: '2', label: 'Opened' },
-                                                                    { value: '3', label: 'Partly Closed' },
-                                                                    { value: '4', label: 'Closed' },
-                                                                    { value: '5', label: 'Closed Waiting Requester Acceptance' },
-                                                                ]} className="js-example-basic-multiple typeInput mb-1" isMulti
-                                                        />
-                                                    </FormGroup>
-                                                </Col>
-                                            }{
                                                 selectedSearchCol.indexOf("service") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
@@ -444,6 +434,20 @@ const TicketsList = () => {
                                                             options={optionsS} className="js-example-basic-single "
                                                             onInputChange={(inputValue) =>
                                                                 handleInputChange(inputValue, "services", "service", setOptionsS, optionsS)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("task_type") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Task Type'}</Label>
+                                                        <Select id='task_type' required
+                                                            name='task_type'
+                                                            options={optionsTY} className="js-example-basic-single "
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "task_type", "task_type", setOptionsTY, optionsTY)
                                                             }
                                                             isMulti />
                                                     </FormGroup>
@@ -478,6 +482,20 @@ const TicketsList = () => {
                                                 </Col>
                                             }
                                             {
+                                                selectedSearchCol.indexOf("subject") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Main-Subject Matter (test)'}</Label>
+                                                        <Select name='subject' id='subject' required
+                                                            options={optionsMain} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "MainSubjectMatter", "subject", setOptionsMain, optionsMain)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
                                                 selectedSearchCol.indexOf("software") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
@@ -488,6 +506,25 @@ const TicketsList = () => {
                                                                 handleInputChange(inputValue, "tools", "software", setOptionsT, optionsT)
                                                             }
                                                             isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("status") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Status'}</Label>
+                                                        <Select id='status' required
+                                                            name='status'
+                                                            options={
+                                                                [
+                                                                    { value: '0', label: 'Rejected' },
+                                                                    { value: '1', label: 'New' },
+                                                                    { value: '2', label: 'Opened' },
+                                                                    { value: '3', label: 'Partly Closed' },
+                                                                    { value: '4', label: 'Closed' },
+                                                                    { value: '5', label: 'Closed Waiting Requester Acceptance' },
+                                                                ]} className="js-example-basic-multiple typeInput mb-1" isMulti
+                                                        />
                                                     </FormGroup>
                                                 </Col>
                                             }
@@ -512,6 +549,23 @@ const TicketsList = () => {
                                                             isMulti />
                                                     </FormGroup>
                                                 </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("date") > -1 &&
+                                                <>
+                                                    <Col md='4'>
+                                                        <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" >{'Date From'}</Label>
+                                                            <Input className='form-control digits' type='date' defaultValue='' name='start_date' required />
+                                                        </FormGroup>
+                                                    </Col>
+                                                    <Col md='4'>
+                                                        <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" >{'Date To'}</Label>
+                                                            <Input className='form-control digits' type='date' defaultValue='' name='end_date' required />
+                                                        </FormGroup>
+                                                    </Col>
+                                                </>
                                             }
 
 
@@ -578,7 +632,7 @@ const TicketsList = () => {
                                                 <th key={fieldIndex}>
                                                     {formatString(field)}
                                                 </th>
-                                            ))}                                           
+                                            ))}
                                             <th scope="col">{'View Ticket'}</th>
                                         </tr>
                                     </thead>
@@ -591,7 +645,7 @@ const TicketsList = () => {
                                                             <td key={fieldIndex}>
                                                                 {item[field]}
                                                             </td>
-                                                        ))}                                                       
+                                                        ))}
                                                         <td>
                                                             <button onClick={() => handleView(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
                                                                 <i className="icofont icofont-ui-edit"></i>

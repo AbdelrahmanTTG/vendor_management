@@ -12,13 +12,14 @@ use App\Models\VmTicketTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Validator;
 
 class TicketsController extends Controller
 {
     public function index(Request $request)
     {
         // default columns array to display        
-       
+
         // check for special format
         $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
@@ -30,7 +31,7 @@ class TicketsController extends Controller
                 return explode(',', $item);
             }, $formatArray));
             array_unshift($formatArray, "id");
-        }else{
+        } else {
             $formatArray = [
                 'id',
                 'brand',
@@ -56,27 +57,50 @@ class TicketsController extends Controller
         $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
             ->select('vm_ticket.*', 'users.brand AS brand')
             ->orderBy('vm_ticket.id', 'desc');
-        // if filter exists         
+        // if filter exists
         if (!empty($request->queryParams)) {
-            foreach ($request->queryParams as $key => $val) {
-                if (!in_array($key, $formatArray)) {                    
-                    $formatArray[] = $key;
-                }               
-                if (!empty($val)) {
-                    if (count($val) >= 1) {
-                        $tickets->where(function ($query) use ($key, $val) {
-                            if ($key != 'brand')
-                                $key = 'vm_ticket.' . $key;
-                            foreach ($val as $k => $v) {
-                                if ($k == 0) {
-                                    $query->where($key,  $v);
-                                } else {
-                                    $query->orWhere($key,  $v);
-                                }
+            $validator = Validator::make($request->queryParams, [
+                'start_date' => 'date',
+                'end_date' => 'date|after_or_equal:start_date',
+            ]);
+            if ($validator->fails()) {
+                $msg['type'] = "error";
+                $message = "";
+                foreach ($validator->errors()->all() as $err) {
+                    $message .= $err;
+                }
+                $msg['message'] = $message;
+                return response()->json($msg);
+            } else {
+                foreach ($request->queryParams as $key => $val) {
+                    if (!in_array($key, $formatArray) && ($key != 'start_date' && $key != 'end_date')) {
+                        $formatArray[] = $key;
+                    }
+                    if (!empty($val)) {
+                        if (is_array($val)) {                           
+                            $tickets->where(function ($query) use ($key, $val) {
+                                if ($key != 'brand')
+                                    $key = 'vm_ticket.' . $key;
+                                foreach ($val as $k => $v) {
+                                    if ($k == 0) {
+                                        $query->where($key,  $v);
+                                    } else {
+                                        $query->orWhere($key,  $v);
+                                    }
+                                }                                
+                            });
+                           
+                        } else {
+                            if ($key == 'start_date') {
+                                $start_date = $request->queryParams['start_date'];
+                                $tickets->where('created_at', '>=', $start_date);
+                            } elseif ($key == 'end_date') {
+                                $end_date = $request->queryParams['end_date'];
+                                $tickets->where('created_at', '<=', $end_date);
+                            } else {
+                                $tickets = $tickets->where($key, "like", "%" . $val . "%");
                             }
-                        });
-                    } else {
-                        $tickets = $tickets->where($key, "like", "%" . $val . "%");
+                        }
                     }
                 }
             }
@@ -97,7 +121,6 @@ class TicketsController extends Controller
             $tickets->chunk(100, function ($chunk) use (&$AllTickets) {
                 $AllTickets = $AllTickets->merge(TicketResource::collection($chunk));
             });
-
         }
         $perPage = $request->input('per_page', 10);
         $tickets = $tickets->paginate($perPage);
@@ -115,10 +138,10 @@ class TicketsController extends Controller
     public function getTicketsTotal()
     {
 
-        $total['new'] =  VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')->where('vm_ticket.status', 1)->get()->count();
-        $total['opened'] =  VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')->where('vm_ticket.status', 2)->get()->count();
-        $total['part_closed'] =  VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')->where('vm_ticket.status', 3)->get()->count();
-        $total['closed'] =  VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')->where('vm_ticket.status', 4)->get()->count();
+        $total['new'] =  VmTicket::where('vm_ticket.status', 1)->get()->count();
+        $total['opened'] =  VmTicket::where('vm_ticket.status', 2)->get()->count();
+        $total['part_closed'] =  VmTicket::where('vm_ticket.status', 3)->get()->count();
+        $total['closed'] =  VmTicket::where('vm_ticket.status', 4)->get()->count();
         return response()->json(["Total" => $total]);
     }
 
