@@ -312,3 +312,16 @@ VALUES
 ('5', 'Feedback', 'Feedback', '0', 'VM'),
 ('5', 'Vacation', 'Vacation', '0', 'VM'),
 ('5', 'History', 'History', '0', 'VM');
+
+INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '7', 'Vendors Tasks', 'reports/allTasks', '1', 'VM'); 
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '299', '21', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '299', '1', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '299', '32', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '5', 'Tickets', 'tickets', '1', 'VM'); 
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '300', '21', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '300', '1', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '300', '32', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '5', 'View Ticket', 'viewTicket', '0', 'VM'); 
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '301', '21', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '301', '1', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '301', '32', '1', '1', '1', '1', '1', '0') ;
