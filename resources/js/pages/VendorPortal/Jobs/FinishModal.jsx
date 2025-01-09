@@ -58,6 +58,8 @@ const FinishModal = (props) => {
       });
   };
 
+
+    
   return (
     <Modal isOpen={props.isOpen} toggle={props.toggler} size='lg' centered>
       <ModalHeader toggle={props.toggler}>
