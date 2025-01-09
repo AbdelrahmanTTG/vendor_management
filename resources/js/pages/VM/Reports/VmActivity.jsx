@@ -29,6 +29,53 @@ const Report = (props) => {
     const handleFormatsChanged = () => {
         setFormatsChanged(!formatsChanged)
     }
+       useEffect(() => {
+              formatData(formats);
+        }, [formats]);
+          const formatData = (format) => {
+      
+              const labelMapping = {
+             
+                  'brand': 'Brand',
+                  'opened_by': 'Opened By',
+                  'closed_by': 'Closed By',
+                  'created_by': 'Requester Name',
+                  'number_of_resource': 'Number Of Rescource',
+                  'request_type': 'Request Type',
+                  'service': 'Service',
+                  'task_type': 'Task Type',
+                  'rate': 'Rate',
+                  'count': 'Count',
+                  'unit': 'Unit',
+                  'currency': 'Currency',
+                  'source_lang': 'Source Language',
+                  'target_lang': 'Target Language',
+                  'start_date': 'Start Date',
+                  'delivery_date': 'Delivery Date',
+                  'subject': 'Subject Matter',
+                  'software': 'Software',
+                  'created_at': 'Request Time',
+                  'time_of_opening': 'Time Of Opening',
+                  'time_of_closing': 'Time Of CLosing',
+                  'TimeTaken': 'Taken Time',
+                  'new': 'New Vendors',
+                  'existing': 'Existing Vendors',
+                  'existing_pair': 'Existing Vendors with New Pairs',
+                  'status': 'Status',
+             
+              };
+              format?.flatMap(element =>
+                  element.format = element.format.split(',').map(value => {
+                      const trimmedValue = value.trim();
+                      return {
+                          value: trimmedValue,
+                          label: labelMapping[trimmedValue] || trimmedValue
+                      };
+                  })
+              );
+              // return data;
+      
+          }
     const handelingSelectUsers = async () => {
         try {
             setLoading(true);

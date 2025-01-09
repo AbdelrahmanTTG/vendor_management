@@ -210,7 +210,7 @@ const Education = (props) => {
                                                     value={field.value}
                                                     options={optionsLD}
                                                     onInputChange={(inputValue) =>
-                                                        handleInputChange(inputValue, "university_degree", "latest_degree", setoptionsLD, optionsLD)
+                                                        handleInputChange(inputValue, "University_degree", "latest_degree", setoptionsLD, optionsLD)
                                                     }
                                                     className="js-example-basic-single col-sm-12"
                                                     isSearchable
