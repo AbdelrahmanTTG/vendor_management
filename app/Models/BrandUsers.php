@@ -24,7 +24,7 @@ class BrandUsers extends Model
 
     public static function SelectVmData()
     {
-        $role = ['11'];
+        $role = ['11','32','59'];
         $query = self::whereIn("role", $role)->where('status', 1)->select('id', 'user_name');
         return $query->get();
     }

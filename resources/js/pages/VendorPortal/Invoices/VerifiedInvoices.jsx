@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardBody } from 'reactstrap';
-import { BreadcrumbsPortal} from '../../../AbstractElements';
+import { BreadcrumbsPortal, Spinner } from '../../../AbstractElements';
 import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import InvoicesTable from './InvoicesTable';
@@ -11,19 +11,20 @@ const VerifiedInvoices = () => {
     const [pageLinks, setPageLinks] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const { user } = useStateContext();
-
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (user) {
             const payload = {
                 'id': user.id,
                 'page': currentPage,
-            };
+            };            
             axiosClient.post(baseURL + "/paidInvoices", payload)
                 .then(({ data }) => {
                     const [Invoices] = [(data?.Invoices)];
                     const [Links] = [(data?.Links)];
                     setPageInvoices(Invoices);
                     setPageLinks(Links);
+                    setLoading(false);
                 });
         }
     }, [user, currentPage]);
@@ -44,7 +45,13 @@ const VerifiedInvoices = () => {
                             {/*                                 */}
                             {/* </CardHeader> */}
                             <CardBody className='b-l-primary'>
-                                <InvoicesTable pageInvoices={pageInvoices} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
+                                {loading ? (
+                                    <div className="loader-box" >
+                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                    </div>
+                                ) :
+                                    <InvoicesTable pageInvoices={pageInvoices} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
+                                }
                             </CardBody>
                         </Card>
                     </Col>

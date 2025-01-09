@@ -4,7 +4,6 @@ import { Btn, P } from '../../../AbstractElements';
 import { Close, SaveChanges } from '../../../Constant';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 import axiosClient from '../../AxiosClint';
 
 const FinishModal = (props) => {

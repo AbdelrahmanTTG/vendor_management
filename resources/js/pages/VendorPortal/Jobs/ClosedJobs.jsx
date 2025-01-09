@@ -1,7 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody } from 'reactstrap';
-import { BreadcrumbsPortal } from '../../../AbstractElements';
-import axios from 'axios';
+import { BreadcrumbsPortal, Spinner } from '../../../AbstractElements';
 import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import JobsTable from './JobsTable';
@@ -12,6 +11,7 @@ const ClosedJobs = () => {
   const [pageLinks, setPageLinks] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const { user } = useStateContext();
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (user) {
       const payload = {
@@ -24,6 +24,7 @@ const ClosedJobs = () => {
           const [Links] = [(data?.Links)];
           setPageTasks(Tasks);
           setPageLinks(Links);
+          setLoading(false);
         });
     }
   }, [user, currentPage]);
@@ -42,8 +43,14 @@ const ClosedJobs = () => {
               {/* <H5>List Of Finished Jobs</H5>                */}
               {/* </CardHeader> */}
               <CardBody className='b-l-primary'>
-                <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
-              </CardBody>
+                {loading ? (
+                  <div className="loader-box" >
+                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                  </div>
+                ) :
+                  <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
+                }
+                </CardBody>
             </Card>
           </Col>
         </Row>

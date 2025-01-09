@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody } from 'reactstrap';
-import { BreadcrumbsPortal, H5, Btn } from '../../../AbstractElements';
+import { BreadcrumbsPortal, H5, Btn, Spinner } from '../../../AbstractElements';
 import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import { Link } from 'react-router-dom';
@@ -12,7 +12,7 @@ const AllInvoices = () => {
   const [pageLinks, setPageLinks] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const { user } = useStateContext();
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (user) {
       const payload = {
@@ -20,17 +20,18 @@ const AllInvoices = () => {
         'page': currentPage,
       };
       axiosClient.post(baseURL + "/allInvoices", payload)
-        .then(({ data }) => {         
+        .then(({ data }) => {
           const [Invoices] = [(data?.Invoices)];
           const [Links] = [(data?.Links)];
           setPageInvoices(Invoices);
           setPageLinks(Links);
+          setLoading(false);
         });
     }
   }, [user, currentPage]);
 
   function handleDataFromChild(data) {
-      setCurrentPage(data);
+    setCurrentPage(data);
   }
 
   return (
@@ -47,7 +48,13 @@ const AllInvoices = () => {
           <Col sm="12">
             <Card>
               <CardBody>
-                <InvoicesTable pageInvoices={pageInvoices} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
+                {loading ? (
+                  <div className="loader-box" >
+                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                  </div>
+                ) :
+                  <InvoicesTable pageInvoices={pageInvoices} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
+                }
               </CardBody>
             </Card>
           </Col>

@@ -15,7 +15,6 @@ const Profile = () => {
   const { user } = useStateContext();
   const [activeTab, setActiveTab] = useState('1');
   const [id, setId] = useState(user.id);
-  const [vendorData, setVendorData] = useState([]);
   const [personalData, setPersonalData] = useState([]);
   const [billingData, setBillingData] = useState([]);
   const handleDataSend = (data) => {
@@ -51,6 +50,7 @@ const Profile = () => {
     // name: 'disable',
     email: 'disable',
     status: 'hide',
+    billing_status: 'hide',
     //  address:"disable"
   });
   const handleSubmit = (event) => {
@@ -92,7 +92,7 @@ const Profile = () => {
                           <Image attrImage={{ className: 'img-70 rounded-circle', alt: '', src: `${userImg}` }} />
                           <div className="media-body">
                             <Link to={``}>
-                              <H3 attrH3={{ className: 'mb-1 f-20 txt-primary' }}>{vendorData.name}</H3>
+                              <H3 attrH3={{ className: 'mb-1 f-20 txt-primary' }}>{personalData.name}</H3>
                             </Link>
                             <P></P>
                           </div>
@@ -101,8 +101,8 @@ const Profile = () => {
                     </Row>
                     <FormGroup className="mb-3">
                       <Label className="form-label">{EmailAddress}</Label>
-                      <Input type='hidden' name='id' defaultValue={vendorData.id} />
-                      <Input className="form-control" disabled placeholder={vendorData.email} />
+                      <Input type='hidden' name='id' defaultValue={user.id} />
+                      <Input className="form-control" disabled placeholder={personalData.email} />
                     </FormGroup>
                     <FormGroup className="mb-3">
                       <Label className="form-label">{Password}</Label>
@@ -144,7 +144,7 @@ const Profile = () => {
                         permission={permissions} vendorPersonalData={personalData} />
                     </TabPane>
                     <TabPane tabId="2">
-                      <Billing ID={id} />
+                      <Billing  permission={permissions} ID={id} />
                     </TabPane>
                   </TabContent>
                 </CardBody>

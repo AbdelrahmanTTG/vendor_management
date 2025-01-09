@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody } from 'reactstrap';
-import { BreadcrumbsPortal } from '../../../AbstractElements';
+import { BreadcrumbsPortal, Spinner } from '../../../AbstractElements';
 import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import JobsTable from './JobsTable';
@@ -11,7 +11,7 @@ const AllJobs = () => {
     const [pageLinks, setPageLinks] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const { user } = useStateContext();
-
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (user) {
             const payload = {
@@ -19,12 +19,12 @@ const AllJobs = () => {
                 'page': currentPage,
             };
             axiosClient.post(baseURL + "/allJobs", payload)
-                .then(({ data }) => {
-                    // console.log(data);                    
+                .then(({ data }) => {                                   
                     const [Tasks] = [(data?.Tasks)];
                     const [Links] = [(data?.Links)];
                     setPageTasks(Tasks);
                     setPageLinks(Links);
+                    setLoading(false);
                 });
         }
     }, [user, currentPage]);
@@ -45,7 +45,13 @@ const AllJobs = () => {
                             {/* <span> {'Use a class'} <code> {'table'} </code> {'to any table.'}</span> */}
                             {/* </CardHeader> */}
                             <CardBody className='b-l-primary'>
+                            {loading ? (
+                                <div className="loader-box" >
+                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                </div>
+                            ) :
                                 <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
+                            }
                             </CardBody>
                         </Card>
                     </Col>

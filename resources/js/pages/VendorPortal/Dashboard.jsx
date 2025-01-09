@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Archive, CloudLightning, CreditCard, Database, MessageCircle } from 'react-feather';
 import { Card, CardBody, CardHeader, Col, Row } from 'reactstrap';
-import { Btn, H4, H5 } from '../../AbstractElements';
+import { Btn, H4, H5, Spinner } from '../../AbstractElements';
 import { useStateContext } from '../../pages/context/contextAuth';
 import { Link } from 'react-router-dom';
 import axiosClient from '../AxiosClint';
@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [finishedJobs, setFinishedJobs] = useState([]);
   const [countData, setCountData] = useState([]);
   const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const month = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
   var d = new Date();
   let dateshow = month[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
@@ -45,7 +46,7 @@ const Dashboard = () => {
           setFinishedJobs(data?.finishedJobs);
           setCountData(data?.countData);
           setChartData(data?.chartData);
-
+          setLoading(false);
         });
     }
   }, [user]);
@@ -220,7 +221,7 @@ const Dashboard = () => {
                 } </div>
             </CardBody>
           </Card>
-        </Col>      
+        </Col>
       </Row>
       <Row>
         <Col sm="8" lg="8" xl="9">
@@ -240,7 +241,13 @@ const Dashboard = () => {
               </Row>
             </CardHeader>
             <CardBody className='pt-0 px-3'>
-              <JobsTable pageTasks={runningJobs} viewStatus="false" />
+              {loading ? (
+                <div className="loader-box" >
+                  <Spinner attrSpinner={{ className: 'loader-6' }} />
+                </div>
+              ) :
+                <JobsTable pageTasks={runningJobs} viewStatus="false" />
+              }
             </CardBody>
           </Card>
           <Card>
@@ -259,7 +266,13 @@ const Dashboard = () => {
               </Row>
             </CardHeader>
             <CardBody className='pt-0 px-3'>
-              <JobsTable pageTasks={pendingJobs} viewStatus="false" />
+              {loading ? (
+                <div className="loader-box" >
+                  <Spinner attrSpinner={{ className: 'loader-6' }} />
+                </div>
+              ) :
+                <JobsTable pageTasks={pendingJobs} viewStatus="false" />
+              }
             </CardBody>
           </Card>
           <Card>
@@ -278,7 +291,13 @@ const Dashboard = () => {
               </Row>
             </CardHeader>
             <CardBody className='pt-0 px-3'>
-              <JobsTable pageTasks={finishedJobs} viewStatus="false" />
+              {loading ? (
+                <div className="loader-box" >
+                  <Spinner attrSpinner={{ className: 'loader-6' }} />
+                </div>
+              ) :
+                <JobsTable pageTasks={finishedJobs} viewStatus="false" />
+              }
             </CardBody>
           </Card>
         </Col>
@@ -298,7 +317,7 @@ const Dashboard = () => {
                   </div>
                 </div>
               </Card>
-            </Col>          
+            </Col>
           </Row>
         </Col>
         <Col sm='12' xl='12'>

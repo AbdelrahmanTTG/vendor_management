@@ -608,6 +608,7 @@ const Billing = (props) => {
                                                         </Col>
                                                     </FormGroup>
                                                 </Col>
+                                                {(props.permission && props.permission.billing_status != "hide") &&
                                                 < Col md="6" id="status-wrapper" >
                                                     <FormGroup className="row" >
                                                         <Label className="col-sm-3 col-form-label" for="validationCustom01" > Status </Label>
@@ -636,6 +637,7 @@ const Billing = (props) => {
                                                         </Col>
                                                     </FormGroup>
                                                 </Col>
+                                                }
                                             </Row>
 
                                         </div>
