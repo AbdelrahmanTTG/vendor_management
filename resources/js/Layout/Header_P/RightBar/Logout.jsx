@@ -6,8 +6,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from '../../../pages/context/contextAuth'
 
 const LogoutClass = () => {
-  const history = useNavigate();
+  const navigate = useNavigate();
   const { setUser, setToken } = useStateContext();
+    const { user } = useStateContext();
+  
   const Logout = () => {
     setUser(null)
     setToken(null)
@@ -18,17 +20,22 @@ const LogoutClass = () => {
     localStorage.removeItem("ACCESS_TOKEN");
     // localStorage.setItem("authenticated", false);
   };
+  const convert = () => {
+    delete user.user_type;
+    setUser(user)
+    window.location.href = "/vm";
 
+
+  }
   return (
     <Fragment>
-      <LI attrLI={{ className: "onhover-dropdown p-0", onClick: Logout }}>
-        <Btn attrBtn={{ as: Card.Header, className: "btn btn-primary-light", color: "default" }}>
-          {/* <Link to={`http://127.0.0.1:8000/login`}> */}
-            <LogOut />
-            Log out
-          {/* </Link> */}
-        </Btn>
-      </LI>
+      <LI attrLI={{ className: "onhover-dropdown p-0" }}>
+        <button className="btn btn-primary-light" onClick={() => Logout() }  style={{ padding: "5px" }}>
+               <LogOut />
+               Log out
+               </button>
+               {user.userType == "admin" && <button className="btn btn-primary-light" onClick={() => convert()} style={{ padding: "5px" }}> Go back</button>}
+             </LI>
     </Fragment>
   );
 };

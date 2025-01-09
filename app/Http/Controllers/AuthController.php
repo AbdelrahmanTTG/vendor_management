@@ -68,7 +68,7 @@ class AuthController extends Controller
             $token = JWTAuth::claims([
                 'exp' => now()->addHour()->timestamp,
                 'access_vendor'=> $user->use_type == 2 ? true : false,
-                'piv' => 1250,
+                "piv" => $this->extractIdsAsString( $this->getEmployeeHierarchy($userAccount->employees_id))
             ])->fromUser($user);
             return response()->json([
                 'message' => 'Login successful',
@@ -227,7 +227,6 @@ class AuthController extends Controller
     public function routes(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        // $r = $this->getEmployeeHierarchy($user->id);
         if ($user->use_type == 2) {
             $allowedRoutes = DB::table('screen')
                 ->whereIn('screen.use_system', ['VM', 'ERP,VM'])
@@ -267,15 +266,15 @@ class AuthController extends Controller
             'allowedRoutes' => $allowedRoutes,
         ], 200);
     }
-    public function getEmployeeHierarchy($managerId)
+    public function getEmployeeHierarchy($managerId = 0)
     {
-        // Fetch direct subordinates
+        // Fetch direct subordinates using Query Builder
         $subordinates = DB::table('employees')
-        ->select('employees.id as id', 'employees.name', 'users.id as userid')
         ->leftJoin('users', 'users.employees_id', '=', 'employees.id')
-        ->where('employees.manager', $managerId)
-            // ->where('users.brand', $brand)
+        ->where('employees.manager', '=', $managerId)
+            ->select('employees.id as id', 'employees.name', 'users.id as userid')
             ->get();
+
         // Initialize the result array
         $result = [];
 
@@ -285,13 +284,13 @@ class AuthController extends Controller
             $result[] = [
                 'id' => $subordinate->userid,
                 'name' => $subordinate->name,
-                // Recursive call for subordinates (if necessary)
-                'subordinates' => $this->extractIdsAsString($subordinate->id),
+                'subordinates' => $this->getEmployeeHierarchy($subordinate->id) // Recursive call for subordinates
             ];
         }
 
-        return $subordinates;
+        return $result;
     }
+
 
     public function extractIdsAsString($array, &$ids = [])
     {

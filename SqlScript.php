@@ -97,7 +97,7 @@ try {
         ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
         "ALTER TABLE payment_method
         ADD COLUMN Active BOOLEAN DEFAULT false;",
-        
+
         // Create messaging_types table if not exists
         "CREATE TABLE IF NOT EXISTS messaging_types (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -202,7 +202,7 @@ try {
             ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NULL DEFAULT NULL,
             ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NULL DEFAULT NULL;",
 
-        
+
         // Alter the 'vendor' table to change column types
         "ALTER TABLE vendor
             MODIFY COLUMN name TEXT NOT NULL,
@@ -249,7 +249,7 @@ try {
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL
         );",
-       // Create the 'logger_master' table if it doesn't exist
+        // Create the 'logger_master' table if it doesn't exist
         "CREATE TABLE IF NOT EXISTS logger_master (
             id INT AUTO_INCREMENT PRIMARY KEY,
             screen DOUBLE NOT NULL,
@@ -260,7 +260,7 @@ try {
             created_by DOUBLE NOT NULL,
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL);",
-       // Create the 'skills' table if it doesn't exist
+        // Create the 'skills' table if it doesn't exist
         "CREATE TABLE IF NOT EXISTS skills (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
@@ -275,14 +275,14 @@ try {
             summary TEXT NULL,
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL);",
-            // Create the 'vendor_skill' table if it doesn't exist
+        // Create the 'vendor_skill' table if it doesn't exist
         "CREATE TABLE IF NOT EXISTS vendor_skill (
             id INT AUTO_INCREMENT PRIMARY KEY,
             vendor_id INT NOT NULL,
             skill_id INT NOT NULL,
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL);",
-            // Create the 'vendor_files' table if it doesn't exist
+        // Create the 'vendor_files' table if it doesn't exist
         "CREATE TABLE IF NOT EXISTS vendor_files (
             id INT AUTO_INCREMENT PRIMARY KEY,
             vendor_id INT NOT NULL,
@@ -291,7 +291,7 @@ try {
             file_content TEXT NOT NULL,
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL);",
-            //Create the 'instant_messaging' table if it doesn't exist
+        //Create the 'instant_messaging' table if it doesn't exist
         "CREATE TABLE IF NOT EXISTS instant_messaging (
             id INT AUTO_INCREMENT PRIMARY KEY,
             vendor_id INT NOT NULL,
@@ -344,6 +344,172 @@ try {
             updated_at TIMESTAMP NULL DEFAULT NULL);",
 
         "ALTER TABLE `vm_ticket` ADD `brand_id` INT(11) NULL AFTER `created_at`",
+
+        "ALTER TABLE `master_user` ADD COLUMN IF NOT EXISTS `use_system` VARCHAR(10) NULL AFTER `employees_id`",
+        "ALTER TABLE `master_user` ADD COLUMN IF NOT EXISTS `use_type` int(1) NULL AFTER `use_system`;",
+        "update `master_user` set `use_system` = 'ERP';",
+        "update `master_user` set `use_type` = '1';",
+        "ALTER TABLE `master_user` ADD COLUMN IF NOT EXISTS  `reset_token` text NULL ;",
+        "ALTER TABLE `master_user` ADD COLUMN IF NOT EXISTS `token_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+        "ALTER TABLE `master_user` ADD COLUMN IF NOT EXISTS `token_expiry` datetime NULL ;",
+        "ALTER TABLE `job` ADD COLUMN IF NOT EXISTS `rate` DOUBLE NULL;
+        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`currency` int(11) NULL;
+        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`revenue` DOUBLE NULL;
+        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`revenue_local` DOUBLE NULL;
+        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`lead` int(11) NULL;
+        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`attach_type` int(1) NULL;
+        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`job_file1` text NULL;
+        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`job_file2` text NULL;
+        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`job_file1_name` text NULL;
+        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`job_file2_name` text NULL;
+        ALTER TABLE `job` ADD `job_link` text NULL; ",
+        "CREATE TABLE IF NOT EXISTS `pm_setup` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `brand` int(11) NOT NULL,
+            `min_profit_percentage` double DEFAULT NULL,
+            `qmemail` varchar(200) DEFAULT NULL,
+            `qmemailsub` varchar(200) DEFAULT NULL,
+            `qmemaildesc` text,
+            `block_v_no` int(11) DEFAULT NULL,
+            `pm_ev_name1` varchar(100) DEFAULT NULL,
+            `pm_ev_per1` int(11) DEFAULT NULL,
+            `pm_ev_name2` varchar(100) DEFAULT NULL,
+            `pm_ev_per2` int(11) DEFAULT NULL,
+            `pm_ev_name3` varchar(100) DEFAULT NULL,
+            `pm_ev_per3` int(11) DEFAULT NULL,
+            `pm_ev_name4` varchar(100) DEFAULT NULL,
+            `pm_ev_per4` int(11) DEFAULT NULL,
+            `pm_ev_name5` varchar(100) DEFAULT NULL,
+            `pm_ev_per5` int(11) DEFAULT NULL,
+            `pm_ev_name6` varchar(100) DEFAULT NULL,
+            `pm_ev_per6` int(11) DEFAULT NULL,
+            `cuemailsub` varchar(200) DEFAULT NULL,
+            `cuemaildesc` text,
+            `c_ev_name1` varchar(100) DEFAULT NULL,
+            `c_ev_per1` int(11) DEFAULT NULL,
+            `c_ev_name2` varchar(100) DEFAULT NULL,
+            `c_ev_per2` int(11) DEFAULT NULL,
+            `c_ev_name3` varchar(100) DEFAULT NULL,
+            `c_ev_per3` int(11) DEFAULT NULL,
+            `c_ev_name4` varchar(100) DEFAULT NULL,
+            `c_ev_per4` int(11) DEFAULT NULL,
+            `c_ev_name5` varchar(100) DEFAULT NULL,
+            `c_ev_per5` int(11) DEFAULT NULL,
+            `c_ev_name6` varchar(100) DEFAULT NULL,
+            `c_ev_per6` int(11) DEFAULT NULL,
+            PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;",
+        "ALTER TABLE `vm_setup`
+        MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+        ALTER TABLE `vm_setup` CHANGE `id` `id` INT(11) NOT NULL AUTO_INCREMENT; 
+        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS `enable_evaluation` TINYINT NOT NULL DEFAULT '0' AFTER `unaccepted_offers_email`;
+        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name1` VARCHAR(255) NULL , ADD `v_ev_per1` INT(3) NULL ;  
+        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name2` VARCHAR(255) NULL , ADD `v_ev_per2` INT(3) NULL ;  
+        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name3` VARCHAR(255) NULL , ADD `v_ev_per3` INT(3) NULL ;  
+        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name4` VARCHAR(255) NULL , ADD `v_ev_per4` INT(3) NULL ;  
+        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name5` VARCHAR(255) NULL , ADD `v_ev_per5` INT(3) NULL ;  
+        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name6` VARCHAR(255) NULL , ADD `v_ev_per6` INT(3) NULL ;
+        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`pm_email` VARCHAR(255) NULL,ADD `vm_email` VARCHAR(255) NULL,  
+        ADD `accounting_email` VARCHAR(255) NULL; ",
+        "ALTER TABLE `job_task` ADD `brand` INT(11) NULL ;
+         ALTER TABLE `job_offer_list` ADD `brand` INT(11) NULL ;",
+        "CREATE TABLE IF NOT EXISTS vendor_aval_tot (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `name` VARCHAR(255) NULL,
+            `email` VARCHAR(255) NULL,
+            `contact` VARCHAR(255) NULL,
+            `country` TEXT NULL,
+            `type` INT NULL,
+            `source_lang` TEXT NULL,
+            `target_lang` TEXT NULL,
+            `dialect` TEXT NULL,
+            `service` TEXT NULL,
+            `task_type` TEXT NULL,  
+            `unit` TEXT NULL,   
+            `subject` TEXT NULL,  
+            `tools` TEXT NULL,
+            `rate` DECIMAL(18,5) NULL,  
+            `mothertongue` TEXT NULL, 
+            `nda` INT NULL, 
+            `vendor_count` INT NULL,
+            `attach_file` text null,
+            `email_subject` text null,
+            `email_body` text null,	
+            `status` INT NULL,
+            `brand` int null,
+            `duration` int null,
+            `created_by` int(11) NOT NULL,
+            `created_at` datetime NOT NULL,
+            `start_at` datetime NOT NULL,
+            `email_from` text  NULL,
+            `email_cc` text  NULL
+        );",
+        "CREATE TABLE IF NOT EXISTS vendor_aval_det (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `tot_id` INT,
+            `vendor` int null,
+            `name` TEXT NULL,
+            `email` TEXT NULL,
+            `vendor_status` int null,
+            `source_lang` TEXT NULL,
+            `target_lang` TEXT NULL,
+            `dialect` TEXT NULL,
+            `service` TEXT NULL,
+            `task_type` TEXT NULL,
+            `unit` TEXT NULL,
+            `rate` DECIMAL(18,5) NULL,  
+            `contact` TEXT NULL,
+            `phone_number` TEXT NULL,
+            `country` TEXT NULL,
+            `mother_tongue` TEXT NULL,
+            `nda` TEXT NULL,
+            `subjects` TEXT NULL,
+            `tools` TEXT NULL,
+            `vendor_type` TEXT NULL,
+            `task_count` int NULL,
+            `status` TEXT NULL,
+            `reasons` TEXT NULL,
+            `reminder` int null,
+            
+            FOREIGN KEY (tot_id) REFERENCES vendor_aval_tot(id)
+    );",
+        "ALTER TABLE `vendor_aval_det` ADD COLUMN IF NOT EXISTS`email_status` int NULL ;",
+        "CREATE TABLE IF NOT EXISTS holidays (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `start_date` datetime  NULL,
+            `end_date` datetime  NULL,
+            `description` text  NULL
+            )",
+        "CREATE TABLE IF NOT EXISTS companies_master (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `brand` int null,
+            `name` VARCHAR(255) NULL,
+            `start_at` datetime NOT NULL,
+            `excel_file` VARCHAR(255) NULL,
+            `duration` int null,
+            `email_from` text  NULL,
+            `email_cc` text  NULL,
+            `email_subject` text null,
+            `email_body` text null,	
+            `status` INT NULL,
+            `email_count` INT NULL,
+            `attach_file` text null,	
+            `created_by` int(11) NOT NULL,
+            `created_at` datetime NOT NULL
+            
+        );",
+        "CREATE TABLE companies_detailed (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `tot_id` INT,
+                `ser` INT,
+                `name` TEXT NULL,
+                `email` TEXT NULL,
+                `email_status` TEXT NULL,
+                
+                FOREIGN KEY (tot_id) REFERENCES vendor_aval_tot(id)
+            );",
+        "update screen set url ='campaign/',name='Campaigns' where  id = 175",
+       "INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`,`use_system`) VALUES ('165', '5', 'Vendor Availability', 'vendor/vendoravailability', '1','ERP');",
         "INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '7', 'VM Activity Sheet', 'reports/vmActivity', '1', 'VM'); ",
         "INSERT INTO screen (groups, name, url, menu, use_system)
             VALUES
