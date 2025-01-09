@@ -4,7 +4,7 @@ import Search from './searchModel';
 const CodeTables = (props) => {
     return (
         <Fragment>
-            <Search />
+            <Search fields={props.fields} />
             {/* <h1>{props.permission_add}</h1> */}
             <Table permissions={props.permissions} table={props.table} dataTable={props.dataTable} header={props.header} fields={props.fields} related={props.related} columns={props.columns}  />
         </Fragment>
