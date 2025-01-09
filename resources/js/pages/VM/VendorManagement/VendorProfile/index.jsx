@@ -1290,7 +1290,7 @@ const Vendor = (props) => {
                                                         <Select name='latest_degree' id='latest_degree' required
                                                             options={optionsLD} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
-                                                                handleInputChange(inputValue, "University_degree", "latest_degree", setoptionsLD, optionsLD)
+                                                                handleInputChange(inputValue, "University_Degree", "latest_degree", setoptionsLD, optionsLD)
                                                             }
                                                             isMulti />
                                                     </FormGroup>

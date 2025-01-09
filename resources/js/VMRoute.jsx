@@ -522,7 +522,7 @@ export const VM = (allowedPermissions) => [
                     key="University_Degree"
                     table="University Degree"
                     permissions={allowedPermissions['University Degree']}
-                    dataTable="University_degree"
+                    dataTable="University_Degree"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[

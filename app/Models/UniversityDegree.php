@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class UniversityDegree extends Model
 {
     use HasFactory;
-    protected $table = 'University_degree';
+    protected $table = 'University_Degree';
     public $timestamps = false;
 
     protected $fillable = ['name', 'Active'];
