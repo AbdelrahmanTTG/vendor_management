@@ -123,8 +123,8 @@ class InvoiceController extends Controller
                 $inv['payment_method'] = $request->payment_method;
                 $inv['total'] = $request->total;
                 $inv['invoice_date'] = date("Y-m-d H:i:s");
-                $inv['billing_legal_name'] = $billingData->billing_legal_name;
-                $inv['billing_address'] = $billingData->billing_address;
+                $inv['billing_legal_name'] = $billingData->billing_legal_name??'';
+                $inv['billing_address'] = $billingData->billing_address??'';
                 $inv['billing_currency'] = $billingData->billing_currency ?? '';
                 $inv['billing_due_date'] = $billingData->billing_due_date ?? '';
                 $inv['bank_name'] = $request->bank_name;

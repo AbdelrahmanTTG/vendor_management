@@ -522,7 +522,7 @@ const TicketsList = () => {
                                                 selectedSearchCol.indexOf("subject") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Main-Subject Matter (test)'}</Label>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Main-Subject Matter'}</Label>
                                                         <Select name='subject' id='subject' required
                                                             options={optionsMain} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
