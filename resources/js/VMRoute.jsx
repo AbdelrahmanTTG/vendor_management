@@ -44,6 +44,7 @@ const fetchAllowedRoutes = async () => {
             role: JSON.parse(localStorage.getItem('USER')).role
         }
         const response = await axios.get('perm', { params: payload });
+        // console.log(response)
         response.data.allowedRoutes.push({ url: "" });
         return response.data.allowedRoutes || [];
     } catch (error) {
@@ -217,7 +218,8 @@ export const VM = (allowedPermissions) => [
                     }}
                     fields={[
                         { name: 'name', type: 'text', field: "input", label: "Name" },
-                        { name: 'region', type: 'text', field: "select", tableData: "regions", label: "Region" },
+                        { name: 'region', type: 'text', field: "selec", tableData: "regions", label: "Region" },
+                        
                         {
                             name: 'Active', type: 'text', field: "selec", label: "Active", static: [
                                 { value: 1, label: 'Active' },
@@ -476,7 +478,7 @@ export const VM = (allowedPermissions) => [
                     }}
                     fields={[
                         { name: 'dialect', type: 'text', field: "input", label: "Dialect" },
-                        { name: 'language', type: 'text', field: "selec", tableData: "languages", label: "Language" },
+                        { name: 'language', type: 'text', field: "selec", tableData: "languages", label: "language" },
                         {
                             name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
                                 { value: 1, label: 'Active' },
@@ -520,7 +522,7 @@ export const VM = (allowedPermissions) => [
                     key="University_Degree"
                     table="University Degree"
                     permissions={allowedPermissions['University Degree']}
-                    dataTable="university_degree"
+                    dataTable="University_degree"
                     header={['ID', 'name', "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[

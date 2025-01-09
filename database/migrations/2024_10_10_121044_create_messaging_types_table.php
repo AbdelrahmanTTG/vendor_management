@@ -38,7 +38,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('messaging_types');
-        Schema::dropIfExists('university_Degree');
+        Schema::dropIfExists('University_Degree');
         Schema::dropIfExists('Major');
     }
 };

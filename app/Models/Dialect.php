@@ -18,7 +18,7 @@ class Dialect extends Model
         return [
             'id' => $insetData->id,
             'dialect' => $insetData->dialect,
-            'Language' => (object) [
+            'language' => (object) [
                 'id' => $relatedRecord->id,
                 'name' => $relatedRecord->name
             ],
@@ -39,7 +39,7 @@ class Dialect extends Model
         return [
             'id' => $item->id,
             'dialect' => $item->dialect,
-            'Language' => (object) [
+            'language' => (object) [
                 'id' => $relatedRecord->id,
                 'name' => $relatedRecord->name
             ],

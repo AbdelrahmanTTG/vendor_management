@@ -318,7 +318,44 @@ const Report = () => {
             window.URL.revokeObjectURL(url);
         });
     };
+    useEffect(() => {
+          formatData(formats);
+    }, [formats]);
+      const formatData = (format) => {
   
+          const labelMapping = {
+         
+              'subject': 'Subject',
+              'task_type': 'Task Type',
+              'vendor': 'Vendor',
+              'source_name': 'Source',
+              'target_name': 'Target',
+              'count': 'Count',
+              'unit': 'Unit',
+              'rate': 'Rate',
+              'total_cost': 'Total Cost',
+              'currency': 'Currency',
+              'start_date': 'Start Date',
+              'delivery_date': 'Delivery Date',
+              'status': 'Status',
+              'closed_date': 'Closed Date',
+              'created_by': 'Created by',
+              'created_at': 'Created at',
+              'brand_name': 'Brand'
+         
+          };
+          format?.flatMap(element =>
+              element.format = element.format.split(',').map(value => {
+                  const trimmedValue = value.trim();
+                  return {
+                      value: trimmedValue,
+                      label: labelMapping[trimmedValue] || trimmedValue
+                  };
+              })
+          );
+          // return data;
+  
+      }
    
     return (
         <Fragment >

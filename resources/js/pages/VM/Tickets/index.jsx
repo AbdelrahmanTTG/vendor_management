@@ -206,7 +206,44 @@ const TicketsList = () => {
     useEffect(() => {
         fetchData();
     }, [currentPage, queryParams, formatsChanged]);
+  useEffect(() => {
+        formatData(formats);
+  }, [formats]);
+    const formatData = (format) => {
 
+        const labelMapping = {
+            'name': 'Name',
+            'brand':"Brand",
+            'request_type':'Request Type',
+            'service':'Service',
+            'task_type': 'Task Type',
+            'rate': 'Rate',
+            'count': 'Count',
+            'unit': 'Unit',
+            'currency': 'Currency',
+            'source_lang': 'Source Language',
+            'target_lang': 'Target Language',
+            'start_date': 'Start Date',
+            'delivery_date': 'Delivery Date',
+            'subject': 'Subject Matter',
+            'software': 'Software',
+            'status': 'Status',
+            'created_by': 'Created By',
+            'created_at': 'Created At',
+       
+        };
+        format?.flatMap(element =>
+            element.format = element.format.split(',').map(value => {
+                const trimmedValue = value.trim();
+                return {
+                    value: trimmedValue,
+                    label: labelMapping[trimmedValue] || trimmedValue
+                };
+            })
+        );
+        // return data;
+
+    }
     const handlePageChange = (newPage) => {
         let tempPage = currentPage;
         if (newPage > 0) {

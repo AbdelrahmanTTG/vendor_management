@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\DB;
 
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['MainSubjectMatter','regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "university_degree", "major", "skills",'brand','vendors'];
+    protected static $validTables = ['MainSubjectMatter','regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "University_degree", "major", "skills",'brand','vendors'];
 
     protected static $models = [
         'regions' => Regions::class,
@@ -41,7 +41,7 @@ class CodingTableController extends Controller
         "tools" => Tools::class,
         "languages_dialect" => Dialect::class,
         "unit" => Unit::class,
-        "university_degree" => UniversityDegree::class,
+        "University_degree" => UniversityDegree::class,
         "major" => Major::class,
         "skills" => Skill::class,
         "MainSubjectMatter"=> MainSubjectMatter::class,
