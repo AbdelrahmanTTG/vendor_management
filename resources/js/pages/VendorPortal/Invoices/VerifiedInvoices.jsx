@@ -14,10 +14,19 @@ const VerifiedInvoices = () => {
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (user) {
-            const payload = {
+            let payload;
+            if (user.user_type == 'vendor') {
+              payload = {
                 'id': user.id,
                 'page': currentPage,
-            };            
+              };
+            } else if (user.userType == 'admin') {
+              payload = {
+                'userType': 'admin',
+                'id': 0,
+                'page': currentPage,
+              };
+            }        
             axiosClient.post(baseURL + "/paidInvoices", payload)
                 .then(({ data }) => {
                     const [Invoices] = [(data?.Invoices)];

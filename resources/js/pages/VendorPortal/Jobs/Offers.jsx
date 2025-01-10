@@ -13,9 +13,17 @@ const Offers = () => {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (user) {
-      const payload = {
-        'id': user.id
-      };      
+      let payload;           
+      if (user.user_type == 'vendor') {
+          payload = {
+              'id': user.id,              
+          };
+      } else if (user.userType == 'admin') {
+          payload = {
+              'userType': 'admin',
+              'id': 0,              
+          };
+      }   
       axiosClient.post(baseURL + "/allJobOffers", payload)
         .then(({ data }) => {
           const [Tasks] = [(data?.Tasks)];
@@ -41,7 +49,7 @@ const Offers = () => {
                     <Spinner attrSpinner={{ className: 'loader-6' }} />
                   </div>
                 ) :
-                  <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} />
+                  <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} viewVendor={user.user_type == 'vendor'?false:true}/>
                 }
               </CardBody>
             </Card>

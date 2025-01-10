@@ -32,10 +32,19 @@ const ViewJob = () => {
         if (!id) {
             setRedirect(true);
         } else {
-            const payload = {
-                'vendor': user.id,
-                'id': id,
-            };            
+            let payload;
+            if (user.user_type == 'vendor') {
+                payload = {
+                    'vendor': user.id,
+                    'id': id,
+                };
+            } else if (user.userType == 'admin') {
+                payload = {
+                    'userType': 'admin',
+                    'vendor': 0,
+                    'id': id,
+                };
+            }
             axiosClient.post(baseURL + "/viewJob", payload)
                 .then(({ data }) => {
                     const [Task] = [(data?.Task)];
@@ -96,21 +105,25 @@ const ViewJob = () => {
                                 </div>
                             ) :
                                 <CardBody className='b-t-primary'>
-                                    <FinishModal isOpen={modal} title={'Finish and Send File'} toggler={toggle} fromInuts={vendorRes} vmConfig={vmConfig} ></FinishModal>
-                                    <PlanModal isOpen={modal2} title={'Send Reply'} toggler={toggle2} fromInuts={vendorRes} ></PlanModal>
+                                    {(user.user_type == 'vendor') &&
+                                        <>
+                                            <FinishModal isOpen={modal} title={'Finish and Send File'} toggler={toggle} fromInuts={vendorRes} vmConfig={vmConfig} ></FinishModal>
+                                            <PlanModal isOpen={modal2} title={'Send Reply'} toggler={toggle2} fromInuts={vendorRes} ></PlanModal>
 
-                                    <div className="pro-group pb-0" style={{ textAlign: 'right' }}>
-                                        {pageTask.status == 0 && (
-                                            <div className="pro-shop">
-                                                <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle }}><i className="icofont icofont-check-circled me-2"></i> {'Finished This Job'}</Btn>
+                                            <div className="pro-group pb-0" style={{ textAlign: 'right' }}>
+                                                {pageTask.status == 0 && (
+                                                    <div className="pro-shop">
+                                                        <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle }}><i className="icofont icofont-check-circled me-2"></i> {'Finished This Job'}</Btn>
+                                                    </div>
+                                                )}
+                                                {pageTask.status == 7 && (
+                                                    <div className="pro-shop ">
+                                                        <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle2 }}><i className="icofont icofont-reply me-2"></i> {'Send Reply'}</Btn>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                        {pageTask.status == 7 && (
-                                            <div className="pro-shop ">
-                                                <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle2 }}><i className="icofont icofont-reply me-2"></i> {'Send Reply'}</Btn>
-                                            </div>
-                                        )}
-                                    </div>
+                                        </>
+                                    }
                                     <Nav tabs className="border-tab">
                                         <NavItem id="myTab" role="tablist">
                                             <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('1') }}>
@@ -263,23 +276,25 @@ const ViewJob = () => {
                                                                 )}
                                                             </UL>
                                                         </div>
-                                                        <div className="chat-message clearfix" style={{ position: 'relative' }}>
-                                                            <div className="row">
-                                                                <Col xl='12' className='d-flex'>
-                                                                    <InputGroup className='text-box'>
-                                                                        <Input type='text' className='form-control input-txt-bx' placeholder='Type a message......' value={messageInput} onChange={(e) => handleMessageChange(e.target.value)} />
-                                                                        <Btn
-                                                                            attrBtn={{
-                                                                                color: "primary",
-                                                                                onClick: () => handleMessagePress("send"),
-                                                                            }}
-                                                                        >
-                                                                            Send
-                                                                        </Btn>
-                                                                    </InputGroup>
-                                                                </Col>
+                                                        {(user.user_type == 'vendor') &&
+                                                            <div className="chat-message clearfix" style={{ position: 'relative' }}>
+                                                                <div className="row">
+                                                                    <Col xl='12' className='d-flex'>
+                                                                        <InputGroup className='text-box'>
+                                                                            <Input type='text' className='form-control input-txt-bx' placeholder='Type a message......' value={messageInput} onChange={(e) => handleMessageChange(e.target.value)} />
+                                                                            <Btn
+                                                                                attrBtn={{
+                                                                                    color: "primary",
+                                                                                    onClick: () => handleMessagePress("send"),
+                                                                                }}
+                                                                            >
+                                                                                Send
+                                                                            </Btn>
+                                                                        </InputGroup>
+                                                                    </Col>
+                                                                </div>
                                                             </div>
-                                                        </div>
+                                                        }
                                                     </div>
                                                 </CardBody>
                                             </Card>

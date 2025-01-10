@@ -41,4 +41,17 @@ class OfferList extends Model
         $taskArray = array("In Progress", "Delivered", "Cancelled", "Rejected", "Waiting Your Confirmation", "Waiting PM Confirmation", " ", "Heads-Up ", "Heads-Up ( Marked as Available )", "Heads-Up ( Marked as Not Available )");
         return $taskArray[$this->status];
     }
+
+    public function getVendorList()
+    {
+        $vendorNames = '';
+        if (!empty($this->vendor_list)) {
+            $this->vendor_list = rtrim($this->vendor_list, ', ');
+            $vendor_list = explode("," ,  $this->vendor_list );
+            $vendorList = Vendor::whereIn('id', $vendor_list)->pluck('name')->all();
+            if (!empty($vendorList))
+                $vendorNames = implode(' , ', $vendorList);
+        }
+        return  $vendorNames;
+    }
 }

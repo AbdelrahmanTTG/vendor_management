@@ -4,11 +4,17 @@ import { Pagination, PaginationItem, PaginationLink, Table } from 'reactstrap';
 const InvoicesTable = (props) => {
     let currentPage = props.currentPage;
     const handlePageChange = (newPage) => {
-        if (newPage > 0 ) {
+        if (newPage > 0) {
             currentPage = newPage;
-        } 
+        }
         props.sendDataToParent(currentPage);
     };
+    let viewVendor = false;
+    {
+        props.viewVendor && (
+            viewVendor = props.viewVendor
+        )
+    }
     return (
         <Fragment>
             <div className="table-responsive">
@@ -16,7 +22,10 @@ const InvoicesTable = (props) => {
                     <thead className="bg-primary">
                         <tr>
                             <th scope="col">{'#'}</th>
-                            <th scope="col">{'Billing Legal Name'}</th>
+                            {viewVendor == true && (
+                                <th scope="col">{'Vendor Name'}</th>
+                            )}
+                            <th scope="col">{'Billing Legal Name'}</th>                           
                             <th scope="col">{'Invoice Date'}</th>
                             <th scope="col">{'Total'}</th>
                             <th scope="col">{'Payment Method'}</th>
@@ -31,7 +40,10 @@ const InvoicesTable = (props) => {
                                 {props.pageInvoices.map((item, i) => (
                                     <tr key={item.id}>
                                         <td>{item.id}</td>
-                                        <td>{item.billing_legal_name}</td>
+                                        {viewVendor == true && (
+                                            <td>{item.vendor}</td>
+                                        )}
+                                        <td>{item.billing_legal_name}</td>                                      
                                         <td>{item.invoice_date}</td>
                                         <td>{item.total}</td>
                                         <td>{item.payment_method}</td>
@@ -43,7 +55,7 @@ const InvoicesTable = (props) => {
                             </>
                         ) : (
                             <tr >
-                                <td scope="row" colSpan={7} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                <td scope="row" colSpan={viewVendor == true?8:7} className='text-center bg-light f-14' >{'No Data Available'}</td>
                             </tr>
                         )
                         }
@@ -54,7 +66,7 @@ const InvoicesTable = (props) => {
                 <div className="mt-5 ">
                     <Pagination aria-label="Page navigation example" className="pagination justify-content-end pagination-primary">
                         {props.pageLinks.map((link, i) => (
-                             <PaginationItem key={i} active={link.active} className={`${link.url ? "" : "disabled"}`} onClick={() => handlePageChange(link.url ?link.url.split('page=').pop():0)}>
+                            <PaginationItem key={i} active={link.active} className={`${link.url ? "" : "disabled"}`} onClick={() => handlePageChange(link.url ? link.url.split('page=').pop() : 0)}>
                                 <PaginationLink dangerouslySetInnerHTML={{ __html: link.label }} ></PaginationLink>
                             </PaginationItem>
 

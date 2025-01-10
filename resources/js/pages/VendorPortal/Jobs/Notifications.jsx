@@ -14,10 +14,19 @@ const Notifications = () => {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (user) {
-      const payload = {
-        'id': user.id,
-        'page': currentPage,
-      };     
+      let payload;
+      if (user.user_type == 'vendor') {
+        payload = {
+          'id': user.id,
+          'page': currentPage,
+        };
+      } else if (user.userType == 'admin') {
+        payload = {
+          'userType': 'admin',
+          'id': 0,
+          'page': currentPage,
+        };
+      }
       axiosClient.post(baseURL + "/allPlannedJobs", payload)
         .then(({ data }) => {
           const [Tasks] = [(data?.Tasks)];
@@ -49,7 +58,7 @@ const Notifications = () => {
                     <Spinner attrSpinner={{ className: 'loader-6' }} />
                   </div>
                 ) :
-                  <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
+                  <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} viewVendor={user.user_type == 'vendor'?false:true}/>
                 }
               </CardBody>
             </Card>

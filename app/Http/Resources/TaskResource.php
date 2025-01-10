@@ -50,7 +50,10 @@ class TaskResource extends JsonResource
             'created_by'=> $this->whenHas('created_by',$this->user?$this->user->user_name:null), 
             'created_at'=> $this->whenHas('created_at'), 
             'closed_date'=>  $this->whenHas('closed_date'), 
-            'vendor'=> $this->whenHas('vendor',$this->getVendor?$this->getVendor->name:null), 
+            //'vendor'=> $this->whenHas('vendor',$this->getVendor?$this->getVendor->name:null), 
+            'vendor'=> $this->getVendor?$this->getVendor->name:null, 
+            'vendor_list'=> $this->whenHas('vendor_list',$this->vendor_list?$this->getVendorList():null), 
+            
             
                         
         ];

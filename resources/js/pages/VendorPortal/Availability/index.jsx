@@ -12,9 +12,17 @@ const AllData = () => {
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (user) {
-            const payload = {
-                'user': user.id,
-            };            
+            let payload;
+            if (user.user_type == 'vendor') {
+                payload = {
+                    'user': user.id,
+                };
+            } else if (user.userType == 'admin') {
+                payload = {
+                    'userType': 'admin',
+                    'user': 0,
+                };
+            }
             axiosClient.post(baseURL + "/getAvailabilityList", payload)
                 .then(({ data }) => {
                     setAvailabilityList(data?.List);
@@ -44,6 +52,9 @@ const AllData = () => {
                                             <thead className="bg-primary">
                                                 <tr>
                                                     <th scope="col">{'#'}</th>
+                                                    {user.user_type != 'vendor' && (
+                                                        <th scope="col">{'Vendor Name'}</th>
+                                                    )}
                                                     <th scope="col">{'Created At'}</th>
                                                     <th scope="col">{'End Date'}</th>
                                                     <th scope="col">{'Email From'}</th>
@@ -57,8 +68,11 @@ const AllData = () => {
                                                 {availabilityList.length > 0 ? (
                                                     <>
                                                         {availabilityList.map((item, i) => (
-                                                            <tr key={item.id}>
+                                                            <tr key={i}>
                                                                 <th scope="row">{item.id} / {item.detid}</th>
+                                                                {user.user_type != 'vendor' && (
+                                                                    <td>{item.vendor}</td>
+                                                                )}
                                                                 <td>{new Date(item.created_at).toLocaleString('en-GB')}</td>
                                                                 <td>{add_minutes(new Date(item.created_at), item.duration).toLocaleString('en-GB')}</td>
                                                                 <td>{item.email_from}</td>

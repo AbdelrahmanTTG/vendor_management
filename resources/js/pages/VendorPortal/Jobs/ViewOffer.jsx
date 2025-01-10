@@ -25,12 +25,21 @@ const ViewOffer = () => {
         if (!id || !type) {
             setRedirect(true);
         } else {
-            const payload = {
-                'vendor': user.id,
-                'id': id,
-                'type': type,
-            };           
-
+            let payload;
+            if (user.user_type == 'vendor') {
+                payload = {
+                    'vendor': user.id,
+                    'id': id,
+                    'type': type,
+                };
+            } else if (user.userType == 'admin') {
+                payload = {
+                    'userType': 'admin',
+                    'vendor': 0,
+                    'id': id,
+                    'type': type,
+                };
+            }
             axiosClient.post(baseURL + "viewOffer", payload)
                 .then(({ data }) => {
                     const [Task] = [(data?.Task)];
@@ -136,20 +145,22 @@ const ViewOffer = () => {
                                 </div>
                             ) :
                                 <CardBody className=' b-t-primary'>
-                                    <div className="pro-group pb-0" style={{ textAlign: 'right' }}>
-                                        {pageTask.offer_type == 'task' && (
-                                            <div className="pro-shop ">
-                                                <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: () => acceptOffer() }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
-                                                <Btn attrBtn={{ color: 'secondary', className: 'btn btn-danger', onClick: () => rejectOffer() }}><i className="icofont icofont-close-line-circled me-2"></i>{'Reject'} </Btn>
-                                            </div>
-                                        )}
-                                        {pageTask.offer_type == 'offer_list' && (
-                                            <div className="pro-shop ">
-                                                <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: () => acceptOfferList() }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
-                                            </div>
-                                        )
-                                        }
-                                    </div>
+                                    {(user.user_type == 'vendor') &&
+                                        <div className="pro-group pb-0" style={{ textAlign: 'right' }}>
+                                            {pageTask.offer_type == 'task' && (
+                                                <div className="pro-shop ">
+                                                    <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: () => acceptOffer() }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
+                                                    <Btn attrBtn={{ color: 'secondary', className: 'btn btn-danger', onClick: () => rejectOffer() }}><i className="icofont icofont-close-line-circled me-2"></i>{'Reject'} </Btn>
+                                                </div>
+                                            )}
+                                            {pageTask.offer_type == 'offer_list' && (
+                                                <div className="pro-shop ">
+                                                    <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: () => acceptOfferList() }}><i className="icofont icofont-check-circled me-2"></i> {'Accept'}</Btn>
+                                                </div>
+                                            )
+                                            }
+                                        </div>
+                                    }
                                     <Nav tabs className="border-tab">
                                         <NavItem id="myTab" role="tablist">
                                             <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('1') }}>

@@ -47,4 +47,9 @@ class VendorInvoice extends Model
     {
         return  $this->belongsTo(Brand::class, 'brand_id');
     }
+
+    public function getVendor()
+    {
+        return  $this->belongsTo(Vendor::class, 'vendor_id');
+    }
 }

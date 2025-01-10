@@ -13,17 +13,24 @@ class AvailabilityController extends Controller
 {
     public function index(Request $request)
     {
-        $request['user'] = Crypt::decrypt($request->user);
-        $query = DB::table('vendor_aval_det as det')->select('brand.name as brand_name','tot.id', 'tot.created_at', 'tot.duration','tot.email_from', 'tot.attach_file', 'tot.email_subject', 'det.id as detid')
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['user'] = 0;
+        } else {
+            $vendorID = $request['user'] = Crypt::decrypt($request->user);
+        }
+        $query = DB::table('vendor_aval_det as det')->select('brand.name as brand_name', 'tot.id', 'tot.created_at', 'tot.duration', 'tot.email_from', 'tot.attach_file', 'tot.email_subject', 'det.id as detid','vendor.name as vendor')
             ->join('vendor_aval_tot as tot', 'det.tot_id', '=', 'tot.id')
             ->leftJoin('brand', 'tot.brand', '=', 'brand.id')
-            ->where('det.vendor', $request->user)
+            ->leftJoin('vendor', 'det.vendor', '=', 'vendor.id')
             ->where('tot.status', 1)
             ->where(function ($q) {
                 $q->where('det.status', '')
                     ->orWhere('det.status', null)
                     ->orWhere('det.status', '0');
             });
+        if ($vendorID != 0) {
+            $query = $query->where('det.vendor', $request->user);
+        }
         $availabilityCheck = ($query->count() > 0) ? $query->get() : [];
         return response()->json([
             "List" => $availabilityCheck,
@@ -32,15 +39,20 @@ class AvailabilityController extends Controller
 
     public function viewAvailabilityCheck(Request $request)
     {
-        $request['user'] = Crypt::decrypt($request->user);
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['user'] = 0;
+        } else {
+            $vendorID = $request['user'] = Crypt::decrypt($request->user);
+        }
         $id = $request->id;
-        $availabilityCheck = DB::table('vendor_aval_det as det')->select('tot.id','tot.email_body','tot.status', 'tot.created_at', 'tot.duration','tot.email_from', 'tot.attach_file', 'tot.email_subject', 'det.id as detid')
+        $availabilityCheck = DB::table('vendor_aval_det as det')->select('tot.id', 'tot.email_body', 'tot.status', 'tot.created_at', 'tot.duration', 'tot.email_from', 'tot.attach_file', 'tot.email_subject', 'det.id as detid')
             ->join('vendor_aval_tot as tot', 'det.tot_id', '=', 'tot.id')
-            ->where('det.vendor', $request->user)
             ->where('tot.status', 1)
-            ->where('det.id', $id)
-            ->first();
-
+            ->where('det.id', $id);
+        if ($vendorID != 0) {
+            $availabilityCheck = $availabilityCheck->where('det.vendor', $request->user);
+        }
+        $availabilityCheck = $availabilityCheck->first();
         return response()->json([
             "availabilityPage" => $availabilityCheck ?? [],
         ], 200);
@@ -102,7 +114,7 @@ class AvailabilityController extends Controller
                 // send email              
                 $cc = rtrim(str_replace('.com', '.com,', $availabilityCheck->email_cc), ",");
                 $ccArray = explode(',', $cc);
-                Mail::send('emails.portalMail', array("body" => $note ), function ($message) use ($availabilityCheck, $ccArray) {
+                Mail::send('emails.portalMail', array("body" => $note), function ($message) use ($availabilityCheck, $ccArray) {
                     $message->to($availabilityCheck->email_from)->cc($ccArray)->subject($availabilityCheck->email_subject . " - The reason for rejection.");
                     // if (!empty($availabilityCheck->email)) {
                     //     $message->from($availabilityCheck->email);
@@ -117,8 +129,5 @@ class AvailabilityController extends Controller
             $msg['message'] = "Error, Please Try Again!";
         }
         return response()->json($msg);
-      
-
-      
     }
 }

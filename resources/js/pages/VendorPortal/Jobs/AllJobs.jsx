@@ -14,12 +14,21 @@ const AllJobs = () => {
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (user) {
-            const payload = {
-                'id': user.id,
-                'page': currentPage,
-            };
+            let payload;           
+            if (user.user_type == 'vendor') {
+                payload = {
+                    'id': user.id,
+                    'page': currentPage,
+                };
+            } else if (user.userType == 'admin') {
+                payload = {
+                    'userType': 'admin',
+                    'id': 0,
+                    'page': currentPage,
+                };
+            }
             axiosClient.post(baseURL + "/allJobs", payload)
-                .then(({ data }) => {                                   
+                .then(({ data }) => {
                     const [Tasks] = [(data?.Tasks)];
                     const [Links] = [(data?.Links)];
                     setPageTasks(Tasks);
@@ -45,13 +54,13 @@ const AllJobs = () => {
                             {/* <span> {'Use a class'} <code> {'table'} </code> {'to any table.'}</span> */}
                             {/* </CardHeader> */}
                             <CardBody className='b-l-primary'>
-                            {loading ? (
-                                <div className="loader-box" >
-                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                </div>
-                            ) :
-                                <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
-                            }
+                                {loading ? (
+                                    <div className="loader-box" >
+                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                    </div>
+                                ) :
+                                    <JobsTable pageTasks={pageTasks} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} viewVendor={user.user_type == 'vendor'?false:true} />
+                                }
                             </CardBody>
                         </Card>
                     </Col>

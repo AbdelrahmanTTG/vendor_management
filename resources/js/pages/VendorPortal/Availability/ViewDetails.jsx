@@ -20,10 +20,19 @@ const ViewOffer = () => {
     const [modal, setModal] = useState(false);
     const toggle = () => setModal(!modal);
     const [loading, setLoading] = useState(true);
-    const payload = {
-        'user': user.id,
-        'id': availabilityId,
-    };
+    let payload;
+    if (user.user_type == 'vendor') {
+        payload = {
+            'user': user.id,
+            'id': availabilityId,
+        };
+    } else if (user.userType == 'admin') {
+        payload = {
+            'userType': 'admin',
+            'user': 0,
+            'id': availabilityId,
+        };
+    }
     useEffect(() => {
         if (!availabilityId) {
             setRedirect(true);
@@ -116,17 +125,17 @@ const ViewOffer = () => {
                                                                     <div className="emailread-group">
                                                                         <H6 attrH6={{ className: 'text-muted me-2' }}><i className="icofont icofont-clip"></i> ATTACHMENTS
                                                                             {availabilityPage.attach_file != null ? (
-                                                                                <Link to={"https://aixnexus.com/erp/assets/uploads/vendorAvaliability/" + availabilityPage.attach_file} target="_blank" className='m-l-10'><i class="fa fa-download"></i> Download File</Link>
+                                                                                <Link to={"https://aixnexus.com/erp/assets/uploads/vendorAvaliability/" + availabilityPage.attach_file} target="_blank" className='m-l-10'><i className="fa fa-download"></i> Download File</Link>
                                                                             ) : (
                                                                                 <span className="text-muted m-l-10 txt-danger f-w-600">{'No File Found'}</span>
                                                                             )}
                                                                         </H6>
                                                                         <div className="clearfix"></div>
-                                                                        <H6 attrH6={{ className: 'text-muted mt-3' }}><i class="icofont icofont-clock-time"></i> Due at :
+                                                                        <H6 attrH6={{ className: 'text-muted mt-3' }}><i className="icofont icofont-clock-time"></i> Due at :
                                                                             <span className="text-muted m-l-10 font-primary f-w-600">{add_minutes(new Date(availabilityPage.created_at), availabilityPage.duration).toLocaleString('en-GB')}</span></H6>
                                                                         <div className="clearfix"></div>
                                                                     </div>
-                                                                    {availabilityPage.status == 1 &&
+                                                                    {(user.user_type == 'vendor') && availabilityPage.status == 1 &&
                                                                         <div className="emailread-group">
                                                                             <div className="action-wrapper">
                                                                                 <UL attrUL={{ className: 'simple-list actions d-flex flex-row' }}>

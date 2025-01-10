@@ -36,9 +36,17 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      const payload = {
-        'id': user.id
-      };
+      let payload;     
+      if (user.user_type == 'vendor') {
+         payload = {
+          'id': user.id
+        };
+      }else if(user.userType == 'admin'){
+        payload = {
+          'userType': 'admin',
+          'id': 0
+        };
+      }
       axiosClient.post(baseURL + "/dashboardData", payload)
         .then(({ data }) => {
           setRunningJobs(data?.runningJobs);
@@ -246,7 +254,7 @@ const Dashboard = () => {
                   <Spinner attrSpinner={{ className: 'loader-6' }} />
                 </div>
               ) :
-                <JobsTable pageTasks={runningJobs} viewStatus="false" />
+                <JobsTable pageTasks={runningJobs} viewStatus="false" viewVendor={user.user_type == 'vendor'?false:true}/>
               }
             </CardBody>
           </Card>
@@ -271,7 +279,7 @@ const Dashboard = () => {
                   <Spinner attrSpinner={{ className: 'loader-6' }} />
                 </div>
               ) :
-                <JobsTable pageTasks={pendingJobs} viewStatus="false" />
+                <JobsTable pageTasks={pendingJobs} viewStatus="false" viewVendor={user.user_type == 'vendor'?false:true}/>
               }
             </CardBody>
           </Card>
@@ -296,7 +304,7 @@ const Dashboard = () => {
                   <Spinner attrSpinner={{ className: 'loader-6' }} />
                 </div>
               ) :
-                <JobsTable pageTasks={finishedJobs} viewStatus="false" />
+                <JobsTable pageTasks={finishedJobs} viewStatus="false" viewVendor={user.user_type == 'vendor'?false:true}/>
               }
             </CardBody>
           </Card>

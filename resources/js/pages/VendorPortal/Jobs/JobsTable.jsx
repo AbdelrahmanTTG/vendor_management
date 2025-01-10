@@ -5,9 +5,13 @@ import { Link } from 'react-router-dom';
 
 const JobsTable = (props) => {
     let viewStatus = 'true';
+    let viewVendor = false;
     {
         props.viewStatus && (
             viewStatus = props.viewStatus
+        )
+        props.viewVendor && (
+            viewVendor = props.viewVendor
         )
     }
     let currentPage = props.currentPage;
@@ -25,6 +29,9 @@ const JobsTable = (props) => {
                     <thead className="bg-primary">
                         <tr>
                             <th scope="col">{'#'}</th>
+                            {viewVendor == true && (
+                                <th scope="col">{'Vendor'}</th>
+                            )}
                             <th scope="col">{'Code'}</th>
                             <th scope="col">{'Subject'}</th>
                             <th scope="col">{'Task Type'}</th>
@@ -37,7 +44,7 @@ const JobsTable = (props) => {
                             <th scope="col">{'Delivery Date'}</th>
                             {viewStatus == "true" && (
                                 <th scope="col">{'Status'}</th>
-                            )}
+                            )}                            
                             <th scope="col">{'Brand'}</th>
                             <th scope="col">{'Actions'}</th>
                         </tr>
@@ -48,6 +55,9 @@ const JobsTable = (props) => {
                                 {props.pageTasks.map((item, i) => (
                                     <tr key={item.id}>
                                         <th scope="row">{item.id}</th>
+                                        {viewVendor == true && (
+                                            <td>{item.vendor}{item.vendor_list??''}</td>
+                                        )}
                                         <td>{item.code}</td>
                                         <td>{item.subject}</td>
                                         <td>{item.task_type}</td>
@@ -60,7 +70,7 @@ const JobsTable = (props) => {
                                         <td>{item.delivery_date}</td>
                                         {viewStatus == "true" && (
                                             <td>{item.statusData}</td>
-                                        )}
+                                        )}                                      
                                         <td>{item.brand_name}</td>
                                         <td>
                                             {item.type == 'job_offer' ? (

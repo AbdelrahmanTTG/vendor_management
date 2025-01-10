@@ -34,7 +34,7 @@ const LogoutClass = () => {
                <LogOut />
                Log out
                </button>
-               {user.userType == "admin" && <button className="btn btn-primary-light" onClick={() => convert()} style={{ padding: "5px" }}> Go back</button>}
+               {user.userType == "admin" && <button className="btn btn-secondary m-l-5 btn-sm" onClick={() => convert()} > Go back</button>}
              </LI>
     </Fragment>
   );

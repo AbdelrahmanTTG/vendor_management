@@ -15,10 +15,19 @@ const AllInvoices = () => {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (user) {
-      const payload = {
-        'id': user.id,
-        'page': currentPage,
-      };
+      let payload;
+      if (user.user_type == 'vendor') {
+        payload = {
+          'id': user.id,
+          'page': currentPage,
+        };
+      } else if (user.userType == 'admin') {
+        payload = {
+          'userType': 'admin',
+          'id': 0,
+          'page': currentPage,
+        };
+      }
       axiosClient.post(baseURL + "/allInvoices", payload)
         .then(({ data }) => {
           const [Invoices] = [(data?.Invoices)];
@@ -37,11 +46,13 @@ const AllInvoices = () => {
   return (
     <Fragment>
       <BreadcrumbsPortal mainTitle="All Invoices" parent="My Invoices" title="All Invoices" >
-        <Link to={`/Vendor/Invoices/addInvoice`}>
-          <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
-            <i className="icofont icofont-pencil-alt-2 me-1"></i>{'Add Invoice'}
-          </Btn>
-        </Link>
+        {(user.user_type == 'vendor') &&
+          <Link to={`/Vendor/Invoices/addInvoice`}>
+            <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default" }}>
+              <i className="icofont icofont-pencil-alt-2 me-1"></i>{'Add Invoice'}
+            </Btn>
+          </Link>
+        }
       </BreadcrumbsPortal>
       <Container fluid={true}>
         <Row>
@@ -53,7 +64,7 @@ const AllInvoices = () => {
                     <Spinner attrSpinner={{ className: 'loader-6' }} />
                   </div>
                 ) :
-                  <InvoicesTable pageInvoices={pageInvoices} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} />
+                  <InvoicesTable pageInvoices={pageInvoices} pageLinks={pageLinks} currentPage={currentPage} sendDataToParent={handleDataFromChild} viewVendor={user.user_type == 'vendor'?false:true}/>
                 }
               </CardBody>
             </Card>

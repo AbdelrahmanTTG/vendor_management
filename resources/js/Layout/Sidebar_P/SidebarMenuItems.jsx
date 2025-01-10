@@ -1,12 +1,15 @@
-import React, { Fragment } from 'react';
+import React, { Fragment} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { LI, UL, H6 } from '../../AbstractElements';
 import { MENUITEMS } from './Menu';
 import { Label } from 'reactstrap';
+import { useStateContext } from '../../pages/context/contextAuth';
+
 const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
   const { t } = useTranslation();
-
+  const { user } = useStateContext();
+  
   const toggletNavActive = (item) => {
 
     if (!item.active) {
@@ -49,6 +52,7 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
               </div>
             </LI>
             {Item.Items.map((menuItem, i) => (
+              ((menuItem.admin == 'default') || (user.user_type == 'vendor' && menuItem.admin == false) || (user.userType == 'admin' && menuItem.admin == true)) && (
               <LI attrLI={{ className: 'dropdown' }} key={i}>
                 {menuItem.type === 'sub' && (
                   <a href="javascript"
@@ -90,18 +94,20 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
                 {menuItem.children && (
                   <UL attrUL={{
                     className: 'simple-list sidebar-submenu',
-                    
+
                   }}>
-                    <UL attrUL={{ className: 'nav-submenu menu-content',
-                    style:
-                      menuItem.active
-                        ? sidebartoogle
-                          ? {
-                            opacity: 1,
-                            transition: 'opacity 500ms ease-in',
-                          }
-                          : { display: 'block' }
-                        : { display: 'none' } }}>
+                    <UL attrUL={{
+                      className: 'nav-submenu menu-content',
+                      style:
+                        menuItem.active
+                          ? sidebartoogle
+                            ? {
+                              opacity: 1,
+                              transition: 'opacity 500ms ease-in',
+                            }
+                            : { display: 'block' }
+                          : { display: 'none' }
+                    }}>
                       {menuItem.children.map((childrenItem, index) => {
                         return (
                           <LI key={index}>
@@ -154,6 +160,7 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
                   </UL>
                 )}
               </LI>
+               )
             ))}
           </Fragment>
         ))

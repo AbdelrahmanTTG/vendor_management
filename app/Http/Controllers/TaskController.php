@@ -34,34 +34,63 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
-        Logger::addToLoggerUpdate('job_task', 'id', 57162, 882);
-        $request['id'] = Crypt::decrypt($request->id);
-        $runningJobs = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status',  0)->orderBy('created_at', 'desc')->take(3)->get();
-        $finishedJobs = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->orderBy('created_at', 'desc')->take(3)->get();
-        $offers1 = Task::where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->take(2)->get();
-        $offers2 = OfferList::where('vendor_list', 'Like', "%$request->id,%")->where('status', 4)->orderBy('created_at', 'desc')->take(2)->get();
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['id'] = 0;
+        } else {
+            $vendorID = $request['id'] = Crypt::decrypt($request->id);
+        }
+
+        $runningJobsData = Task::where('job_portal', 1)->where('status',  0);
+        $finishedJobsData = Task::where('job_portal', 1)->where('status', 1);
+        $offers1Data = Task::where('job_portal', 1)->where('status', 4);
+        $offers2Data = OfferList::where('status', 4);
+        if ($vendorID != 0) {
+            $runningJobsData = $runningJobsData->where('vendor',  $request->id);
+            $finishedJobsData = $finishedJobsData->where('vendor',  $request->id);
+            $offers1Data = $offers1Data->where('vendor',  $request->id);
+            $offers2Data = $offers2Data->where('vendor_list', 'Like', "%$request->id,%");
+        }
+        $runningJobs = $runningJobsData->orderBy('created_at', 'desc')->take(3)->get();
+        $finishedJobs = $finishedJobsData->orderBy('created_at', 'desc')->take(3)->get();
+        $offers1 = $offers1Data->orderBy('created_at', 'desc')->take(2)->get();
+        $offers2 = $offers2Data->orderBy('created_at', 'desc')->take(2)->get();
         // start count
-        $runningJobsCount = Task::where('vendor', $request->id)->where('job_portal', 1)->where('status', 0)->count();
-        $closedJobsCount = Task::where('vendor', $request->id)->where('job_portal', 1)->where('status', 1)->count();
-        $offerJobsCount1 = Task::where('vendor', $request->id)->where('job_portal', 1)->where('status', 4)->count();
-        $offerJobsCount2 = OfferList::where('vendor_list', 'Like', "%$request->id,%")->where('job_portal', 1)->where('status', 4)->count();
-        $invoiceCount = VendorInvoice::where('vendor_id',  $request->id)->count();
-
-
-        $pendingInvoicesCount = VendorInvoice::query()->where('vendor_id',  $request->id)->where('verified', 3)->count();
-        $paidInvoicesCount = VendorInvoice::query()->where('vendor_id',  $request->id)->where('verified', 1)->count();
-        $pendingTasksCount = Task::select('id', 'code')->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->where(function ($query) {
+        $invoiceCount = VendorInvoice::query();
+        $pendingInvoicesCount = VendorInvoice::where('verified', 3);
+        $paidInvoicesCount = VendorInvoice::where('verified', 1);
+        $pendingTasksCount = Task::select('id', 'code')->where('job_portal', 1)->where('status', 1)->where(function ($query) {
             $query->where('verified', '=', 2)
                 ->orWhereNull('verified');
-        })->count();
+        });
+        if ($vendorID != 0) {
+            $invoiceCount = $invoiceCount->where('vendor_id',  $request->id);
+            $pendingInvoicesCount = $pendingInvoicesCount->where('vendor_id',  $request->id);
+            $paidInvoicesCount = $paidInvoicesCount->where('vendor_id',  $request->id);
+            $pendingTasksCount = $pendingTasksCount->where('vendor',  $request->id);
+        }
+        $runningJobsCount = $runningJobsData->count();
+        $closedJobsCount = $finishedJobsData->count();
+        $offerJobsCount1 = $offers1Data->count();
+        $offerJobsCount2 = $offers2Data->count();
+        $invoiceCount = $invoiceCount->count();
+        $pendingInvoicesCount = $pendingInvoicesCount->count();
+        $paidInvoicesCount = $paidInvoicesCount->count();
+        $pendingTasksCount = $pendingTasksCount->count();
+
 
         // get last 12 months data 
         $allJobsArray = $closedJobsArray = $monthNameArray = array();
         for ($i = 11; $i >= 0; $i--) {
             $date = date(strtotime("-$i month"));
             $monthName = date('M Y', $date);
-            $allJobs = Task::where('vendor', $request->id)->whereMonth('created_at', date('m', $date))->whereYear('created_at', date('Y', $date))->count();
-            $closedJobs = Task::where('vendor', $request->id)->whereMonth('created_at', date('m', $date))->whereYear('created_at', date('Y', $date))->where('status', 1)->count();
+            $allJobs = Task::whereMonth('created_at', date('m', $date))->whereYear('created_at', date('Y', $date));
+            $closedJobs = Task::whereMonth('created_at', date('m', $date))->whereYear('created_at', date('Y', $date))->where('status', 1);
+            if ($vendorID != 0) {
+                $allJobs = $allJobs->where('vendor',  $request->id);
+                $closedJobs = $closedJobs->where('vendor',  $request->id);
+            }
+            $allJobs = $allJobs->count();
+            $closedJobs = $closedJobs->count();
 
             array_push($allJobsArray, $allJobs);
             array_push($closedJobsArray, $closedJobs);
@@ -94,8 +123,15 @@ class TaskController extends Controller
      */
     public function allJobs(Request $request)
     {
-        $request['id'] = Crypt::decrypt($request->id);
-        $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', '!=', 6);
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['id'] = 0;
+        } else {
+            $vendorID = $request['id'] = Crypt::decrypt($request->id);
+        }
+        $query = Task::query()->where('job_portal', 1)->where('status', '!=', 6);
+        if ($vendorID != 0) {
+            $query = $query->where('vendor',  $request->id);
+        }
         $tasks = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
         $links = $tasks->linkCollection();
         return response()->json([
@@ -108,9 +144,19 @@ class TaskController extends Controller
      */
     public function allJobOffers(Request $request)
     {
-        $request['id'] = Crypt::decrypt($request->id);
-        $tasks = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->get();
-        $tasks2  = OfferList::query()->where('vendor_list', 'Like', "%$request->id,%")->where('job_portal', 1)->where('status', 4)->orderBy('created_at', 'desc')->get();
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['id'] = 0;
+        } else {
+            $vendorID = $request['id'] = Crypt::decrypt($request->id);
+        }
+        $tasks = Task::query()->where('job_portal', 1)->where('status', 4);
+        $tasks2  = OfferList::query()->where('job_portal', 1)->where('status', 4);
+        if ($vendorID != 0) {
+            $tasks = $tasks->where('vendor',  $request->id);
+            $tasks2 = $tasks2->where('vendor_list', 'Like', "%$request->id,%");
+        }
+        $tasks = $tasks->orderBy('created_at', 'desc')->get();
+        $tasks2 = $tasks2->orderBy('created_at', 'desc')->get();
 
         return response()->json(["Tasks" => TaskResource::collection($tasks->merge($tasks2))], 200);
     }
@@ -119,8 +165,15 @@ class TaskController extends Controller
      */
     public function allClosedJobs(Request $request)
     {
-        $request['id'] = Crypt::decrypt($request->id);
-        $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1);
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['id'] = 0;
+        } else {
+            $vendorID = $request['id'] = Crypt::decrypt($request->id);
+        }
+        $query = Task::query()->where('job_portal', 1)->where('status', 1);
+        if ($vendorID != 0) {
+            $query = $query->where('vendor',  $request->id);
+        }
         $tasks = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
         $links = $tasks->linkCollection();
         return response()->json([
@@ -133,8 +186,15 @@ class TaskController extends Controller
      */
     public function allPlannedJobs(Request $request)
     {
-        $request['id'] = Crypt::decrypt($request->id);
-        $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 7);
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['id'] = 0;
+        } else {
+            $vendorID = $request['id'] = Crypt::decrypt($request->id);
+        }
+        $query = Task::query()->where('job_portal', 1)->where('status', 7);
+        if ($vendorID != 0) {
+            $query = $query->where('vendor',  $request->id);
+        }
         $tasks = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
         $links = $tasks->linkCollection();
         return response()->json([
@@ -147,13 +207,24 @@ class TaskController extends Controller
      */
     public function viewOffer(Request $request)
     {
-        $request['vendor'] = Crypt::decrypt($request->vendor);
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['vendor'] = 0;
+        } else {
+            $vendorID = $request['vendor'] = Crypt::decrypt($request->vendor);
+        }
         $type = $request->type;
         if ($type == 'task') {
-            $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
+            $task = Task::where('id', $request->id)->where('job_portal', 1)->where('status', 4);
+            if ($vendorID != 0) {
+                $task =  $task->where('vendor', $request->vendor);
+            }
         } elseif ($type == 'offer_list') {
-            $task  = OfferList::where('vendor_list', 'Like', "%$request->vendor,%")->where('id', $request->id)->where('job_portal', 1)->where('status', 4)->first();
+            $task  = OfferList::where('id', $request->id)->where('job_portal', 1)->where('status', 4);
+            if ($vendorID != 0) {
+                $task =  $task->where('vendor_list', 'Like', "%$request->vendor,%");
+            }
         }
+        $task =  $task->first();
         return response()->json(["Task" => new TaskResource($task)], 200);
     }
     /**
@@ -161,9 +232,17 @@ class TaskController extends Controller
      */
     public function viewJob(Request $request)
     {
-        $request['vendor'] = Crypt::decrypt($request->vendor);
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['vendor'] = 0;
+        } else {
+            $vendorID = $request['vendor'] = Crypt::decrypt($request->vendor);
+        }
         $vmConfig = VmSetup::select('enable_evaluation', 'v_ev_name1', 'v_ev_name2', 'v_ev_name3', 'v_ev_name4', 'v_ev_name5', 'v_ev_name6')->first();
-        $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->first();
+        if ($vendorID != 0) {
+            $task = Task::where('vendor', $request->vendor)->where('id', $request->id)->where('job_portal', 1)->first();
+        } else {
+            $task = Task::where('id', $request->id)->where('job_portal', 1)->first();
+        }
         return response()->json([
             "Task" => new TaskResource($task),
             "Notes" => TaskNotesResource::collection($task->conversation),
@@ -447,7 +526,7 @@ class TaskController extends Controller
                     'showMoreDetails' => 1,
                     'data' =>  $confirmLink,
                 ];
-                Mail::to($pmEmail)->send(new PortalMail($mailData2));               
+                Mail::to($pmEmail)->send(new PortalMail($mailData2));
                 $msg['type'] = "success";
                 $message = "Your data has been successfully transmitted.";
             }

@@ -30,9 +30,16 @@ class InvoiceController extends Controller
 
     public function allInvoices(Request $request)
     {
-        $request['id'] = Crypt::decrypt($request->id);
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['id'] = 0;
+        } else {
+            $vendorID = $request['id'] = Crypt::decrypt($request->id);
+        }
         //   $query = Task::query()->where('vendor',  $request->id)->where('job_portal', 1)->where('status', 1)->where('verified', '!=', 0);
-        $query = VendorInvoice::query()->where('vendor_id',  $request->id);
+        $query = VendorInvoice::query();
+        if ($vendorID != 0) {
+            $query = $query->where('vendor_id',  $request->id);
+        }
         $Invoices = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
         $links = $Invoices->linkCollection();
 
@@ -44,11 +51,18 @@ class InvoiceController extends Controller
 
     public function paidInvoices(Request $request)
     {
-        $request['id'] = Crypt::decrypt($request->id);
-        $query = VendorInvoice::query()->where('vendor_id',  $request->id)->where('verified', 1);
+        if (isset($request['userType']) && $request['userType'] == 'admin') {
+            $vendorID = $request['id'] = 0;
+        } else {
+            $vendorID = $request['id'] = Crypt::decrypt($request->id);
+        }
+        $query = VendorInvoice::query()->where('verified', 1);
+        if ($vendorID != 0) {
+            $query = $query->where('vendor_id',  $request->id);
+        }
         $Invoices = $query->orderBy('created_at', 'desc')->paginate($this->per_page);
         $links = $Invoices->linkCollection();
-        
+
         return response()->json([
             "Invoices" => InvoiceResource::collection($Invoices),
             "Links" => $links,
@@ -123,8 +137,8 @@ class InvoiceController extends Controller
                 $inv['payment_method'] = $request->payment_method;
                 $inv['total'] = $request->total;
                 $inv['invoice_date'] = date("Y-m-d H:i:s");
-                $inv['billing_legal_name'] = $billingData->billing_legal_name??'';
-                $inv['billing_address'] = $billingData->billing_address??'';
+                $inv['billing_legal_name'] = $billingData->billing_legal_name ?? '';
+                $inv['billing_address'] = $billingData->billing_address ?? '';
                 $inv['billing_currency'] = $billingData->billing_currency ?? '';
                 $inv['billing_due_date'] = $billingData->billing_due_date ?? '';
                 $inv['bank_name'] = $request->bank_name;
@@ -133,8 +147,8 @@ class InvoiceController extends Controller
                 $inv['bank_IBAN'] = $request->bank_IBAN;
                 $inv['bank_address'] = $request->bank_address;
                 $inv['wallet_method'] = $request->wallet_method;
-                $inv['wallet_account'] = $request->wallet_account;                
-                $inv['brand_id'] = 0;                
+                $inv['wallet_account'] = $request->wallet_account;
+                $inv['brand_id'] = 0;
                 $invoice = VendorInvoice::create($inv);
                 $insert_id = $invoice->id;
                 $data['invoice_id'] = $insert_id;
@@ -145,7 +159,7 @@ class InvoiceController extends Controller
                     $brand['brand_id'] = $offer->getTaskBrandId();
                     $invoice->update($brand);
                     if ($offer->update($data)) {
-                        Logger::addToLoggerUpdate('job_task', 'id', $id, $request->vendor);                        
+                        Logger::addToLoggerUpdate('job_task', 'id', $id, $request->vendor);
                         $msg['type'] = "success";
                         $message = "Selected Jobs Added To Invoice Successfully ...";
                     } else {
@@ -162,11 +176,11 @@ class InvoiceController extends Controller
                     $mailData = [
                         'subject' => $vmConfig->pe_invoice_subject,
                         'title' => 'New Invoice',
-                        'body' =>  $vmConfig->pe_invoice_body,                        
+                        'body' =>  $vmConfig->pe_invoice_body,
                         'taskDetails' => $tasks,
-                       
-                    ];                 
-                    Mail::to($vendorEmail)->cc($vmConfig->accounting_email)->send(new PortalMail($mailData));                       
+
+                    ];
+                    Mail::to($vendorEmail)->cc($vmConfig->accounting_email)->send(new PortalMail($mailData));
                 }
             }
         }
@@ -201,7 +215,5 @@ class InvoiceController extends Controller
             "bankData" => $bankData,
             "walletData" => $walletData,
         ];
-
-
     }
 }

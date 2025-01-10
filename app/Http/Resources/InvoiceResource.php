@@ -29,6 +29,7 @@ class InvoiceResource extends JsonResource
             'statusData' => $this->getVerifiedStatus(),        
             'brand_name' => $this->brand->name,
             'payment_method'=>($this->payment_method == 0)?'Bank': 'Wallet',
+            'vendor'=> $this->getVendor?$this->getVendor->name:null, 
            
            
            
