@@ -316,10 +316,11 @@ class VendorProfileController extends Controller
         $totalVendors = $vendorsQuery->count();
 
         if ($request->has('export') && $request->input('export') === true) {
+            ini_set('memory_limit', '10284M');
             // $AllVendors = $vendorsQuery->get()->toArray();
             // $AllVendors = $this->flattenVendorsWithSheets($AllVendors);
             $AllVendors = [];
-            $vendorsQuery->chunk(1000, function ($vendorsChunk) use (&$AllVendors) {
+            $vendorsQuery->chunk(100, function ($vendorsChunk) use (&$AllVendors) {
                 $flattenedVendors = $this->flattenVendorsWithSheets($vendorsChunk->toArray());
                 $AllVendors = array_merge($AllVendors, $flattenedVendors);
             });

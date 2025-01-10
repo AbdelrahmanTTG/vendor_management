@@ -14,15 +14,16 @@ const Search = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialOptions, setInitialOptions] = useState({});
     const [options, setOptions] = useState([]);
+    const [data, setData] = useState({});
 
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
     const handleSearchInputsOnChange = (values) => {
         setSelectedSearchCol(values.map(item => item.value));
-        // if (values.length == 0) {
-        //     setQueryParams(null);
-        // }
+        if (values.length == 0) {
+            setData(null);
+        }
     }
     const capitalizeWords = (str) => {
         if (!str) return '';
@@ -62,7 +63,9 @@ const Search = (props) => {
         }
 
     };
-
+    useEffect(() => { 
+        props.getQu(data)
+    },[data])
     useEffect(() => {
         if (props.fields && props.fields.length > 0) {
             const fieldOptions = props.fields.map(fieldObj => ({
@@ -72,9 +75,29 @@ const Search = (props) => {
             setOptions(fieldOptions);
         }
     }, [props.fields]);
-    const sub = (data) => {
-        console.log(data)
+    const sub = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = formData.getAll(key);
+        }
+        setData(data)
     }
+    const addBtn = (event, divID) => {
+        event.preventDefault();
+        const div = document.querySelector(["." + divID]);
+        const container = document.getElementById(divID);
+        container.appendChild(div.cloneNode(true));
+        document.querySelector(["." + divID + ":last-child"]).value = '';
+    };
+    const delBtn = (event, divID) => {
+        event.preventDefault();
+        var divLength = document.querySelectorAll(["." + divID]).length;
+        var div = document.querySelector(['#' + divID + " ." + divID + ":last-child"]);
+        if (divLength > 1)
+            div && div.remove();
+    };
     return (
         <Fragment >
             <Col>
@@ -93,19 +116,18 @@ const Search = (props) => {
                                 <Select onChange={e => handleSearchInputsOnChange(e)} options={options} className="js-example-placeholder-multiple col-sm-12" isMulti />
 
                             </div>
-                            <div className="">
+                            <form onSubmit={sub}>
+
+                            <div className="" style={{ display: "flex" }}>
                                 {props.fields ? (
                                     props.fields.map((fieldObj, index) => {
                                         const [options, setOptions] = useState([]);
                                         const [selectedOption, setSelectedOption] = useState(null);
-
                                         useEffect(() => {
-
                                             if (fieldObj.tableData) {
                                                 handelingSelect(fieldObj.tableData, setOptions, fieldObj.name);
                                             }
                                         }, [fieldObj.tableData]);
-
                                         const handleInputChange = (inputValue) => {
                                             if (inputValue.length === 0) {
                                                 setOptions(initialOptions[fieldObj.name] || []);
@@ -119,19 +141,18 @@ const Search = (props) => {
                                                 }
                                             }
                                         };
-
                                         const isSelected = selectedSearchCol.includes(fieldObj.name);
                                         if (!isSelected) {
                                             return null;
                                         }
                                         return (
-                                            <div key={index}>
-                                                <FormGroup className="row">
-                                                    <Label className="col-sm-3 col-form-label" htmlFor={fieldObj.label}>
-                                                        {capitalizeWords(fieldObj.label)}
-                                                    </Label>
-                                                    <Col sm="9">
-                                                        {fieldObj.field === "selec" && fieldObj.tableData && (
+                                            <Col key={index} md="4" >
+                                                {fieldObj.field === "selec" && fieldObj.tableData && (
+                                                    <Col md="11">
+                                                        <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor={fieldObj.label}>
+                                                                {capitalizeWords(fieldObj.label)}
+                                                            </Label>
                                                             <Controller
                                                                 name={fieldObj.name}
                                                                 control={control}
@@ -140,15 +161,18 @@ const Search = (props) => {
                                                                     <Select
                                                                         {...field}
                                                                         isMulti
-                                                                        value={selectedOption}
                                                                         options={options}
+                                                                        value={selectedOption}
                                                                         onInputChange={handleInputChange}
-                                                                        className="js-example-basic-single col-sm-12"
+                                                                        className="js-example-basic-multiple mb-1"
                                                                         isSearchable
-                                                                        noOptionsMessage={() => loading ?
-                                                                            <div className="loader-box">
-                                                                                <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                                            </div> : 'No options found'}
+                                                                        noOptionsMessage={() =>
+                                                                            loading ? (
+                                                                                <div className="loader-box">
+                                                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                                </div>
+                                                                            ) : 'No options found'
+                                                                        }
                                                                         onChange={(option) => {
                                                                             setSelectedOption(option);
                                                                             field.onChange(option.value);
@@ -156,19 +180,26 @@ const Search = (props) => {
                                                                     />
                                                                 )}
                                                             />
-                                                        )}
-                                                        {fieldObj.field === "selec" && fieldObj.static && (
+                                                        </FormGroup>
+                                                    </Col>
+                                                )}
+                                                {fieldObj.field === "selec" && fieldObj.static && (
+                                                    <Col md="11">
+                                                        <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor={fieldObj.label}>
+                                                                {capitalizeWords(fieldObj.label)}
+                                                            </Label>
                                                             <Controller
                                                                 name={fieldObj.name}
                                                                 control={control}
                                                                 rules={{ required: true }}
                                                                 render={({ field }) => (
                                                                     <Select
-                                                                        isMulti
                                                                         {...field}
-                                                                        value={selectedOption}
+                                                                        isMulti
                                                                         options={fieldObj.static}
-                                                                        className="js-example-basic-single col-sm-12"
+                                                                        value={selectedOption}
+                                                                        className="js-example-basic-multiple mb-1"
                                                                         isSearchable
                                                                         onChange={(option) => {
                                                                             setSelectedOption(option);
@@ -177,36 +208,50 @@ const Search = (props) => {
                                                                     />
                                                                 )}
                                                             />
-                                                        )}
-                                                        {fieldObj.field === "input" && (
-                                                            <input
-                                                                className="form-control"
+                                                        </FormGroup>
+                                                    </Col>
+                                                )}
+                                                {fieldObj.field === "input" && (
+                                                    <Col md="11" className='mb-3' >
+                                                        <FormGroup id={`prefix-${fieldObj.name}`}>
+                                                            <Label className="col-form-label-sm f-12" htmlFor={fieldObj.name}>
+                                                                {capitalizeWords(fieldObj.label)}
+                                                                <Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, `prefix-${fieldObj.name}`) }}><i className="fa fa-plus-circle"></i></Btn>
+                                                                <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, `prefix-${fieldObj.name}`) }}><i className="fa fa-minus-circle"></i></Btn>
+                                                            </Label>
+
+                                                            <input style={{ marginBottom: '20px' }}
+                                                                className={`form-control prefix-${fieldObj.name}`}
                                                                 id={fieldObj.name}
                                                                 type={fieldObj.type}
                                                                 name={fieldObj.name}
                                                                 {...register(fieldObj.name, { required: true })}
                                                             />
-                                                        )}
+                                                        </FormGroup>
                                                     </Col>
-                                                    {errors[fieldObj.name] && (
+                                                )}
+                                                {errors[fieldObj.name] && (
+                                                    <Col md="3">
                                                         <span style={{ color: '#dc3545', fontStyle: 'italic' }}>
                                                             {fieldObj.name} is required
                                                         </span>
-                                                    )}
-                                                </FormGroup>
-                                               
-                                            </div>
+                                                    </Col>
+                                                )}
+                                            </Col>
+
                                         );
                                     })
                                 ) : null}
-                                <Row>
-                                    <Col>
-                                        <div className="d-inline">
-                                            <Btn attrBtn={{ color: 'btn btn-primary-gradien', className: "btn-sm ", type: 'submit', onClick: handleSubmit(sub) }}><i className="fa fa-search me-1"></i> Search</Btn>
-                                        </div>
-                                    </Col>
-                                </Row>
+
                             </div>
+                            <Row>
+                                <Col>
+                                    <div className="d-inline">
+                                                    <Btn attrBtn={{ color: 'btn btn-primary-gradien', className: "btn-sm ", type: 'submit' }}><i className="fa fa-search me-1"></i> Search</Btn>
+                                    </div>
+                                </Col>
+                                </Row>
+                                </form>
                         </CardBody>
                     </Collapse>
                 </Card>

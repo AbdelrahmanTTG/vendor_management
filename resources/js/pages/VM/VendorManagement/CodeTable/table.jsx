@@ -14,6 +14,7 @@ const table = (props) => {
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(true);
     const [alert, setalert] = useState(false)
+    const [queryParams, setQueryParams] = useState(null);
 
     const onAddData = (newData) => {
         setdataTable(prevData => [...prevData, newData]);
@@ -24,10 +25,15 @@ const table = (props) => {
         );
     };
     useEffect(() => {
+       
+        setQueryParams(props.queryParams)
+    }, [props.queryParams])
+    useEffect(() => {
       
         const fetchData = async () => {
             const payload = {
                 table: props.dataTable,
+                queryParams: queryParams,
                 per_page: 10,
                 page: currentPage,
                 columns: props.columns,
@@ -54,7 +60,7 @@ const table = (props) => {
         };
 
         fetchData();
-    }, [currentPage]);
+    }, [currentPage,queryParams]);
     const handlePageChange = (newPage) => {
         if (newPage > 0 && newPage <= totalPages) {
             setCurrentPage(newPage);

@@ -1,12 +1,16 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 import Table from './table';
 import Search from './searchModel';
 const CodeTables = (props) => {
+    const [queryParams, setQueryParams] = useState(null);
+    const gitQueryParams = (data) => {
+        setQueryParams(data)
+    }
     return (
         <Fragment>
-            <Search fields={props.fields} />
+            <Search fields={props.fields} getQu={gitQueryParams} />
             {/* <h1>{props.permission_add}</h1> */}
-            <Table permissions={props.permissions} table={props.table} dataTable={props.dataTable} header={props.header} fields={props.fields} related={props.related} columns={props.columns}  />
+            <Table permissions={props.permissions} queryParams={queryParams} table={props.table} dataTable={props.dataTable} header={props.header} fields={props.fields} related={props.related} columns={props.columns}  />
         </Fragment>
     );
 };

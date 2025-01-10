@@ -930,7 +930,8 @@ const Vendor = (props) => {
                                             {selectedSearchCol.indexOf("name") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup id='nameInput'>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Name'}
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
                                                             <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
                                                         <Input className='form-control form-control-sm nameInput mb-1' type='text' name='name' required />
                                                     </FormGroup>
