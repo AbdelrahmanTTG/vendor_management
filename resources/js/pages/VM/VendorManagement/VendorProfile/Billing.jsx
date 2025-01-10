@@ -255,6 +255,7 @@ const Billing = (props) => {
         handelingSelect("currency", setOptionsC, "Currency");
     }, []);
     useEffect(() => {
+        
         if (props.mode === "edit" || dataB) {
             setLoading(true);
             if (props.BillingData || dataB) {

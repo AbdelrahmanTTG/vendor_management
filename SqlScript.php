@@ -115,7 +115,14 @@ try {
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL
         );",
-
+        // Create vendor_payment_methods table if not exists
+        "CREATE TABLE IF NOT EXISTS vendor_payment_methods (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            Active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP NULL DEFAULT NULL,
+            updated_at TIMESTAMP NULL DEFAULT NULL
+        );",
         // Create Major table if not exists
         "CREATE TABLE IF NOT EXISTS Major (
             id INT AUTO_INCREMENT PRIMARY KEY,

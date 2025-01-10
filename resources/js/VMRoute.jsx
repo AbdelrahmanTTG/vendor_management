@@ -393,7 +393,7 @@ export const VM = (allowedPermissions) => [
                     permissions={allowedPermissions['Wallets Payment methods']}
                     key="Wallets Payment methods"
                     table="Wallets Payment methods"
-                    dataTable="payment_method"
+                    dataTable="vendor_payment_methods"
                     header={["id", " name", "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[

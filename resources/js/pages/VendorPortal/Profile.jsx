@@ -141,10 +141,10 @@ const Profile = () => {
                   <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
                       <EditMyProfile onSubmit="onUpdate" mode="edit"
-                        permission={permissions} vendorPersonalData={personalData} />
+                        permission={permissions} vendorPersonalData={personalData} backPermissions={{ edit: 1 }} />
                     </TabPane>
                     <TabPane tabId="2">
-                      <Billing  permission={permissions} ID={id} />
+                      <Billing backPermissions={{edit:1}}  permission={permissions} ID={id} />
                     </TabPane>
                   </TabContent>
                 </CardBody>

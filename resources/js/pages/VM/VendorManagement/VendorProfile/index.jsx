@@ -402,11 +402,13 @@ const Vendor = (props) => {
             sortDirection: sortConfig.direction,
             table: "vendors",
             export: ex,
+            view: props.permissions?.view
 
         }
         try {
             setLoading2(true)
             const { data } = await axiosClient.post("Vendors", payload);
+            // console.log(data)
             setVendors(data.vendors.data);
             setFields(data.fields)
             setFormats(data.formats)

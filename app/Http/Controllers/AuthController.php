@@ -239,7 +239,6 @@ class AuthController extends Controller
                 )
                 ->get();
         } else {
-
             $validator = Validator::make($request->all(), [
                 'role' => 'required|string',
             ]);
@@ -302,6 +301,8 @@ class AuthController extends Controller
                 $this->extractIdsAsString($element['subordinates'], $ids);
             }
         }
+        $ids = array_unique($ids);
         return implode(", ", $ids);
     }
+
 }

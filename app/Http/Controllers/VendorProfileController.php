@@ -36,6 +36,7 @@ class VendorProfileController extends Controller
 {
     public function format($request)
     {
+
         try {
             $user = JWTAuth::parseToken()->authenticate();
             $userId = $user->id;
@@ -51,6 +52,21 @@ class VendorProfileController extends Controller
     }
     public function Vendors(Request $request)
     {
+        $user = JWTAuth::parseToken()->authenticate();
+        $payload = JWTAuth::getPayload(JWTAuth::getToken());
+        $view = $request->input('view');
+        if ($request->filled('view')) {
+            if ($view == 1) {
+                $piv = explode(',', $payload["piv"]);
+                array_push($piv, $payload["sub"]);
+            } elseif ($view == 2) {
+                $piv = explode(',', $payload["sub"]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Bad Request: view parameter is missing or invalid.'
+            ], 400);
+        }
         $formats = $this->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
@@ -92,10 +108,23 @@ class VendorProfileController extends Controller
         if (!empty($intersectColumns)) {
             $vendorsQuery = Vendor::select('vendor.id')
                 ->addSelect(DB::raw(implode(',', $intersectColumns)));
+                if($user->use_type != 2){
+                $vendorsQuery->whereIn('created_by', $piv);
+                if(count($piv) > 1){
+                $vendorsQuery->orWhereNull('created_by');
+                }
+                }
+               
         } else {
             $vendorsQuery = Vendor::select('vendor.id');
+            if ($user->use_type != 2) {
+                $vendorsQuery->whereIn('created_by', $piv);
+                if (count($piv) > 1) {
+                    $vendorsQuery->orWhereNull('created_by');
+                }
+            }
         }
-        if (in_array('priceList', $formatArray) || !empty($intersectColumnsVendorSheet) ) {
+        if (in_array('priceList', $formatArray) || !empty($intersectColumnsVendorSheet)) {
             if (!in_array('priceList', $formatArray)) {
                 $middleIndex = intval(count($formatArray) / 2);
                 $formatArray = array_merge(
@@ -132,9 +161,7 @@ class VendorProfileController extends Controller
                         $vendorsQuery->leftJoin("{$table} as {$aliasTarget}", "{$aliasTarget}.billing_data_id", '=', "{$aliasBilling}.id");
                         $vendorsQuery->addSelect("{$aliasTarget}.{$column} as {$column}");
                         $vendorsQuery->distinct()->limit(1);
-
-                    } 
-                    else {
+                    } else {
                         $alias = "{$table}_{$joinCount}";
                         $vendorsQuery->leftJoin("{$table} as {$alias}", "{$alias}.vendor_id", '=', 'vendor.id');
                         $vendorsQuery->addSelect("{$alias}.{$column} as {$column}");
@@ -298,7 +325,7 @@ class VendorProfileController extends Controller
             }
         }
 
-      
+
         $formatArray = array_map(function ($column) {
             if (strpos($column, '.') !== false) {
                 return explode('.', $column)[1];
@@ -357,18 +384,17 @@ class VendorProfileController extends Controller
             return $this->flattenObject($vendor, $tableKeys);
         }, $vendorsData['data']);
         $vendors->setCollection(collect($flattenedVendors));
-       
-     
-      
+
+
+
         return response()->json([
             "vendors" => $vendors,
             "fields" => $formatArray,
             "formats" => $formats,
             "totalVendors" => $totalVendors,
             "AllVendors" => !empty($AllVendors) ? [$diffFormatArrayEx, $AllVendors] : null,
-
+            "t" => $piv,
         ], 200);
-      
     }
     function flattenVendorsWithSheets($vendors)
     {
@@ -377,7 +403,7 @@ class VendorProfileController extends Controller
         foreach ($vendors as $vendor) {
             $vendorData = $vendor;
             $vendorId = $vendor['id'];
-            unset($vendorData['vendor_sheet'], $vendorData['id']); 
+            unset($vendorData['vendor_sheet'], $vendorData['id']);
 
             if (isset($vendorData['priceList'])) {
                 unset($vendorData['priceList']);
@@ -395,9 +421,9 @@ class VendorProfileController extends Controller
                         }
                     }
                     $flattenedVendors[] = array_merge(
-                        ['id' => $vendorId], 
-                        $adjustedVendorData, 
-                        $sheet 
+                        ['id' => $vendorId],
+                        $adjustedVendorData,
+                        $sheet
                     );
                 }
             } else {
@@ -593,7 +619,7 @@ class VendorProfileController extends Controller
             'city' => $request['city'],
             'street' => $request['street'],
             'billing_address' => $request['billing_address'],
-            'billing_status'=> "2"
+            'billing_status' => "2"
         ]);
 
         if (
@@ -802,7 +828,7 @@ class VendorProfileController extends Controller
                     'billing_status'
                 ]);
                 if (empty($requestData['billing_status'])) {
-                    $requestData['billing_status'] = '2'; 
+                    $requestData['billing_status'] = '2';
                 }
                 $billingData->update($requestData);
             } else {
@@ -1479,7 +1505,6 @@ class VendorProfileController extends Controller
             'sub_subject:id,name'
         ]);
         return response()->json($vendorSheet, 200);
-
     }
     public function AddVendorstools(Request $request)
     {
@@ -1776,7 +1801,8 @@ class VendorProfileController extends Controller
     {
         return $this->deleteItem($request, Formatstable::class);
     }
-    public function getPriceListById(Request $request){
+    public function getPriceListById(Request $request)
+    {
         $id = $request->input("id");
         $vendorData = VendorSheet::with([
             'source_lang:id,name',
@@ -1796,6 +1822,6 @@ class VendorProfileController extends Controller
                 'message' => 'No data found for the given  ID.'
             ], 404);
         }
-        return response()->json($vendorData, 200); 
-       }
+        return response()->json($vendorData, 200);
+    }
 }

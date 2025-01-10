@@ -300,10 +300,13 @@ const FilesCertificate = (props) => {
                                                     className="form-control"
                                                     onChange={(e) => {
                                                         const file = e.target.files[0];
-                                                        if (file && file.type !== "application/zip") {
-                                                            alert("The file must be a ZIP file.");
-                                                            e.target.value = ""
-                                                            return;
+                                                        if (file) {
+                                                            const fileName = file.name.toLowerCase();
+                                                            if (!fileName.endsWith(".zip")) {
+                                                                alert("The file must be a ZIP file.");
+                                                                e.target.value = "";
+                                                                return;
+                                                            }
                                                         }
                                                         if (file && file.size > 5 * 1024 * 1024) {
                                                             alert("The file size must not exceed 5MB.");
@@ -351,10 +354,13 @@ const FilesCertificate = (props) => {
                                                     className="form-control"
                                                     onChange={(e) => {
                                                         const file = e.target.files[0];
-                                                        if (file && file.type !== "application/zip") {
-                                                            alert("The file must be a ZIP file.");
-                                                            e.target.value = ""
-                                                            return;
+                                                        if (file) {
+                                                            const fileName = file.name.toLowerCase();
+                                                            if (!fileName.endsWith(".zip")) {
+                                                                alert("The file must be a ZIP file.");
+                                                                e.target.value = ""; 
+                                                                return;
+                                                            }
                                                         }
                                                         if (file && file.size > 5 * 1024 * 1024) {
                                                             alert("The file size must not exceed 5MB.");
