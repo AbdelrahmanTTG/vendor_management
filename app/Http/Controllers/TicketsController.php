@@ -136,19 +136,41 @@ class TicketsController extends Controller
         foreach ($formatArray  as $f) {
             $headerFormatArray[] = $renameArrayForDisplay[$f] ?? $f;
         }
+        $relationships = [
+            'service' => ['id', 'name'],
+            "task_type" => ['id', 'name'],
+            "unit" => ['id', 'name'],
+            "currency" => ['id', 'name'],
+            "source_lang" => ['id', 'name'],
+            "target_lang" => ['id', 'name'],
+            "subject" => ['id', 'name'],
+            "software" => ['id', 'name'],
+            "brand" => ['id', 'name'],
+            "created_by" => ['id', 'user_name'],
+
+            
+            
+        ];
+        foreach ($relationships as $relation => $columns) {
+            if (in_array($relation, $formatArray)) {
+                $tickets->with([$relation => function ($query) use ($columns) {
+                    $query->select($columns);
+                }]);
+            }
+        }
         // if export
         if ($request->has('export') && $request->input('export') === true) {
             // $AllTickets = TicketResource::collection($tickets->get());
             $AllTickets = collect();
             $tickets->chunk(100, function ($chunk) use (&$AllTickets) {
-                $AllTickets = $AllTickets->merge(TicketResource::collection($chunk));
+                $AllTickets = $AllTickets->merge($chunk);
             });
         }
         $perPage = $request->input('per_page', 10);
         $tickets = $tickets->paginate($perPage);
         $links = $tickets->linkCollection();
         return response()->json([
-            "Tickets" => TicketResource::collection($tickets),
+            "Tickets" => $tickets,
             "Links" => $links,
             "AllTickets" => $AllTickets ?? null,
             "fields" => $formatArray,

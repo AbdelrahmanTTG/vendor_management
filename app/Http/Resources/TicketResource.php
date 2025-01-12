@@ -11,7 +11,7 @@ use PhpParser\Node\Expr\Empty_;
 
 class TicketResource extends JsonResource
 {
-
+ 
     public static $wrap = false;
 
     /**

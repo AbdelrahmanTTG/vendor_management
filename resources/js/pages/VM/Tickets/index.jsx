@@ -200,7 +200,7 @@ const TicketsList = (props) => {
         try {
             setLoading2(true);
             const { data } = await axiosClient.post("getTickets", payload);
-            setTickets(data?.Tickets);
+            setTickets(data?.Tickets.data);
             setPageLinks(data?.Links);
             setFormats(data?.formats);
             setFields(data?.fields);
@@ -216,16 +216,16 @@ const TicketsList = (props) => {
     useEffect(() => {
         fetchData();
     }, [currentPage, queryParams, formatsChanged]);
-  useEffect(() => {
+    useEffect(() => {
         formatData(formats);
-  }, [formats]);
+    }, [formats]);
     const formatData = (format) => {
 
         const labelMapping = {
             'name': 'Name',
-            'brand':"Brand",
-            'request_type':'Request Type',
-            'service':'Service',
+            'brand': "Brand",
+            'request_type': 'Request Type',
+            'service': 'Service',
             'task_type': 'Task Type',
             'rate': 'Rate',
             'count': 'Count',
@@ -240,7 +240,7 @@ const TicketsList = (props) => {
             'status': 'Status',
             'created_by': 'Created By',
             'created_at': 'Created At',
-       
+
         };
         format?.flatMap(element =>
             element.format = element.format.split(',').map(value => {
@@ -291,16 +291,37 @@ const TicketsList = (props) => {
         if (exportEx) {
             data = exportEx.map(item => {
                 if (typeof item === 'object' && item !== null) {
-                    fields.map(key => {
-                        if (item[key] === null || item[key] === undefined) {
-                            item[key] = '';
-                        } else if (typeof item[key] === 'number') {
-                            item[key] = item[key];
+                    const processedItem = { ...item };
+                    for (const key in processedItem) {
+                        if (typeof processedItem[key] === 'object' && processedItem[key] !== null) {
+                            processedItem[key] = String(processedItem[key]?.name || processedItem[key]?.user_name  || '');
+                        } else if (processedItem[key] === null || processedItem[key] === undefined) {
+                            processedItem[key] = '';
+                        } else if (typeof processedItem[key] === 'number') {
+                            processedItem[key] = processedItem[key];
                         } else {
-                            item[key] = String(item[key]);
+                            processedItem[key] = String(processedItem[key]);
                         }
-                    })
-                    return item;
+                        if (key === 'status') {
+                            processedItem[key] == 0 ? processedItem[key] = 'Rejected' : "";
+                            processedItem[key] == 1 ? processedItem[key] = 'New' : "";
+                            processedItem[key] == 2 ? processedItem[key] = 'Opened' : "";
+                            processedItem[key] == 3 ? processedItem[key] = 'Partly Closed' : "";
+                            processedItem[key] == 4 ? processedItem[key] = 'Closed' : "";
+                            processedItem[key] == 5 ? processedItem[key] = 'Closed Waiting Requester Acceptance' : "";
+
+                        }
+                        if (key === 'request_type') {
+                            processedItem[key] == 1 ? processedItem[key] = 'New Resource' : "";
+                            processedItem[key] == 2 ? processedItem[key] = 'Price Inquiry' : "";
+                            processedItem[key] == 3 ? processedItem[key] = 'General' : "";
+                            processedItem[key] == 4 ? processedItem[key] = 'Resources Availability' : "";
+                            processedItem[key] == 5 ? processedItem[key] = 'CV Request' : "";
+
+                        }
+             
+                    }
+                    return processedItem;
                 }
             });
         }
@@ -681,7 +702,37 @@ const TicketsList = (props) => {
                                                     <tr key={index}>
                                                         {fields.map((field, fieldIndex) => (
                                                             <td key={fieldIndex}>
-                                                                {item[field]}
+                                                                {field === "request_type" || field === "status"? (
+                                                                    <div>
+                                                                        {field === 'request_type' && (
+                                                                            <div>
+                                                                                {item[field] == 1 && <span style={{ color: 'gray' }}> New Resource</span>}
+                                                                                {item[field] == 2 && <span style={{ color: 'gray' }}> Price Inquiry</span>}
+                                                                                {item[field] == 3 && <span style={{ color: 'gray' }}> General</span>}
+                                                                                {item[field] == 4 && <span style={{ color: 'gray' }}> Resources Availability</span>}
+                                                                                {item[field] == 5 && <span style={{ color: 'gray' }}> CV Request</span>}
+
+                                                                                {(item[field] < 0 || item[field] > 5 || item[field] == null) && <span>Status: Unknown</span>}
+                                                                            </div>
+                                                                        )}
+                                                                        {field === 'status' && (
+                                                                            <div>
+                                                                                {item[field] == 0 && <span style={{ color: 'gray' }}> Rejected</span>}
+                                                                                {item[field] == 1 && <span style={{ color: 'gray' }}> New</span>}
+                                                                                {item[field] == 2 && <span style={{ color: 'gray' }}> Opened</span>}
+                                                                                {item[field] == 3 && <span style={{ color: 'gray' }}> Partly Closed</span>}
+                                                                                {item[field] == 4 && <span style={{ color: 'gray' }}> Closed</span>}
+                                                                                {item[field] == 5 && <span style={{ color: 'gray' }}> Closed Waiting Requester Acceptance</span>}
+
+                                                                                {(item[field] < 0 || item[field] > 5 || item[field] == null) && <span>Status: Unknown</span>}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                ) : typeof item[field] === 'object' && item[field] !== null ? (
+                                                                    item[field].name || item[field].user_name || "No Name"
+                                                                ) : (
+                                                                    item[field]
+                                                                )}
                                                             </td>
                                                         ))}
                                                         <td>

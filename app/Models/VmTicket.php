@@ -15,7 +15,46 @@ class VmTicket extends Model
         $typeArray = array("", "New Resource", "Price Inquiry", "General", "Resources Availability", "CV Request");
         return $typeArray[$this->request_type];
     }
-
+    public function brand()
+    {
+        return  $this->belongsTo(Brand::class, 'brand');
+    }
+    public function service()
+    {
+        return  $this->belongsTo(Service::class, 'service');
+    }
+    public function source_lang()
+    {
+        return $this->belongsTo(Language::class, 'source_lang');
+    }
+    public function software()
+    {
+        return  $this->belongsTo(Tools::class, 'software');
+    }
+    public function target_lang()
+    {
+        return $this->belongsTo(Language::class, 'target_lang');
+    }
+    public function created_by()
+    {
+        return $this->belongsTo(BrandUsers::class, 'created_by');
+    }
+    public function task_type()
+    {
+        return  $this->belongsTo(TaskType::class, 'task_type');
+    }
+    public function unit()
+    {
+        return  $this->belongsTo(Unit::class, 'unit');
+    }
+    public function currency()
+    {
+        return  $this->belongsTo(Currency::class, 'currency');
+    }
+    public function subject()
+    {
+        return $this->belongsTo(MainSubjectMatter::class, 'subject');
+    }
     public function serviceData()
     {
         return  $this->belongsTo(Service::class, 'service');
