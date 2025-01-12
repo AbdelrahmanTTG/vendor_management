@@ -31,7 +31,7 @@ class VendorTest extends Model
 
     public function sub_subject()
     {
-        return $this->belongsTo(MainSubjectMatter::class, 'sub_subject');
+        return $this->belongsTo(SubSubjectMatter::class, 'sub_subject');
     }
 
     public function service()

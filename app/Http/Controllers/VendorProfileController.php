@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Countries;
+use App\Models\SubSubjectMatter;
 use App\Models\BillingData;
 use App\Models\BankDetails;
 use App\Models\WalletsPaymentMethods;
@@ -464,6 +465,12 @@ class VendorProfileController extends Controller
     {
         $id = $request->input('id');
         $Countries = Countries::getColumnValue($id);
+        return response()->json($Countries, 201);
+    }
+    public function findSubSubject(Request $request)
+    {
+        $id = $request->input('id');
+        $Countries = SubSubjectMatter::getColumnValue($id);
         return response()->json($Countries, 201);
     }
     public function findTask(Request $request)

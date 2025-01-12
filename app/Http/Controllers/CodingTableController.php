@@ -19,15 +19,16 @@ use App\Models\Unit;
 use App\Models\UniversityDegree;
 use App\Models\Major;
 use App\Models\Skill;
+use App\Models\SubSubjectMatter;
 use App\Models\Vendor;
 use App\Models\VendorPaymentMethod;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
-
+ 
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['MainSubjectMatter','regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "University_Degree", "major", "skills",'brand','vendors', 'vendor_payment_methods'];
+    protected static $validTables = ['MainSubjectMatter', "subSubject",'regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "University_Degree", "major", "skills",'brand','vendors', 'vendor_payment_methods'];
 
     protected static $models = [
         'regions' => Regions::class,
@@ -46,6 +47,7 @@ class CodingTableController extends Controller
         "major" => Major::class,
         "skills" => Skill::class,
         "MainSubjectMatter"=> MainSubjectMatter::class,
+        "subSubject" => SubSubjectMatter::class,
         "brand"=> Brand::class,
         "vendors"=> Vendor::class,
         "vendor_payment_methods" => VendorPaymentMethod::class,
@@ -66,8 +68,12 @@ class CodingTableController extends Controller
             return response()->json(['error' => 'Invalid table'], 400);
         }
         $modelClass = self::$models[$table];
+        if($table == "brand" || $table == "vendors"){
+            $data = $modelClass::SelectData($searchTerm);
+        }else{
+            $data = $modelClass::SelectData($searchTerm)->where('Active', 1);
 
-        $data = $modelClass::SelectData($searchTerm);
+        }
         return response()->json($data, 200);
     }
 
@@ -101,7 +107,7 @@ class CodingTableController extends Controller
             return response()->json($inserted, 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'An error occurred while adding the data. Please try again later.'
+                'message' => $e->getMessage()
             ], 500);
         }
     }

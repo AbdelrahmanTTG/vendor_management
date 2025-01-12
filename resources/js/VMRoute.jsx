@@ -60,7 +60,7 @@ export const VM = (allowedPermissions) => [
         path: 'Tickets',
         element: (
             <LazyWrapper>
-                <Tickets />
+                <Tickets permissions={allowedPermissions['Tickets']} />
             </LazyWrapper>
         )
     },
@@ -84,7 +84,7 @@ export const VM = (allowedPermissions) => [
         path: 'reports/allTasks',
         element: (
             <LazyWrapper>
-                <AllTasks />
+                <AllTasks permissions={allowedPermissions['reports/allTasks']} />
             </LazyWrapper>
         )
     },
@@ -266,7 +266,7 @@ export const VM = (allowedPermissions) => [
                 <CodeTable
                     permissions={allowedPermissions['Main-Subject Matter']}
                     key="Main-Subject Matter"
-                    table="Main-Subject Matter" dataTable="fields" columns={["id", "name", "Active"]} header={["id", " name", "Active", "Edit", "Delete"]}
+                    table="Main Subject Matter" dataTable="fields" columns={["id", "name", "Active"]} header={["id", " name", "Active", "Edit", "Delete"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input", label: "name" },
                         {
@@ -289,11 +289,12 @@ export const VM = (allowedPermissions) => [
                     permissions={allowedPermissions['Sub-Subject Matter']}
                     key="Sub-Subject Matter"
                     table="Sub-Subject Matter"
-                    dataTable="fields"
-                    columns={["id", "name", "Active"]}
-                    header={["id", " name", "Active", "Edit", "Delete"]}
+                    dataTable="subSubject"
+                    columns={["id", "name","mainSubjectId", "Active"]}
+                    header={["id", " name", "Main Subject Matter", "Active", "Edit", "Delete"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input", label: "Name" },
+                        { name: 'mainSubjectId', type: 'text', field: "selec", tableData: "fields", label: "Main Subject Matter" },
                         {
                             name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
                                 { value: 1, label: 'Active' },
@@ -301,6 +302,12 @@ export const VM = (allowedPermissions) => [
                             ]
                         }
                     ]}
+                    related={{
+                        'table': 'fields',
+                        'foreign_key': 'mainSubjectId',
+                        'primary_key': 'id',
+                        'columns': ['id', 'name']
+                    }}
                 />
             </LazyWrapper>
         )

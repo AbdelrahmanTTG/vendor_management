@@ -123,6 +123,15 @@ try {
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL
         );",
+
+        "CREATE TABLE subSubject (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            mainSubjectId INT NOT NULL,
+            Active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP NULL DEFAULT NULL,
+            updated_at TIMESTAMP NULL DEFAULT NULL
+        );",
         // Create Major table if not exists
         "CREATE TABLE IF NOT EXISTS Major (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -516,7 +525,7 @@ try {
                 FOREIGN KEY (tot_id) REFERENCES vendor_aval_tot(id)
             );",
         "update screen set url ='campaign/',name='Campaigns' where  id = 175",
-       "INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`,`use_system`) VALUES ('165', '5', 'Vendor Availability', 'vendor/vendoravailability', '1','ERP');",
+        "INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`,`use_system`) VALUES ('165', '5', 'Vendor Availability', 'vendor/vendoravailability', '1','ERP');",
         "INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '7', 'VM Activity Sheet', 'reports/vmActivity', '1', 'VM'); ",
         "INSERT INTO screen (groups, name, url, menu, use_system)
             VALUES

@@ -106,7 +106,37 @@ const Test = (props) => {
 
         setFileName(file ? file : null);
     };
+    const handelingSelectSub = async (id) => {
+        if (!id) return
+        try {
+            setLoading(true);
+            const { data } = await axiosClient.get("GetSubSubject", {
+                params: {
+                    id: id
+                }
+            });
 
+            const formattedOptions = data.map(item => ({
+                value: item.id,
+                label: item.name,
+            }));
+
+            setOptionsSub(formattedOptions);
+
+        } catch (err) {
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+        } finally {
+            setLoading(false);
+        }
+
+    };
     const onSubmit = async (data) => {
         if (props?.mode == "edit" && !props.backPermissions?.edit) {
             basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
@@ -393,6 +423,7 @@ const Test = (props) => {
                                                                     </div>
                                                                 ) : 'No options found'}
                                                                 onChange={(option) => {
+                                                                    handelingSelectSub(option.value)
 
                                                                     field.onChange(option);
                                                                 }}
@@ -417,16 +448,13 @@ const Test = (props) => {
                                                                 {...field}
                                                                 value={field.value}
                                                                 options={optionsSub}
-                                                                onInputChange={(inputValue) =>
-                                                                    handleInputChange(inputValue, "MainSubjectMatter", "sub_subject", setOptionsSub, optionsSub)
-                                                                }
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
                                                                 noOptionsMessage={() => loading ? (
                                                                     <div className="loader-box" >
                                                                         <Spinner attrSpinner={{ className: 'loader-6' }} />
                                                                     </div>
-                                                                ) : 'No options found'}
+                                                                ) : 'Select Main Subject Matter'}
                                                                 onChange={(option) => {
                                                                     field.onChange(option);
                                                                 }}

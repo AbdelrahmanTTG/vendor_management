@@ -7,9 +7,15 @@ import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
 import { Image } from '../AbstractElements';
 import Logo from '../assets/images/logo/1-400x141.png';
+import { ToastContainer } from "react-toastify";
+import Toast from "./Toast";
 
 const Login = () => {
- 
+  const basictoaster = () => {
+    toast.error("status", {
+      position: toast.POSITION.TOP_RIGHT
+    });
+  };
   const { user, token } = useStateContext();
   if (token) {
     if (user?.user_type) {
@@ -18,7 +24,7 @@ const Login = () => {
       return <Navigate to='/vm' />
     }
   }
-
+ 
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [errorMessage, setErrorMessage] = useState(null);
@@ -26,11 +32,22 @@ const Login = () => {
   const { setUser, setToken } = useStateContext();
   const [redirect, setRedirect] = useState(null);
   const [togglePassword, setTogglePassword] = useState(false);
+  const [toasts, setToasts] = useState([]);
 
+  const error = (message,type = "error") => {
+    const id = Date.now();
+    setToasts([...toasts, { id, message, type }]);
+    setTimeout(() => {
+      removeToast(id);
+    }, 3000);
+  }
+  const removeToast = (id) => {
+    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
+  };
+  
   const Submit = (e) => {
-    e.preventDefault();
     setLoading(true);
-
+    e.preventDefault();
     const payload = {
       email: email,
       password: password
@@ -45,16 +62,10 @@ const Login = () => {
       }
       setLoading(false);
     }).catch(err => {
-      const response = err.response;
-      if (response && response.status === 422) {
-        setErrorMessage(response.data.errors);
-      } else if (response && response.status === 401) {
-        setErrorMessage(response.data.message);
-      } else {
-        setErrorMessage("An unexpected error occurred.");
-      }
+      error("Incorrect email or password")
       setLoading(false);
     });
+    
 
 
   }
@@ -99,9 +110,7 @@ const Login = () => {
                         }}
                       >
                         
-                        {/* <div className="entry-content" style={{ position: "fixed", right: "38vw" }}>
-                          <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
-                        </div> */}
+                    
                         <div>
                           
                         </div>
@@ -112,10 +121,10 @@ const Login = () => {
                             </div>
                             <div className="login-card" style={{ backgroundColor: "rgb(0,0,0,0%)", position:"relative" , top:"-28vh"}}>
                               <div className="login-main login-tab">
-                                <Form className="theme-form" onSubmit={Submit}>
+                                <Form className="theme-form" onSubmit={Submit} >
                                   <H4>Sign</H4>
                                   <P>{"Enter your email & password to login"}</P>
-                                  {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+                                  {/* {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} */}
                                   <FormGroup>
                                     <Label className="col-form-label">Email Address</Label>
                                     <Input className="form-control" type="email" required onChange={(e) => setEmail(e.target.value)} />
@@ -188,7 +197,14 @@ const Login = () => {
           </Col>
         </Row> */}
       </div>
-    
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => removeToast(toast.id)}
+        />
+      ))}
     </Fragment>
   );
 };

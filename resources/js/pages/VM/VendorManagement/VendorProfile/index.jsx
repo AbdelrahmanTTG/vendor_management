@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState, useCallback, Suspense } from 'react';
-import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, Button, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
+import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, Progress, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../../../pages/AxiosClint";
 import { useNavigate } from 'react-router-dom';
 import { Previous, Next } from '../../../../Constant';
@@ -65,6 +65,7 @@ const Vendor = (props) => {
     const [formatsChanged, setFormatsChanged] = useState(false);
     const [totalVendors, setTotalVendors] = useState(null);
     const [price, setPrice] = useState(null);
+    const [progress, setProgress] = useState(0);
 
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
@@ -408,13 +409,18 @@ const Vendor = (props) => {
         try {
             setLoading2(true)
             const { data } = await axiosClient.post("Vendors", payload);
-            // console.log(data)
+            
             setVendors(data.vendors.data);
             setFields(data.fields)
             setFormats(data.formats)
             setTotalPages(data.vendors.last_page);
             setTotalVendors(data.totalVendors)
-            if (data.AllVendors) { exportToExcel(data.AllVendors) }
+            
+            if (data.AllVendors) {
+                exportToExcel(data.AllVendors)
+                setProgress(50);
+            }
+            
         } catch (err) {
             console.error(err);
         } finally {
@@ -587,7 +593,9 @@ const Vendor = (props) => {
         // return data;
 
     }
+
     const exportToExcel = async (exportEx) => {
+        setProgress(5); 
         let data = [];
         if (exportEx) {
             data = exportEx[1].map(item => {
@@ -627,22 +635,21 @@ const Vendor = (props) => {
                             processedItem[key] == 0 ? processedItem[key] = 'Inactive' : "";
                             processedItem[key] == 1 ? processedItem[key] = 'Active' : "";
                             processedItem[key] == 2 ? processedItem[key] = 'Pending' : "";
-                         
                         }
                         if (key === 'method') {
                             processedItem[key] == 4 ? processedItem[key] = 'Other' : "";
                         }
                     }
-                    return processedItem;  
+                    return processedItem;
                 }
-                return item; 
+                return item;
             });
         }
+        setProgress(30);
 
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sheet 1');
         const headersArray = ['id', ...exportEx[0]];
-
         worksheet.columns = headersArray.map((key) => {
             return {
                 header: key.replace(/_/g, ' ')
@@ -653,7 +660,6 @@ const Vendor = (props) => {
                 width: 20,
             };
         });
-
         worksheet.mergeCells('A1:' + String.fromCharCode(65 + headersArray.length - 1) + '1');
         worksheet.getCell('A1').value = 'Vendor List';
         worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
@@ -661,7 +667,7 @@ const Vendor = (props) => {
 
         const headerRow = worksheet.getRow(2);
         headersArray.forEach((header, index) => {
-            headerRow.getCell(index + 1).value = formatString(header);
+            headerRow.getCell(index + 1).value = header;
         });
         headerRow.eachCell((cell) => {
             cell.fill = {
@@ -679,8 +685,8 @@ const Vendor = (props) => {
             };
         });
 
-        data.forEach(rowData => {
-            const row = worksheet.addRow(headersArray.map(header => rowData[header] ?? '')); 
+        data.forEach((rowData, index) => {
+            const row = worksheet.addRow(headersArray.map(header => rowData[header] ?? ''));
             row.eachCell((cell) => {
                 if (typeof cell.value === 'number') {
                     cell.numFmt = '0';
@@ -694,8 +700,8 @@ const Vendor = (props) => {
                     right: { style: 'thin' }
                 };
             });
+            setProgress(30 + Math.round(((index + 1) / data.length) * 60));   
         });
-
 
         workbook.xlsx.writeBuffer().then(buffer => {
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -705,8 +711,13 @@ const Vendor = (props) => {
             a.download = 'Vendor-List.xlsx';
             a.click();
             window.URL.revokeObjectURL(url);
+            setProgress(100); 
+            setTimeout(() => setProgress(0), 2000); 
         });
     };
+
+   
+
 
     function removeLastIfNumber(str) {
         if (/\d$/.test(str)) {
@@ -906,6 +917,7 @@ const Vendor = (props) => {
 
     return (
         <Fragment >
+           
             <Col>
                 <Card>
 
@@ -1264,7 +1276,7 @@ const Vendor = (props) => {
                                                         <Select name='sub_subject' id='sub_subject' required
                                                             options={optionsSub} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
-                                                                handleInputChange(inputValue, "MainSubjectMatter", "sub_subject", setOptionsSub, optionsSub)
+                                                                handleInputChange(inputValue, "subSubject", "sub_subject", setOptionsSub, optionsSub)
                                                             }
                                                             isMulti />
                                                     </FormGroup>
@@ -1373,7 +1385,7 @@ const Vendor = (props) => {
                                                         <Select name='sub_subject2' id='sub_subject2' required
                                                             options={optionsSub} className="js-example-basic-single"
                                                             onInputChange={(inputValue) =>
-                                                                handleInputChange(inputValue, "MainSubjectMatter", "sub_subject2", setOptionsSub, optionsSub)
+                                                                handleInputChange(inputValue, "subSubject", "sub_subject2", setOptionsSub, optionsSub)
                                                             }
                                                             isMulti />
                                                     </FormGroup>
@@ -1509,7 +1521,7 @@ const Vendor = (props) => {
                                         <Row>
                                             <Col>
                                                 <div className="d-inline">
-                                                    <Btn attrBtn={{ color: 'btn btn-primary-gradien', className: "btn-sm ", type: 'submit' }}><i className="fa fa-search me-1"></i> Search</Btn>
+                                                    <Btn attrBtn={{ color: 'btn btn-primary-gradien', className: "btn-sm ", type: 'submit', disabled: loading2 ? loading2 : loading2 }}><i className="fa fa-search me-1"></i> Search</Btn>
                                                 </div>
                                             </Col>
                                         </Row>
@@ -1522,15 +1534,23 @@ const Vendor = (props) => {
             </Col>
             <Col sm="12">
                 <Card>
+                    <div>
+                        {progress > 0 && (
+                            <div className="mt-3">
+                                <Progress value={progress} color="success">{progress}%</Progress>
+                            </div>
+                        )}
+                    </div>
                     <CardHeader className="px-3 d-flex justify-content-between align-items-center">
+                       
                         <H5>Vendors | {totalVendors}</H5>
                         <div className="ml-auto">
                             <ButtonGroup>
                                 {props.permissions?.add == 1 && (
 
-                                    <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: Add }} >Add new vendor</Btn>
+                                    <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: Add, disabled: loading2 ? loading2 : loading2 }} >Add new vendor</Btn>
                                 )}
-                                <FormatTable title="Add vendors table formatting"
+                                <FormatTable disabled={loading2 ? loading2 : loading2} title="Add vendors table formatting"
                                     Columns={[
                                         {
                                             label: "Personal information",
@@ -1626,7 +1646,7 @@ const Vendor = (props) => {
                                     ]} table="vendors"
                                     formats={formats} FormatsChanged={handleFormatsChanged}
                                 />
-                                <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: EX }}  >Export to Excel</Btn>
+                                <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: EX, disabled: loading2 ? loading2 : loading2 }}  >Export to Excel</Btn>
 
                             </ButtonGroup>
                             {/* <Btn  className="me-2">Add New vendor</Btn> */}

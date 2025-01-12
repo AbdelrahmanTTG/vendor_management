@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\VendorProfileController;
 use Illuminate\Support\Facades\DB;
-
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 class ReportsController extends Controller
 {
     public function vmActivity(Request $request)
@@ -157,8 +158,29 @@ class ReportsController extends Controller
 
     public function allTasks(Request $request)
     {
+        $user = JWTAuth::parseToken()->authenticate();
+        $payload = JWTAuth::getPayload(JWTAuth::getToken());
+        $view = $request->input('view');
+        if ($request->filled('view')) {
+            if ($view == 1) {
+                $piv = explode(',', $payload["piv"]);
+                array_push($piv, $payload["sub"]);
+            } elseif ($view == 2) {
+                $piv = explode(',', $payload["sub"]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Bad Request: view parameter is missing or invalid.'
+            ], 400);
+        }
         // start get data
         $tasks = Task::where('job_id', '<>', 0);
+        if ($user->use_type != 2) {
+            $tasks->whereIn('created_by', $piv);
+            if (count($piv) > 1) {
+                $tasks->orWhereNull('created_by');
+            }
+        }
         // default columns array to display
         $tableColumns = DB::getSchemaBuilder()->getColumnListing('job_task');
       

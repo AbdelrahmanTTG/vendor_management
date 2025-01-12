@@ -115,6 +115,7 @@ Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () 
     Route::post('/EditVendor', [VendorProfileController::class, 'ModificationComplex']);
     Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
     Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
+    Route::get('/GetSubSubject', [VendorProfileController::class, 'findSubSubject']);
     Route::post('/refreshToken ', [AuthController::class, 'RegenrateToken']);
     Route::post('/SendMessage ', [VendorProfileController::class, 'Message_VM_to_Vendor']);
 });

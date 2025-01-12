@@ -170,9 +170,19 @@ const Format = (props) => {
             margin: "5px 0",
         }),
     };
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleClick = (e) => {
+        e.preventDefault();
+        setIsOpen(!props.disabled && !isOpen); 
+    };
     return (
         <Fragment>
-            <UncontrolledDropdown>
+            <UncontrolledDropdown
+                isOpen={isOpen} 
+                toggle={handleClick} 
+                className={props.disabled ? "disabled" : ""}
+            >
                 <DropdownToggle color="light">
                     {'Format table ▼'}
                 </DropdownToggle>

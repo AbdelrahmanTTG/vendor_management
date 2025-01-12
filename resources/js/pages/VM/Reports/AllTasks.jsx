@@ -8,7 +8,7 @@ import FormatTable from "../Format";
 import SweetAlert from 'sweetalert2';
 import ExcelJS from 'exceljs';
 
-const Report = () => {
+const Report = (props) => {
     const [Tasks, setTasks] = useState([]);
     const [pageLinks, setPageLinks] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -159,6 +159,8 @@ const Report = () => {
             queryParams: queryParams,
             table: "job_task",           
             export: ex,
+            view: props.permissions?.view
+
         };
         try {
             setLoading(true);

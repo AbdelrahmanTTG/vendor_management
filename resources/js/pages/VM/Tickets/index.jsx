@@ -10,7 +10,7 @@ import FormatTable from "../Format";
 import SweetAlert from 'sweetalert2';
 import ExcelJS from 'exceljs';
 
-const TicketsList = () => {
+const TicketsList = (props) => {
     const [tickets, setTickets] = useState([]);
     const [pageLinks, setPageLinks] = useState([]);
     const [totalCount, setTotalCount] = useState([]);
@@ -195,6 +195,7 @@ const TicketsList = () => {
             queryParams: queryParams,
             table: "vm_tickets",
             export: ex,
+            view: props.permissions?.view
         };
         try {
             setLoading2(true);

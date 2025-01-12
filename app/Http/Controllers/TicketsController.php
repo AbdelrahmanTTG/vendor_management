@@ -13,13 +13,28 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
-
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 class TicketsController extends Controller
 {
     public function index(Request $request)
     {
         // default columns array to display        
-
+        $user = JWTAuth::parseToken()->authenticate();
+        $payload = JWTAuth::getPayload(JWTAuth::getToken());
+        $view = $request->input('view');
+        if ($request->filled('view')) {
+            if ($view == 1) {
+                $piv = explode(',', $payload["piv"]);
+                array_push($piv, $payload["sub"]);
+            } elseif ($view == 2) {
+                $piv = explode(',', $payload["sub"]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Bad Request: view parameter is missing or invalid.'
+            ], 400);
+        }
         // check for special format
         $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
@@ -57,6 +72,13 @@ class TicketsController extends Controller
         $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
             ->select('vm_ticket.*', 'users.brand AS brand')
             ->orderBy('vm_ticket.id', 'desc');
+        if ($user->use_type != 2) {
+            $tickets->whereIn('created_by', $piv);
+            if (count($piv) > 1) {
+                $tickets->orWhereNull('created_by');
+            }
+        }
+
         // if filter exists
         if (!empty($request->queryParams)) {
             $validator = Validator::make($request->queryParams, [
