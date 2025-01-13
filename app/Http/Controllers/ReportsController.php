@@ -16,6 +16,7 @@ use App\Http\Controllers\VendorProfileController;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+
 class ReportsController extends Controller
 {
     public function vmActivity(Request $request)
@@ -75,7 +76,7 @@ class ReportsController extends Controller
             'existing' => 'Existing Vendors',
             'existing_pair' => 'Existing Vendors with New Pairs'
         ];
-        foreach ($formatArray??$defaultArray as $f) {
+        foreach ($formatArray ?? $defaultArray as $f) {
             $headerFormatArray[] = $renameArrayForDisplay[$f] ?? $f;
         }
         // start get data
@@ -127,21 +128,22 @@ class ReportsController extends Controller
                 // if export
                 if ($request->has('export') && $request->input('export') === true) {
                     $AllTickets = TicketResource::collection($tickets->get());
+                    $tickets = [];
+                } else {
+                    $tickets = $tickets->paginate($perPage);
+                    $links = $tickets->linkCollection();
                 }
-                $tickets = $tickets->paginate($perPage);
-                $links = $tickets->linkCollection();
             }
         }
 
         return response()->json([
             "Tickets" => isset($tickets)?TicketResource::collection($tickets):[],
             "AllTickets" => $AllTickets ?? null,
-            "Links" => $links?? [],
+            "Links" => $links ?? [],
             "fields" => $formatArray ?? $defaultArray,
             "headerFields" => $headerFormatArray,
             "formats" => $formats,
         ]);
-        
     }
 
     public function getVmData()
@@ -310,13 +312,16 @@ class ReportsController extends Controller
             $tasks->chunk(100, function ($chunk) use (&$AllTasks) {
                 $AllTasks = $AllTasks->merge(TaskResource::collection($chunk));
             });
+            $tasks = [];
+        } 
+        else {
+            $perPage = $request->input('per_page', 10);
+            $tasks = $tasks->paginate($perPage);
+            $links = $tasks->linkCollection();
         }
-        $perPage = $request->input('per_page', 10);
-        $tasks = $tasks->paginate($perPage);
-        $links = $tasks->linkCollection();
         return response()->json([
-            "Tasks" => TaskResource::collection($tasks),
-            "Links" => $links,
+            "Tasks" => $tasks?TaskResource::collection($tasks):[],
+            "Links" => $links??[],
             "fields" => $formatArray,
             "formats" => $formats,
             "AllTasks" => $AllTasks ?? null,

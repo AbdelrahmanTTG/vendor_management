@@ -168,12 +168,14 @@ const Report = (props) => {
                 .then(({ data }) => {
                     if (data.type == 'error') {
                         toast.error(data.message);
-                    } else {
-                        setTasks(data?.Tasks);
-                        setPageLinks(data?.Links);
+                    } else {                        
                         setFormats(data?.formats);
                         setFields(data?.fields);
                         if (data.AllTasks) { exportToExcel(data.AllTasks) }
+                        else{
+                            setTasks(data?.Tasks);
+                            setPageLinks(data?.Links);
+                        }
                     }
                     setLoading(false);
                 });
