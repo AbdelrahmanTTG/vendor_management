@@ -177,12 +177,12 @@ class ReportsController extends Controller
         }
         // start get data
         $tasks = Task::where('job_id', '<>', 0);
-        if ($user->use_type != 2) {
-            $tasks->whereIn('created_by', $piv);
-            if (count($piv) > 1) {
-                $tasks->orWhereNull('created_by');
-            }
-        }
+        // if ($user->use_type != 2) {
+        //     $tasks->whereIn('created_by', $piv);
+        //     if (count($piv) > 1) {
+        //         $tasks->orWhereNull('created_by');
+        //     }
+        // }
         // default columns array to display
         $tableColumns = DB::getSchemaBuilder()->getColumnListing('job_task');
       
@@ -310,7 +310,7 @@ class ReportsController extends Controller
             // $AllTasks = TaskResource::collection($tasks->get());
             $AllTasks = collect();
             $tasks->chunk(100, function ($chunk) use (&$AllTasks) {
-                $AllTasks = $AllTasks->merge(TaskResource::collection($chunk));
+                $AllTasks = $AllTasks->merge($AllTasks);
             });
             $tasks = [];
         } 
