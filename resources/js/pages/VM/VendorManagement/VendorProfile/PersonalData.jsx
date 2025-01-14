@@ -331,6 +331,7 @@ const PersonalData = (props) => {
   };
   useEffect(() => {
     if (props.permission) {
+      
       Object.keys(props.permission).forEach((field) => {
         // const input = document.querySelector(`[name=${field}]`);
         const inputDiv = document.getElementById(`${field}-wrapper`);;
@@ -513,7 +514,7 @@ const PersonalData = (props) => {
                       </Col>
                     </FormGroup>
                   </Col>
-                  < Col md="6" id="status-wrapper" >
+                    < Col md="6" id="status-wrapper" style={{ display: props?.permission?.status ? "none" : "block" }} >
                     <FormGroup className="row" >
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > Status </Label>
                       < Col sm="9" >
@@ -609,7 +610,7 @@ const PersonalData = (props) => {
                         {/* <Input className="form-control" type="email" placeholder="email" /> */}
                         < input
                           className="form-control"
-
+                            disabled={props?.permission?.email?true:false}
                           // id="email"
                           type="email"
                           name="email"

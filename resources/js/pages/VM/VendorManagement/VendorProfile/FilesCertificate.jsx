@@ -227,7 +227,7 @@ const FilesCertificate = (props) => {
             basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
             return;
         }
-        if (!cvFileName || !ndaFileName) { return }
+        if (!cvFileName && !ndaFileName) { return }
         const formData = new FormData();
 
         formData.append('cv', cvFileName);
