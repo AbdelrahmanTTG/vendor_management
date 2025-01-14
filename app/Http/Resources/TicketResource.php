@@ -47,7 +47,7 @@ class TicketResource extends JsonResource
             'TeamResponse'=>TicketTeamResponseResource::collection($this->whenLoaded('TeamResponse')),
             'Response'=> TicketResponseResource::collection($this->whenLoaded('Response')), 
             'TimeTaken'=> $this->ticketTime().' H:M', 
-            'brand'=> $this->brand?$this->BrandName->name:'', 
+            // 'brand'=> $this->brand?$this->BrandName->name:'', 
 
             'time_of_opening'=> $this->open_time??null, 
             'opened_by'=> $this->opened_by?$this->getUser($this->opened_by):null, 
