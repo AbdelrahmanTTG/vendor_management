@@ -13,8 +13,8 @@ class Vendor extends Authenticatable  implements JWTSubject
 {
     use HasFactory, Notifiable ,HasApiTokens;
     protected $table = 'vendor';
-        public $timestamps = false;
-
+        public $timestamps = true;
+         const UPDATED_AT = null;
 
     public static function vendor($email , $password){
         $encryptedPassword = base64_encode($password);

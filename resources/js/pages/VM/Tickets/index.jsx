@@ -711,7 +711,6 @@ const TicketsList = (props) => {
                                                                                 {item[field] == 3 && <span style={{ color: 'gray' }}> General</span>}
                                                                                 {item[field] == 4 && <span style={{ color: 'gray' }}> Resources Availability</span>}
                                                                                 {item[field] == 5 && <span style={{ color: 'gray' }}> CV Request</span>}
-
                                                                                 {(item[field] < 0 || item[field] > 5 || item[field] == null) && <span>Status: Unknown</span>}
                                                                             </div>
                                                                         )}

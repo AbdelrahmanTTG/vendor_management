@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Countries;
 use App\Models\SubSubjectMatter;
@@ -109,13 +110,12 @@ class VendorProfileController extends Controller
         if (!empty($intersectColumns)) {
             $vendorsQuery = Vendor::select('vendor.id')
                 ->addSelect(DB::raw(implode(',', $intersectColumns)));
-                if($user->use_type != 2){
+            if ($user->use_type != 2) {
                 $vendorsQuery->whereIn('created_by', $piv);
-                if(count($piv) > 1){
-                $vendorsQuery->orWhereNull('created_by');
+                if (count($piv) > 1) {
+                    $vendorsQuery->orWhereNull('created_by');
                 }
-                }
-               
+            }
         } else {
             $vendorsQuery = Vendor::select('vendor.id');
             if ($user->use_type != 2) {
@@ -1830,5 +1830,113 @@ class VendorProfileController extends Controller
             ], 404);
         }
         return response()->json($vendorData, 200);
+    }
+    public function getDashboardChart(Request $request)
+    {
+        $Vendors =  $this->getVendorsChart();
+        $statusesCount = $this->countTaskStatus();
+        $service = $this->getServiceChart();
+        $taskType = $this->getTaskTypeChart();
+        $source = $this->getSourceChart();
+        $target = $this->getTargetChart();
+        $request_type = $this->countTicketsType();
+
+        return response()->json([
+            "Vendors" => $Vendors,
+            "TaskStatus" => $statusesCount,
+            "service" => $service,
+            "taskType" => $taskType,
+            "source" => $source,
+            "target" => $target,
+            "requestType" => $request_type,
+
+
+
+        ], 200);
+    }
+    public function getVendorsChart()
+    {
+        $startDate = Carbon::now()->subMonths(6)->startOfMonth();
+        $endDate = Carbon::now()->endOfMonth();
+        $Vendors = DB::table('vendor')
+            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as total')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('month')
+            ->orderBy('month', 'asc')
+            ->get();
+        return $Vendors;
+    }
+    public function countTaskStatus()
+    {
+        $statusesCount = DB::table('job_task')
+            ->select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->get();
+        return $statusesCount;
+    }
+    public function countTicketsType()
+    {
+        $request_type = DB::table('vm_ticket')
+        ->select('request_type', DB::raw('COUNT(*) as total'))
+        ->groupBy('request_type')
+        ->get();
+        return $request_type;
+    }
+    public function getSourceChart()
+    {
+        $data = DB::table('job_task')
+        ->leftJoin('job', 'job_task.job_id', '=', 'job.id')
+        ->leftJoin('job_price_list', 'job.price_list', '=', 'job_price_list.id')
+        ->leftJoin('languages', 'job_price_list.source', '=', 'languages.id') 
+        ->select('languages.name as source_name', DB::raw('COUNT(*) as total')) 
+        ->groupBy('languages.name') 
+        ->orderByDesc('total') 
+        ->limit(10)
+        ->get();
+
+        return $data;
+    }
+    public function getTargetChart()
+    {
+        $data = DB::table('job_task')
+        ->leftJoin('job', 'job_task.job_id', '=', 'job.id')
+        ->leftJoin('job_price_list', 'job.price_list', '=', 'job_price_list.id')
+        ->leftJoin('languages', 'job_price_list.target', '=', 'languages.id')
+        ->select('languages.name as target_name', DB::raw('COUNT(*) as total'))
+        ->groupBy('languages.name')
+        ->orderByDesc('total')
+        ->limit(10)
+            ->get();
+
+        return $data;
+    }
+    public function getServiceChart()
+    {
+       
+        $data = DB::table('job_task')
+        ->leftJoin('job', 'job_task.job_id', '=', 'job.id')
+        ->leftJoin('job_price_list', 'job.price_list', '=', 'job_price_list.id')
+        ->leftJoin('services', 'job_price_list.service', '=', 'services.id')
+        ->select('services.name as service_name', DB::raw('COUNT(*) as total'))
+        ->groupBy('services.name')
+        ->orderByDesc('total')
+        ->limit(10)
+        ->get();
+
+        return $data;
+    }
+    public function getTaskTypeChart()
+    {
+
+        $data = DB::table('job_task')
+        ->leftJoin('job', 'job_task.job_id', '=', 'job.id')
+        ->leftJoin('job_price_list', 'job.price_list', '=', 'job_price_list.id')
+        ->leftJoin('task_type', 'job_price_list.task_type', '=', 'task_type.id')
+        ->select('task_type.name as task_type_name', DB::raw('COUNT(*) as total'))
+        ->groupBy('task_type.name')
+        ->orderByDesc('total')
+        ->limit(10)
+        ->get();
+        return $data;
     }
 }
