@@ -16,6 +16,7 @@ use App\Http\Controllers\VendorProfileController;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportsController extends Controller
 {
@@ -137,7 +138,7 @@ class ReportsController extends Controller
         }
 
         return response()->json([
-            "Tickets" => isset($tickets)?TicketResource::collection($tickets):[],
+            "Tickets" => isset($tickets) ? TicketResource::collection($tickets) : [],
             "AllTickets" => $AllTickets ?? null,
             "Links" => $links ?? [],
             "fields" => $formatArray ?? $defaultArray,
@@ -185,8 +186,8 @@ class ReportsController extends Controller
         // }
         // default columns array to display
         $tableColumns = DB::getSchemaBuilder()->getColumnListing('job_task');
-      
-        $renameArrayForSearch = ['job.priceList.source' => 'source_name', 'job.priceList.target' => 'target_name', 'user.brand' => 'brand_name','brand'=> 'brand_name'];
+
+        $renameArrayForSearch = ['job.priceList.source' => 'source_name', 'job.priceList.target' => 'target_name', 'user.brand' => 'brand_name', 'brand' => 'brand_name'];
         // check for special format
         $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
@@ -197,7 +198,7 @@ class ReportsController extends Controller
             $formatArray = array_merge(...array_map(function ($item) {
                 return explode(',', $item);
             }, $formatArray));
-        }else{
+        } else {
             $formatArray = [
                 'code',
                 'subject',
@@ -236,11 +237,11 @@ class ReportsController extends Controller
             } else {
                 if (!empty($request->queryParams)) {
                     foreach ($request->queryParams as $key => $val) {
-                        if (!in_array($key, $formatArray) && ($key != 'start_date' && $key != 'end_date')){
-                         if(isset($renameArrayForSearch[$key]) && !in_array($renameArrayForSearch[$key],$formatArray)) { 
-                            $formatArray[] = $renameArrayForSearch[$key] ?? $key;
-                            }         
-                        }                  
+                        if (!in_array($key, $formatArray) && ($key != 'start_date' && $key != 'end_date')) {
+                            if (isset($renameArrayForSearch[$key]) && !in_array($renameArrayForSearch[$key], $formatArray)) {
+                                $formatArray[] = $renameArrayForSearch[$key] ?? $key;
+                            }
+                        }
                         if (!empty($val)) {
                             if (is_array($val)) {
                                 if (str_contains($key, '.')) {
@@ -303,6 +304,30 @@ class ReportsController extends Controller
         if (isset($formatArray)) {
             $selectArray = array_intersect($tableColumns, $formatArray);
             $tasks = $tasks->select('id', 'job_id', 'code', 'status', 'rate', 'count', 'created_by')->addSelect(DB::raw(implode(',', $selectArray)));
+        }  
+        // start relations
+        $relationships = [
+            'source_name' => ["rel"=>'job.priceList.SourceName',"col"=>"id,name","displayData"=>"job.price_list.source_name"],
+            'target_name' => ["rel"=>'job.priceList.TargetName',"col"=>"id,name","displayData"=>"job.price_list.target_name"],
+            'created_by' => ["rel"=>'user',"col"=>"id,user_name,brand","displayData"=>"user"],
+            'brand_name' => ["rel"=>'user.getBrand',"col"=>"id,name","displayData"=>"user.get_brand"],
+            'vendor' => ["rel"=>'getVendor',"col"=>"id,name","displayData"=>"get_vendor"],
+            'unit' => ["rel"=>'unitName',"col"=>"id,name","displayData"=>"unit_name"],
+            'task_type' => ["rel"=>'taskTypeName',"col"=>"id,name","displayData"=>"task_type_name"],
+            'currency' => ["rel"=>'currencyName',"col"=>"id,name","displayData"=>"currency_name"],
+            
+        ];
+        foreach ($relationships as $relation => $columns) {
+            if (in_array($relation, $formatArray)) {               
+                $withArray[] =  $columns['rel'] . ":" . $columns['col']??''; 
+            }
+        }
+        if (isset($withArray)) {
+            $tasks->with($withArray);
+        }
+        // end 
+        foreach ($formatArray as $f) {
+            $displayFormatArray[] = $relationships[$f]['displayData'] ?? $f;
         }
         $tasks = $tasks->orderBy('created_at', 'desc');
         // if export
@@ -310,18 +335,19 @@ class ReportsController extends Controller
             // $AllTasks = TaskResource::collection($tasks->get());
             $AllTasks = collect();
             $tasks->chunk(100, function ($chunk) use (&$AllTasks) {
-                $AllTasks = $AllTasks->merge($AllTasks);
+                $AllTasks = $AllTasks->merge($chunk);
             });
             $tasks = [];
-        } 
-        else {
+        } else {
             $perPage = $request->input('per_page', 10);
             $tasks = $tasks->paginate($perPage);
             $links = $tasks->linkCollection();
         }
         return response()->json([
-            "Tasks" => $tasks?TaskResource::collection($tasks):[],
-            "Links" => $links??[],
+            "Tasks" => $tasks ? $tasks : [],
+            //  "Tasks" => $tasks?TaskResource::collection($tasks):[],
+            "Links" => $links ?? [],
+            "displayFormatArray" => $displayFormatArray,
             "fields" => $formatArray,
             "formats" => $formats,
             "AllTasks" => $AllTasks ?? null,
