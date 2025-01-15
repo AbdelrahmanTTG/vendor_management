@@ -140,7 +140,7 @@
     @endif
 
     @if(isset($mailData['data']))
-        <p>{{ $mailData['data'] }}</p>
+        <p>{!! $mailData['data'] !!}</p>
     @endif
     <p>Thank you</p>
 

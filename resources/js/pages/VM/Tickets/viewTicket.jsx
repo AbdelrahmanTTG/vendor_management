@@ -149,7 +149,7 @@ const ViewTicket = () => {
                                             <tr key={index}>
                                                 <td scope="row">{item.created_by}</td>
                                                 <td scope="row">
-                                                    {item.response}
+                                                <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} /> 
                                                     <br />
                                                     {item.fileLink != null && (
                                                         <Link to={item.fileLink} className='txt-dangers'>{'View File'}</Link>
@@ -220,7 +220,7 @@ const ViewTicket = () => {
                                             <tr key={index}>
                                                 <td scope="row">{item.created_by}</td>
                                                 <td scope="row">
-                                                    {item.response}
+                                                    <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />                                                 
                                                 </td>
                                                 <td scope="row">{item.created_at}</td>
                                             </tr>
