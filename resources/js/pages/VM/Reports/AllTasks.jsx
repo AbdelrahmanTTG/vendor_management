@@ -171,7 +171,7 @@ const Report = (props) => {
                     } else {                        
                         setFormats(data?.formats);
                         setFields(data?.fields);
-                        console.log(data.AllTasks)
+                        // console.log(data.AllTasks)
                         if (data.AllTasks) { exportToExcel(data.AllTasks) }
                         else{
                             setTasks(data?.Tasks);
@@ -224,26 +224,38 @@ const Report = (props) => {
         });
     };
     const exportToExcel = async (exportEx) => {
-        let data = exportEx;
-        // if (exportEx) {
-        //     data = exportEx.map(item => {                
-        //         if (typeof item === 'object' && item !== null) {
-        //             fields.map(key =>{
-        //                 if (item[key] === null || item[key] === undefined) {
-        //                     item[key] = '';
-        //                 } else if (typeof item[key] === 'number') {
-        //                     item[key] = item[key];
-        //                 } else {
-        //                     item[key] = String(item[key]);
-        //                 }
-        //                 if (key === 'status') {
-        //                     item[key] = String(item['statusData'].replace('Your', 'Vendor'));                          
-        //                 }                       
-        //             })
-        //             return item;
-        //         }                
-        //     });
-        // }
+        let data = [];
+        if (exportEx) {
+            data = exportEx.map(item => {
+                if (typeof item === 'object' && item !== null) {
+                    const processedItem = { ...item };
+                    for (const key in processedItem) {
+                        if (typeof processedItem[key] === 'object' && processedItem[key] !== null) {
+                            processedItem[key] = String(processedItem[key]?.name || processedItem[key]?.user_name || '');
+                        } else if (processedItem[key] === null || processedItem[key] === undefined) {
+                            processedItem[key] = '';
+                        } else if (typeof processedItem[key] === 'number') {
+                            processedItem[key] = processedItem[key];
+                        } else {
+                            processedItem[key] = String(processedItem[key]);
+                        }
+                        if (key === 'status') {
+                            processedItem[key] == 0 ? processedItem[key] = 'In Progress' : "";
+                            processedItem[key] == 1 ? processedItem[key] = 'Delivered' : "";
+                            processedItem[key] == 2 ? processedItem[key] = 'Cancelled' : "";
+                            processedItem[key] == 3 ? processedItem[key] = 'Rejected' : "";
+                            processedItem[key] == 4 ? processedItem[key] = 'Waiting Vendor Confirmation' : "";
+                            processedItem[key] == 5 ? processedItem[key] = 'Waiting PM Confirmation' : "";
+                            processedItem[key] == 7 ? processedItem[key] = 'Heads-Up' : "";
+                            processedItem[key] == 8 ? processedItem[key] = 'Heads-Up ( Marked as Available )' : "";
+                            processedItem[key] == 9 ? processedItem[key] = 'Heads-Up ( Marked as Not Available )' : "";
+           
+                        }
+                    }
+                    return processedItem;
+                }
+            });
+        }
         // else {
         //     const tableRows = document.querySelectorAll("table tbody tr");
         //     tableRows.forEach(row => {

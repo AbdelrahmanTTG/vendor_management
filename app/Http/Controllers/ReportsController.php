@@ -315,13 +315,26 @@ class ReportsController extends Controller
             $data = DB::table('job_task')
                 ->leftJoin('job', 'job_task.job_id', '=', 'job.id')
                 ->leftJoin('job_price_list', 'job.price_list', '=', 'job_price_list.id')
-                ->leftJoin('languages', 'job_price_list.source', '=', 'languages.id')
-                ->leftJoin('vendor', 'job_task.vendor', '=', 'vendor.id')
-                ->select('languages.name as source_name' , "job_task.code" , "job_task.subject" , "vendor.name"  )
-                // ->groupBy('languages.name')
-                // ->orderByDesc('total')
+                ->leftJoin('languages as source_lang', 'job_price_list.source', '=', 'source_lang.id')
+                ->leftJoin('languages as target_lang', 'job_price_list.target', '=', 'target_lang.id')
+                ->leftJoin('vendor as vendor', 'job_task.vendor', '=', 'vendor.id')
+                ->leftJoin('unit as unit', 'job_task.unit', '=', 'unit.id')
+                ->leftJoin('currency as currency', 'job_task.currency', '=', 'currency.id')
+                ->leftJoin('task_type as task_type', 'job_task.task_type', '=', 'task_type.id')
+                ->leftJoin('users as users', 'job_task.created_by', '=', 'users.id')
+                ->leftJoin('brand as brand', 'users.brand', '=', 'brand.id')
+                ->select('source_lang.name as source_name', 'target_lang.name as target_name', "job_task.code", "job_task.subject",  "vendor.name as vendor",
+                "job_task.count" , "unit.name as unit","job_task.rate","task_type.name as task_type","task_type.name as task_type",
+                "job_task.start_date",
+                "job_task.delivery_date",
+                "job_task.status",
+                "job_task.closed_date",
+                "users.user_name as created_by",
+                "brand.name as brand_name",
+                "job_task.created_at",
+                DB::raw('job_task.count * job_task.rate as total_cost') )
                 ->orderBy('job_task.created_at', 'desc');
-                // ->limit(10);
+             
                 // ->get();
 
             // foreach ($relationships as $relation => $columns) {
