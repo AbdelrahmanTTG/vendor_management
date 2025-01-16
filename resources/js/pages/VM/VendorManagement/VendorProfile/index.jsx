@@ -395,6 +395,7 @@ const Vendor = (props) => {
     };
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: 'asc' });
     const fetchData = useCallback(async (ex) => {
+        console.log(props.permissions?.view)
         const payload = {
             per_page: 10,
             page: currentPage,

@@ -72,12 +72,12 @@ class TicketsController extends Controller
         $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
             ->select('vm_ticket.*', 'users.brand AS brand')
             ->orderBy('vm_ticket.id', 'desc');
-        if ($user->use_type != 2 && $view != 3) {
-            $tickets->whereIn('created_by', $piv);
-            if (count($piv) > 1) {
-                $tickets->orWhereNull('created_by');
-            }
-        }
+        // if ($user->use_type != 2 && $view != 3) {
+        //     $tickets->whereIn('created_by', $piv);
+        //     if (count($piv) > 1) {
+        //         $tickets->orWhereNull('created_by');
+        //     }
+        // }
 
         // if filter exists
         if (!empty($request->queryParams)) {

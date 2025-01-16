@@ -110,20 +110,20 @@ class VendorProfileController extends Controller
         if (!empty($intersectColumns)) {
             $vendorsQuery = Vendor::select('vendor.id')
                 ->addSelect(DB::raw(implode(',', $intersectColumns)));
-            if ($user->use_type != 2 && $view != 3 ) {
-                $vendorsQuery->whereIn('created_by', $piv);
-                if (count($piv) > 1) {
-                    $vendorsQuery->orWhereNull('created_by');
-                }
-            }
+            // if ($user->use_type != 2 && $view != 3 ) {
+            //     $vendorsQuery->whereIn('created_by', $piv);
+            //     if (count($piv) > 1) {
+            //         $vendorsQuery->orWhereNull('created_by');
+            //     }
+            // }
         } else {
             $vendorsQuery = Vendor::select('vendor.id');
-            if ($user->use_type !=2 && $view != 3) {
-                $vendorsQuery->whereIn('created_by', $piv);
-                if (count($piv) > 1) {
-                    $vendorsQuery->orWhereNull('created_by');
-                }
-            }
+            // if ($user->use_type !=2 && $view != 3) {
+            //     $vendorsQuery->whereIn('created_by', $piv);
+            //     if (count($piv) > 1) {
+            //         $vendorsQuery->orWhereNull('created_by');
+            //     }
+            // }
         }
         if (in_array('priceList', $formatArray) || !empty($intersectColumnsVendorSheet)) {
             if (!in_array('priceList', $formatArray)) {
