@@ -16,6 +16,7 @@ const ViewOffer = () => {
     const location = useLocation();
     const availabilityId = location.state;
     const [availabilityPage, setAvailabilityPage] = useState({});
+    const [uploadslink, setUploadslink] = useState('');
     const { user } = useStateContext();
     const [modal, setModal] = useState(false);
     const toggle = () => setModal(!modal);
@@ -40,6 +41,7 @@ const ViewOffer = () => {
             axiosClient.post(baseURL + "viewAvailabilityCheck", payload)
                 .then(({ data }) => {
                     setAvailabilityPage(data?.availabilityPage);
+                    setUploadslink(data?.uploads_link);
                     setLoading(false);
                 });
         }
@@ -125,7 +127,7 @@ const ViewOffer = () => {
                                                                     <div className="emailread-group">
                                                                         <H6 attrH6={{ className: 'text-muted me-2' }}><i className="icofont icofont-clip"></i> ATTACHMENTS
                                                                             {availabilityPage.attach_file != null ? (
-                                                                                <Link to={"https://aixnexus.com/erp/assets/uploads/vendorAvaliability/" + availabilityPage.attach_file} target="_blank" className='m-l-10'><i className="fa fa-download"></i> Download File</Link>
+                                                                                <Link to={uploadslink + "/vendorAvaliability/" + availabilityPage.attach_file} target="_blank" className='m-l-10'><i className="fa fa-download"></i> Download File</Link>
                                                                             ) : (
                                                                                 <span className="text-muted m-l-10 txt-danger f-w-600">{'No File Found'}</span>
                                                                             )}

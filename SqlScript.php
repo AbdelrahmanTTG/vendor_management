@@ -427,6 +427,7 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
         ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name4` VARCHAR(255) NULL , ADD `v_ev_per4` INT(3) NULL ;  
         ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name5` VARCHAR(255) NULL , ADD `v_ev_per5` INT(3) NULL ;  
         ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name6` VARCHAR(255) NULL , ADD `v_ev_per6` INT(3) NULL ;
+        ALTER TABLE `vm_setup` ADD `vm_setup` TEXT NULL , ADD `erp_uploads_folder_path` TEXT NULL ;
         ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`pm_email` VARCHAR(255) NULL,ADD `vm_email` VARCHAR(255) NULL,  
         ADD `accounting_email` VARCHAR(255) NULL; ",
         "ALTER TABLE `job_task` ADD `brand` INT(11) NULL ;
@@ -551,6 +552,7 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
             ( 5, 'edit vendor profile', 'vendors/editprofiletest', 0, 'VM');",
         "ALTER TABLE logger
             ADD COLUMN master_id UNSIGNED BIGINT NULL;"
+            
     ];
 
     // Execute the queries

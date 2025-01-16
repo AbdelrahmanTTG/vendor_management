@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Job;
+use App\Models\VmSetup;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -41,9 +42,10 @@ class TaskResource extends JsonResource
             'type'=>($this->status == 4)?'job_offer': 'job',
             'offer_type'=>(isset($this->task_id))?'offer_list': 'task',
             'file'=> $this->whenHas('file'),
-            'fileLink'=> $this->whenHas('file',"https://aixnexus.com/erp/assets/uploads/taskFile/$this->file"),
+            // 'fileLink'=> $this->whenHas('file',"https://stage.aixnexus.com/erp/assets/uploads/taskFile/$this->file"),
+            'fileLink'=> $this->whenHas('file',VmSetup::getUploadsFullLink()."/taskFile/$this->file"),
             'job_file'=> $this->whenHas('job_file',$this->jobFile?$this->jobFile->job_file:null),
-            'job_fileLink'=> $this->whenHas('job_file',"https://aixnexus.com/erp/assets/uploads/jobFile/$this->job_file"),
+            'job_fileLink'=> $this->whenHas('job_file',VmSetup::getUploadsFullLink()."/jobFile/$this->job_file"),
             'insrtuctions'=>$this->whenHas('insrtuctions'),
 
             'brand_name'=> $this->whenHas('created_by',$this->user?$this->user->getBrand->name:null),

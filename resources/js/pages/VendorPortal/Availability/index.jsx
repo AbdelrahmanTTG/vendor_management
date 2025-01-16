@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 const AllData = () => {
     const baseURL = "/Portal/Vendor";
     const [availabilityList, setAvailabilityList] = useState([]);
+    const [uploadslink, setUploadslink] = useState('');
     const { user } = useStateContext();
     const [loading, setLoading] = useState(true);
     useEffect(() => {
@@ -26,6 +27,7 @@ const AllData = () => {
             axiosClient.post(baseURL + "/getAvailabilityList", payload)
                 .then(({ data }) => {
                     setAvailabilityList(data?.List);
+                    setUploadslink(data?.uploads_link);
                     setLoading(false);
                 });
         }
@@ -79,7 +81,7 @@ const AllData = () => {
                                                                 <td>{item.email_subject}</td>
                                                                 <td>
                                                                     {item.attach_file != null ?
-                                                                        <Link to={'https://aixnexus.com/erp/assets/uploads/vendorAvaliability/' + item.attach_file} target="_blank"><i className="icofont icofont-clip"></i> View File</Link>
+                                                                        <Link to={ uploadslink+'/vendorAvaliability/' + item.attach_file} target="_blank"><i className="icofont icofont-clip"></i> View File</Link>
                                                                         : (
                                                                             ''
                                                                         )}</td>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Mail\PortalMail;
+use App\Models\VmSetup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,13 @@ use Illuminate\Support\Facades\Mail;
 
 class AvailabilityController extends Controller
 {
+    protected $uploads_link;
+
+    public function __construct()
+    {
+        $this->uploads_link = VmSetup::getUploadsFullLink()??'';
+    }
+
     public function index(Request $request)
     {
         if (isset($request['userType']) && $request['userType'] == 'admin') {
@@ -18,7 +26,7 @@ class AvailabilityController extends Controller
         } else {
             $vendorID = $request['user'] = Crypt::decrypt($request->user);
         }
-        $query = DB::table('vendor_aval_det as det')->select('brand.name as brand_name', 'tot.id', 'tot.created_at', 'tot.duration', 'tot.email_from', 'tot.attach_file', 'tot.email_subject', 'det.id as detid','vendor.name as vendor')
+        $query = DB::table('vendor_aval_det as det')->select('brand.name as brand_name', 'tot.id', 'tot.created_at', 'tot.duration', 'tot.email_from', 'tot.attach_file', 'tot.email_subject', 'det.id as detid', 'vendor.name as vendor')
             ->join('vendor_aval_tot as tot', 'det.tot_id', '=', 'tot.id')
             ->leftJoin('brand', 'tot.brand', '=', 'brand.id')
             ->leftJoin('vendor', 'det.vendor', '=', 'vendor.id')
@@ -34,6 +42,7 @@ class AvailabilityController extends Controller
         $availabilityCheck = ($query->count() > 0) ? $query->get() : [];
         return response()->json([
             "List" => $availabilityCheck,
+            "uploads_link" =>  $this->uploads_link
         ], 200);
     }
 
@@ -55,6 +64,7 @@ class AvailabilityController extends Controller
         $availabilityCheck = $availabilityCheck->first();
         return response()->json([
             "availabilityPage" => $availabilityCheck ?? [],
+            "uploads_link" =>  $this->uploads_link
         ], 200);
     }
 

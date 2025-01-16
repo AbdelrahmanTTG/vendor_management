@@ -89,6 +89,18 @@ const Admin = () => {
                                 </Col>
                               </FormGroup>
                               <FormGroup className="row">
+                                <Label className="col-sm-4 col-form-label">{'Erp Link'}</Label>
+                                <Col sm="8">
+                                  <Input type="text" name="erp_link" className="form-control" defaultValue={pageData.erp_link} />
+                                </Col>
+                              </FormGroup>
+                              <FormGroup className="row">
+                                <Label className="col-sm-4 col-form-label">{'Erp Uploads Folder Path'}</Label>
+                                <Col sm="8">
+                                  <Input type="text" name="erp_uploads_folder_path" className="form-control" defaultValue={pageData.erp_uploads_folder_path} />
+                                </Col>
+                              </FormGroup>
+                              <FormGroup className="row">
                                 <Label className="col-sm-4 col-form-label">{'PM Email'}</Label>
                                 <Col sm="8">
                                   <Input type="text" name="pm_email" className="form-control" defaultValue={pageData.pm_email} />

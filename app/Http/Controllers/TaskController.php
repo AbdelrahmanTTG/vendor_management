@@ -514,8 +514,9 @@ class TaskController extends Controller
                 //send Confirm Task Mail To Pm        
                 $pmEmail = BrandUsers::select('email')->where('id', $offer->created_by)->get();
                 $encodeId = base64_encode($offer->id);
+                $erp_link = VmSetup::getErpLink();
                 $confirmLink = "<strong>Confirm Task : </strong>
-                 <a href='https://aixnexus.com/erp/projectManagment/pmDirectConfirmExternalLink?task_id='.$encodeId>
+                 <a href= $erp_link.'/projectManagment/pmDirectConfirmExternalLink?task_id='.$encodeId>
                                                                 Click Here To Confirm
                                                             </a>";
                 $mailData2 = [

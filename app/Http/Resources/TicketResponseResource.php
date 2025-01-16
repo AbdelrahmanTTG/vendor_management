@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Job;
+use App\Models\VmSetup;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -25,7 +26,7 @@ class TicketResponseResource extends JsonResource
             'response' => $this->response,          
             'created_by' => $this->user?$this->user->user_name:$this->created_by,         
             'created_at' => $this->created_at,
-            'fileLink'=> $this->file?"https://aixnexus.com/erp/assets/uploads/tickets/$this->file":null,                     
+            'fileLink'=> $this->file?VmSetup::getUploadsFullLink()."/tickets/$this->file":null,                     
                
                     
                         
