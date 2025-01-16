@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState, useCallback } from 'react';
+import React, { Fragment, useEffect, useState, useCallback  } from 'react';
 import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../AxiosClint";
 import { Btn, H5, Spinner } from '../../../AbstractElements';
@@ -25,7 +25,6 @@ const Report = (props) => {
     const [initialOptions, setInitialOptions] = useState({});
     const [queryParams, setQueryParams] = useState(null);
     const [fields, setFields] = useState([]);
-    const [displayFormatArray, setDisplayFormatArray] = useState([]);
     const [formats, setFormats] = useState(null);
     const [formatsChanged, setFormatsChanged] = useState(false);
     const toggleCollapse = () => {
@@ -158,7 +157,7 @@ const Report = (props) => {
             per_page: 10,
             page: currentPage,
             queryParams: queryParams,
-            table: "job_task",
+            table: "job_task",           
             export: ex,
             view: props.permissions?.view
 
@@ -169,15 +168,14 @@ const Report = (props) => {
                 .then(({ data }) => {
                     if (data.type == 'error') {
                         toast.error(data.message);
-                    } else {
+                    } else {                        
                         setFormats(data?.formats);
                         setFields(data?.fields);
-                        setDisplayFormatArray(data?.displayFormatArray);
+                        console.log(data.AllTasks)
                         if (data.AllTasks) { exportToExcel(data.AllTasks) }
-                        else {
-                            setTasks(data?.Tasks.data);
+                        else{
+                            setTasks(data?.Tasks);
                             setPageLinks(data?.Links);
-
                         }
                     }
                     setLoading(false);
@@ -187,7 +185,7 @@ const Report = (props) => {
         }
     });
 
-    useEffect(() => {
+    useEffect(() => {       
         fetchData();
     }, [currentPage, queryParams, formatsChanged]);
 
@@ -225,62 +223,51 @@ const Report = (props) => {
             }
         });
     };
-    const deepGet = (obj, field) => {
-        let newObj = obj;
-        let x = field.split('.');
-        x.map((item) => {
-            newObj = newObj?.[item]
-        })
-        return newObj ? newObj.name : '--';
-
-    }
     const exportToExcel = async (exportEx) => {
-        let data = [];
-        if (exportEx) {
-            data = exportEx.map(item => {
-                if (typeof item === 'object' && item !== null) {
-                    displayFormatArray.slice(0).reverse().map(key => {
-                        if (key.includes('.')) {
-                            item[key] = deepGet(item, key);
-                        } else {
-                            if (item[key] === null || item[key] === undefined) {
-                                item[key] = '';
-                            } else if (typeof item[key] === 'number') {
-                                item[key] = item[key];
-                            } else {
-                                item[key] = String(item[key].name || item[key].user_name || item[key]);
-                            }
-                            if (key === 'total_cost') {
-                                item[key] = parseFloat(item['count'] * item['rate']).toFixed(2);
-                            }
-                            if (key === 'status') {
-                                item[key] == 0 ? item[key] = ' In Progress' : "";
-                                item[key] == 1 ? item[key] = ' Delivered' : "";
-                                item[key] == 2 ? item[key] = ' Cancelled' : "";
-                                item[key] == 3 ? item[key] = ' Rejected' : "";
-                                item[key] == 4 ? item[key] = ' Waiting Vendor Confirmation' : "";
-                                item[key] == 5 ? item[key] = ' Waiting PM Confirmation' : "";
-                                item[key] == 7 ? item[key] = ' "Heads-Up' : "";
-                                item[key] == 8 ? item[key] = ' "Heads-Up ( Marked as Available )' : "";
-                                item[key] == 9 ? item[key] = ' "Heads-Up ( Marked as Not Available )' : "";                                                    
-                            }
-                        }
-                    })
-                    return item;
-                }
-            });
-        }
+        let data = exportEx;
+        // if (exportEx) {
+        //     data = exportEx.map(item => {                
+        //         if (typeof item === 'object' && item !== null) {
+        //             fields.map(key =>{
+        //                 if (item[key] === null || item[key] === undefined) {
+        //                     item[key] = '';
+        //                 } else if (typeof item[key] === 'number') {
+        //                     item[key] = item[key];
+        //                 } else {
+        //                     item[key] = String(item[key]);
+        //                 }
+        //                 if (key === 'status') {
+        //                     item[key] = String(item['statusData'].replace('Your', 'Vendor'));                          
+        //                 }                       
+        //             })
+        //             return item;
+        //         }                
+        //     });
+        // }
+        // else {
+        //     const tableRows = document.querySelectorAll("table tbody tr");
+        //     tableRows.forEach(row => {
+        //         const rowData = [];
+        //         const cells = row.querySelectorAll("td");
+        //         const dataWithoutLastTwo = Array.from(cells);
+        //         dataWithoutLastTwo.forEach(cell => {
+        //             rowData.push(cell.innerText);
+        //         });
+        //         data.push(rowData);
+        //     });
+        // }
 
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sheet 1');
         const headersArray = [...fields];
-        worksheet.columns = headersArray.map((key, i) => {
+
+        worksheet.columns = headersArray.map((key) => {
             return {
                 header: key.replace('_name', '')
-                    .split(/[_-]/)
+                .split(/[_-]/)
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' '),
-                key: displayFormatArray[i],
+                key: key,
                 width: 20,
             };
         });
@@ -316,7 +303,7 @@ const Report = (props) => {
 
         data.forEach(rowData => {
             const row = worksheet.addRow(rowData);
-            row.eachCell((cell) => {
+            row.eachCell((cell) => {                
                 cell.border = {
                     top: { style: 'thin' },
                     left: { style: 'thin' },
@@ -337,44 +324,44 @@ const Report = (props) => {
         });
     };
     useEffect(() => {
-        formatData(formats);
+          formatData(formats);
     }, [formats]);
-    const formatData = (format) => {
-
-        const labelMapping = {
-
-            'subject': 'Subject',
-            'task_type': 'Task Type',
-            'vendor': 'Vendor',
-            'source_name': 'Source',
-            'target_name': 'Target',
-            'count': 'Count',
-            'unit': 'Unit',
-            'rate': 'Rate',
-            'total_cost': 'Total Cost',
-            'currency': 'Currency',
-            'start_date': 'Start Date',
-            'delivery_date': 'Delivery Date',
-            'status': 'Status',
-            'closed_date': 'Closed Date',
-            'created_by': 'Created by',
-            'created_at': 'Created at',
-            'brand_name': 'Brand'
-
-        };
-        format?.flatMap(element =>
-            element.format = element.format.split(',').map(value => {
-                const trimmedValue = value.trim();
-                return {
-                    value: trimmedValue,
-                    label: labelMapping[trimmedValue] || trimmedValue
-                };
-            })
-        );
-        // return data;
-
-    }
-
+      const formatData = (format) => {
+  
+          const labelMapping = {
+         
+              'subject': 'Subject',
+              'task_type': 'Task Type',
+              'vendor': 'Vendor',
+              'source_name': 'Source',
+              'target_name': 'Target',
+              'count': 'Count',
+              'unit': 'Unit',
+              'rate': 'Rate',
+              'total_cost': 'Total Cost',
+              'currency': 'Currency',
+              'start_date': 'Start Date',
+              'delivery_date': 'Delivery Date',
+              'status': 'Status',
+              'closed_date': 'Closed Date',
+              'created_by': 'Created by',
+              'created_at': 'Created at',
+              'brand_name': 'Brand'
+         
+          };
+          format?.flatMap(element =>
+              element.format = element.format.split(',').map(value => {
+                  const trimmedValue = value.trim();
+                  return {
+                      value: trimmedValue,
+                      label: labelMapping[trimmedValue] || trimmedValue
+                  };
+              })
+          );
+          // return data;
+  
+      }
+   
     return (
         <Fragment >
             <Col>
@@ -594,32 +581,14 @@ const Report = (props) => {
                                             <>
                                                 {Tasks.map((item, index) => (
                                                     <tr key={index}>
-                                                        {displayFormatArray.map((field, fieldIndex) => (
+                                                        {fields.map((field, fieldIndex) => (
                                                             <td key={fieldIndex}>
-                                                                {field.includes('.') ?
-                                                                    deepGet(item, field)
-                                                                    : (field == 'status' ? (
-                                                                        <div>
-                                                                            {item[field] == 0 && <span style={{ color: 'gray' }}> In Progress</span>}
-                                                                            {item[field] == 1 && <span style={{ color: 'gray' }}> Delivered</span>}
-                                                                            {item[field] == 2 && <span style={{ color: 'gray' }}> Cancelled</span>}
-                                                                            {item[field] == 3 && <span style={{ color: 'gray' }}> Rejected</span>}
-                                                                            {item[field] == 4 && <span style={{ color: 'gray' }}> Waiting Vendor Confirmation</span>}
-                                                                            {item[field] == 5 && <span style={{ color: 'gray' }}> Waiting PM Confirmation</span>}
-                                                                            {item[field] == 7 && <span style={{ color: 'gray' }}> "Heads-Up</span>}
-                                                                            {item[field] == 8 && <span style={{ color: 'gray' }}> "Heads-Up ( Marked as Available )</span>}
-                                                                            {item[field] == 9 && <span style={{ color: 'gray' }}> "Heads-Up ( Marked as Not Available )</span>}
-
-                                                                        </div>
-                                                                    )
-                                                                        : typeof item[field] === 'object' && item[field] !== null ? (
-                                                                            item[field].name || item[field].user_name || "No Name"
-                                                                        ) : item[field]
-
-                                                                    )
-                                                                }
-                                                                {field == 'total_cost' &&
-                                                                    parseFloat(item['count'] * item['rate']).toFixed(2)
+                                                                {field == 'status' ?
+                                                                    <span className='badge badge-info p-2'>{item.statusData.replace('Your', 'Vendor')}</span>
+                                                                    :
+                                                                    <>
+                                                                        {item[field]}
+                                                                    </>
                                                                 }
 
                                                             </td>
@@ -629,7 +598,7 @@ const Report = (props) => {
                                             </>
                                         ) : (
                                             <tr >
-                                                <td scope="row" colSpan={fields.length ?? '18'} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                                <td scope="row" colSpan={fields.length??'18'} className='text-center bg-light f-14' >{'No Data Available'}</td>
                                             </tr>
                                         )
                                         }

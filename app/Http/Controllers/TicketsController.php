@@ -72,7 +72,7 @@ class TicketsController extends Controller
         $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
             ->select('vm_ticket.*', 'users.brand AS brand')
             ->orderBy('vm_ticket.id', 'desc');
-        if ($user->use_type != 2) {
+        if ($user->use_type != 2 && $view != 3) {
             $tickets->whereIn('created_by', $piv);
             if (count($piv) > 1) {
                 $tickets->orWhereNull('created_by');
@@ -151,15 +151,16 @@ class TicketsController extends Controller
             
             
         ];
-        foreach ($relationships as $relation => $columns) {
-            if (in_array($relation, $formatArray)) {
-                $tickets->with([$relation => function ($query) use ($columns) {
-                    $query->select($columns);
-                }]);
-            }
-        }
+     
         // if export
         if ($request->has('export') && $request->input('export') === true) {
+            foreach ($relationships as $relation => $columns) {
+                if (in_array($relation, $formatArray)) {
+                    $tickets->with([$relation => function ($query) use ($columns) {
+                        $query->select($columns);
+                    }]);
+                }
+            }
             // $AllTickets = TicketResource::collection($tickets->get());
             $AllTickets = collect();
             $tickets->chunk(100, function ($chunk) use (&$AllTickets) {
@@ -170,7 +171,7 @@ class TicketsController extends Controller
         $tickets = $tickets->paginate($perPage);
         $links = $tickets->linkCollection();
         return response()->json([
-            "Tickets" => $tickets,
+            "Tickets" => TicketResource::collection($tickets),
             "Links" => $links,
             "AllTickets" => $AllTickets ?? null,
             "fields" => $formatArray,

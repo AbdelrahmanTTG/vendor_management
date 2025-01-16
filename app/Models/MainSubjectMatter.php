@@ -11,7 +11,7 @@ class MainSubjectMatter extends Model
     protected $fillable = ['name', 'Active', "status"];
 
     public $timestamps = false;
-    protected $table = 'fields';
+    protected $table = 'mainsubject';
     public static function insert($data)
     {
         $data['status'] = 0;
@@ -36,9 +36,9 @@ class MainSubjectMatter extends Model
     {
 
         if ($searchTerm) {
-            $query = self::where('name', 'like', '%' . $searchTerm . '%');
+            $query = self::where('name', 'like', '%' . $searchTerm . '%')->where('Active', 1);
         } else {
-            $query = self::select('id', 'name')->limit(5);
+            $query = self::select('id', 'name')->where('Active', 1)->limit(5);
 
         }
         return $query->get();

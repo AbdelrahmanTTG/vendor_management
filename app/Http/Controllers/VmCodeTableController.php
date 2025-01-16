@@ -48,11 +48,12 @@ class VmCodeTableController extends Controller
                 }, $related['columns'])) . ') as ' . $related['foreign_key']);
 
                 $data = DB::table($table)
-                    ->join($related['table'], $table . '.' . $related['foreign_key'], '=', $related['table'] . '.' . $related['primary_key'])
-                    ->select(array_merge(
-                        $columns,
-                        [$relatedJsonColumns]
-                    ));
+                ->leftJoin($related['table'], $table . '.' . $related['foreign_key'], '=', $related['table'] . '.' . $related['primary_key'])
+                ->select(array_merge(
+                    $columns,
+                    [$relatedJsonColumns]
+                ));
+
                 if ($request->has('queryParams') && is_array($request->queryParams)) {
                     $queryParams = $request->queryParams;
 

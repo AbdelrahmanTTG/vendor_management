@@ -51,9 +51,9 @@ class Dialect extends Model
     {
 
         if ($searchTerm) {
-            $query = self::where('dialect', 'like', '%' . $searchTerm . '%');
+            $query = self::where('dialect', 'like', '%' . $searchTerm . '%')->where('Active', 1);
         } else {
-            $query = self::select('id', 'name')->limit(5);
+            $query = self::select('id', 'name')->limit(5)->where('Active', 1);
 
         }
         return $query->get();

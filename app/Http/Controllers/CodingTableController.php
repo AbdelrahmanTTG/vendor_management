@@ -68,12 +68,8 @@ class CodingTableController extends Controller
             return response()->json(['error' => 'Invalid table'], 400);
         }
         $modelClass = self::$models[$table];
-        if($table == "brand" || $table == "vendors"){
+   
             $data = $modelClass::SelectData($searchTerm);
-        }else{
-            $data = $modelClass::SelectData($searchTerm)->where('Active', 1);
-
-        }
         return response()->json($data, 200);
     }
 

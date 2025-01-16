@@ -139,7 +139,7 @@ const FilesCertificate = (props) => {
             const section = document.getElementById("personal-data");
             section.scrollIntoView({ behavior: 'smooth' });
         } else {
-            if (!cvFileName || !ndaFileName){return}
+            if (!cvFileName && !ndaFileName){return}
             const formData = new FormData();
             formData.append('cv', cvFileName);
             formData.append('nda', ndaFileName);
@@ -436,12 +436,13 @@ const FilesCertificate = (props) => {
                                                 type="file"
                                                 onChange={(e) => {
                                                     const file = e.target.files[0];
-                                                    if (!file) return;
-
-                                                    if (file.type !== "application/zip") {
-                                                        alert("The file must be a ZIP file.");
-                                                        e.target.value = "";
-                                                        return;
+                                                    if (file) {
+                                                        const fileName = file.name.toLowerCase();
+                                                        if (!fileName.endsWith(".zip")) {
+                                                            alert("The file must be a ZIP file.");
+                                                            e.target.value = "";
+                                                            return;
+                                                        }
                                                     }
 
                                                     if (file.size > 5 * 1024 * 1024) {

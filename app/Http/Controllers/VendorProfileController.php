@@ -110,7 +110,7 @@ class VendorProfileController extends Controller
         if (!empty($intersectColumns)) {
             $vendorsQuery = Vendor::select('vendor.id')
                 ->addSelect(DB::raw(implode(',', $intersectColumns)));
-            if ($user->use_type != 2) {
+            if ($user->use_type != 2 && $view != 3 ) {
                 $vendorsQuery->whereIn('created_by', $piv);
                 if (count($piv) > 1) {
                     $vendorsQuery->orWhereNull('created_by');
@@ -118,7 +118,7 @@ class VendorProfileController extends Controller
             }
         } else {
             $vendorsQuery = Vendor::select('vendor.id');
-            if ($user->use_type != 2) {
+            if ($user->use_type !=2 && $view != 3) {
                 $vendorsQuery->whereIn('created_by', $piv);
                 if (count($piv) > 1) {
                     $vendorsQuery->orWhereNull('created_by');
@@ -502,7 +502,7 @@ class VendorProfileController extends Controller
             'city' => 'nullable|string',
             'note' => 'nullable|string',
             'address' => 'nullable|string',
-            'reject_reason' => 'nullable|string',
+            'reject_reason' => 'nullable|string', 
         ]);
 
         if ($validator->fails()) {
@@ -513,7 +513,7 @@ class VendorProfileController extends Controller
 
         return response()->json([
             'message' => 'Vendor created successfully!',
-            'vendor' => ['id' => $vendor->id, "email" => $vendor->email]
+            'vendor' => ['id' => $vendor->id, "data" => $this->PersonalData($vendor->id) ]
         ], 201);
     }
 
@@ -772,7 +772,7 @@ class VendorProfileController extends Controller
                 $receiver_email,
                 $content
             );
-            event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
+          //  event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
             return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "created_at" => $data->created_at]], 200);
         } catch (\Exception $e) {
             return response()->json([

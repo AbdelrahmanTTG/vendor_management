@@ -56,6 +56,7 @@ const ViewTicket = () => {
                                 <tr>
                                     <th scope="col" >{'Ticket Number'}</th>
                                     <th scope="col" >{'Request Type'}</th>
+                                    <th scope="col" >{'Brand'}</th>
                                     <th scope="col" >{'Number Of Rescource'}</th>
                                     <th scope="col">{'Service'}</th>
                                     <th scope="col">{'Task Type	'}</th>
@@ -80,6 +81,7 @@ const ViewTicket = () => {
                                 <tr>
                                     <td>{ticketData.id}</td>
                                     <td>{ticketData.request_type}</td>
+                                    <td>{ticket.brand.name}</td>
                                     <td>{ticketData.number_of_resource}</td>
                                     <td>{ticketData.service}</td>
                                     <td>{ticketData.task_type}</td>

@@ -36,9 +36,9 @@ class UniversityDegree extends Model
     {
 
         if ($searchTerm) {
-            $query = self::where('name', 'like', '%' . $searchTerm . '%');
+            $query = self::where('name', 'like', '%' . $searchTerm . '%')->where('Active', 1);
         } else {
-            $query = self::select('id', 'name')->limit(5);
+            $query = self::select('id', 'name')->where('Active', 1)->limit(5);
 
         }
         return $query->get();

@@ -454,7 +454,7 @@ const Test = (props) => {
                                                                     <div className="loader-box" >
                                                                         <Spinner attrSpinner={{ className: 'loader-6' }} />
                                                                     </div>
-                                                                ) : 'Select Main Subject Matter'}
+                                                                ) : 'Select Sub Subject Matter'}
                                                                 onChange={(option) => {
                                                                     field.onChange(option);
                                                                 }}

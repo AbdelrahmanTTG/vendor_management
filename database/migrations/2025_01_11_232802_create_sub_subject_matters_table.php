@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subSubject', function (Blueprint $table) {
+        Schema::create('mainsubject', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('mainSubjectId');
+            $table->integer('parent');
             $table->boolean('Active')->default(true);
             $table->timestamps();
         });
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subSubject');
+        Schema::dropIfExists('mainsubject');
     }
 };

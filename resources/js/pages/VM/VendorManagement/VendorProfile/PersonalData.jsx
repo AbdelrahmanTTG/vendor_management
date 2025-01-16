@@ -9,7 +9,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import CommonModal from '../../Model';
 import { toast } from 'react-toastify';
 
-const PersonalData = (props) => {
+const PersonalData = React.memo((props) => {
   toast.configure();
   const basictoaster = (toastname, status) => {
     switch (toastname) {
@@ -28,7 +28,7 @@ const PersonalData = (props) => {
   };
   const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
   const { register: registerContact, handleSubmit: handleSubmitContact, setValue: setValueContact, formState: { errors: errorsContact } } = useForm();
-
+ 
   const [inputValues, setInputValues] = useState([]);
   const [nameLabel, setNameLabel] = useState('Name');
   const [ContactLabel, setContactLabel] = useState('Contact name');
@@ -194,7 +194,7 @@ const PersonalData = (props) => {
       const response = await axiosClient.post("PersonalInformation", formData);
       setIsSubmitting(true)
       setidVendor(response.data.vendor.id)
-      props.onDataSend(response.data.vendor)
+      props.onDataSend(response.data.vendor.data)
       basictoaster("successToast", response.data.message);
 
     } catch (err) {
@@ -230,7 +230,7 @@ const PersonalData = (props) => {
       try {
         const response = await axiosClient.post("updatePersonalInformation", formData);
         basictoaster("successToast", response.data.message);
-        props.onDataSend(response.data.vendor)
+        // props.onDataSend(response.data.vendor)
       } catch (err) {
         const response = err.response;
         if (response && response.data) {
@@ -323,12 +323,23 @@ const PersonalData = (props) => {
     toggle()
   }
   const handleClick = (data) => {
-    if (props.onSubmit === 'onSubmit' && !isSubmitting) {
+    if (props.onSubmit === 'onSubmit' && !isSubmitting ) {
+      // setIsSubmitting(true)
+      // props.onDataSend(1) 
+      // console.log("1")
       onSubmit(data);
     } else if (props.onSubmit === 'onUpdate' || isSubmitting) {
+      // console.log("2")
+
       Update(data)
     }
   };
+  // useEffect(() => {
+  //   if (typeof props.personal == "object" && ) {
+  //     console.log(props.personal)
+  //   }
+    
+  // }, [props.personal])
   useEffect(() => {
     if (props.permission) {
       
@@ -362,13 +373,14 @@ const PersonalData = (props) => {
   }, [props.permission]);
   const [loading2, setLoading2] = useState(false);
   useEffect(() => {
-
-    if (props.mode === "edit") {
+    if (props.personal) {
+      setIsSubmitting(true)
+       }
+    if (props.mode === "edit" || props.personal) {
       setLoading2(true);
-
-      if (props.vendorPersonalData) {
-        if (props.vendorPersonalData.PersonalData) {
-          const data = props.vendorPersonalData.PersonalData;
+      if (props?.vendorPersonalData || props.personal) {
+        if (props.vendorPersonalData?.PersonalData || props.personal) {
+          const data = props?.vendorPersonalData?.PersonalData || props.personal;
           setidVendor(data?.id)
           if (data.type !== null && data.type !== undefined ) {
             const vendorTypeOption = {
@@ -462,7 +474,6 @@ const PersonalData = (props) => {
   return (
     <Fragment>
       <Card>
-
         <CardHeader
           className="pb-3 d-flex justify-content-between align-items-center"
           onClick={toggleCollapse}
@@ -576,7 +587,7 @@ const PersonalData = (props) => {
                           </select>
                           < input
                             className="form-control"
-                            // id="contact_name"
+                         
                             defaultValue=""
                             type="text"
                             name="contact_name"
@@ -607,7 +618,6 @@ const PersonalData = (props) => {
                     <FormGroup className="row" >
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > Email </Label>
                       < Col sm="9" >
-                        {/* <Input className="form-control" type="email" placeholder="email" /> */}
                         < input
                           className="form-control"
                             disabled={props?.permission?.email?true:false}
@@ -661,8 +671,7 @@ const PersonalData = (props) => {
                             {...register("Anothernumber", { required: false })}
                           />
 
-                          {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="Another number" />
-                      <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="Another number" /> */}
+                        
                         </InputGroup>
                       </Col>
                     </FormGroup>
@@ -885,14 +894,14 @@ const PersonalData = (props) => {
                       </Col>
                     </FormGroup>
                     </Col>
-                    {props.vendorPersonalData?.PersonalData?.contact ? (
+                    {props.vendorPersonalData?.PersonalData?.contact || props?.personal?.contact ? (
                       <Col md="6" id="Old_Contact-wrapper">
                         <FormGroup className="row">
                           <Label className="col-sm-3 col-form-label" for="validationCustom01">Old Contact</Label>
                           <Col sm="9">
                             <input
                               className="form-control"
-                              defaultValue={props.vendorPersonalData.PersonalData.contact}
+                              defaultValue={props.vendorPersonalData.PersonalData.contact || props?.personal?.contact }
                               // onChange={(e) => console.log(e.target.value)}
                               placeholder="Old Contact Info"
                             />
@@ -911,7 +920,7 @@ const PersonalData = (props) => {
 
                         <CKEditor
                           editor={ClassicEditor}
-                          data={props.vendorPersonalData?.PersonalData?.note || ""}
+                            data={props.vendorPersonalData?.PersonalData?.note || props?.personal?.note || ""}
                           onChange={(event, editor) => {
                             const data = editor.getData();
                             setValue('note', data);
@@ -919,7 +928,7 @@ const PersonalData = (props) => {
                         />
                         < input
 
-                          value={props.vendorPersonalData?.PersonalData?.address || ""}
+                            value={props.vendorPersonalData?.PersonalData?.note || props?.personal?.note || ""}
                           hidden disabled
                           {...register('note', { required: false })}
                         />
@@ -933,7 +942,7 @@ const PersonalData = (props) => {
 
                         <CKEditor
                           editor={ClassicEditor}
-                          data={props.vendorPersonalData?.PersonalData?.address || ""}
+                            data={props.vendorPersonalData?.PersonalData?.address || props?.personal?.address ||""}
 
                           onChange={(event, editor) => {
                             const data = editor.getData();
@@ -961,7 +970,7 @@ const PersonalData = (props) => {
                             <Col style={{ width: '87.5%' }}>
                               <CKEditor
                                 editor={ClassicEditor}
-                                data={props.vendorPersonalData?.PersonalData?.reject_reason || ""}
+                                data={props.vendorPersonalData?.PersonalData?.reject_reason || props?.personal?.reject_reason ||""}
                                 onChange={(event, editor) => {
                                   const data = editor.getData();
                                   setValue('reject_reason', data);
@@ -1094,6 +1103,6 @@ const PersonalData = (props) => {
       </CommonModal>
     </Fragment>
   );
-};
+});
 
 export default PersonalData;

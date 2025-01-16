@@ -34,9 +34,9 @@ class TimeZone extends Model
     {
 
         if ($searchTerm) {
-            $query = self::where('gmt', 'like', '%' . $searchTerm . '%');
+            $query = self::where('gmt', 'like', '%' . $searchTerm . '%')->where('Active', 1);
         } else {
-            $query = self::select('id', 'gmt')->limit(5);
+            $query = self::select('id', 'gmt')->where('Active', 1)->limit(5);
 
         }
         return $query->get();

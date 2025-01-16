@@ -17,6 +17,8 @@ const Billing = (props) => {
     const [optionsC, setOptionsC] = useState([]);
     const { control, register, handleSubmit, unregister, setValue, formState: { errors } } = useForm();
     const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(false);
+
     const [initialOptions, setInitialOptions] = useState({})
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [rows, setRows] = useState([]);
@@ -213,7 +215,7 @@ const Billing = (props) => {
                 option.label.toLowerCase().includes(inputValue.toLowerCase())
             );
             if (!existingOption) {
-                setLoading(true);
+                setLoading2(true);
                 handelingSelect(tableName, setOptions, fieldName, inputValue);
             }
         }
@@ -221,7 +223,7 @@ const Billing = (props) => {
     const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
         if (!tablename) return
         try {
-            setLoading(true);
+            setLoading2(true);
             const { data } = await axiosClient.get("SelectDatat", {
                 params: {
                     search: searchTerm,
@@ -247,22 +249,26 @@ const Billing = (props) => {
                 setErrorMessage("An unexpected error occurred.");
             }
         } finally {
-            setLoading(false);
+            setLoading2(false);
         }
 
     };
     useEffect(() => {
         handelingSelect("currency", setOptionsC, "Currency");
     }, []);
-    useEffect(() => {
-        
-        if (props.mode === "edit" || dataB) {
+    useEffect(() => { 
+        if (props.Bill) {
+            setIsSubmitting(true)
+        }
+        if (props.mode === "edit" || props.Bill) {
             setLoading(true);
-            if (props.BillingData || dataB) {
-                if (props.BillingData?.BillingData || dataB) {
-                    if (!dataB) { setdataB(props.BillingData.BillingData) }
-                    const data = dataB;
-                 
+            if (props.BillingData || props.Bill) {
+                if (props.BillingData?.BillingData || props.Bill) {
+                    // if (!dataB) { setdataB(props.BillingData.BillingData) }
+                    
+                    const data =  props?.BillingData?.BillingData || props.Bill;
+                    
+
                     if (data?.billingData) {
                         setAdd(false)
                         setBillingData_id(data.billingData.id)
@@ -302,6 +308,7 @@ const Billing = (props) => {
                         setValue("bank_address", data.bankData.bank_address)
                     }
                     if (data?.walletData) {
+                        // console.log(data?.walletData)
                         setRows([])
                         data.walletData.forEach(element => {
                             editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
@@ -347,10 +354,10 @@ const Billing = (props) => {
             delete newFormData.account;
             try {
                 const response = await axiosClient.post("storeBilling", newFormData);
-                setdataB(response.data)
+                // setdataB(response.data)
                 basictoaster("successToast", "Added successfully !");
                 setIsSubmitting(true)
-                props.Currancy(selectedOptionC)
+                props.Currancy(response.data, selectedOptionC)
             } catch (err) {
                 const response = err.response;
                 if (response && response.data) {
@@ -399,10 +406,10 @@ const Billing = (props) => {
 
         try {
             const response = await axiosClient.post("UpdateBillingData", newFormData);
-            setdataB(response.data)
+            setIsSubmitting(true)
+            // setdataB(response.data)
             basictoaster("successToast", "Updated successfully !");
-            props.Currancy(selectedOptionC)
-
+            props.Currancy(response.data, selectedOptionC)
             response.data.forEach(element => {
                 editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
                 setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
@@ -544,7 +551,7 @@ const Billing = (props) => {
                                                                         }
                                                                         className="js-example-basic-single col-sm-12"
                                                                         isSearchable
-                                                                        noOptionsMessage={() => loading ? (
+                                                                        noOptionsMessage={() => loading2 ? (
                                                                             <div className="loader-box">
                                                                                 <Spinner attrSpinner={{ className: 'loader-6' }} />
                                                                             </div>
@@ -595,7 +602,7 @@ const Billing = (props) => {
                                                         <Col sm="9">
                                                             <CKEditor
                                                                 editor={ClassicEditor}
-                                                                data={isChecked.billing_address || props.BillingData?.BillingData?.billingData?.billing_address || ""}
+                                                                data={isChecked.billing_address || props.BillingData?.BillingData?.billingData?.billing_address || props.Bill?.billingData.billing_address  ||""}
                                                                 onChange={(event, editor) => {
                                                                     const data = editor.getData();
                                                                     setValue('billing_address', data);
@@ -609,7 +616,7 @@ const Billing = (props) => {
                                                         </Col>
                                                     </FormGroup>
                                                 </Col>
-                                                {(props.permission && props.permission.billing_status != "hide") &&
+                                                {(props.backPermissions.edit == 1 && props?.permission?.billing_status != "hide") &&
                                                 < Col md="6" id="status-wrapper" >
                                                     <FormGroup className="row" >
                                                         <Label className="col-sm-3 col-form-label" for="validationCustom01" > Status </Label>
@@ -750,7 +757,7 @@ const Billing = (props) => {
                                                         <Col sm="9">
                                                             <CKEditor
                                                                 editor={ClassicEditor}
-                                                                data={props.BillingData?.BillingData?.bankData?.bank_address}
+                                                                data={props.BillingData?.BillingData?.bankData?.bank_address || props.Bill?.bankData?.bank_address}
                                                                 onChange={(event, editor) => {
                                                                     const data = editor.getData();
                                                                     setValue('bank_address', data);

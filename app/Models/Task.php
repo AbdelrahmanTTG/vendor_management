@@ -31,7 +31,10 @@ class Task extends Model
     {
         return  $this->belongsTo(TaskType::class, 'task_type');
     }
-
+    public function task_type()
+    {
+        return  $this->belongsTo(TaskType::class, 'task_type');
+    }
     public function currencyName()
     {
         return  $this->belongsTo(Currency::class, 'currency');
@@ -84,5 +87,9 @@ class Task extends Model
     {
         return  $this->belongsTo(Vendor::class, 'vendor');
     }
-   
+    public function vendor()
+    {
+        return  $this->belongsTo(Vendor::class, 'vendor');
+    }
+    
 }

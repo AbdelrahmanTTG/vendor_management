@@ -200,7 +200,7 @@ const TicketsList = (props) => {
         try {
             setLoading2(true);
             const { data } = await axiosClient.post("getTickets", payload);
-            setTickets(data?.Tickets.data);
+            setTickets(data?.Tickets);
             setPageLinks(data?.Links);
             setFormats(data?.formats);
             setFields(data?.fields);
@@ -702,32 +702,7 @@ const TicketsList = (props) => {
                                                     <tr key={index}>
                                                         {fields.map((field, fieldIndex) => (
                                                             <td key={fieldIndex}>
-                                                                {field === "request_type" || field === "status"? (
-                                                                    <div>
-                                                                        {field === 'request_type' && (
-                                                                            <div>
-                                                                                {item[field] == 1 && <span style={{ color: 'gray' }}> New Resource</span>}
-                                                                                {item[field] == 2 && <span style={{ color: 'gray' }}> Price Inquiry</span>}
-                                                                                {item[field] == 3 && <span style={{ color: 'gray' }}> General</span>}
-                                                                                {item[field] == 4 && <span style={{ color: 'gray' }}> Resources Availability</span>}
-                                                                                {item[field] == 5 && <span style={{ color: 'gray' }}> CV Request</span>}
-                                                                                {(item[field] < 0 || item[field] > 5 || item[field] == null) && <span>Status: Unknown</span>}
-                                                                            </div>
-                                                                        )}
-                                                                        {field === 'status' && (
-                                                                            <div>
-                                                                                {item[field] == 0 && <span style={{ color: 'gray' }}> Rejected</span>}
-                                                                                {item[field] == 1 && <span style={{ color: 'gray' }}> New</span>}
-                                                                                {item[field] == 2 && <span style={{ color: 'gray' }}> Opened</span>}
-                                                                                {item[field] == 3 && <span style={{ color: 'gray' }}> Partly Closed</span>}
-                                                                                {item[field] == 4 && <span style={{ color: 'gray' }}> Closed</span>}
-                                                                                {item[field] == 5 && <span style={{ color: 'gray' }}> Closed Waiting Requester Acceptance</span>}
-
-                                                                                {(item[field] < 0 || item[field] > 5 || item[field] == null) && <span>Status: Unknown</span>}
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                ) : typeof item[field] === 'object' && item[field] !== null ? (
+                                                                {typeof item[field] === 'object' && item[field] !== null ? (
                                                                     item[field].name || item[field].user_name || "No Name"
                                                                 ) : (
                                                                     item[field]

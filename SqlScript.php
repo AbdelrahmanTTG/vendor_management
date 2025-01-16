@@ -124,14 +124,16 @@ try {
             updated_at TIMESTAMP NULL DEFAULT NULL
         );",
 
-        "CREATE TABLE subSubject (
+        "CREATE TABLE mainsubject (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
-            mainSubjectId INT NOT NULL,
             Active BOOLEAN DEFAULT TRUE,
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL
         );",
+        "ALTER TABLE fields 
+ADD COLUMN parent INT(11) DEFAULT NULL;
+",
         // Create Major table if not exists
         "CREATE TABLE IF NOT EXISTS Major (
             id INT AUTO_INCREMENT PRIMARY KEY,

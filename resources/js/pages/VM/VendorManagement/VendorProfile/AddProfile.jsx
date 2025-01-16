@@ -19,8 +19,10 @@ import NavBar from './NavBar';
 import { Spinner } from '../../../../AbstractElements';
 
 const AddProfile = (props) => {
-    const [data, setdata] = useState([]);
-    const [Currancydata, setCurrancy] = useState([]);
+    const [data, setdata] = useState(null);
+    const [Currancydata, setCurrancy] = useState(null);
+    const [Cur, setCUR] = useState(null);
+
     const [progressValue, setProgressValue] = useState(20);
     const [marginBottom, setMarginBottom] = useState('18vh');
     const LazyWrapper = ({ children }) => (
@@ -38,8 +40,9 @@ const AddProfile = (props) => {
     const handleDataSend = (data) => {
         setdata(data);
     };
-    const getCurrancy = (Currancystat) => {
+    const getCurrancy = (Currancystat , Cur) => {
         setCurrancy(Currancystat);
+        setCUR(Cur)
     }
 
     useEffect(() => {
@@ -81,7 +84,7 @@ const AddProfile = (props) => {
 
                         <div id="personal-data" className="row mb-3">
                             <div className="col-12">
-                                <PersonalData backPermissions={props.permissions?.PersonalData} onDataSend={handleDataSend} onSubmit="onSubmit" />
+                                <PersonalData personal={data} backPermissions={props.permissions?.PersonalData} onDataSend={handleDataSend} onSubmit="onSubmit" />
                             </div>
                         </div>
                     </LazyWrapper>
@@ -91,7 +94,7 @@ const AddProfile = (props) => {
 
                         <div id="messaging" className="row mb-3">
                             <div className="col-12">
-                                <Messaging backPermissions={props.permissions?.Messaging} onSubmit="onSubmit" id={data.id} />
+                                <Messaging backPermissions={props.permissions?.Messaging} onSubmit="onSubmit" id={data?.id} />
                             </div>
                         </div>
                     </LazyWrapper>
@@ -101,7 +104,7 @@ const AddProfile = (props) => {
 
                         <div id="VM-Notes" className="row mb-3">
                             <div className="col-12">
-                                <VMnote id={data.id} backPermissions={props.permissions?.VMnote} email={data.email} onSubmit="onSubmit" />
+                                <VMnote id={data?.id} backPermissions={props.permissions?.VMnote} email={data?.email} onSubmit="onSubmit" />
                             </div>
                         </div>
                     </LazyWrapper>
@@ -111,7 +114,7 @@ const AddProfile = (props) => {
 
                         <div id="Files-Certificate" className="row mb-3">
                             <div className="col-12">
-                                <FilesCertificate backPermissions={props.permissions?.FilesCertificate} onSubmit="onSubmit" id={data.id} />
+                                <FilesCertificate backPermissions={props.permissions?.FilesCertificate} onSubmit="onSubmit" id={data?.id} />
                             </div>
                         </div>
                     </LazyWrapper>
@@ -121,7 +124,7 @@ const AddProfile = (props) => {
 
                         <div id="Education" className="row mb-3">
                             <div className="col-12">
-                                <Education backPermissions={props.permissions?.Education} id={data.id} />
+                                <Education backPermissions={props.permissions?.Education} id={data?.id} />
                             </div>
                         </div>
                     </LazyWrapper>
@@ -131,7 +134,7 @@ const AddProfile = (props) => {
 
                         <div id="Experience" className="row mb-3">
                             <div className="col-12">
-                                <Experience backPermissions={props.permissions?.Experience} onSubmit="onSubmit" id={data.id} />
+                                <Experience backPermissions={props.permissions?.Experience} onSubmit="onSubmit" id={data?.id} />
                             </div>
                         </div>
                     </LazyWrapper>
@@ -141,7 +144,7 @@ const AddProfile = (props) => {
 
                         <div id="Test" className="row mb-3">
                             <div className="col-12">
-                                <Test backPermissions={props.permissions?.Test} id={data.id} onSubmit="onSubmit" />
+                                <Test backPermissions={props.permissions?.Test} id={data?.id} onSubmit="onSubmit" />
                             </div>
                         </div>
                     </LazyWrapper>
@@ -151,7 +154,7 @@ const AddProfile = (props) => {
 
                         <div id="Billing" className="row mb-3">
                             <div className="col-12">
-                                <Billing backPermissions={props.permissions?.Billing} id={data.id} onSubmit="onSubmit" Currancy={getCurrancy} />
+                                <Billing Bill={Currancydata} backPermissions={props.permissions?.Billing} id={data?.id} onSubmit="onSubmit" Currancy={getCurrancy} />
                             </div>
                         </div>
                     </LazyWrapper>
@@ -161,7 +164,7 @@ const AddProfile = (props) => {
 
                         <div id="Portal_User" className="row mb-3">
                             <div className="col-12">
-                                <Portal_User backPermissions={props.permissions?.Portal_User} email={data.email} onSubmit="onSubmit" />
+                                <Portal_User backPermissions={props.permissions?.Portal_User} email={data?.email} onSubmit="onSubmit" />
                             </div>
                         </div>
                     </LazyWrapper>
@@ -171,7 +174,7 @@ const AddProfile = (props) => {
 
                         <div id="Price_List" className="row mb-3">
                             <div className="col-12">
-                                <Price_List backPermissions={props.permissions?.Price_List} Currency={Currancydata} id={data.id} />
+                                <Price_List backPermissions={props.permissions?.Price_List} Currency={Cur} id={data?.id} />
                             </div>
                         </div>
                     </LazyWrapper>

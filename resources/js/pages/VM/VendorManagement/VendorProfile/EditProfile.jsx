@@ -35,14 +35,13 @@ const EditProfile = (props) => {
     const [VendorTestData, setVendorTestData] = useState([]);
     const [EducationVendor, setEducationVendor] = useState([]);
     const [marginBottom, setMarginBottom] = useState('18vh');
-    const [permissions, setPermissions] = useState({
-        // type: 'hide',
-        // name: 'disable',
-        // email: 'disable',
-        // status: 'disable',
-        // address: "disable",
-        // contact:"disable"
-    });
+    const [Currancydata, setCurrancy] = useState(null);
+    const [Cur, setCUR] = useState(null);
+    const getCurrancy = (Currancystat, Cur) => {
+        setBillingData({ BillingData:Currancystat })
+        setCurrancy(Currancystat);
+        setCUR(Cur)
+    }
     const LazyWrapper = ({ children }) => (
         <Suspense fallback={
             <div className="loader-box"  >
@@ -130,7 +129,7 @@ const EditProfile = (props) => {
 
                         <div id="personal-data">
                             <PersonalData onSubmit="onUpdate" mode="edit"
-                                permission={permissions} backPermissions={props.permissions?.PersonalData} vendorPersonalData={vendorPersonalData}
+                                 backPermissions={props.permissions?.PersonalData} vendorPersonalData={vendorPersonalData}
                             />
                         </div>
                     </LazyWrapper>
@@ -186,7 +185,7 @@ const EditProfile = (props) => {
                     <LazyWrapper>
 
                         <div id='Billing'>
-                            <Billing id={vendor?.id} BillingData={BillingData} onSubmit="onUpdate" backPermissions={props.permissions?.Billing} mode="edit" />
+                            <Billing Bill={Currancydata} Currancy={getCurrancy} id={vendor?.id} BillingData={BillingData} onSubmit="onUpdate" backPermissions={props.permissions?.Billing} mode="edit" />
                         </div>
                     </LazyWrapper>
                 )}
@@ -202,7 +201,7 @@ const EditProfile = (props) => {
                     <LazyWrapper>
 
                         <div id='Price_List'>
-                            <Price_List Currency={BillingData?.BillingData?.billingData?.billing_currency} backPermissions={props.permissions?.Price_List} id={vendor?.id} priceList={priceList} />
+                            <Price_List Currency={BillingData?.BillingData?.billingData?.billing_currency || Cur} backPermissions={props.permissions?.Price_List} id={vendor?.id} priceList={priceList} />
                         </div>
                     </LazyWrapper>
                 )}
