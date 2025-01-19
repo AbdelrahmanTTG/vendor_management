@@ -406,9 +406,14 @@ const Report = (props) => {
                                                     <tr key={index}>
                                                         {fields.map((field, fieldIndex) => (
                                                             <td key={fieldIndex}>
-                                                                {item[field]}
+                                                                {typeof item[field] === 'object' && item[field] !== null ? (
+                                                                    item[field].name || item[field].name || "No Name"
+                                                                ) : (
+                                                                    item[field]
+                                                                )}
                                                             </td>
                                                         ))}
+
                                                     </tr>
                                                 ))}
                                             </>
