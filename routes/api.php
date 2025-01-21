@@ -66,6 +66,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/sendTicketVmResponse', [TicketsController::class, 'sendTicketVmResponse']);
     Route::post('/changeTicketStatus', [TicketsController::class, 'changeTicketStatus']);
     Route::delete('/deleteTicketResource', [TicketsController::class, 'deleteTicketResource']);
+    Route::post('/assignTicket', [TicketsController::class, 'assignTicket']);
     Route::post('/vmActivity', [ReportsController::class, 'vmActivity']);
     Route::post('/getVmData', [ReportsController::class, 'getVmData']);
     Route::post('/getPmData', [ReportsController::class, 'getPmData']);

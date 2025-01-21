@@ -15,7 +15,7 @@ const ViewOffer = () => {
     const { user } = useStateContext();
     const [redirect, setRedirect] = useState(false);
     const location = useLocation();
-    const { id, type } = location.state;
+    const { id, type } = location.state??{};
     const [loading, setLoading] = useState(true);
     const vendorRes = {
         'vendor': user.id,

@@ -60,6 +60,7 @@ class TicketResource extends JsonResource
             'existing_pair'=> $this->open_time?$this->getResourcesCount(3):null,
             'TicketResource'=> $this->whenLoaded('TicketResource')?$this->TicketResource:null,
             'rejection_reason'=> $this->rejection_reason,
+            'assignedUser'=> $this->assigned_to?$this->assigned_to_user->user_name:0,
 
                     
                         

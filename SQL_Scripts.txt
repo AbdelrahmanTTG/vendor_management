@@ -115,3 +115,4 @@ FOREIGN KEY (billing_data_id) REFERENCES billing_data(id)
 ON DELETE CASCADE;
 
 ALTER TABLE `vm_ticket` ADD `rejection_reason` TEXT NULL; 
+ALTER TABLE `vm_ticket` ADD `assigned_to` INT(11) NULL; 
