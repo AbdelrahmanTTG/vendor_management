@@ -259,7 +259,17 @@ class TicketsController extends Controller
                 }
             }
         }
-        return response()->json(["ticket" => new TicketResource($ticket), "resourceVendors" => $vendors ?? null]);
+        $vmUsers = BrandUsers::SelectVmData();
+        foreach ($vmUsers as $k => $vmUser) {
+            $vmArray[$k]['label'] = $vmUser->user_name;
+            $vmArray[$k]['value'] = $vmUser->id;
+        };
+
+        return response()->json([
+            "ticket" => new TicketResource($ticket),
+            "resourceVendors" => $vendors ?? null,
+            "vmUsers" => $vmArray ?? []
+        ]);
     }
 
     public function changeTicketToOpen($id, $user)
@@ -269,6 +279,11 @@ class TicketsController extends Controller
             $data['status'] = 2;
             if ($result->update($data)) {
                 $this->addTicketTimeStatus($id, $user, 2);
+            }
+            if (empty($result->assigned_to)) {
+                $data['assigned_to'] = $user;
+                if ($result->update($data)) 
+                    $this->addTicketTimeStatus($id, $user, 6);
             }
         }
     }
@@ -525,11 +540,42 @@ class TicketsController extends Controller
             }
             return response()->json($msg);
         } else {
-            return response()->json(['message' => 'Ticket not found', 'type' => 'error'], 404);
+            return response()->json(['message' => 'Ticket not found', 'type' => 'error']);
         }
     }
     public function deleteTicketResource(Request $request)
     {
         VmTicketResource::find($request->id)->delete();
+    }
+    public function assignTicket(Request $request)
+    {
+        $user = Crypt::decrypt($request->user);
+        $ticket_id = $request->ticket;
+        $vm_id = $request->vmUser;
+        $ticket = VmTicket::find($ticket_id);
+        if (empty($ticket->assigned_to)) {
+            $data['assigned_to'] = $vm_id;
+            if ($ticket->update($data)) {
+                $this->addTicketTimeStatus($ticket_id, $user, 6);
+                // send email to user assigned to  
+                // setup mail data         
+                $to = BrandUsers::select('email', 'user_name')->where('id', $vm_id)->first();
+                $ccEmail = BrandUsers::select('email')->where('id', $user)->first()->email;
+                $toEmail = $to->email;
+                $user_name = $to->user_name;
+                //end setup mail                 
+                $mailData = [
+                    'user_name' =>  $user_name,
+                    'subject' => "New Ticket Assigned : # " . $ticket_id,
+                    'body' =>  "New Ticket Assigned to you at " . date("Y-m-d H:i:s") . ", please Check ...",
+                ];
+                Mail::to($toEmail)->cc($ccEmail)->send(new TicketMail($mailData));
+                //end                               
+                return response()->json(['message' => 'Ticket Assigned Successfully', 'type' => 'success']);
+                
+            }
+        } else {
+            return response()->json(['message' => 'Ticket Already Assigned, please Check', 'type' => 'error']);
+        }
     }
 }

@@ -30,6 +30,7 @@ const ViewTicket = () => {
     const [commentInput, setCommentInput] = useState("");
     const [optionsV, setOptionsV] = useState([]);
     const [resourceVendors, setResourceVendors] = useState([]);
+    const [vmUsers, setVmUsers] = useState([]);
     const res = {
         ticket_id: ticket.id,
         user: user.id,
@@ -44,6 +45,7 @@ const ViewTicket = () => {
                     const data = await axiosClient.post("getTicketData", res);
                     setTicketData(data.data?.ticket);
                     setResourceVendors(data.data?.resourceVendors);
+                    setVmUsers(data.data?.vmUsers);
                 } catch (error) {
                     console.error('Error fetching Data:', error);
                 }
@@ -156,6 +158,26 @@ const ViewTicket = () => {
             });
         }
     };
+    const AssignTicket = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const res = {
+            ...Object.fromEntries(formData),
+            'ticket': ticket.id,
+            'user': user.id, 
+        };
+        axiosClient.post("assignTicket", res).then(({ data }) => {
+            switch (data.type) {
+                case 'success':                   
+                    toast.success(data.message);                  
+                    setTemp(!temp)
+                    break;
+                case 'error':
+                    toast.error(data.message);
+                    break;
+            }
+        });
+    };
     const deleteRes = (id) => {
         if (id) {
             SweetAlert.fire({
@@ -198,7 +220,7 @@ const ViewTicket = () => {
             });
         }
     };
-    
+
     return (
         <Fragment>
             <Card>
@@ -272,6 +294,12 @@ const ViewTicket = () => {
                                         <td colSpan={19} dangerouslySetInnerHTML={{ __html: ticketData.rejection_reason }} ></td>
                                     </tr>
                                 }
+                                {ticketData.assignedUser != 0 &&
+                                    <tr>
+                                        <th>{'Assigned To'}</th>
+                                        <td colSpan={19}>{ ticketData.assignedUser }</td>
+                                    </tr>
+                                }
                             </tbody>
                         </Table>
                     </div>
@@ -315,7 +343,7 @@ const ViewTicket = () => {
                                                 <td scope="row">
                                                     <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />
                                                     <div className="clearfix"></div>
-                                                    {item.fileLink != null && item.fileLink.trim() !='' && (
+                                                    {item.fileLink != null && item.fileLink.trim() != '' && (
                                                         <button onClick={() => handleDownload(item.fileLink)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>Attachment : <i className="fa fa-download"></i> {'View File'}</button>
                                                     )}
                                                 </td>
@@ -345,16 +373,20 @@ const ViewTicket = () => {
                     </Row>
                 </CardHeader>
                 <CardBody>
-                    {ticketData.statusVal == 1 && (
+                    {ticketData.statusVal == 1 && ticketData.assignedUser == 0 && (
                         <>
-                            <FormGroup className="row">
-                                <Label className="col-sm-3 col-form-label">{'Assign Ticket To'}</Label>
-                                <Col sm="9">
-                                    <Input type="select" name="status" className="custom-select form-control">
-                                        <option value="2">{'Vendor Listing'}</option>
-                                    </Input>
-                                </Col>
-                            </FormGroup>
+                            <form onSubmit={AssignTicket}>
+                                <FormGroup className="row">
+                                    <Label className="col-sm-3 col-form-label">{'Assign Ticket To'}</Label>
+                                    <Col sm="7">
+                                        <Select name='vmUser' id='vmUser' required
+                                            options={vmUsers} className="js-example-basic-single" />
+                                    </Col>
+                                    <Col sm="2">
+                                        <Btn attrBtn={{ color: 'primary', type: 'submit' }}>{'Send'}</Btn>
+                                    </Col>
+                                </FormGroup>
+                            </form>
                             <hr />
                         </>
                     )}
@@ -410,7 +442,7 @@ const ViewTicket = () => {
                         )}
                         {/*  CV Request */}
                         {ticketData.request_type_val == 5 && (
-                             ticketData.statusVal != 0 && (
+                            ticketData.statusVal != 0 && (
                                 ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ?
                                     ticketData['TicketResource'].map((item, i) => (
                                         <Row key={i} className="row mt-2">

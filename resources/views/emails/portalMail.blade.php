@@ -17,7 +17,7 @@
 
     @if(isset($mailData['taskDetails']))
         @if(is_object($mailData['taskDetails'][0]))
-            @foreach($mailData['taskDetails'] as $k => $row)?>
+            @foreach($mailData['taskDetails'] as $k => $row)
                 <table border="0" cellpadding="2" cellspacing="0">
                     <tbody>
                         <tr>

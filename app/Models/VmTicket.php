@@ -164,5 +164,9 @@ class VmTicket extends Model
     {
         return  $this->hasMany(VmTicketResource::class, 'ticket');
     }
+    public function assigned_to_user()
+    {
+        return $this->belongsTo(BrandUsers::class, 'assigned_to');
+    }
    
 }

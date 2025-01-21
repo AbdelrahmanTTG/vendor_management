@@ -17,7 +17,7 @@ class VmTicketTime extends Model
 
     public function getStatus()
     {
-        $statusArray = array("Rejected", "New", "Opened", "Partly Closed", "Closed", "Closed Waiting Requester Acceptance");
+        $statusArray = array("Rejected", "New", "Opened", "Partly Closed", "Closed", "Closed Waiting Requester Acceptance","Assigned");
         return $statusArray[$this->status];
     }
     
