@@ -1366,7 +1366,13 @@ class VendorProfileController extends Controller
                 if ($vendor->cv && Storage::disk('external')->exists($vendor->cv)) {
                     Storage::disk('external')->delete($vendor->cv);
                 }
-
+                $path = storage_path('app/external/cv_files');
+                if (!file_exists($path)) {
+                    mkdir($path,
+                        0777,
+                        true
+                    ); 
+                }
                 $originalFileName = $cvFile->getClientOriginalName();
                 $encryptedFileName = Crypt::encryptString($originalFileName);
                 $cvFilePath = $cvFile->storeAs('cv_files', $encryptedFileName . '.' . $cvFile->getClientOriginalExtension(), 'external');
