@@ -1021,7 +1021,7 @@ class VendorProfileController extends Controller
             $vendor->password = base64_encode($password);
             $vendor->save();
             $details = [
-                'subject' => 'Password ',
+                'subject' => 'Create password ',
                 'title' => 'Create_password',
                 'body' =>  $password,
             ];
