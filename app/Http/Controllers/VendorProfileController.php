@@ -1315,16 +1315,15 @@ class VendorProfileController extends Controller
         $file = $request->input("filename");
         $directory = dirname($file);
         $fileName = basename($file);
-        $filePath = storage_path("app/private/{$directory}/{$fileName}");
-        if (!file_exists($filePath)) {
+        $filePath = storage_path("app/external/{$directory}/{$fileName}");
+        if (!Storage::disk('local')->exists("external/{$directory}/{$fileName}")) {
             return response()->json(['message' => 'File not found'], 404);
         }
         $encryptedFileName = pathinfo($fileName, PATHINFO_FILENAME);
         $originalFileName = Crypt::decryptString($encryptedFileName);
-        // return response()->json($originalFileName, 200);
-
         return response()->download($filePath, $originalFileName);
     }
+
     public function deleteFile(Request $request)
     {
         $id = $request->input('id');
