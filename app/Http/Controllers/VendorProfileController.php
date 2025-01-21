@@ -807,7 +807,7 @@ class VendorProfileController extends Controller
                     'title' => 'New notifications',
                     'body' =>  $content,
                 ];
-                Mail::to($sender_email)->send(new VMmail($details));
+                Mail::to($receiver_email)->send(new VMmail($details));
             }
 
             //  event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
@@ -1016,7 +1016,8 @@ class VendorProfileController extends Controller
             $details = [
                 'subject' => 'Password ',
                 'title' => 'Create a password',
-                'body' =>  $password,
+                'password' =>  $password,
+                "type"=> "Create_password"
             ];
             Mail::to($email)->send(new VMmail($details));
             return response()->json(['message' => 'Password updated successfully'], 200);

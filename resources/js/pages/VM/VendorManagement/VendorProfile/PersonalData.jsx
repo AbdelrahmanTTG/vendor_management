@@ -15,12 +15,12 @@ const PersonalData = React.memo((props) => {
     switch (toastname) {
       case 'successToast':
         toast.success(status, {
-          position: toast.POSITION.TOP_RIGHT
+          position: "top-right"
         });
         break;
       case 'dangerToast':
         toast.error(status, {
-          position: toast.POSITION.TOP_RIGHT
+          position: "top-right"
         });
         break;
       default:
@@ -171,6 +171,7 @@ const PersonalData = React.memo((props) => {
       const formattedOptions =  [{ value: data.id, label: data.gmt }]
       setSelectedOptionT(formattedOptions)
       setOptionsT(formattedOptions);
+      setValue("timezone", data?.id)
       if (!searchTerm) {
         setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
       }

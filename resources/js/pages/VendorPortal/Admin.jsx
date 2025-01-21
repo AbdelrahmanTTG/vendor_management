@@ -20,7 +20,6 @@ const Admin = () => {
         .then(({ data }) => {          
           setPageData(data?.vmConfig);
         });
-
     } catch (error) {
       console.error('Error fetching data:', error);
     }
