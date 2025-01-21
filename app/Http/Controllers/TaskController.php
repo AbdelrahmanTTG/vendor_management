@@ -515,10 +515,8 @@ class TaskController extends Controller
                 $pmEmail = BrandUsers::select('email')->where('id', $offer->created_by)->get();
                 $encodeId = base64_encode($offer->id);
                 $erp_link = VmSetup::getErpLink();
-                $confirmLink = "<strong>Confirm Task : </strong>
-                 <a href= $erp_link.'/projectManagment/pmDirectConfirmExternalLink?task_id='.$encodeId>
-                                                                Click Here To Confirm
-                                                            </a>";
+                $confirmLink = "<strong>Confirm Task : </strong>";
+                $confirmLink .= "<a href=".$erp_link."/projectManagment/pmDirectConfirmExternalLink?task_id=".$encodeId.">Click Here To Confirm</a>";
                 $mailData2 = [
                     'subject' => 'Confirm Task -' . $offer->subject,
                     'title' => 'Confirm Task',

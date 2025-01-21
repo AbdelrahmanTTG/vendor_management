@@ -26,8 +26,9 @@ class TicketResponseResource extends JsonResource
             'response' => $this->response,          
             'created_by' => $this->user?$this->user->user_name:$this->created_by,         
             'created_at' => $this->created_at,
-            'fileLink'=> $this->file?VmSetup::getUploadsFullLink()."/tickets/$this->file":null,                     
-               
+            // 'fileLink'=> $this->file?(Storage::disk('public')->exists("uploads/tickets/$this->file")?$this->file:VmSetup::getUploadsFullLink()."/tickets/$this->file"):null,                     
+            'fileLink'=> $this->file??null,                     
+            
                     
                         
         ];

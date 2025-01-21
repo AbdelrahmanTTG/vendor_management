@@ -12,7 +12,7 @@
 
     <h3>{{ $mailData['title']??'' }}</h3>
 
-    <p>{{ $mailData['body']??'' }}</p>
+    <p>{!! $mailData['body']??'' !!}</p>
     <p>{{ $body ??'' }}</p>
 
     @if(isset($mailData['taskDetails']))
@@ -142,6 +142,76 @@
     @if(isset($mailData['data']))
         <p>{!! $mailData['data'] !!}</p>
     @endif
+    @if(isset($mailData['invoiveData']))
+    <hr/>
+    <p> Invoive Details : </p>
+            <table border="0" cellpadding="2" cellspacing="0">
+                    <tbody>                       
+                        <tr>
+                            <td width="1200">
+                                <p><strong>Billing Legal Name:</strong> {{$mailData['invoiveData']->billing_legal_name}} </p>
+                            </td>
+                        </tr> 
+                        <tr>
+                            <td width="1200">
+                                <p><strong>Billing Address:</strong> {{ $mailData['invoiveData']->billing_address }} </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="1200">
+                                <p><strong>Billing Currency :</strong> {{!empty($mailData['invoiveData']->billing_currency)?$mailData['invoiveData']->currencyName->name:'' }} </p>
+                            </td>
+                        </tr>
+                        @if($mailData['invoiveData']->payment_method == 0)
+                            <tr>
+                                <td width="1200">
+                                    <p><strong>Payment Method  :</strong> Bank </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="1200">
+                                    <p><strong>Bank name :</strong> {{$mailData['invoiveData']->bank_name }}</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="1200">
+                                    <p><strong>Account holder :</strong> {{ $mailData['invoiveData']->bank_account_holder }} </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="1200">
+                                    <p><strong>SWIFT/BIC :</strong> {{$mailData['invoiveData']->bank_swift }}</p>
+                                </td>
+                            <tr>
+                            <tr>
+                                <td width="1200">
+                                    <p><strong>IBAN :</strong> {{ $mailData['invoiveData']->bank_IBAN }} </p>
+                                </td>
+                            <tr>
+                                <td width="1200">
+                                    <p><strong>Bank Address :</strong> {{$mailData['invoiveData']->bank_address }} </p>
+                                </td>
+                            </tr>
+                        @else
+                            <tr>
+                                <td width="1200">
+                                    <p><strong>Payment Method  :</strong> Wallet </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="1200">
+                                    <p><strong>Method :</strong> {{$mailData['invoiveData']->wallet_method }} </p>
+                                </td>
+                            <tr>
+                                <td width="1200">
+                                    <p><strong>Account :</strong> {{$mailData['invoiveData']->wallet_account }} </p>
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            @endif
+
     <p>Thank you</p>
 
 </body>

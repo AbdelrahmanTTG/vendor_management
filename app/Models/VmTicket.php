@@ -159,5 +159,10 @@ class VmTicket extends Model
         $row = VmTicketResource::where('ticket',$this->id)->where('type',$type)->count();
         return  $row;
     }
+
+    public function TicketResource()
+    {
+        return  $this->hasMany(VmTicketResource::class, 'ticket');
+    }
    
 }

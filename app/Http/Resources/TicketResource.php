@@ -25,6 +25,7 @@ class TicketResource extends JsonResource
         return [
             'id' => $this->id,
             'request_type' => $this->getTicketType(),
+            'request_type_val' => $this->request_type,
             'service' => $this->serviceData-> name ?? null,
             'task_type' => $this->taskType-> name ?? null,
             'rate' => $this-> rate ?? null,
@@ -57,6 +58,8 @@ class TicketResource extends JsonResource
             'new'=> $this->open_time?$this->getResourcesCount(1):null,
             'existing'=> $this->open_time?$this->getResourcesCount(2):null, 
             'existing_pair'=> $this->open_time?$this->getResourcesCount(3):null,
+            'TicketResource'=> $this->whenLoaded('TicketResource')?$this->TicketResource:null,
+            'rejection_reason'=> $this->rejection_reason,
 
                     
                         

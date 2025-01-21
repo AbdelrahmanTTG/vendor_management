@@ -5,20 +5,26 @@ import { BreadcrumbsPortal, H5, Btn, H6 } from '../../AbstractElements';
 import axiosClient from '../AxiosClint';
 import { useStateContext } from '../../pages/context/contextAuth';
 import { toast } from 'react-toastify';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 const Admin = () => {
   const baseURL = "/Portal/Admin/";
   const [pageData, setPageData] = useState([]);
   const { user } = useStateContext();
   const [LeftLineTab, setLeftLineTab] = useState('1');
+  const [peInvoiceInput, setPeInvoiceInput] = useState('');
+  const [peMessageInput, setPeMessageInput] = useState('');
   useEffect(() => {
     fetchData();
   }, []);
   const fetchData = async () => {
     try {
       axiosClient.post(baseURL + "settingsData")
-        .then(({ data }) => {          
+        .then(({ data }) => {
           setPageData(data?.vmConfig);
+          setPeInvoiceInput(data?.vmConfig?.pe_invoice_body);
+          setPeMessageInput(data?.vmConfig?.pe_message_body);
         });
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -26,7 +32,13 @@ const Admin = () => {
   };
 
   const handleSubmit = (event) => {
-    const formData = new FormData(event.currentTarget);
+    const form = new FormData(event.currentTarget);
+    const formData = {
+      ...Object.fromEntries(form),      
+      'pe_invoice_body': peInvoiceInput,
+      'pe_message_body': peMessageInput,
+  };
+   
     event.preventDefault();
     axiosClient.post(baseURL + "saveSettings", formData)
       .then(({ data }) => {
@@ -171,7 +183,14 @@ const Admin = () => {
                               <FormGroup className="row  ">
                                 <Label className="col-sm-3 col-form-label">{'Email (Body)'}</Label>
                                 <Col sm="9">
-                                  <textarea name="pe_invoice_body" rows={10} className="form-control" defaultValue={pageData.pe_invoice_body}>{pageData.pe_invoice_body}</textarea>
+                                  <CKEditor name="pe_invoice_body"
+                                    editor={ClassicEditor} data={pageData.pe_invoice_body}
+                                    onChange={(e, editor) => {
+                                      const data = editor.getData();
+                                      setPeInvoiceInput(data);
+                                    }}
+                                  />
+                                  {/* <textarea name="pe_invoice_body" rows={10} className="form-control" defaultValue={pageData.pe_invoice_body}>{pageData.pe_invoice_body}</textarea> */}
                                 </Col>
                               </FormGroup>
                             </CardBody>
@@ -189,7 +208,14 @@ const Admin = () => {
                               <FormGroup className="row  ">
                                 <Label className="col-sm-3 col-form-label">{'Email (Body)'}</Label>
                                 <Col sm="9">
-                                  <textarea name="pe_message_body" rows={10} className="form-control" defaultValue={pageData.pe_message_body}>{pageData.pe_message_body}</textarea>
+                                <CKEditor name="pe_message_body"
+                                    editor={ClassicEditor} data={pageData.pe_message_body}
+                                    onChange={(e, editor) => {
+                                      const data = editor.getData();
+                                      setPeMessageInput(data);
+                                    }}
+                                  />
+                                  {/* <textarea name="pe_message_body" rows={10} className="form-control" defaultValue={pageData.pe_message_body}>{pageData.pe_message_body}</textarea> */}
                                 </Col>
                               </FormGroup>
                             </CardBody>

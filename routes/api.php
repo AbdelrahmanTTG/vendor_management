@@ -61,8 +61,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/getTicketsTotal', [TicketsController::class, 'getTicketsTotal']);
     Route::post('/getPMSalesData', [TicketsController::class, 'getPMSalesData']);
     Route::post('/getTicketData', [TicketsController::class, 'getTicketData']);
+    Route::post('/downloadTicketFile', [TicketsController::class, 'download']);
     Route::post('/sendTicketResponse', [TicketsController::class, 'sendTicketResponse']);
     Route::post('/sendTicketVmResponse', [TicketsController::class, 'sendTicketVmResponse']);
+    Route::post('/changeTicketStatus', [TicketsController::class, 'changeTicketStatus']);
+    Route::delete('/deleteTicketResource', [TicketsController::class, 'deleteTicketResource']);
     Route::post('/vmActivity', [ReportsController::class, 'vmActivity']);
     Route::post('/getVmData', [ReportsController::class, 'getVmData']);
     Route::post('/getPmData', [ReportsController::class, 'getPmData']);

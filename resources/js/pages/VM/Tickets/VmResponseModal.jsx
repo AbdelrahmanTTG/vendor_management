@@ -4,14 +4,16 @@ import { Btn } from '../../../AbstractElements';
 import { Close, SaveChanges } from '../../../Constant';
 import { toast } from 'react-toastify';
 import axiosClient from "../../AxiosClint";
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
-const VmResponseModal = (props) => {  
+const VmResponseModal = (props) => {
   const [commentInput, setCommentInput] = useState("");
- 
+
 
   const Res = {
     'user': props.fromInuts.user,
-    'id': props.fromInuts.ticket_id,   
+    'id': props.fromInuts.ticket_id,
     'comment': commentInput,
   };
 
@@ -24,7 +26,7 @@ const VmResponseModal = (props) => {
           switch (data.type) {
             case 'success':
               toast.success(data.message);
-              props.changeTicketData(true); 
+              props.changeTicketData(true);
               break;
             case 'error':
               toast.error(data.message);
@@ -32,7 +34,7 @@ const VmResponseModal = (props) => {
           }
         });
     }
-    props.sendDataToParent(false);   
+    props.sendDataToParent(false);
   };
 
   return (
@@ -45,10 +47,16 @@ const VmResponseModal = (props) => {
           <Col>
             <FormGroup className='mb-0'>
               <Label>{'Comment :'}</Label>
-              <Input type='textarea' className='form-control' rows='5' name="comment" onChange={e => setCommentInput(e.target.value)} />
+              <CKEditor name="comment"
+                editor={ClassicEditor}
+                onChange={(e, editor) => {
+                  const data = editor.getData();
+                  setCommentInput(data);
+                }}
+              />
             </FormGroup>
           </Col>
-        </Row>        
+        </Row>
       </ModalBody>
       <ModalFooter>
         <Btn attrBtn={{ color: 'secondary', onClick: props.toggler }} >{Close}</Btn>
