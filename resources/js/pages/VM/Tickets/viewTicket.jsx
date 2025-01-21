@@ -315,7 +315,7 @@ const ViewTicket = () => {
                                                 <td scope="row">
                                                     <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />
                                                     <div className="clearfix"></div>
-                                                    {item.fileLink != null && (
+                                                    {item.fileLink != null && item.fileLink.trim() !='' && (
                                                         <button onClick={() => handleDownload(item.fileLink)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>Attachment : <i className="fa fa-download"></i> {'View File'}</button>
                                                     )}
                                                 </td>
