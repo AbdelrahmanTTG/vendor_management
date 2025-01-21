@@ -10,7 +10,7 @@ import CommonModal from '../../Model';
 import { toast } from 'react-toastify';
 
 const PersonalData = React.memo((props) => {
-  toast.configure();
+  // toast.configure();
   const basictoaster = (toastname, status) => {
     switch (toastname) {
       case 'successToast':

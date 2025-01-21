@@ -8,7 +8,7 @@ import axiosClient from "../../../../AxiosClint";
 import { toast } from 'react-toastify';
 
 const AddNewBtn = (props) => {
-    toast.configure();
+    // toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':

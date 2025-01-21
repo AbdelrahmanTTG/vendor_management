@@ -6,7 +6,7 @@ import { useForm, Controller, set } from 'react-hook-form';
 import axiosClient from "../../../AxiosClint";
 import { toast } from 'react-toastify';
 const Education = (props) => {
-    toast.configure();
+    // toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':

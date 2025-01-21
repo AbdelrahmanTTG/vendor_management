@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { toast } from 'react-toastify';
 import SweetAlert from 'sweetalert2';
 const FilesCertificate = (props) => {
-    toast.configure();
+    // toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':

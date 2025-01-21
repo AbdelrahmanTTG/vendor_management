@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { useForm, Controller } from 'react-hook-form';
 
 const Test = (props) => {
-    toast.configure();
+    // toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':

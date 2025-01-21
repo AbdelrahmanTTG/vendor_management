@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import axios from "../../../../pages/AxiosClint";
 
 const VMnote = (props) => {
-    toast.configure();
+    // toast.configure();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isOpen, setIsOpen] = useState(true);
     const { control, register, handleSubmit, setValue, formState: { errors } } = useForm();
