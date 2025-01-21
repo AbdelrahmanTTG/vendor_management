@@ -47,7 +47,7 @@ class VMmail extends Mailable
     }
     public function build()
     {
-        return $this->from($this->sender_email)
+        return $this->from($this->sender_email,null)
         ->view('emails.VMmail')
         ->with([
             'title' => $this->details['title'],

@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { Col, Form, FormGroup, Input, Label, Row } from "reactstrap";
+import { Col, Form, FormGroup, Input, Label, Row, Container } from "reactstrap";
 import { Navigate } from 'react-router-dom';
-import { Btn, H4, P } from "../AbstractElements";
+import { Btn, H4, P, Footer } from "../AbstractElements";
 import { toast } from "react-toastify";
 import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
@@ -9,7 +9,44 @@ import { Image } from '../AbstractElements';
 import Logo from '../assets/images/logo/1-400x141.png';
 import { ToastContainer } from "react-toastify";
 import Toast from "./Toast";
-
+const FooterClass = () => {
+  return (
+    <Fragment>
+      <Footer
+        attrFooter={{
+          className: `footer ${location.pathname === '/viho/page-layout/footer-dark'
+              ? 'footer-dark'
+              : location.pathname === '/viho/page-layout/footer-fixed'
+                ? 'footer-fix'
+                : ''
+            }`,
+          style: {
+            position: 'fixed', 
+            bottom: '0',       
+            left: '0',
+            width: '100vw',
+            height:"7vh",
+            backgroundColor: '#f1f1f1',
+            textAlign: 'center' ,
+            margin:"0"
+          }
+        }}
+      >
+        <Container fluid={true}>
+          <Row>
+            <Col md="6" className="footer-copyright">
+              <P attrPara={{ className: 'mb-0' }}>
+                {'Copyright 2024 © Lingo Talents All rights reserved.'}
+              </P>
+            </Col>
+            <Col md="6">
+            </Col>
+          </Row>
+        </Container>
+      </Footer>
+    </Fragment>
+  );
+};
 const Login = () => {
   const basictoaster = () => {
     toast.error("status", {
@@ -75,6 +112,7 @@ const Login = () => {
   
   return (
     <Fragment>
+
       <div className="p-0 container-fluid">
         <div id="boxed-wrapper">
           <div id="wrapper" className="fusion-wrapper">
@@ -151,15 +189,21 @@ const Login = () => {
                             </div>
                           </Col>
                         </Row>
-
                       </div>
                     </div>
                   </div>
                 </section>
+             
+                  <FooterClass />
+               
               </div>
+              
             </main>
+            
           </div>
+          
         </div>
+       
         {/* <Row>
           <Col className="col-12">
             <div className="login-card">
@@ -197,6 +241,7 @@ const Login = () => {
           </Col>
         </Row> */}
       </div>
+
       {toasts.map((toast) => (
         <Toast
           key={toast.id}

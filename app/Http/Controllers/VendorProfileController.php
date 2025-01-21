@@ -813,7 +813,7 @@ class VendorProfileController extends Controller
                     'subject' => 'New notifications ',
                     'title' => 'notifications',
                     'body' =>  $content,
-                    'brand' => env('BRAND'),
+                    'brand' => env('BRAND' ,"Nexus"),
                 ];
                 Mail::to($receiver_email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
             }
@@ -1025,11 +1025,9 @@ class VendorProfileController extends Controller
                 'subject' => 'Create password ',
                 'title' => 'Create_password',
                 'body' =>  $password,
-                'brand' =>env('BRAND'),
+                'brand' => env('BRAND', "Nexus"),
 
             ];
-         
-            
             Mail::to($email)->send(new VMmail($details , env('MAIL_FROM_ADDRESS')));
             return response()->json(['message' => 'Password updated successfully'], 200);
         }
@@ -1316,7 +1314,7 @@ class VendorProfileController extends Controller
         $directory = dirname($file);
         $fileName = basename($file);
         $filePath = storage_path("app/external/{$directory}/{$fileName}");
-        if (!Storage::disk('local')->exists("external/{$directory}/{$fileName}")) {
+        if (!Storage::disk('external')->exists("{$directory}/{$fileName}")) {
             return response()->json(['message' => 'File not found'], 404);
         }
         $encryptedFileName = pathinfo($fileName, PATHINFO_FILENAME);
