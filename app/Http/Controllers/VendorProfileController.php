@@ -1313,12 +1313,17 @@ class VendorProfileController extends Controller
         $file = $request->input("filename");
         $directory = dirname($file);
         $fileName = basename($file);
-        $filePath = storage_path("app/external/{$directory}/{$fileName}");
+        $filePath = Storage::disk('external')->path("{$directory}/{$fileName}");
+
         if (!Storage::disk('external')->exists("{$directory}/{$fileName}")) {
             return response()->json(['message' => 'File not found'], 404);
         }
         $encryptedFileName = pathinfo($fileName, PATHINFO_FILENAME);
-        $originalFileName = Crypt::decryptString($encryptedFileName);
+        try {
+            $originalFileName = Crypt::decryptString($encryptedFileName);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Invalid file encryption'], 400);
+        }
         return response()->download($filePath, $originalFileName);
     }
 
