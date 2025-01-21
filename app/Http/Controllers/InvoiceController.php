@@ -178,6 +178,7 @@ class InvoiceController extends Controller
                         'title' => 'New Invoice',
                         'body' =>  $vmConfig->pe_invoice_body,
                         'taskDetails' => $tasks,
+                        'invoiveData' => VendorInvoice::find($insert_id)
 
                     ];
                     Mail::to($vendorEmail)->cc($vmConfig->accounting_email)->send(new PortalMail($mailData));

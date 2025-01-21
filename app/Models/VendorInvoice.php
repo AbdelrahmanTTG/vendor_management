@@ -52,4 +52,9 @@ class VendorInvoice extends Model
     {
         return  $this->belongsTo(Vendor::class, 'vendor_id');
     }
+
+    public function currencyName()
+    {
+        return  $this->belongsTo(Currency::class, 'billing_currency');
+    }
 }

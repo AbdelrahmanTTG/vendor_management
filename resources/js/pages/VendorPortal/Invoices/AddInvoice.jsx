@@ -34,16 +34,14 @@ const AddInvoice = () => {
                     setCompletedJobs(completedJobs);
                 });
             // get billing data 
-            axiosClient.post("/EditVendor", {
-                params: {
+            axiosClient.post("/EditVendor", {               
                     id: user.id,
-                    BillingData: "Billing Data",
-                }
+                    BillingData: "Billing Data",              
             })
                 .then(({ data }) => {
-                    setBillingData(data?.billingData);
-                    setBankData(data?.bankData);
-                    setWalletData(data?.walletData);
+                    setBillingData(data?.BillingData?.billingData);
+                    setBankData(data?.BillingData?.bankData?.[0]);
+                    setWalletData(data?.BillingData?.walletData?.[0]);
                 });
         }
     }, [user]);
@@ -266,12 +264,12 @@ const AddInvoice = () => {
                                                     <Input type="text" className="form-control" readOnly disabled defaultValue={new Date().toLocaleDateString()} />
                                                 </Col>
                                             </FormGroup>
-                                            <FormGroup className="row">
+                                            {/* <FormGroup className="row">
                                                 <Label className="col-sm-4 col-form-label">{'Due Date'}</Label>
                                                 <Col sm="8">
-                                                    <Input type="text" name="billing_due_date" className="form-control" readOnly disabled defaultValue={'Due Date [Date after Payment terms]'} />
+                                                    <Input type="text" name="billing_due_date" className="form-control" readOnly disabled defaultValue='' />
                                                 </Col>
-                                            </FormGroup>
+                                            </FormGroup> */}
                                             <FormGroup className="row">
                                                 <Label className="col-sm-4 col-form-label">{'Billing Currency'}</Label>
                                                 <Col sm="8">

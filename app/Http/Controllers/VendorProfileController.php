@@ -682,8 +682,15 @@ class VendorProfileController extends Controller
             }
 
             if ($request->input('BillingData')) {
+                
                 $InvoiceController = new InvoiceController();
-                $decID = Crypt::encrypt($id);
+                 try {
+                    Crypt::decrypt($id);
+                    $decID = $id;
+                } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                    $decID = Crypt::encrypt($id);
+                }
+                // $decID = Crypt::encrypt($id);
                 $BillingData = $InvoiceController->getVendorBillingData($decID);
             }
             if ($request->input('VMNotes')) {

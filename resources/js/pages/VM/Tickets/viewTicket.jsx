@@ -2,10 +2,16 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import axiosClient from "../../AxiosClint";
 import { useStateContext } from '../../context/contextAuth';
-import { Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
+import { Card, CardBody, CardHeader, Col, Input, Label, Row, Table } from 'reactstrap';
 import { Btn, H5, P } from '../../../AbstractElements';
 import ResponseModal from './ResponseModal';
 import VmResponseModal from './VmResponseModal';
+import { FormGroup } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import Select from 'react-select';
+import SweetAlert from 'sweetalert2';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 const ViewTicket = () => {
     const [redirect, setRedirect] = useState(false);
@@ -19,6 +25,11 @@ const ViewTicket = () => {
     const toggle2 = () => setModal2(!modal2);
     const [temp, setTemp] = useState(false);
     const changeData = () => setTemp(!temp);
+    const [fileInput, setFileInput] = useState("");
+    const [statusInput, setStatusInput] = useState("");
+    const [commentInput, setCommentInput] = useState("");
+    const [optionsV, setOptionsV] = useState([]);
+    const [resourceVendors, setResourceVendors] = useState([]);
     const res = {
         ticket_id: ticket.id,
         user: user.id,
@@ -31,7 +42,8 @@ const ViewTicket = () => {
             const fetchData = async () => {
                 try {
                     const data = await axiosClient.post("getTicketData", res);
-                    setTicketData(data.data);
+                    setTicketData(data.data?.ticket);
+                    setResourceVendors(data.data?.resourceVendors);
                 } catch (error) {
                     console.error('Error fetching Data:', error);
                 }
@@ -43,9 +55,153 @@ const ViewTicket = () => {
     if (redirect) {
         return <Navigate to='/' />;
     }
+
+    const handleDownload = async (filename) => {
+        try {
+            const response = await axiosClient.post("downloadTicketFile", { filename }, { responseType: 'blob' });
+            const file = new Blob([response.data], { type: response.headers['content-type'] });
+            const link = document.createElement('a');
+            const url = window.URL.createObjectURL(file);
+            const contentDisposition = response.headers['content-disposition'];
+            const fileName = contentDisposition ? contentDisposition.split('filename=')[1] : filename;
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            const response = err.response;
+            console.error(response);
+            alert('Error downloading the file: ' + (response?.data?.message || 'Unknown error'));
+        }
+    };
+
+    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
+        if (!tablename) return
+        try {
+            const { data } = await axiosClient.get("SelectDatat", {
+                params: {
+                    search: searchTerm,
+                    table: tablename
+                }
+            });
+            const formattedOptions = data.map(item => ({
+                value: item.id,
+                label: item.name || item.gmt,
+            }));
+
+            setOptions(formattedOptions);
+            if (!searchTerm) {
+                setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
+            }
+        } catch (err) {
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+        }
+
+    };
+    const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
+        if (inputValue.length === 0) {
+            setOptions([]);
+        } else if (inputValue.length >= 1) {
+            const existingOption = options.some(option =>
+                option.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+            if (!existingOption) {
+                handelingSelect(tableName, setOptions, fieldName, inputValue);
+            }
+        }
+    };
+
+    const changeTicketStatus = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const TicketRes = {
+            ...Object.fromEntries(formData),
+            'ticket': ticket.id,
+            'user': user.id,
+            'file': fileInput,
+            'vendor': formData.getAll('vendor'),
+            'comment': commentInput,
+
+        };
+        if (statusInput == '0' && commentInput.trim() == '') {
+            toast.error("Please Enter Rejection Reason!");
+        } else {
+            axiosClient.post("changeTicketStatus", TicketRes, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            }).then(({ data }) => {
+                switch (data.type) {
+                    case 'success':
+                        data.message.map((msg, i) => {
+                            if (msg.trim() != "")
+                                toast.success(msg)
+                        });
+                        setTemp(!temp)
+                        setStatusInput('')
+                        break;
+                    case 'error':
+                        toast.error(data.message);
+                        break;
+                }
+            });
+        }
+    };
+    const deleteRes = (id) => {
+        if (id) {
+            SweetAlert.fire({
+                title: 'Are you sure?',
+                text: `Do you want to delete This Resource ?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const payload = {
+                        'id': id,
+                    };
+                    axiosClient.delete("deleteTicketResource", { data: payload }).then((response) => {
+                        if (response.status == 200) {
+                            setTemp(!temp)
+                            SweetAlert.fire(
+                                'Deleted!',
+                                `The Resource has been deleted..`,
+                                'success'
+                            );
+                        } else {
+                            SweetAlert.fire(
+                                'Ooops !',
+                                ' An error occurred while deleting. :)',
+                                'error'
+                            );
+                        }
+                    });
+
+                } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
+                    SweetAlert.fire(
+                        'Cancelled',
+                        'Your item is safe :)',
+                        'info'
+                    );
+                }
+            });
+        }
+    };
+    
     return (
         <Fragment>
-            <Card >
+            <Card>
                 <CardHeader className=' b-l-primary p-b-0'>
                     <H5>Ticket Details</H5>
                 </CardHeader>
@@ -108,15 +264,21 @@ const ViewTicket = () => {
                                 </tr>
                                 <tr>
                                     <th>{'Comment'}</th>
-                                    <td colSpan={18} dangerouslySetInnerHTML={{ __html: ticketData.comment }} ></td>
+                                    <td colSpan={19} dangerouslySetInnerHTML={{ __html: ticketData.comment }} ></td>
                                 </tr>
+                                {ticketData.statusVal == 0 &&
+                                    <tr>
+                                        <th>{'Rejection Reason'}</th>
+                                        <td colSpan={19} dangerouslySetInnerHTML={{ __html: ticketData.rejection_reason }} ></td>
+                                    </tr>
+                                }
                             </tbody>
                         </Table>
                     </div>
                 </CardBody>
             </Card>
             {/*  response */}
-            <Card >
+            <Card>
                 <CardHeader className='b-t-primary p-b-0'>
                     <Row>
                         <Col sm="9">
@@ -151,10 +313,10 @@ const ViewTicket = () => {
                                             <tr key={index}>
                                                 <td scope="row">{item.created_by}</td>
                                                 <td scope="row">
-                                                <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} /> 
-                                                    <br />
+                                                    <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />
+                                                    <div className="clearfix"></div>
                                                     {item.fileLink != null && (
-                                                        <Link to={item.fileLink} className='txt-dangers'>{'View File'}</Link>
+                                                        <button onClick={() => handleDownload(item.fileLink)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>Attachment : <i className="fa fa-download"></i> {'View File'}</button>
                                                     )}
                                                 </td>
                                                 <td scope="row">{item.created_at}</td>
@@ -174,20 +336,208 @@ const ViewTicket = () => {
                 </CardBody>
             </Card>
             {/*  action */}
-            <Card >
+            <Card>
                 <CardHeader className='b-t-primary p-b-0'>
                     <Row>
                         <Col sm="9">
                             <H5>  Ticket Action   </H5>
-                        </Col>                        
+                        </Col>
                     </Row>
                 </CardHeader>
                 <CardBody>
-                 
+                    {ticketData.statusVal == 1 && (
+                        <>
+                            <FormGroup className="row">
+                                <Label className="col-sm-3 col-form-label">{'Assign Ticket To'}</Label>
+                                <Col sm="9">
+                                    <Input type="select" name="status" className="custom-select form-control">
+                                        <option value="2">{'Vendor Listing'}</option>
+                                    </Input>
+                                </Col>
+                            </FormGroup>
+                            <hr />
+                        </>
+                    )}
+                    <form onSubmit={changeTicketStatus}>
+                        {ticketData.statusVal <= 5 && (
+                            <>
+                                <FormGroup className="row mt-2">
+                                    <Label className="col-sm-3 col-form-label">{'Ticket Status'}</Label>
+                                    <Col sm="9">
+                                        <Input type="select" name="status" className="custom-select form-control" defaultValue={ticketData.statusVal} onChange={e => setStatusInput(e.target.value)}>
+                                            {ticketData.statusVal == 1 &&
+                                                <>
+                                                    <option value="1" disabled>{'New'}</option>
+                                                    <option value="2">{'Opened'}</option>
+                                                    <option value="0">{'reject'}</option>
+                                                </>
+                                            }{ticketData.statusVal == 2 &&
+                                                <>
+                                                    <option value="2">{'Opened'}</option>
+                                                    <option value="3">{'Partly Closed'}</option>
+                                                </>
+                                            }{ticketData.statusVal == 3 &&
+                                                <>
+                                                    <option value="3">{'Partly Closed'}</option>
+                                                    <option value="4">{'Closed'}</option>
+                                                </>
+                                            }{ticketData.statusVal == 5 &&
+                                                <option value="5" disabled >{'Waiting Requester Acceptance'}</option>
+                                            }{ticketData.statusVal == 4 &&
+                                                <option value="4" disabled >{'Closed'}</option>
+                                            }{ticketData.statusVal == 0 &&
+                                                <option value="0" disabled >{'Rejected'}</option>
+                                            }
+                                        </Input>
+                                    </Col>
+                                </FormGroup>
+                                {statusInput == '0' &&
+                                    <FormGroup className="row mt-2">
+                                        <Label className="col-sm-3 col-form-label">{'Rejection Reason '}</Label>
+                                        <Col sm="9">
+                                            <CKEditor name="comment" required
+                                                editor={ClassicEditor}
+                                                onChange={(e, editor) => {
+                                                    const data = editor.getData();
+                                                    setCommentInput(data);
+                                                }}
+                                            />
+                                        </Col>
+                                    </FormGroup>
+                                }
+                                <hr />
+                            </>
+                        )}
+                        {/*  CV Request */}
+                        {ticketData.request_type_val == 5 && (
+                            ticketData.statusVal <= 3 && ticketData.statusVal != 0 && (
+                                ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ?
+                                    ticketData['TicketResource'].map((item, i) => (
+                                        <Row key={i} className="row mt-2">
+                                            <Col>
+                                                <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
+                                                <button type='reset' onClick={() => handleDownload(item.file)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2 '> <i className="fa fa-download"></i> {'Click Here'}</button>
+                                            </Col>
+                                        </Row>
+                                    ))
+                                    :
+                                    <FormGroup className="row mt-2">
+                                        <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
+                                        <Col sm="9">
+                                            <Input className="form-control" type="file" onChange={e => setFileInput(e.target.files[0])} required={ticketData.statusVal == 1 ? false : true} />
+                                        </Col>
+                                    </FormGroup>
+                            )
+                        )}
+                        {/*  Resource Availabilty */}
+                        {ticketData.request_type_val == 4 && (
+                            ticketData.statusVal <= 3 && ticketData.statusVal != 0 ?
+                                <FormGroup className="row mt-2">
+                                    <Label className="col-sm-3 col-form-label">{'Number Of Resources'}</Label>
+                                    <Col sm="9">
+                                        <Input className="form-control" type="number" name='number_of_resource' defaultValue={ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ? ticketData['TicketResource'][0]['number_of_resource'] : ''} required={ticketData.statusVal == 1 ? false : true} />
+                                    </Col>
+                                </FormGroup>
+                                :
+                                <FormGroup className="row mt-2">
+                                    <Label className="col-sm-3 col-form-label">{'Number Of Resources'}</Label>
+                                    <Col sm="9">
+                                        <Input className="form-control" defaultValue={ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ? ticketData['TicketResource'][0]['number_of_resource'] : ''} disabled />
+                                    </Col>
+                                </FormGroup>
+                        )}
+                        {/*  new Resource  */}
+                        {(ticketData.request_type_val == 1 || ticketData.request_type_val == 3) &&
+                            (ticketData.statusVal != 4 && ticketData.statusVal != 0) &&
+                            <>
+                                <FormGroup className="row mt-2">
+                                    <Label className="col-sm-3 col-form-label">{'Select Vendor'}</Label>
+                                    <Col sm="9">
+                                        <Select name='vendor' id='vendor' required={resourceVendors != null || ticketData.statusVal == 1 ? false : true}
+                                            options={optionsV} className="js-example-basic-single "
+                                            onInputChange={(inputValue) =>
+                                                handleInputChange(inputValue, "vendors", "vendor", setOptionsV, optionsV)
+                                            }
+                                            isMulti />
+                                    </Col>
+                                </FormGroup>
+                                {resourceVendors != null && (resourceVendors).length > 0 &&
+                                    <div className="table-responsive mt-5">
+                                        <Table className='table-bordered mb-10'>
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" >{'Name'}</th>
+                                                    <th scope="col" >{'Email'}</th>
+                                                    <th scope="col" >{'Contact'}</th>
+                                                    <th scope="col" >{'Country of Residence'}</th>
+                                                    <th scope="col">{'Mother Tongue'}</th>
+                                                    <th scope="col">{'Profile'}</th>
+                                                    <th scope="col">{'CV'}</th>
+                                                    <th scope="col">{'Source Language'}</th>
+                                                    <th scope="col">{'Target Language'}</th>
+                                                    <th scope="col">{'Dialect'}</th>
+                                                    <th scope="col">{'Service'}</th>
+                                                    <th scope="col">{'Task Type'}</th>
+                                                    <th scope="col">{'Unit'}</th>
+                                                    <th scope="col">{'Rate'}</th>
+                                                    <th scope="col">{'Currency'}</th>
+                                                    <th scope="col">{'Created By'}</th>
+                                                    {ticketData.statusVal != 4 &&
+                                                        <th scope="col">{'Delete'}</th>
+                                                    }
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {resourceVendors.map((item, i) => (
+                                                    <tr key={i}>
+                                                        <td>{item['vendor'].name}</td>
+                                                        <td>{item['vendor'].email}</td>
+                                                        <td>{item['vendor'].contact}</td>
+                                                        <td>{item['vendor']['country']?.name}</td>
+                                                        <td>{item['vendor'].mother_tongue}</td>
+                                                        <td>{item['vendor'].profile}</td>
+                                                        {item['vendor'].cv != null ?
+                                                            <td>
+                                                                <button type='reset' onClick={() => handleDownload(item['vendor'].cv)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>{'CV'}</button>
+                                                            </td>
+                                                            :
+                                                            <td></td>
+                                                        }
+
+
+                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['source_lang']?.name}</td>
+                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['target_lang']?.name}</td>
+                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.dialect}</td>
+                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['service']?.name}</td>
+                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['task_type']?.name}</td>
+                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['unit']?.name}</td>
+                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.rate}</td>
+                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['currency']?.name}</td>
+                                                        <td>{item['vendor']?.['created_by']?.user_name}</td>
+                                                        {ticketData.statusVal != 4 &&
+                                                            <td>  <button type='reset' onClick={() => deleteRes(item.id)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'> <i className="icofont icofont-ui-delete"></i></button></td>
+                                                        }
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </Table>
+                                    </div>
+                                }
+                            </>
+                        }
+                        {ticketData.statusVal <= 3 && ticketData.statusVal != 0 && (
+                            <Row className='mt-2'>
+                                <Col className='text-end'>
+                                    <Btn attrBtn={{ color: 'primary', type: 'submit' }}>{'Save Changes'}</Btn>
+                                </Col>
+                            </Row>
+                        )}
+                    </form>
                 </CardBody>
             </Card>
             {/*  vm response */}
-            <Card >
+            <Card>
                 <CardHeader className='b-t-primary p-b-0'>
                     <Row>
                         <Col sm="9">
@@ -222,7 +572,7 @@ const ViewTicket = () => {
                                             <tr key={index}>
                                                 <td scope="row">{item.created_by}</td>
                                                 <td scope="row">
-                                                    <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />                                                 
+                                                    <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />
                                                 </td>
                                                 <td scope="row">{item.created_at}</td>
                                             </tr>
@@ -241,7 +591,7 @@ const ViewTicket = () => {
                 </CardBody>
             </Card>
             {/*  time */}
-            <Card >
+            <Card>
                 <CardHeader className='b-t-primary p-b-0'>
                     <Row>
                         <Col sm="12">
@@ -281,7 +631,7 @@ const ViewTicket = () => {
                                             </tr>
                                         ))}
                                     </>
-                                ) }
+                                )}
                                 <tr className='bg-light '>
                                     <th>Time taken</th>
                                     <td colSpan={2}>{ticketData.TimeTaken}</td>
