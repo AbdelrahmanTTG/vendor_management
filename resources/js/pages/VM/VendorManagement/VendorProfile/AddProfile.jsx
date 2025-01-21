@@ -114,7 +114,7 @@ const AddProfile = (props) => {
 
                         <div id="Files-Certificate" className="row mb-3">
                             <div className="col-12">
-                                <FilesCertificate backPermissions={props.permissions?.FilesCertificate} onSubmit="onSubmit" id={data.id} />
+                                <FilesCertificate backPermissions={props.permissions?.FilesCertificate} onSubmit="onSubmit" id={data?.id} />
                             </div>
                         </div>
                     </LazyWrapper>

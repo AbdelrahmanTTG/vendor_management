@@ -242,7 +242,7 @@ const Simple = (props) => {
           </Nav>
 
         </Collapse>
-        {!isEmpty && (
+        {/* {!isEmpty && (
           <div style={{ position: 'relative' }}>
             <Progress value={props.value} color="success" style={{
               height: '10px', position: 'relative', borderRadius: '0'
@@ -261,7 +261,7 @@ const Simple = (props) => {
               </span>
             </Progress>
           </div>
-        )}
+        )} */}
               </div>
           </Navbar>
 
