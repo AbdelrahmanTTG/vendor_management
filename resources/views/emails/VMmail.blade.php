@@ -1,5 +1,3 @@
-@extends('layouts.email')
-
 @section('styles')
 <style>
     body {
