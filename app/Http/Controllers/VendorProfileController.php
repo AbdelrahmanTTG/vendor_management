@@ -1020,12 +1020,18 @@ class VendorProfileController extends Controller
         if ($vendor) {
             $vendor->password = base64_encode($password);
             $vendor->save();
+            $results = DB::table('vm_mail')
+            ->where('name', 'password')
+            ->get();
             $details = [
                 'subject' => 'Create password ',
                 'title' => 'Create_password',
                 'body' =>  $password,
+                'email' => $results->emailSupport,
             ];
-            Mail::to($email)->send(new VMmail($details , "no-reply@aixnexus.com"));
+         
+            
+            Mail::to($email)->send(new VMmail($details , $results->email));
             return response()->json(['message' => 'Password updated successfully'], 200);
         }
 
