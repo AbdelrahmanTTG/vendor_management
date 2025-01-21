@@ -810,11 +810,11 @@ class VendorProfileController extends Controller
             );
             if($status == 1){
                 $details = [
-                    'subject' => 'Notifications ',
-                    'title' => 'New notifications',
+                    'subject' => 'New notifications ',
+                    'title' => 'notifications',
                     'body' =>  $content,
                 ];
-                Mail::to($receiver_email)->send(new VMmail($details));
+                Mail::to($receiver_email)->send(new VMmail($details, $sender_email));
             }
 
             //  event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
@@ -1020,12 +1020,18 @@ class VendorProfileController extends Controller
         if ($vendor) {
             $vendor->password = base64_encode($password);
             $vendor->save();
+            $results = DB::table('vm_mail')
+            ->where('name', 'password')
+            ->get();
             $details = [
                 'subject' => 'Create password ',
                 'title' => 'Create_password',
                 'body' =>  $password,
+                'email' => $results->emailSupport,
             ];
-            Mail::to($email)->send(new VMmail($details));
+         
+            
+            Mail::to($email)->send(new VMmail($details , $results->email));
             return response()->json(['message' => 'Password updated successfully'], 200);
         }
 
