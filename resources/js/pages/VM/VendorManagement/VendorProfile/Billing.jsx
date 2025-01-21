@@ -15,6 +15,8 @@ const Billing = (props) => {
     const [isChecked, setIsChecked] = useState({ billing_legal_name: '', city: '', street: '', billing_address: "" });
     const [selectedOptionC, setSelectedOptionC] = useState(null);
     const [optionsC, setOptionsC] = useState([]);
+    const [selectedOptionM, setSelectedOptionM] = useState([]);
+    const [optionsM, setOptionsM] = useState([]);
     const { control, register, handleSubmit, unregister, setValue, formState: { errors } } = useForm();
     const [loading, setLoading] = useState(false);
     const [loading2, setLoading2] = useState(false);
@@ -83,23 +85,23 @@ const Billing = (props) => {
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
-    const options = [
-        { value: '4', label: '-- Other --' },
-    ];
+  
     const addRow = () => {
         const newRow = {
             id: rows.length + 1,
+            default: 0,
             type: null,
             inputValue: '',
         };
         setRows([...rows, newRow]);
     };
-    const editRow = (id , selec , input) => {
+    const editRow = (id, selec, input, def) => {
         setRows(prevRows => [
             ...prevRows,
             {
                 id: id,
                 idUpdate: id,
+                default: def,
                 type: selec,
                 inputValue: input,
             },
@@ -125,7 +127,14 @@ const Billing = (props) => {
     };
     const [rowIdToDelete, setRowIdToDelete] = useState(null)
 
-    const deleteRow = useCallback((rowId, idUpdate) => {
+    const deleteRow = useCallback((rowId, idUpdate , d) => {
+        // console.log(selectedDefaults)
+        // delete selectedDefaults[rowId];
+        // console.log(d[rowId])
+        if (d[rowId] == 1) {
+            basictoaster("dangerToast", "Its default values ​​should not be deleted before setting others.");
+            return
+        }
         if (idUpdate) {
             SweetAlert.fire({
                 title: 'Are you sure?',
@@ -144,6 +153,7 @@ const Billing = (props) => {
                             `This payment wallet has been deleted..`,
                             'success'
                         );
+                        delete d[rowId]
                         setRowIdToDelete(rowId);
                     } else {
                         SweetAlert.fire(
@@ -166,18 +176,22 @@ const Billing = (props) => {
                 setRowIdToDelete(rowId);
             }
         }
-    
+
     }, []);
     const onDelete = async (id) => {
         if (!props.backPermissions?.delete) {
             basictoaster("dangerToast", " Oops! You are not authorized to delete this section .");
             return;
         }
+        
         try {
             const payload = {
                 id: id,
             }
             const { data } = await axiosClient.delete("deleteWallet", { data: payload });
+            
+
+
             return data
         } catch (err) {
             const response = err.response;
@@ -193,6 +207,8 @@ const Billing = (props) => {
         if (rowIdToDelete !== null) {
             unregister(`method[${rowIdToDelete}]`);
             unregister(`account[${rowIdToDelete}]`);
+            unregister(`defaults[${rowIdToDelete}]`);
+
             setRows((prevRows) => prevRows.filter(row => row.id !== rowIdToDelete));
             setRowIdToDelete(null);
         }
@@ -206,21 +222,24 @@ const Billing = (props) => {
             Update(data)
         }
     };
- 
-    const handleInputChangeSelect = (inputValue, tableName, fieldName, setOptions, options) => {
+
+    const handleInputChangeSelect = (inputValue, tableName, fieldName, setOptions, options, rowId) => {
         if (inputValue.length === 0) {
             setOptions(initialOptions[fieldName] || []);
         } else if (inputValue.length >= 1) {
-            const existingOption = options.some(option =>
-                option.label.toLowerCase().includes(inputValue.toLowerCase())
-            );
-            if (!existingOption) {
-                setLoading2(true);
-                handelingSelect(tableName, setOptions, fieldName, inputValue);
+            if (Array.isArray(options)) {
+                const existingOption = options.some(option =>
+                    option?.label.toLowerCase().includes(inputValue.toLowerCase())
+                );
+                if (!existingOption) {
+                    setLoading2(true);
+                    handelingSelect(tableName, setOptions, fieldName, inputValue, rowId);
+                }
             }
         }
     };
-    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
+
+    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '', rowId) => {
         if (!tablename) return
         try {
             setLoading2(true);
@@ -234,8 +253,11 @@ const Billing = (props) => {
                 value: item.id,
                 label: item.name,
             }));
-
-            setOptions(formattedOptions);
+            if (rowId) {
+                setOptions(prev => ({ ...prev, [rowId]: formattedOptions }));
+            } else {
+                setOptions(formattedOptions);
+            }
             if (!searchTerm) {
                 setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
             }
@@ -256,7 +278,12 @@ const Billing = (props) => {
     useEffect(() => {
         handelingSelect("currency", setOptionsC, "Currency");
     }, []);
-    useEffect(() => { 
+    useEffect(() => {
+        if (props?.Cru) {
+            console.log(props?.Cru)
+        }
+    }, [props?.Cru]);
+    useEffect(() => {
         if (props.Bill) {
             setIsSubmitting(true)
         }
@@ -265,9 +292,8 @@ const Billing = (props) => {
             if (props.BillingData || props.Bill) {
                 if (props.BillingData?.BillingData || props.Bill) {
                     // if (!dataB) { setdataB(props.BillingData.BillingData) }
-                    
-                    const data =  props?.BillingData?.BillingData || props.Bill;
-                    
+
+                    const data = props?.BillingData?.BillingData || props.Bill;
 
                     if (data?.billingData) {
                         setAdd(false)
@@ -284,15 +310,15 @@ const Billing = (props) => {
                         setValue("billing_currency", billing_currency.value);
                         setValue("street", data.billingData.street)
                         setValue("billing_address", data.billingData.billing_address)
-                        if (data.billingData?.billing_status !== null && data.billingData?.billing_status !== undefined ) {
+                        if (data.billingData?.billing_status !== null && data.billingData?.billing_status !== undefined) {
                             const vendorTypeOption = {
-                                value:"",
+                                value: "",
                                 // value: props.permission?.status !== "disable"? data.billingData.status:null,
                                 label:
                                     data.billingData.billing_status == 0 ? "Inactive" :
                                         data.billingData.billing_status == 1 ? "Active" :
                                             data.billingData.billing_status == 2 ? "Pending" :
-                                                    "Unknown"
+                                                "Unknown"
                             };
                             setValue("billing_status", vendorTypeOption);
                         }
@@ -308,11 +334,22 @@ const Billing = (props) => {
                         setValue("bank_address", data.bankData.bank_address)
                     }
                     if (data?.walletData) {
-                        // console.log(data?.walletData)
                         setRows([])
                         data.walletData.forEach(element => {
-                            editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
-                            setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
+
+                            editRow(element.id, { value: element.method.id, label: element.method.name }, element.account)
+                            setValue(`method[${element.id}]`, { value: element.method.id, label: element.method.name })
+                            setValue(`defaults[${element.id}]`, element.defaults)
+                            const x = {
+                                [element.id]: element.defaults
+                            };
+                            
+
+                            setSelectedDefaults(prevSelectedDefaults => ({
+                                ...prevSelectedDefaults,
+                                ...x
+                            }));
+                            setSelectedOptionM(prev => ({ ...prev, [element.id]: { value: element.method.id, label: element.method.name } }));
                         });
 
                     }
@@ -321,17 +358,23 @@ const Billing = (props) => {
                     setAdd(true)
                 }
 
-            } 
+            }
 
-        } 
-        
-    }, [props.BillingData, setValue , dataB])
-  
+        }
+
+    }, [props.BillingData, setValue, dataB])
+
     const onSubmit = async (data) => {
         if (!props.backPermissions?.add) {
             basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
             return;
         }
+        const containsOne = Object.values(selectedDefaults).includes(1);
+        if (!containsOne) {
+            basictoaster("dangerToast", " The default wallet must be selected.");
+            return;
+
+        } 
         if (!props.id) {
             basictoaster("dangerToast", "Make sure to send your personal information first.");
             const section = document.getElementById("personal-data");
@@ -340,7 +383,8 @@ const Billing = (props) => {
 
             const formData = { ...data };
             const result = rows?.map((row, index) => ({
-                method: formData.method[row.id]?.value,
+                defaults: selectedDefaults[row.id],
+                method: formData.method[row.id]?.value ? formData.method[row.id]?.value : formData.method[row.id],
                 account: formData.account[row.id],
             }));
             const newFormData = {
@@ -352,6 +396,8 @@ const Billing = (props) => {
             }
             delete newFormData.method;
             delete newFormData.account;
+            delete newFormData.defaults;
+
             try {
                 const response = await axiosClient.post("storeBilling", newFormData);
                 // setdataB(response.data)
@@ -385,10 +431,18 @@ const Billing = (props) => {
             basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
             return;
         }
+        const containsOne = Object.values(selectedDefaults).includes(1);
+        if (!containsOne) {
+            basictoaster("dangerToast", " The default wallet must be selected.");
+            return;
+
+        } 
+        // console.log(selectedDefaults)
         const formData = { ...data };
         const result = rows?.map((row, index) => ({
             id: row.idUpdate,
-            method: formData.method[row.id]?.value,
+            defaults: selectedDefaults[row.id] == 1 ? 1:0,
+            method: formData.method[row.id]?.value ? formData.method[row.id]?.value : formData.method[row.id],
             account: formData.account[row.id],
         }));
         formData.billing_status = formData?.billing_status?.value
@@ -403,17 +457,13 @@ const Billing = (props) => {
         newFormData['vendor_id'] = props.id;
         delete newFormData.method;
         delete newFormData.account;
-
+        delete newFormData.defaults;
         try {
             const response = await axiosClient.post("UpdateBillingData", newFormData);
             setIsSubmitting(true)
-            // setdataB(response.data)
             basictoaster("successToast", "Updated successfully !");
             props.Currancy(response.data, selectedOptionC)
-            response.data.forEach(element => {
-                editRow(element.id, { value: '4', label: '-- Other --' }, element.account)
-                setValue(`method[${element.id}]`, { value: '4', label: '-- Other --' })
-            });
+           
 
         } catch (err) {
             const response = err.response;
@@ -483,6 +533,18 @@ const Billing = (props) => {
 
     }
   
+    const [selectedDefaults, setSelectedDefaults] = useState({});
+
+    const handleRadioChange = (event) => {
+        const newSelectedDefaults = { ...selectedDefaults };
+        Object.keys(newSelectedDefaults).forEach((key) => {
+            newSelectedDefaults[key] = 0; 
+        });
+        newSelectedDefaults[event.target.value] = 1; 
+        setSelectedDefaults(newSelectedDefaults) 
+
+        // console.log(newSelectedDefaults);
+    };
     return (
         <Fragment>
             <Card>
@@ -513,7 +575,7 @@ const Billing = (props) => {
                                                     <Input className="radio_animated" id="edo-ani" type="checkbox" onChange={handleCheckboxChange} name="rdo-ani" />
                                                 </Col>
                                             )}
-                                            
+
 
                                             <Row>
                                                 <Col md="6" className="mb-3">
@@ -602,7 +664,7 @@ const Billing = (props) => {
                                                         <Col sm="9">
                                                             <CKEditor
                                                                 editor={ClassicEditor}
-                                                                data={isChecked.billing_address || props.BillingData?.BillingData?.billingData?.billing_address || props.Bill?.billingData.billing_address  ||""}
+                                                                data={isChecked.billing_address || props.BillingData?.BillingData?.billingData?.billing_address || props.Bill?.billingData.billing_address || ""}
                                                                 onChange={(event, editor) => {
                                                                     const data = editor.getData();
                                                                     setValue('billing_address', data);
@@ -617,34 +679,34 @@ const Billing = (props) => {
                                                     </FormGroup>
                                                 </Col>
                                                 {(props.backPermissions.edit == 1 && props?.permission?.billing_status != "hide") &&
-                                                < Col md="6" id="status-wrapper" >
-                                                    <FormGroup className="row" >
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01" > Status </Label>
-                                                        < Col sm="9" >
-                                                            <Controller
-                                                                name="billing_status"
-                                                                control={control}
-                                                                rules={{ required: false }}
-                                                                render={({ field }) => (
-                                                                    <Select
-                                                                        id='status'
-                                                                        {...field}
-                                                                        value={field.value}
-                                                                        options={
-                                                                            [
-                                                                                { value: '1', label: 'Active' },
-                                                                                { value: '0', label: 'Inactive' },
-                                                                                { value: '2', label: 'Pending' },
-                                                                            ]} className="js-example-basic-single col-sm-12"
-                                                                        onChange={(option) => {
-                                                                            field.onChange(option);
-                                                                        }}
-                                                                        isDisabled={(props.permission && props.permission.billing_status === "disable" || add)}
-                                                                    />
-                                                                )} />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
+                                                    < Col md="6" id="status-wrapper" >
+                                                        <FormGroup className="row" >
+                                                            <Label className="col-sm-3 col-form-label" for="validationCustom01" > Status </Label>
+                                                            < Col sm="9" >
+                                                                <Controller
+                                                                    name="billing_status"
+                                                                    control={control}
+                                                                    rules={{ required: false }}
+                                                                    render={({ field }) => (
+                                                                        <Select
+                                                                            id='status'
+                                                                            {...field}
+                                                                            value={field.value}
+                                                                            options={
+                                                                                [
+                                                                                    { value: '1', label: 'Active' },
+                                                                                    { value: '0', label: 'Inactive' },
+                                                                                    { value: '2', label: 'Pending' },
+                                                                                ]} className="js-example-basic-single col-sm-12"
+                                                                            onChange={(option) => {
+                                                                                field.onChange(option);
+                                                                            }}
+                                                                            isDisabled={(props.permission && props.permission.billing_status === "disable" || add)}
+                                                                        />
+                                                                    )} />
+                                                            </Col>
+                                                        </FormGroup>
+                                                    </Col>
                                                 }
                                             </Row>
 
@@ -779,9 +841,10 @@ const Billing = (props) => {
                                                 <thead>
                                                     <tr>
                                                         <th scope="col">{'#'}</th>
+                                                        <th scope="col">{'Default'}</th>
                                                         <th scope="col">{'Method'}</th>
                                                         <th scope="col">Account</th>
-                                                        <th  style={{ width: "10%" }} scope="col"
+                                                        <th style={{ width: "10%" }} scope="col"
                                                             onClick={(event) => {
                                                                 event.preventDefault();
                                                                 addRow()
@@ -795,7 +858,17 @@ const Billing = (props) => {
                                                 <tbody>
                                                     {rows.map((row, index) => (
                                                         <tr key={row.id}>
-                                                            <td>{index + 1}</td>
+                                                            <td>{index+1}</td>
+                                                            <td>
+                                                                <input
+                                                                    {...register(`defaults[${row.id}]`, { required: false })}
+                                                                    name={`defaults[${row.id}]`}
+                                                                    type="radio"
+                                                                    value={row.id}
+                                                                    checked={selectedDefaults[row.id] == 1} 
+                                                                    onChange={handleRadioChange}
+                                                                />
+                                                            </td>
                                                             <td>
                                                                 <Controller
                                                                     name={`method[${row.id}]`}
@@ -804,46 +877,54 @@ const Billing = (props) => {
                                                                     render={({ field }) => (
                                                                         <Select
                                                                             {...field}
-                                                                            options={options}
+                                                                            value={selectedOptionM[row.id] || null}
+                                                                            options={optionsM[row.id] || []}
+                                                                            onInputChange={(inputValue) =>
+                                                                                handleInputChangeSelect(inputValue, "vendor_payment_methods", `method[${row.id}]`, setOptionsM, optionsM, row.id)
+                                                                            }
                                                                             className="js-example-basic-single col-sm-12"
-                                                                            onChange={(selectedOption) => {
-                                                                                field.onChange(selectedOption);
-                                                                                handleSelectChange(selectedOption, row.id);
+                                                                            isSearchable
+                                                                            noOptionsMessage={() => loading2 ? (
+                                                                                <div className="loader-box">
+                                                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                                </div>
+                                                                            ) : 'No options found'}
+                                                                            onChange={(option) => {
+                                                                                setSelectedOptionM(prev => ({ ...prev, [row.id]: option })); // تحديث القيمة لهذا الصف فقط
+                                                                                field.onChange(option.value);
                                                                             }}
-                                                                            value={field.value}
                                                                         />
                                                                     )}
                                                                 />
-
                                                             </td>
-                                                            <td>
-                                                             
-                                                                <input
 
+                                                            <td>
+                                                                <input
                                                                     type="text"
                                                                     value={row.inputValue}
                                                                     {...register(`account[${row.id}]`, { required: true })}
                                                                     onChange={(e) => handleInputChange(e, row.id)}
                                                                     className="form-control"
                                                                     placeholder="Account"
-
                                                                 />
                                                             </td>
-                                                            
-                                                            <td  onClick={(event) => {
+
+                                                            <td onClick={(event) => {
                                                                 event.preventDefault();
-                                                                deleteRow(row.id, row.idUpdate)
-                                                            }}  >                                                    <Btn attrBtn={{ color: 'btn btn-danger' }}>
+                                                                deleteRow(row.id, row.idUpdate, selectedDefaults);
+                                                            }}>
+                                                                <Btn attrBtn={{ color: 'btn btn-danger' }}>
                                                                     <i className="fa fa-trash"></i>
                                                                 </Btn>
                                                             </td>
                                                         </tr>
                                                     ))}
+
                                                 </tbody>
                                             </Table>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError)}}>Submit</Btn>
+                                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError) }}>Submit</Btn>
                                         </div>
                                     </div>
                             }

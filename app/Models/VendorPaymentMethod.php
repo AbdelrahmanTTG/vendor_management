@@ -25,4 +25,14 @@ class VendorPaymentMethod extends Model
 
         return $item->makeHidden(['created_at', 'updated_at']);
     }
+    public static function SelectData($searchTerm = null)
+    {
+
+        if ($searchTerm) {
+            $query = self::where('name', 'like', '%' . $searchTerm . '%')->where('Active', 1);
+        } else {
+            $query = self::select('id', 'name')->where('Active', 1)->limit(5);
+        }
+        return $query->get();
+    }
 }

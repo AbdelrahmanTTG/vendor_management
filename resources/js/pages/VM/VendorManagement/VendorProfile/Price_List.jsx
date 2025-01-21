@@ -25,7 +25,12 @@ const PriceList = (props) => {
     const [initialOptions, setInitialOptions] = useState({});
     const [dataPrice, setdataPrice] = useState(null);
     const [tools, setTools] = useState(null);
+    const [selectedOptionC, setSelectedOptionC] = useState(null);
+    const [optionsC, setOptionsC] = useState([]);
+    const [loading2, setLoading2] = useState(false);
+    const [rows, setRows] = useState(false);
 
+    
     const getData = (newData) => {
         setdataPrice((prevData) => {
             const validData = Array.isArray(prevData) ? prevData : [];
@@ -36,7 +41,7 @@ const PriceList = (props) => {
                 return [...validData, newData];
             }
         });
-
+        setRows(true)
     };
 
     const removeDataById = (id) => {
@@ -128,6 +133,7 @@ const PriceList = (props) => {
         }
     };
     const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
+        // console.log(props.Currency)
         if (!tablename) return
         try {
             setLoading(true);
@@ -160,13 +166,7 @@ const PriceList = (props) => {
         }
 
     };
-    // const handleClick = (data) => {
-    //     if (props.onSubmit === 'onSubmit') {
-    //         onSubmit(data);
-    //     } else if (props.onSubmit === 'onUpdate') {
-    //         Update(data)
-    //     }
-    // };
+
     const onSubmit = async (data) => {
         if (!props.backPermissions?.add) {
             basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
@@ -203,6 +203,12 @@ const PriceList = (props) => {
             }
         }
     }
+    useEffect(() => {
+        if (props.Currency) {
+            setSelectedOptionC({ value: props?.Currency?.id, label: props?.Currency?.name })
+        }
+
+    }, [props.Currency]);
     return (
         <Fragment>
             <Card>
@@ -251,10 +257,42 @@ const PriceList = (props) => {
 
 
                         </Row>
+                        <Col md="6" className="mb-3">
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01">Currency</Label>
+                                <Col sm="8">
+                                    <Controller
+                                        name="currency"
+                                        control={control}
+                                        rules={{ required: true }}
+                                    render={({ field }) => (
+                                        <Select
+                                            {...field}
+                                            value={selectedOptionC}
+                                            options={optionsC}
+                                            onInputChange={(inputValue) =>
+                                                handleInputChange(inputValue, "currency", "Currency", setOptionsC, optionsC)
+                                            }
+                                            isDisabled={props?.Currency || rows}
+                                            className="js-example-basic-single col-sm-12"
+                                            isSearchable
+                                            noOptionsMessage={() => loading2 ? (
+                                                <div className="loader-box">
+                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                </div>
+                                            ) : 'No options found'}
+                                            onChange={(option) => {
+                                                setSelectedOptionC(option);
+                                                field.onChange(option.value);
+                                            }}
+                                        />
+                                    )}
+                                    />
+                                </Col>
+                        </Col>
                         <Col md="12" className="d-flex justify-content-end mb-3">
-                            {props.backPermissions?.add == 1 && (
+                            {props.backPermissions?.add == 1 && selectedOptionC && (
                                 <LazyWrapper>
-                                    <Model currency={props.Currency} id={props.id} getData={getData} />
+                                    <Model currency={selectedOptionC} id={props.id} getData={getData} />
                                 </LazyWrapper>
                             )}
 
@@ -292,9 +330,14 @@ const PriceList = (props) => {
                                         <td>{item?.unit?.name}</td>
                                         <td>{item?.rate}</td>
                                         <td>{item?.currency?.name}</td>
-                                        <td>{item?.Status}</td>
+                                        <td>
+                                            {item?.Status == 0 ? "Active"
+                                                : item?.Status == 1 ? "Not Active"
+                                                    : item?.Status == 2 ? "Pending by PM"
+                                                        : ""}
+                                        </td>
                                         {props.backPermissions?.edit == 1 && (
-                                            <td><LazyWrapper><ModelEdit data={item} getData={getData} /></LazyWrapper></td>
+                                            <td><LazyWrapper><ModelEdit currency={selectedOptionC} data={item} getData={getData} /></LazyWrapper></td>
                                         )}
                                         {props.backPermissions?.delete == 1 && (
 

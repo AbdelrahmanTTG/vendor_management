@@ -195,7 +195,7 @@ class InvoiceController extends Controller
         $id = Crypt::decrypt($id);
 
         $billingData = BillingData::where('vendor_id', $id)
-            ->with(['bankDetail', 'walletPaymentMethod', 'currency:id,name'])
+            ->with(['bankDetail', 'walletPaymentMethod.method', 'currency:id,name'])
             ->first();
 
         if ($billingData) {

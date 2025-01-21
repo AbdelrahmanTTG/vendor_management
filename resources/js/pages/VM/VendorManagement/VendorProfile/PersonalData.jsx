@@ -28,7 +28,7 @@ const PersonalData = React.memo((props) => {
   };
   const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
   const { register: registerContact, handleSubmit: handleSubmitContact, setValue: setValueContact, formState: { errors: errorsContact } } = useForm();
- 
+
   const [inputValues, setInputValues] = useState([]);
   const [nameLabel, setNameLabel] = useState('Name');
   const [ContactLabel, setContactLabel] = useState('Contact name');
@@ -159,10 +159,38 @@ const PersonalData = React.memo((props) => {
     }
 
   };
+  const handelingSelectTimeZone = async (id) => {
+    if (!id) return
+    try {
+      setLoading(true);
+      const { data } = await axiosClient.get("GetTimeZone", {
+        params: {
+          id: id
+        }
+      });
+      const formattedOptions =  [{ value: data.id, label: data.gmt }]
+      setSelectedOptionT(formattedOptions)
+      setOptionsT(formattedOptions);
+      if (!searchTerm) {
+        setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
+      }
+    } catch (err) {
+      const response = err.response;
+      if (response && response.status === 422) {
+        setErrorMessage(response.data.errors);
+      } else if (response && response.status === 401) {
+        setErrorMessage(response.data.message);
+      } else {
+        setErrorMessage("An unexpected error occurred.");
+      }
+    } finally {
+      setLoading(false);
+    }
+
+  };
   useEffect(() => {
     handelingSelect("regions", setOptionsR, "region");
     handelingSelect("countries", setOptionsN, "Nationality");
-    handelingSelect("time_zone", setOptionsT, "TimeZone");
   }, []);
   const columnMapping = {
     "LinkedIn": "contact_linked_in",
@@ -227,23 +255,23 @@ const PersonalData = React.memo((props) => {
     formData.status = formData.status.value;
     delete formData.contacts;
     idVendor ? formData.id = idVendor : false;
-      try {
-        const response = await axiosClient.post("updatePersonalInformation", formData);
-        basictoaster("successToast", response.data.message);
-        // props.onDataSend(response.data.vendor)
-      } catch (err) {
-        const response = err.response;
-        if (response && response.data) {
-          const errors = response.data;
-          Object.keys(errors).forEach(key => {
-            const messages = errors[key];
-            messages.forEach(message => {
-              basictoaster("dangerToast", message);
-            });
+    try {
+      const response = await axiosClient.post("updatePersonalInformation", formData);
+      basictoaster("successToast", response.data.message);
+      // props.onDataSend(response.data.vendor)
+    } catch (err) {
+      const response = err.response;
+      if (response && response.data) {
+        const errors = response.data;
+        Object.keys(errors).forEach(key => {
+          const messages = errors[key];
+          messages.forEach(message => {
+            basictoaster("dangerToast", message);
           });
-        }
-        setIsSubmitting(false)
+        });
       }
+      setIsSubmitting(false)
+    }
   };
 
   const onError = (errors) => {
@@ -258,8 +286,11 @@ const PersonalData = React.memo((props) => {
         case "status":
           basictoaster("dangerToast", "Status is required");
           return;
-        case "legal_Name":
-          basictoaster("dangerToast", "Legal name is required");
+        case "vendor_source":
+          basictoaster("dangerToast", "Vendor Source is required");
+          return;
+        case "timezone":
+          basictoaster("dangerToast", "Time zone is required");
           return;
         case "phone_number":
           if (errors.phone_number?.type === "required") {
@@ -277,33 +308,13 @@ const PersonalData = React.memo((props) => {
         case "nationality":
           basictoaster("dangerToast", "Nationality is required");
           return;
-        case "city":
-          basictoaster("dangerToast", "City or state is required");
-          return;
-        case "contact_name":
-          basictoaster("dangerToast", "Contacts name is required");
-          return;
-        case "prfx_name":
-          basictoaster("dangerToast", "Prefix is required");
-          return;
+
         case "email":
           if (errors.email?.type === "required") {
             basictoaster("dangerToast", "Email is required");
           } else if (errors.email?.type === "pattern") {
             basictoaster("dangerToast", "Invalid email address");
           }
-          return;
-        case "contacts":
-          basictoaster("dangerToast", "Contact is required");
-          return;
-        case "address":
-          basictoaster("dangerToast", "Address is required");
-          return;
-        case "reject_reason":
-          basictoaster("dangerToast", "Rejection Reason is required");
-          return;
-        case "Street":
-          basictoaster("dangerToast", "Street is required");
           return;
         default:
           break;
@@ -323,7 +334,7 @@ const PersonalData = React.memo((props) => {
     toggle()
   }
   const handleClick = (data) => {
-    if (props.onSubmit === 'onSubmit' && !isSubmitting ) {
+    if (props.onSubmit === 'onSubmit' && !isSubmitting) {
       // setIsSubmitting(true)
       // props.onDataSend(1) 
       // console.log("1")
@@ -338,11 +349,11 @@ const PersonalData = React.memo((props) => {
   //   if (typeof props.personal == "object" && ) {
   //     console.log(props.personal)
   //   }
-    
+
   // }, [props.personal])
   useEffect(() => {
     if (props.permission) {
-      
+
       Object.keys(props.permission).forEach((field) => {
         // const input = document.querySelector(`[name=${field}]`);
         const inputDiv = document.getElementById(`${field}-wrapper`);;
@@ -375,14 +386,14 @@ const PersonalData = React.memo((props) => {
   useEffect(() => {
     if (props.personal) {
       setIsSubmitting(true)
-       }
+    }
     if (props.mode === "edit" || props.personal) {
       setLoading2(true);
       if (props?.vendorPersonalData || props.personal) {
         if (props.vendorPersonalData?.PersonalData || props.personal) {
           const data = props?.vendorPersonalData?.PersonalData || props.personal;
           setidVendor(data?.id)
-          if (data.type !== null && data.type !== undefined ) {
+          if (data.type !== null && data.type !== undefined) {
             const vendorTypeOption = {
               value: data.type,
               label:
@@ -395,21 +406,22 @@ const PersonalData = React.memo((props) => {
             handleVendorTypeChange(vendorTypeOption);
             setValue("type", vendorTypeOption);
           }
-          if (data.status !== null && data.status !== undefined ) {
+          if (data.status !== null && data.status !== undefined) {
             const statusOption = {
               value: data.status,
               label:
                 data.status == 0 ? "Active" :
-                  data.status ==1 ? "Inactive" :
-                    data.status ==2 ? "Wait for Approval" :
-                      data.status ==3 ? "Rejected" :
+                  data.status == 1 ? "Inactive" :
+                    data.status == 2 ? "Wait for Approval" :
+                      data.status == 3 ? "Rejected" :
                         "Unknown"
-            };            handleStatusChange(statusOption);
+            }; handleStatusChange(statusOption);
             setValue("status", statusOption);
           }
           setValue("name", data.name);
           setValue("email", data.email);
           setValue("prfx_name", data.prfx_name);
+          setValue("vendor_source", data.vendor_source);
           setValue("contact_name", data.contact_name);
           setValue("legal_Name", data.legal_Name);
           const country = data.country ? {
@@ -455,7 +467,7 @@ const PersonalData = React.memo((props) => {
           } : null;
           setSelectedOptionT(timezone);
           setValue("timezone", timezone?.value);
-          
+
           setValue("street", data.street);
           setValue("city", data.city);
           setValue("address", data.address)
@@ -517,7 +529,7 @@ const PersonalData = React.memo((props) => {
                                 handleVendorTypeChange(option);
                                 field.onChange(option);
                               }}
-                              isDisabled={ (props.permission && props.permission.type === "disable")}
+                              isDisabled={(props.permission && props.permission.type === "disable")}
                             />
                           )}
                         />
@@ -525,7 +537,7 @@ const PersonalData = React.memo((props) => {
                       </Col>
                     </FormGroup>
                   </Col>
-                    < Col md="6" id="status-wrapper" style={{ display: props?.permission?.status ? "none" : "block" }} >
+                  < Col md="6" id="status-wrapper" style={{ display: props?.permission?.status ? "none" : "block" }} >
                     <FormGroup className="row" >
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > Status </Label>
                       < Col sm="9" >
@@ -577,7 +589,7 @@ const PersonalData = React.memo((props) => {
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > {ContactLabel} </Label>
                       < Col sm="9" >
                         <InputGroup>
-                          <select disabled={ (props.permission && props.permission.contact === "disable")} className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: true })} >
+                          <select disabled={(props.permission && props.permission.contact === "disable")} className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: false })} >
                             <option value="" disabled > Prefix </option>
                             < option value="Mr" > Mr </option>
                             < option value="Ms" > Ms </option>
@@ -587,11 +599,11 @@ const PersonalData = React.memo((props) => {
                           </select>
                           < input
                             className="form-control"
-                         
+
                             defaultValue=""
                             type="text"
                             name="contact_name"
-                            {...register("contact_name", { required: true })}
+                            {...register("contact_name", { required: false })}
                             placeholder={ContactLabel}
                           />
                         </InputGroup>
@@ -606,8 +618,8 @@ const PersonalData = React.memo((props) => {
                           className="form-control leg"
                           id="Legal_Name"
                           type="text"
-                            name="legal_Name"
-                            {...register("legal_Name", { required: true })}
+                          name="legal_Name"
+                          {...register("legal_Name", { required: false })}
                           placeholder="As Mentioned in ID and Passport"
 
                         />
@@ -620,7 +632,7 @@ const PersonalData = React.memo((props) => {
                       < Col sm="9" >
                         < input
                           className="form-control"
-                            disabled={props?.permission?.email?true:false}
+                          disabled={props?.permission?.email ? true : false}
                           // id="email"
                           type="email"
                           name="email"
@@ -671,7 +683,7 @@ const PersonalData = React.memo((props) => {
                             {...register("Anothernumber", { required: false })}
                           />
 
-                        
+
                         </InputGroup>
                       </Col>
                     </FormGroup>
@@ -691,7 +703,7 @@ const PersonalData = React.memo((props) => {
                           < Controller
                             name="contacts"
                             control={control}
-                            rules={{ required: true }}
+                            rules={{ required: false }}
                             render={({ field }) => (
                               <Select
                                 {...field}
@@ -764,6 +776,8 @@ const PersonalData = React.memo((props) => {
                               ) : 'Select region first '}
                               onChange={(option) => {
                                 setSelectedOptionC(option);
+                                handelingSelectTimeZone(option.value)
+
                                 field.onChange(option.value);
                               }}
 
@@ -832,15 +846,13 @@ const PersonalData = React.memo((props) => {
                         <Controller
                           name="timezone"
                           control={control}
-                          rules={{ required: false }}
+                          rules={{ required: true }}
                           render={({ field }) => (
                             <Select
                               {...field}
                               value={selectedOptionT}
                               options={optionsT}
-                              onInputChange={(inputValue) =>
-                                handleInputChange(inputValue, "time_zone", "TimeZone", setOptionsT, optionsT)
-                              }
+                           
                               className="js-example-basic-single col-sm-12"
                               isSearchable
                               noOptionsMessage={() => loading ? (
@@ -871,7 +883,7 @@ const PersonalData = React.memo((props) => {
                           id="Street"
                           type="text"
                           name="Street"
-                          {...register("street", { required: true })}
+                          {...register("street", { required: false })}
                           placeholder="Street"
                         />
                       </Col>
@@ -888,53 +900,31 @@ const PersonalData = React.memo((props) => {
                           id="City_state"
                           type="text"
                           name="City_state"
-                          {...register("city", { required: true })}
+                          {...register("city", { required: false })}
                           placeholder="City / state"
                         />
                       </Col>
                     </FormGroup>
-                    </Col>
-                    {props.vendorPersonalData?.PersonalData?.contact || props?.personal?.contact ? (
-                      <Col md="6" id="Old_Contact-wrapper">
-                        <FormGroup className="row">
-                          <Label className="col-sm-3 col-form-label" for="validationCustom01">Old Contact</Label>
-                          <Col sm="9">
-                            <input
-                              className="form-control"
-                              defaultValue={props.vendorPersonalData.PersonalData.contact || props?.personal?.contact }
-                              // onChange={(e) => console.log(e.target.value)}
-                              placeholder="Old Contact Info"
-                            />
-                          </Col>
-                        </FormGroup>
-                      </Col>
-                    ) : (
-                      <Col md="6" id="Old_Contact-wrapper" style={{ minHeight: '100px' }}>
-                        <div style={{ height: '100%' }} />
-                      </Col>
-                    )}
+                  </Col>
                   < Col md="6" >
                     <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Notes </Label>
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Vendor Source </Label>
                       < Col sm="9" >
-
-                        <CKEditor
-                          editor={ClassicEditor}
-                            data={props.vendorPersonalData?.PersonalData?.note || props?.personal?.note || ""}
-                          onChange={(event, editor) => {
-                            const data = editor.getData();
-                            setValue('note', data);
-                          }}
+                        <input
+                          className="form-control"
+                          id="vendor_source"
+                          type="text"
+                          name="vendor_source"
+                          {...register("vendor_source", { required: true })}
+                          placeholder="Vendor Source"
                         />
-                        < input
 
-                            value={props.vendorPersonalData?.PersonalData?.note || props?.personal?.note || ""}
-                          hidden disabled
-                          {...register('note', { required: false })}
-                        />
+
                       </Col>
                     </FormGroup>
                   </Col>
+
+
                   < Col md="6" id="address-wrapper" >
                     <FormGroup className="row" >
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > Address </Label>
@@ -942,58 +932,77 @@ const PersonalData = React.memo((props) => {
 
                         <CKEditor
                           editor={ClassicEditor}
-                            data={props.vendorPersonalData?.PersonalData?.address || props?.personal?.address ||""}
+                          data={props.vendorPersonalData?.PersonalData?.address || props?.personal?.address || ""}
 
                           onChange={(event, editor) => {
                             const data = editor.getData();
                             setValue('address', data);
                           }}
-                          disabled={ (props.permission && props.permission.address === "disable")}
+                          disabled={(props.permission && props.permission.address === "disable")}
                         />
                         < input
                           id='address'
                           hidden disabled
-                          {...register('address', { required: true })}
+                          {...register('address', { required: false })}
                         />
                       </Col>
                     </FormGroup>
                   </Col>
-                    {
-                      Status && (
-                        <Col md="12" id="reject_reason-wrapper">
-                          <FormGroup className="row">
-                            <Label className="col-form-label" style={{ width: '12.5%' }} for="validationCustom01">
-                              Rejection Reason
-                            </Label>
-
-
-                            <Col style={{ width: '87.5%' }}>
-                              <CKEditor
-                                editor={ClassicEditor}
-                                data={props.vendorPersonalData?.PersonalData?.reject_reason || props?.personal?.reject_reason ||""}
-                                onChange={(event, editor) => {
-                                  const data = editor.getData();
-                                  setValue('reject_reason', data);
-                                }}
-                                disabled={ (props.permission && props.permission.reject_reason === "disable")}
-                              />
-                              <input
-                                disabled
-                                hidden
-                                {...register('reject_reason', { required: true })}
-                              />
-                            </Col>
-                          </FormGroup>
+                  {props.vendorPersonalData?.PersonalData?.contact || props?.personal?.contact ? (
+                    <Col md="6" id="Old_Contact-wrapper">
+                      <FormGroup className="row">
+                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Old Contact</Label>
+                        <Col sm="9">
+                          <input
+                            className="form-control"
+                            defaultValue={props.vendorPersonalData.PersonalData.contact || props?.personal?.contact}
+                            // onChange={(e) => console.log(e.target.value)}
+                            placeholder="Old Contact Info"
+                          />
                         </Col>
-                      )
-                    }
+                      </FormGroup>
+                    </Col>
+                  ) : (
+                    <Col md="6" id="Old_Contact-wrapper" style={{ minHeight: '100px' }}>
+                      <div style={{ height: '100%' }} />
+                    </Col>
+                  )}
+                  {
+                    Status && (
+                      <Col md="12" id="reject_reason-wrapper">
+                        <FormGroup className="row">
+                          <Label className="col-form-label" style={{ width: '12.5%' }} for="validationCustom01">
+                            Rejection Reason
+                          </Label>
 
-                    
-                   
+
+                          <Col style={{ width: '87.5%' }}>
+                            <CKEditor
+                              editor={ClassicEditor}
+                              data={props.vendorPersonalData?.PersonalData?.reject_reason || props?.personal?.reject_reason || ""}
+                              onChange={(event, editor) => {
+                                const data = editor.getData();
+                                setValue('reject_reason', data);
+                              }}
+                              disabled={(props.permission && props.permission.reject_reason === "disable")}
+                            />
+                            <input
+                              disabled
+                              hidden
+                              {...register('reject_reason', { required: false })}
+                            />
+                          </Col>
+                        </FormGroup>
+                      </Col>
+                    )
+                  }
+
+
+
                 </Row>
                 < div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Btn
-                      attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError), }}
+                    attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError), }}
                   >
                     Submit
                   </Btn>
@@ -1017,21 +1026,21 @@ const PersonalData = React.memo((props) => {
                   name="LinkedIn"
                   placeholder="Linked In"
                   {...registerContact("LinkedIn", {
-                    required: true,
-                    validate: {
-                      isValidURL: value => {
-                        const regex = /^(ftp|http|https):\/\/[^ "]+$/;
-                        return regex.test(value) || "Please enter a valid URL";
-                      }
-                    }
+                    required: false,
+                    // validate: {
+                    //   isValidURL: value => {
+                    //     const regex = /^(ftp|http|https):\/\/[^ "]+$/;
+                    //     return regex.test(value) || "Please enter a valid URL";
+                    //   }
+                    // }
                   })
                   }
                 />
               </Col>
-              < span style={{ color: '#dc3545', fontStyle: 'italic' }}>
+              {/* < span style={{ color: '#dc3545', fontStyle: 'italic' }}>
                 {errorsContact.LinkedIn?.type === 'required' && 'LinkedIn link is required'}
                 {errorsContact.LinkedIn?.type === 'isValidURL' && 'Please enter a valid URL'}
-              </span>
+              </span> */}
             </FormGroup>
             < FormGroup className="row" >
               <Label className="col-sm-3 col-form-label" for="validationCustom01" > ProZ </Label>
@@ -1043,21 +1052,21 @@ const PersonalData = React.memo((props) => {
                   name="ProZ"
                   placeholder="ProZ"
                   {...registerContact("ProZ", {
-                    required: true,
-                    validate: {
-                      isValidURL: value => {
-                        const regex = /^(ftp|http|https):\/\/[^ "]+$/;
-                        return regex.test(value) || "Please enter a valid URL";
-                      }
-                    }
+                    required: false,
+                    // validate: {
+                    //   isValidURL: value => {
+                    //     const regex = /^(ftp|http|https):\/\/[^ "]+$/;
+                    //     return regex.test(value) || "Please enter a valid URL";
+                    //   }
+                    // }
                   })
                   } />
 
               </Col>
-              < span style={{ color: '#dc3545', fontStyle: 'italic' }}>
+              {/* < span style={{ color: '#dc3545', fontStyle: 'italic' }}>
                 {errorsContact.ProZ?.type === 'required' && 'ProZ link is required'}
                 {errorsContact.ProZ?.type === 'isValidURL' && 'Please enter a valid URL'}
-              </span>
+              </span> */}
             </FormGroup>
             < FormGroup className="row" >
               <Label className="col-sm-3 col-form-label" for="validationCustom01" > other 1 </Label>

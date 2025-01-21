@@ -203,7 +203,7 @@ const Vendor = (props) => {
         {
             label: "Education",
             options: [
-                { value: 'university_name', label: 'University name' },
+                { value: 'university_name', label: 'Institute Name' },
                 { value: 'latest_degree', label: 'latest degree' },
                 { value: 'major', label: 'Major' },
                 { value: 'year_of_graduation', label: 'Year of graduation' },
@@ -573,7 +573,7 @@ const Vendor = (props) => {
             'sub_subject': 'Sub–Subject Matter',
             'rate': 'Rate',
             'special_rate': 'Special rate',
-            'vendor_education.university_name': 'University name',
+            'vendor_education.university_name': 'Institute Name',
             'vendor_education.latest_degree': 'Last degree',
             'vendor_education.major': 'Major',
             'vendor_education.year_of_graduation': 'Year of graduation',
@@ -762,7 +762,7 @@ const Vendor = (props) => {
             'sub_subject': 'Sub–Subject Matter',
             'test_type': 'Test Type',
             'test_result': 'Test result',
-            'university_name': 'University name',
+            'university_name': 'Institute Name',
             'latest_degree': 'last degree',
             'major': 'Major',
             'year_of_graduation': 'Year of graduation',
@@ -1292,7 +1292,7 @@ const Vendor = (props) => {
                                             {selectedSearchCol.indexOf("university_name") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup id='university_nameInput'>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='university_name'>{'University name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'university_nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='university_name'>{'Institute Name'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'university_nameInput') }}><i className="fa fa-plus-circle"></i></Btn>
                                                             <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'university_nameInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
                                                         <Input className='form-control form-control-sm university_nameInput mb-1' type='text' name='university_name' required />
                                                     </FormGroup>
@@ -1615,7 +1615,7 @@ const Vendor = (props) => {
                                         {
                                             label: "Education",
                                             options: [
-                                                { value: 'vendor_education.university_name', label: 'University name' },
+                                                { value: 'vendor_education.university_name', label: 'Institute Name' },
                                                 { value: 'vendor_education.latest_degree', label: 'last degree' },
                                                 { value: 'vendor_education.major', label: 'Major' },
                                                 { value: 'vendor_education.year_of_graduation', label: 'Year of graduation' },

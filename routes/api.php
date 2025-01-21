@@ -68,6 +68,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/getPmData', [ReportsController::class, 'getPmData']);
     Route::post('/allTasks', [ReportsController::class, 'allTasks']);
     Route::get('/getDashboardChart', [VendorProfileController::class, 'getDashboardChart']);
+    Route::post('/MessagePM', [VendorProfileController::class, 'Message_VM_to_PM']);
 
 
 
@@ -117,6 +118,7 @@ Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () 
     Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
     Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
     Route::get('/GetSubSubject', [VendorProfileController::class, 'findSubSubject']);
+    Route::get('/GetTimeZone', [VendorProfileController::class, 'findTimeZone']);
     Route::post('/refreshToken ', [AuthController::class, 'RegenrateToken']);
     Route::post('/SendMessage ', [VendorProfileController::class, 'Message_VM_to_Vendor']);
 });

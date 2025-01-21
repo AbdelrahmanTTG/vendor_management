@@ -155,10 +155,11 @@ export const VM = (allowedPermissions) => [
                 <CodeTable
                     permissions={allowedPermissions['Time zone']}
                     key="Time zone"
-                    table="Time zone" dataTable="time_zone" header={["id", "zone", "gmt", 'Active', "Edit", "Delete"]}
+                    table="Time zone" dataTable="time_zone" header={["id", "zone", "gmt","Country", 'Active', "Edit", "Delete"]}
                     fields={[
                         { name: 'zone', type: 'text', field: "input", label: "zone" },
                         { name: 'gmt', type: 'text', field: "input", label: "gmt" },
+                        { name: 'parent', type: 'text', field: "selec", tableData: "countries", label: "Country" },
                         {
                             name: 'Active', type: 'number', field: "selec", label: "Active", static: [
                                 { value: 1, label: 'Active' },
@@ -168,7 +169,12 @@ export const VM = (allowedPermissions) => [
 
                     ]}
                     columns={["id", "zone", "gmt", "Active"]}
-
+                    related={{
+                        'table': 'countries',
+                        'foreign_key': 'parent',
+                        'primary_key': 'id',
+                        'columns': ['id', 'name']
+                    }}
                 />
             </LazyWrapper>
         )

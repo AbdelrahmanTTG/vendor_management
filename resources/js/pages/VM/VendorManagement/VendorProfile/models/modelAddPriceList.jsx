@@ -49,7 +49,7 @@ const AddNewBtn = (props) => {
     const [optionsC, setOptionsC] = useState([]);
 
     const onSubmit = async (data) => {
-        if (props.id && props.currency) {
+        if (props.id) {
             const formDate = Object.fromEntries(
                 Object.entries(data).map(([key, value]) => {
                     if (typeof value === 'object' && value !== null) {
@@ -59,7 +59,7 @@ const AddNewBtn = (props) => {
                 })
             );
             formDate['vendor'] = props.id;
-
+            formDate['currency'] = props.currency?.value
             try {
                 const response = await axiosClient.post("AddPriceList", formDate);
                 props.getData(response.data)
@@ -96,13 +96,13 @@ const AddNewBtn = (props) => {
             return acc;
         }, {});
     };
-    useEffect(() => {
-        if (props.currency) {
-            const updatedData = renameKeys(props.currency, { id: "value", name: "label" });
-            setOptionsC(updatedData);
-            setValue("currency", updatedData)
-        }
-    }, [props.currency])
+    // useEffect(() => {
+    //     if (props.currency) {
+    //         const updatedData = renameKeys(props.currency, { id: "value", name: "label" });
+    //         setOptionsC(updatedData);
+    //         setValue("currency", updatedData)
+    //     }
+    // }, [props.currency])
     const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
 
         if (inputValue.length === 0) {
@@ -224,7 +224,7 @@ const AddNewBtn = (props) => {
                                 <Controller
                                     name="subject"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -260,7 +260,7 @@ const AddNewBtn = (props) => {
                                 <Controller
                                     name="sub_subject"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -294,7 +294,7 @@ const AddNewBtn = (props) => {
                                 <Controller
                                     name="service"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -330,7 +330,7 @@ const AddNewBtn = (props) => {
                                 <Controller
                                     name="task_type"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -362,7 +362,7 @@ const AddNewBtn = (props) => {
                                 <Controller
                                     name="source_lang"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -397,7 +397,7 @@ const AddNewBtn = (props) => {
                                 <Controller
                                     name="target_lang"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -432,7 +432,7 @@ const AddNewBtn = (props) => {
                                 <Controller
                                     name="dialect"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -467,7 +467,7 @@ const AddNewBtn = (props) => {
                                 <Controller
                                     name="dialect_target"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -502,7 +502,7 @@ const AddNewBtn = (props) => {
                                 <Controller
                                     name="unit"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -540,7 +540,7 @@ const AddNewBtn = (props) => {
                                     className="form-control"
                                     type="number"
                                     name="rate"
-                                    {...register("rate", { required: true })}
+                                    {...register("rate", { required: false })}
 
                                 />
                             </Col>
@@ -558,7 +558,7 @@ const AddNewBtn = (props) => {
                                     className="form-control"
                                     type="number"
                                     name="special_rate"
-                                    {...register("special_rate", { required: true })}
+                                    {...register("special_rate", { required: false })}
                                 />
                             </Col>
                         </FormGroup>
@@ -572,7 +572,7 @@ const AddNewBtn = (props) => {
                                 <Controller
                                     name="Status"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             id='Status'
@@ -593,17 +593,11 @@ const AddNewBtn = (props) => {
                             </Col>
                         </FormGroup>
                     </Col>
-                    <Col md="6" className="mb-3">
+                    {/* <Col md="6" className="mb-3">
                         <FormGroup className="row">
 
                             <Label className="col-sm-4 col-form-label" for="validationCustom01">Currency</Label>
                             <Col sm="8">
-                                {/* <Select isDisabled defaultValue={{ isDisabled: true, label: '-- Select Status --' }}
-                                    options={[
-                                        { value: 'Active', label: 'Active' },
-                                        { value: 'Not Active', label: 'Not Active' },
-                                        { value: 'Pending by PM', label: 'Pending by PM' }
-                                    ]} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
                                     name="currency"
                                     control={control}
@@ -623,7 +617,7 @@ const AddNewBtn = (props) => {
                                 />
                             </Col>
                         </FormGroup>
-                    </Col>
+                    </Col> */}
                 </Row>
                 {/* <Row className="g-0">
                     <Col  >

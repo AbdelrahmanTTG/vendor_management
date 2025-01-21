@@ -309,6 +309,19 @@ const Test = (props) => {
                                                         type="file"
                                                         className="form-control"
                                                         onChange={(e) => {
+                                                            const file = e.target.files[0];
+                                                            if (file) {
+                                                                const fileName = file.name.toLowerCase();
+                                                                const fileSize = file.size;
+                                                                const allowedExtensions = [".zip", ".rar"];
+                                                                if (fileSize > 5 * 1024 * 1024) {
+                                                                    if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
+                                                                        alert("If the file is larger than 5MB, it must be a ZIP or RAR file.");
+                                                                        e.target.value = "";
+                                                                        return;
+                                                                    }
+                                                                }
+                                                            }
                                                             handleFileChange(e, setTestFileName);
                                                             field.onChange(e);
                                                         }}
