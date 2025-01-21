@@ -88,7 +88,7 @@ const EditProfile = (props) => {
                     }
                     const data = await axiosClient.post("EditVendor", payload);
                     setPersonalData({ PersonalData: data.data.Data });
-                    setlastMessage({ VMNotes: data.data.VMNotes })
+                    setlastMessage({ VMNotes: data.data.VMNotes, pm: data.data.pm })
                     setBillingData({ BillingData: data.data.BillingData })
                     setExperience({ Experience: data.data.Experience })
                     setVendorFiles({ VendorFiles: data.data.VendorFiles })
@@ -146,7 +146,7 @@ const EditProfile = (props) => {
                     <LazyWrapper>
 
                         <div id='VM-Notes'>
-                            <VMnote email={vendor?.email || vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.VMnote} lastMessage={lastMessage} />
+                            <VMnote id={vendor?.id} email={vendor?.email || vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.VMnote} lastMessage={lastMessage} />
                         </div>
                     </LazyWrapper>
                 )}

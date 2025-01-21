@@ -11,13 +11,15 @@ class Messages extends Model
         'receiver_email',
         'content',
         'is_read',
+        "status"
     ];
-    public static function createMessage($senderId, $receiverId, $content)
+    public static function createMessage($senderId, $receiverId, $content ,$status)
     {
         return self::create([
             'sender_email' => $senderId,
             'receiver_email' => $receiverId,
             'content' => $content,
+            'status' => $status,
         ]);
     }
     public static function getLastMessageBetween($sender_email, $receiver_email)
@@ -27,7 +29,7 @@ class Messages extends Model
                 ->where('receiver_email', $receiver_email);
         })
             ->latest('created_at')
-            ->select('id', 'content', 'is_read', 'created_at') 
+            ->select('id', 'content', 'is_read',"status",  'created_at') 
             ->first();
 
     }

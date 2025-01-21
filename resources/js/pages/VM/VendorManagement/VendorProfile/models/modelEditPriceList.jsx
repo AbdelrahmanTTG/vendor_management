@@ -8,7 +8,7 @@ import axiosClient from "../../../../AxiosClint";
 import { toast } from 'react-toastify';
 
 const EditNewBtn = (props) => {
-    toast.configure();
+    // toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':
@@ -50,14 +50,6 @@ const EditNewBtn = (props) => {
     const [priceList, setPriceList] = useState([]);
 
     const onSubmit = async (data) => {
-        // const keys = Object.keys(data);
-        // const extractedValues = keys.map(key => {
-        //     const value = props?.data[key];
-        //     return value && typeof value === 'object' ? value.id : value;
-        // });
-        // const extractedValues2 = keys.map(key => formData[key]);
-        // const areEqual = extractedValues2.every((val, index) => val === extractedValues[index]);
-
         const formDate = Object.fromEntries(
             Object.entries(data).map(([key, value]) => {
                 if (typeof value === 'object' && value !== null) {
@@ -67,6 +59,7 @@ const EditNewBtn = (props) => {
             })
         );
         formDate['id'] = props?.data?.id || props?.id;
+        formDate['currency'] = props?.currency?.value;
 
         try {
             const response = await axiosClient.post("UpdatePriceList", formDate);
@@ -93,24 +86,29 @@ const EditNewBtn = (props) => {
     };
     useEffect(() => {
         const fetchData = async (id) => {
-            const payload = { id: id,}
+            const payload = { id: id, }
             try {
                 const { data } = await axiosClient.post("getPriceList", payload);
                 setPriceList(data);
             } catch (err) {
                 console.error(err);
             } finally {
-            }            
+            }
         };
         if (props?.id) {
             fetchData(props?.id);
         }
-    }, [ props?.id]);
+    }, [props?.id]);
     useEffect(() => {
         if (props?.data || priceList?.length) {
             var data = props?.data || priceList[0];
         }
         if (data) {
+            const statusLabels = {
+                0: "Active",
+                1: "Not Active",
+                2: "Pending by PM"
+            };
             setValue("subject", renameKeys(data?.subject, { id: "value", name: "label" }))
             setValue("sub_subject", renameKeys(data?.sub_subject, { id: "value", name: "label" }))
             setValue("service", renameKeys(data?.service, { id: "value", name: "label" }))
@@ -122,9 +120,11 @@ const EditNewBtn = (props) => {
             setValue("unit", renameKeys(data?.unit, { id: "value", name: "label" }))
             setValue("rate", data?.rate)
             setValue("special_rate", data?.special_rate)
-            setValue("Status", { value: data?.Status || "", label: data?.Status || "" })
+            setValue("Status", { value: data?.Status || "", label: statusLabels[data?.Status] || "Unknown" })
             setValue("currency", renameKeys(data?.currency, { id: "value", name: "label" }))
             handelingSelectTasks(data?.service?.id)
+            handelingSelectSub(data?.subject?.id)
+
         }
 
     }, [props?.data, priceList, props?.id])
@@ -246,6 +246,18 @@ const EditNewBtn = (props) => {
         }
 
     };
+    const [inputVal, setInputVal] = useState('');
+    const [inputValMain, setInputValMain] = useState('');
+    const [inputValSub, setInputValSub] = useState('');
+    const [inputValTask, setInputTask] = useState('');
+    const [inputValSL, setInputSL] = useState('');
+    const [inputValTL, setInputTL] = useState('');
+    const [inputValD, setInputD] = useState('');
+    const [inputValD2, setInputD2] = useState('');
+    const [inputValU, setInputU] = useState('');
+
+
+
     return (
         <Fragment>
             <Btn attrBtn={{ color: 'btn btn-primary-light', onClick: toggle }} className="me-2" > <i className="icofont icofont-ui-edit"></i></Btn>
@@ -264,19 +276,31 @@ const EditNewBtn = (props) => {
                                             {...field}
                                             value={field.value}
                                             options={optionsMain}
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "MainSubjectMatter", "subject", setOptionsMain, optionsMain)
-                                            }
+                                            inputValue={inputValMain}
+                                            onInputChange={(newInputValue, { action }) => {
+                                                if (action !== "input-blur" && action !== "menu-close") {
+                                                    setInputValMain(newInputValue);
+                                                }
+                                                handleInputChange(newInputValue, "MainSubjectMatter", "subject", setOptionsMain, optionsMain);
+                                            }}
+
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                    </div>
+                                                ) : "No options found"
+                                            }
                                             onChange={(option) => {
                                                 handelingSelectSub(option.value)
                                                 field.onChange(option);
+                                            }}
+                                            onFocus={() => {
+                                                if (field.value) {
+                                                    setInputValMain(field.value.label);
+                                                }
                                             }}
 
                                         />
@@ -293,7 +317,7 @@ const EditNewBtn = (props) => {
                                 <Controller
                                     name="sub_subject"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -301,13 +325,26 @@ const EditNewBtn = (props) => {
                                             options={optionsSub}
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'Select Sub Subject Matter'}
+                                            inputValue={inputValSub}
+                                            onInputChange={(newInputValue, { action }) => {
+                                                if (action !== "input-blur" && action !== "menu-close") {
+                                                    setInputValSub(newInputValue);
+                                                }
+                                            }}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                    </div>
+                                                ) : "No options found"
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
+                                            }}
+                                            onFocus={() => {
+                                                if (field.value) {
+                                                    setInputValSub(field.value.label);
+                                                }
                                             }}
 
                                         />
@@ -324,6 +361,7 @@ const EditNewBtn = (props) => {
                             <Col sm="8">
 
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Service --' }} className="js-example-basic-single col-sm-12" /> */}
+
                                 <Controller
                                     name="service"
                                     control={control}
@@ -332,26 +370,36 @@ const EditNewBtn = (props) => {
                                         <Select
                                             {...field}
                                             value={field.value}
-
                                             options={optionsSre}
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "services", "service", setOptionsSer, optionsSre)
-                                            }
+                                            inputValue={inputVal}
+                                            onInputChange={(newInputValue, { action }) => {
+                                                if (action !== "input-blur" && action !== "menu-close") {
+                                                    setInputVal(newInputValue);
+                                                }
+                                                handleInputChange(newInputValue, "services", "service", setOptionsSer, optionsSre);
+                                            }}
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                    </div>
+                                                ) : "No options found"
+                                            }
                                             onChange={(option) => {
-                                                handelingSelectTasks(option.value)
+                                                handelingSelectTasks(option.value);
                                                 field.onChange(option);
                                             }}
-
+                                            onFocus={() => {
+                                                if (field.value) {
+                                                    setInputVal(field.value.label);
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
+
                             </Col>
                         </FormGroup>
                     </Col>
@@ -372,15 +420,27 @@ const EditNewBtn = (props) => {
                                             options={optionsT}
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            inputValue={inputValTask}
+                                            onInputChange={(newInputValue, { action }) => {
+                                                if (action !== "input-blur" && action !== "menu-close") {
+                                                    setInputTask(newInputValue);
+                                                }
+                                            }}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                    </div>
+                                                ) : "No options found"
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
+                                            onFocus={() => {
+                                                if (field.value) {
+                                                    setInputTask(field.value.label);
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
@@ -402,20 +462,30 @@ const EditNewBtn = (props) => {
                                             {...field}
                                             value={field.value}
                                             options={optionsSL}
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "languages", "source_lang", setOptionsSL, optionsSL)
-                                            }
+                                            inputValue={inputValSL}
+                                            onInputChange={(newInputValue, { action }) => {
+                                                if (action !== "input-blur" && action !== "menu-close") {
+                                                    setInputSL(newInputValue);
+                                                }
+                                                handleInputChange(newInputValue, "languages", "source_lang", setOptionsSL, optionsSL);
+                                            }}
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                    </div>
+                                                ) : "No options found"
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
+                                            onFocus={() => {
+                                                if (field.value) {
+                                                    setInputSL(field.value.label);
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
@@ -437,20 +507,31 @@ const EditNewBtn = (props) => {
                                             {...field}
                                             value={field.value}
                                             options={optionsTL}
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "languages", "target_lang", setOptionsTL, optionsTL)
-                                            }
+                                            inputValue={inputValTL}
+                                            onInputChange={(newInputValue, { action }) => {
+                                                if (action !== "input-blur" && action !== "menu-close") {
+                                                    setInputTL(newInputValue);
+                                                }
+                                                handleInputChange(newInputValue, "languages", "target_lang", setOptionsTL, optionsTL);
+                                            }}
+                                           
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                    </div>
+                                                ) : "No options found"
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
+                                            onFocus={() => {
+                                                if (field.value) {
+                                                    setInputTL(field.value.label);
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
@@ -466,26 +547,37 @@ const EditNewBtn = (props) => {
                                 <Controller
                                     name="dialect"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
                                             value={field.value}
                                             options={optionsD}
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "languages_dialect", "dialect", setOptionsD, optionsD)
-                                            }
+                                            inputValue={inputValD}
+                                            onInputChange={(newInputValue, { action }) => {
+                                                if (action !== "input-blur" && action !== "menu-close") {
+                                                    setInputD(newInputValue);
+                                                }
+                                                handleInputChange(newInputValue, "languages_dialect", "dialect", setOptionsD, optionsD);
+                                            }}
+                                           
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                    </div>
+                                                ) : "No options found"
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
+                                            onFocus={() => {
+                                                if (field.value) {
+                                                    setInputD(field.value.label);
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
@@ -501,26 +593,37 @@ const EditNewBtn = (props) => {
                                 <Controller
                                     name="dialect_target"
                                     control={control}
-                                    rules={{ required: true }}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
                                             value={field.value}
                                             options={optionsD}
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "languages_dialect", "dialect_target", setOptionsD, optionsD)
-                                            }
+                                            inputValue={inputValD2}
+                                            onInputChange={(newInputValue, { action }) => {
+                                                if (action !== "input-blur" && action !== "menu-close") {
+                                                    setInputD2(newInputValue);
+                                                }
+                                                handleInputChange(newInputValue, "languages_dialect", "dialect_target", setOptionsD, optionsD);
+                                            }}
+                                           
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                    </div>
+                                                ) : "No options found"
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
+                                            onFocus={() => {
+                                                if (field.value) {
+                                                    setInputD2(field.value.label);
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
@@ -542,20 +645,31 @@ const EditNewBtn = (props) => {
                                             {...field}
                                             value={field.value}
                                             options={optionsUnit}
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "unit", "unit", setOptionsUnit, optionsUnit)
-                                            }
+                                            inputValue={inputValU}
+                                            onInputChange={(newInputValue, { action }) => {
+                                                if (action !== "input-blur" && action !== "menu-close") {
+                                                    setInputVal(newInputValue);
+                                                }
+                                                handleInputChange(newInputValue, "unit", "unit", setOptionsUnit, optionsUnit);
+                                            }}
+                                           
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                    </div>
+                                                ) : "No options found"
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
+                                            onFocus={() => {
+                                                if (field.value) {
+                                                    setInputU(field.value.label);
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
@@ -569,9 +683,7 @@ const EditNewBtn = (props) => {
                             <Col sm="8">
                                 {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
                                 <input
-
-                                    value={props?.data?.rate}
-
+                                    defaultValue={props?.data?.rate}
                                     className="form-control"
                                     type="number"
                                     name="rate"
@@ -589,11 +701,11 @@ const EditNewBtn = (props) => {
                                 {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
                                 <input
 
-                                    value={props?.data?.special_rate}
+                                    defaultValue={props?.data?.special_rate}
                                     className="form-control"
                                     type="number"
                                     name="special_rate"
-                                    {...register("special_rate", { required: true })}
+                                    {...register("special_rate", { required: false })}
                                 />
                             </Col>
                         </FormGroup>
@@ -614,9 +726,9 @@ const EditNewBtn = (props) => {
                                             {...field}
                                             value={field.value}
                                             options={[
-                                                { value: 'Active', label: 'Active' },
-                                                { value: 'Not Active', label: 'Not Active' },
-                                                { value: 'Pending by PM', label: 'Pending by PM' }
+                                                { value: '0', label: 'Active' },
+                                                { value: '1', label: 'Not Active' },
+                                                { value: '2', label: 'Pending by PM' }
                                             ]}
                                             className="js-example-basic-single col-sm-12"
                                             onChange={(option) => {
@@ -628,31 +740,7 @@ const EditNewBtn = (props) => {
                             </Col>
                         </FormGroup>
                     </Col>
-                    <Col md="6" className="mb-3">
-                        <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Currency</Label>
-                            <Col sm="8">
-                                <Controller
-                                    name="currency"
-                                    control={control}
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            isDisabled
-                                            value={renameKeys(props?.data?.currency, { id: "value", name: "label" }) || renameKeys(priceList[0]?.currency, { id: "value", name: "label" })}
-                                            className="js-example-basic-single col-sm-12"
-                                            onChange={(option) => {
-                                                field.onChange(option);
-                                            }}
-
-                                        />
-                                    )}
-                                />
-                            </Col>
-                        </FormGroup>
-                    </Col>
+                 
                 </Row>
                 {/* <Row className="g-0">
                     <Col  >

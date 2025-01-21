@@ -71,7 +71,7 @@ class VendorSheet extends Model
 
  public function sub_subject()
 {
-    return $this->belongsTo(MainSubjectMatter::class, 'sub_subject')->select('id', 'name');
+    return $this->belongsTo(SubSubjectMatter::class, 'sub_subject')->select('id', 'name');
 }
 
 

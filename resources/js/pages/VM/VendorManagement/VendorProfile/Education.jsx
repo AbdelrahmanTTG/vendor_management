@@ -6,7 +6,7 @@ import { useForm, Controller, set } from 'react-hook-form';
 import axiosClient from "../../../AxiosClint";
 import { toast } from 'react-toastify';
 const Education = (props) => {
-    toast.configure();
+    // toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':
@@ -149,7 +149,7 @@ const Education = (props) => {
         for (const [key, value] of Object.entries(errors)) {
             switch (key) {
                 case "university_name":
-                    basictoaster("dangerToast", "University name is required");
+                    basictoaster("dangerToast", "Institute name is required");
                     return;
                 case "latest_degree":
                     basictoaster("dangerToast", "latest degree is required");
@@ -182,7 +182,7 @@ const Education = (props) => {
                         <Row className="g-3 mb-3">
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">University name</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Institute Name</Label>
                                     <Col sm="9">
                                         {/* <Input className="form-control" type="text" placeholder="University name" /> */}
                                         <input

@@ -14,9 +14,14 @@ class WalletsPaymentMethods extends Model
         'billing_data_id',
         'method',
         'account',
+        'defaults',
     ];
     public function remove()
     {
         return $this->delete();
+    }
+    public function method()
+    {
+        return $this->belongsTo(VendorPaymentMethod::class, 'method')->select('id', 'name'); // assuming 'method' هو المفتاح الذي يرتبط بـ PaymentMethods
     }
 }

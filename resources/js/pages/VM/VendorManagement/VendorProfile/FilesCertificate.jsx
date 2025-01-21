@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { toast } from 'react-toastify';
 import SweetAlert from 'sweetalert2';
 const FilesCertificate = (props) => {
-    toast.configure();
+    // toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':
@@ -31,16 +31,16 @@ const FilesCertificate = (props) => {
     const [cvFileNames, setCvFileNames] = useState(false);
 
     const [ndaFileName, setNdaFileName] = useState(null);
-    const [ndaFileNames, setNdaFileNames] = useState(false);
+    const [ndaFileNames, setNdaFileNames] = useState(null);
 
     const { control, register, handleSubmit, formState: { errors } } = useForm();
     const [rows, setRows] = useState([]);
     const [rowIdToDelete, setRowIdToDelete] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [ loading, setLoading ] = useState(false);
 
     const handleFileChange = (event, setFileName) => {
         const file = event.target.files[0];
-
         setFileName(file ? file : null);
     };
     const addRow = () => {
@@ -139,7 +139,10 @@ const FilesCertificate = (props) => {
             const section = document.getElementById("personal-data");
             section.scrollIntoView({ behavior: 'smooth' });
         } else {
+            
             if (!cvFileName && !ndaFileName){return}
+            setLoading(true)
+
             const formData = new FormData();
             formData.append('cv', cvFileName);
             formData.append('nda', ndaFileName);
@@ -157,16 +160,35 @@ const FilesCertificate = (props) => {
                 if (row.File) formData.append(`file_${index}`, row.File);
             });
             try {
-                const response = await axiosClient.post("uploadFiles", formData, {
+            
+                const response = await axiosClient.post("updateFiles", formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
+                setCvFileName(response.data.files.vendor.cv);
+                setNdaFileName(response.data.files.vendor.nda)
+                const data = response.data.files.files
+                setRows([])
+                setRows(data?.map((file, index) => ({
+                    id: index + 1,
+                    idUpdate: file.id,
+                    File_Title: file.file_title,
+                    File_Content: file.file_content,
+                    File_URL: file.file_path
+                })));
                 basictoaster("successToast", "Added successfully !");
-
                 setIsSubmitting(true)
+                // setCvFileName(null)
+                // setNdaFileName(null)
             } catch (err) {
+                basictoaster("dangerToast", err.message);
                 console.error("Error:", err.response ? err.response.data : err.message);
+                setLoading(false)
+
+            } finally {
+                setLoading(false)
+
             }
         }
     };
@@ -196,6 +218,7 @@ const FilesCertificate = (props) => {
     const handleDownload = async (filename) => {
         try {
             const response = await axiosClient.post("download", { filename }, { responseType: 'blob' });
+            // console.log(response)
             const file = new Blob([response.data], { type: response.headers['content-type'] });
             const link = document.createElement('a');
             const url = window.URL.createObjectURL(file);
@@ -212,9 +235,8 @@ const FilesCertificate = (props) => {
             console.error(response);
             alert('Error downloading the file: ' + (response?.data?.message || 'Unknown error'));
         }
-
-
     };
+
     const handleClick = (data) => {
         if (props.onSubmit === 'onSubmit' && !isSubmitting) {
             onSubmit(data);
@@ -227,23 +249,22 @@ const FilesCertificate = (props) => {
             basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
             return;
         }
-        if (!cvFileName && !ndaFileName) { return }
+        if (!cvFileName && !ndaFileName) {
+            basictoaster("dangerToast", " One of the fields files must be uploaded.");
+            return
+        }
+        setLoading(true)
         const formData = new FormData();
-
         formData.append('cv', cvFileName);
         formData.append('nda', ndaFileName);
-
         formData.append('vendor_id', props.id);
-
-        rows.forEach((row, index) => {
+        rows?.forEach((row, index) => {
             if (row.idUpdate) formData.append(`file_id_${index}`, row.idUpdate);
             if (row.File_Title) formData.append(`file_title_${index}`, row.File_Title);
             if (row.File_Content) formData.append(`file_content_${index}`, row.File_Content);
             if (row.File) formData.append(`file_${index}`, row.File);
         });
-
-
-        rows.forEach((row, index) => {
+        rows?.forEach((row, index) => {
             if (row.File) formData.append(`file_${index}`, row.File);
         });
         try {
@@ -252,11 +273,11 @@ const FilesCertificate = (props) => {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            // setIsSubmitting(true)
-            const data = response.data.additional_files
+            setCvFileName(response.data.files.vendor.cv);
+            setNdaFileName(response.data.files.vendor.nda)
+            const data = response.data.files.files
             setRows([])
-
-            setRows(data.map((file, index) => ({
+            setRows(data?.map((file, index) => ({
                 id: index + 1,
                 idUpdate: file.id,
                 File_Title: file.file_title,
@@ -264,9 +285,14 @@ const FilesCertificate = (props) => {
                 File_URL: file.file_path
             })));
             basictoaster("successToast", "Updated successfully !");
-
+           
         } catch (err) {
             console.error("Error:", err.response ? err.response.data : err.message);
+            basictoaster("dangerToast", err.message);
+            setLoading(false)
+
+        } finally {
+            setLoading(false)
         }
     };
     return (
@@ -293,7 +319,6 @@ const FilesCertificate = (props) => {
                                             name="cv"
                                             control={control}
                                             rules={{ required: "CV is required" }}
-                                            accept=".zip"
                                             render={({ field }) => (
                                                 <input
                                                     type="file"
@@ -302,17 +327,17 @@ const FilesCertificate = (props) => {
                                                         const file = e.target.files[0];
                                                         if (file) {
                                                             const fileName = file.name.toLowerCase();
-                                                            if (!fileName.endsWith(".zip")) {
-                                                                alert("The file must be a ZIP file.");
-                                                                e.target.value = "";
-                                                                return;
+                                                            const fileSize = file.size;
+                                                            const allowedExtensions = [".zip", ".rar"];
+                                                            if (fileSize > 5 * 1024 * 1024) {
+                                                                if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
+                                                                    alert("If the file is larger than 5MB, it must be a ZIP or RAR file.");
+                                                                    e.target.value = "";
+                                                                    return;
+                                                                }
                                                             }
                                                         }
-                                                        if (file && file.size > 5 * 1024 * 1024) {
-                                                            alert("The file size must not exceed 5MB.");
-                                                            e.target.value = ""
-                                                            return;
-                                                        }
+
                                                         handleFileChange(e, setCvFileName);
                                                         field.onChange(e); // Pass the file to react-hook-form
                                                     }}
@@ -347,7 +372,6 @@ const FilesCertificate = (props) => {
                                             name="NDA"
                                             control={control}
                                             rules={{ required: "NDA is required" }}
-                                            accept=".zip"
                                             render={({ field }) => (
                                                 <input
                                                     type="file"
@@ -356,16 +380,15 @@ const FilesCertificate = (props) => {
                                                         const file = e.target.files[0];
                                                         if (file) {
                                                             const fileName = file.name.toLowerCase();
-                                                            if (!fileName.endsWith(".zip")) {
-                                                                alert("The file must be a ZIP file.");
-                                                                e.target.value = ""; 
-                                                                return;
+                                                            const fileSize = file.size;
+                                                            const allowedExtensions = [".zip", ".rar"];
+                                                            if (fileSize > 5 * 1024 * 1024) {
+                                                                if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
+                                                                    alert("If the file is larger than 5MB, it must be a ZIP or RAR file.");
+                                                                    e.target.value = "";
+                                                                    return;
+                                                                }
                                                             }
-                                                        }
-                                                        if (file && file.size > 5 * 1024 * 1024) {
-                                                            alert("The file size must not exceed 5MB.");
-                                                            e.target.value = ""
-                                                            return;
                                                         }
                                                         handleFileChange(e, setNdaFileName);
                                                         field.onChange(e); // Pass the file to react-hook-form
@@ -410,7 +433,7 @@ const FilesCertificate = (props) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {rows.map((row, index) => (
+                                {rows?.map((row, index) => (
                                     <tr key={row.id}>
                                         <td>{index + 1}</td>
                                         <td>
@@ -438,20 +461,16 @@ const FilesCertificate = (props) => {
                                                     const file = e.target.files[0];
                                                     if (file) {
                                                         const fileName = file.name.toLowerCase();
-                                                        if (!fileName.endsWith(".zip")) {
-                                                            alert("The file must be a ZIP file.");
-                                                            e.target.value = "";
-                                                            return;
+                                                        const fileSize = file.size;
+                                                        const allowedExtensions = [".zip", ".rar"];
+                                                        if (fileSize > 5 * 1024 * 1024) {
+                                                            if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
+                                                                alert("If the file is larger than 5MB, it must be a ZIP or RAR file.");
+                                                                e.target.value = "";
+                                                                return;
+                                                            }
                                                         }
                                                     }
-
-                                                    if (file.size > 5 * 1024 * 1024) {
-                                                        alert("The file size must not exceed 5MB.");
-                                                        e.target.value = ""; 
-                                                        return;
-                                                    }
-                                                    
-                                                    
                                                     handleRowFileChange(e, row.id)
                                                 }}
                                                 className="form-control"
@@ -480,7 +499,7 @@ const FilesCertificate = (props) => {
                             </tbody>
                         </Table>
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Btn attrBtn={{ color: 'primary', onClick: handleClick }}>Submit</Btn>
+                            <Btn attrBtn={{ color: 'primary', onClick: handleClick, disabled: loading }}>{loading ? 'Loading...' : 'Submit'}</Btn>
                         </div>
                     </CardBody>
                 </Collapse>

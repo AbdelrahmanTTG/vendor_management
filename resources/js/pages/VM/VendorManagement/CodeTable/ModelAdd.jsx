@@ -12,7 +12,7 @@ const AddNewBtn = (props) => {
     const [errorMessage, setErrorMessage] = useState(null);
     const [initialOptions, setInitialOptions] = useState({});
     const [loading, setLoading] = useState(false);
-    toast.configure();
+    // toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':

@@ -10,14 +10,23 @@ class TimeZone extends Model
     use HasFactory;
     protected $table = 'time_zone';
     public $timestamps = false;
-    protected $fillable = ['zone', 'gmt', 'Active',"status"];
+    protected $fillable = ['zone', 'gmt', 'parent','Active',"status"];
     public static function insert($data)
     {
         $data['status'] = 0;
         $insertedData = self::create($data);
         unset($insertedData['status']);
-        return $insertedData;
-    }
+        $relatedRecord = countries::find($insertedData->parent);
+        return [
+            'id' => $insertedData->id,
+            'zone' => $insertedData->zone,
+            'gmt' => $insertedData->gmt,
+            'parent' => (object) [
+                'id' => $relatedRecord->id,
+                'name' => $relatedRecord->name
+            ],
+            'Active' => $insertedData->Active,
+        ];    }
     public function updatedata($data)
     {
         $item = self::find($data['id']);
@@ -27,8 +36,23 @@ class TimeZone extends Model
         $item->fill($data);
         $item->save();
         unset($item['status']);
-        return $item;
+        $relatedRecord = Countries::find($item->parent);
+        return [
+            'id' => $item->id,
+            'zone' => $item->zone,
+            'gmt' => $item->gmt,
 
+            'parent' => (object) [
+                'id' => $relatedRecord->id,
+                'name' => $relatedRecord->name
+            ],
+            'Active' => $item->Active,
+        ];
+
+    }
+    public static function getColumnValue($id)
+    {
+        return self::where('parent', $id)->where('Active', 1)->first();
     }
     public static function SelectData($searchTerm = null)
     {

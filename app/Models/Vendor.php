@@ -144,6 +144,7 @@ class Vendor extends Authenticatable  implements JWTSubject
         'contact_other2',
         'contact_other3',
         'Anothernumber',
+        "PM",
 
     ];
 
