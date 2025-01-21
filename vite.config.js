@@ -13,6 +13,7 @@ export default defineConfig({
         }),
     ],
     build: {
-        outDir: 'public/build', // Ensure the output directory is set correctly
+        outDir: 'public/build',
+        // Ensure the output directory is set correctly
     },
 });
