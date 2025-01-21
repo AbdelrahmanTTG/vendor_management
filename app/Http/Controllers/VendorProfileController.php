@@ -1022,7 +1022,7 @@ class VendorProfileController extends Controller
             $vendor->save();
             $results = DB::table('vm_mail')
             ->where('name', 'password')
-            ->get();
+            ->first();
             $details = [
                 'subject' => 'Create password ',
                 'title' => 'Create_password',
