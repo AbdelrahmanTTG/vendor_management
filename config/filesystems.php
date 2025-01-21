@@ -56,6 +56,15 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
+      
+            'external' => [
+                'driver' => 'local',
+                'root'   => '/var/www/html/erp/assets/uploads', 
+            ],
+     
+
+
+       
 
     ],
 

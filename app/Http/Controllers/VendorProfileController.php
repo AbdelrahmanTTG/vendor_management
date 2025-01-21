@@ -809,17 +809,13 @@ class VendorProfileController extends Controller
                 ]
             );
             if($status == 1){
-                $results = DB::table('vm_mail')
-                    ->where('name', 'notice')
-                    ->first();
                 $details = [
                     'subject' => 'New notifications ',
                     'title' => 'notifications',
                     'body' =>  $content,
-                    'email' => $results->emailSupport,
-                    'brand' => $results->brand,
+                    'brand' => env('BRAND'),
                 ];
-                Mail::to($receiver_email)->send(new VMmail($details, $results->email));
+                Mail::to($receiver_email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
             }
 
             //  event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
@@ -1025,20 +1021,16 @@ class VendorProfileController extends Controller
         if ($vendor) {
             $vendor->password = base64_encode($password);
             $vendor->save();
-            $results = DB::table('vm_mail')
-            ->where('name', 'password')
-            ->first();
             $details = [
                 'subject' => 'Create password ',
                 'title' => 'Create_password',
                 'body' =>  $password,
-                'email' => $results->emailSupport,
-                'brand' => $results->brand,
+                'brand' =>env('BRAND'),
 
             ];
          
             
-            Mail::to($email)->send(new VMmail($details , $results->email));
+            Mail::to($email)->send(new VMmail($details , env('MAIL_FROM_ADDRESS')));
             return response()->json(['message' => 'Password updated successfully'], 200);
         }
 
@@ -1364,9 +1356,9 @@ class VendorProfileController extends Controller
             $cvFilePath = null;
             $ndaFilePath = null;
 
-
             if ($request->hasFile('cv')) {
                 $cvFile = $request->file('cv');
+
                 if ($cvFile->getSize() > 5 * 1024 * 1024) {
                     $allowedExtensions = ['zip', 'rar'];
                     if (!in_array($cvFile->getClientOriginalExtension(), $allowedExtensions)) {
@@ -1374,20 +1366,20 @@ class VendorProfileController extends Controller
                     }
                 }
 
-                if ($vendor->cv && Storage::exists($vendor->cv)) {
-                    Storage::delete($vendor->cv);
+                if ($vendor->cv && Storage::disk('external')->exists($vendor->cv)) {
+                    Storage::disk('external')->delete($vendor->cv);
                 }
 
-                // $cvFilePath = $cvFile->store('cv_files');
                 $originalFileName = $cvFile->getClientOriginalName();
                 $encryptedFileName = Crypt::encryptString($originalFileName);
-                $cvFilePath = $cvFile->storeAs('cv_files', $encryptedFileName . '.' . $cvFile->getClientOriginalExtension());
+                $cvFilePath = $cvFile->storeAs('cv_files', $encryptedFileName . '.' . $cvFile->getClientOriginalExtension(), 'external');
                 $vendor->cv = $cvFilePath;
                 $vendor->save();
             }
 
             if ($request->hasFile('nda')) {
                 $ndaFile = $request->file('nda');
+
                 if ($ndaFile->getSize() > 5 * 1024 * 1024) {
                     $allowedExtensions = ['zip', 'rar'];
                     if (!in_array($ndaFile->getClientOriginalExtension(), $allowedExtensions)) {
@@ -1395,18 +1387,16 @@ class VendorProfileController extends Controller
                     }
                 }
 
-                if ($vendor->NDA && Storage::exists($vendor->NDA)) {
-                    Storage::delete($vendor->NDA);
+                if ($vendor->NDA && Storage::disk('external')->exists($vendor->NDA)) {
+                    Storage::disk('external')->delete($vendor->NDA);
                 }
-                // $ndaFilePath = $ndaFile->store('nda_files');
+
                 $originalFileNameN = $ndaFile->getClientOriginalName();
                 $encryptedFileName = Crypt::encryptString($originalFileNameN);
-                $ndaFilePath = $ndaFile->storeAs('nda_files', $encryptedFileName . '.' . $ndaFile->getClientOriginalExtension());
+                $ndaFilePath = $ndaFile->storeAs('nda_files', $encryptedFileName . '.' . $ndaFile->getClientOriginalExtension(), 'external');
                 $vendor->NDA = $ndaFilePath;
                 $vendor->save();
             }
-
-
 
             $additionalFiles = [];
             foreach ($request->all() as $key => $value) {
@@ -1428,13 +1418,14 @@ class VendorProfileController extends Controller
                     if ($fileId) {
                         $vendorFile = VendorFile::find($fileId);
                         if ($vendorFile) {
-                            if ($vendorFile->file_path && Storage::exists($vendorFile->file_path)) {
-                                Storage::delete($vendorFile->file_path);
+                            if ($vendorFile->file_path && Storage::disk('external')->exists($vendorFile->file_path)) {
+                                Storage::disk('external')->delete($vendorFile->file_path);
                             }
+
                             $originalFileName = $file->getClientOriginalName();
                             $encryptedFileName = Crypt::encryptString($originalFileName);
-                            $filePath = $file->storeAs('other_files', $encryptedFileName . '.' . $file->getClientOriginalExtension());
-                            // $filePath = $file->store('other_files');
+                            $filePath = $file->storeAs('other_files', $encryptedFileName . '.' . $file->getClientOriginalExtension(), 'external');
+
                             $vendorFile->file_path = $filePath;
                             $vendorFile->file_title = $fileTitle;
                             $vendorFile->file_content = $fileContent;
@@ -1446,9 +1437,7 @@ class VendorProfileController extends Controller
                         if ($file) {
                             $originalFileName = $file->getClientOriginalName();
                             $encryptedFileName = Crypt::encryptString($originalFileName);
-                            $filePath = $file->storeAs('other_files', $encryptedFileName . '.' . $file->getClientOriginalExtension());
-
-                            // $filePath = $file->store('other_files');
+                            $filePath = $file->storeAs('other_files', $encryptedFileName . '.' . $file->getClientOriginalExtension(), 'external');
 
                             $vendorFile = new VendorFile();
                             $vendorFile->vendor_id = $vendorId;
@@ -1468,24 +1457,21 @@ class VendorProfileController extends Controller
             }
 
             DB::commit();
-            // $vendorFiles = VendorFile::where('vendor_id', $vendorId)->get();
             return response()->json([
                 'message' => 'Files updated and vendor information saved successfully.',
                 'files' => $this->getVendorFiles($vendorId)
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            if ($cvFilePath)
-                Storage::delete($cvFilePath);
-            if ($ndaFilePath)
-                Storage::delete($ndaFilePath);
+            Storage::disk('external')->delete($cvFilePath);
+            Storage::disk('external')->delete($ndaFilePath);
             foreach ($additionalFiles as $file) {
-                Storage::delete($file['file_path']);
+                Storage::disk('external')->delete($file['file_path']);
             }
-
             return response()->json($e->getMessage(), 500);
         }
     }
+
     // public function AddinstantMessaging(Request $request)
     // {
     //     $validator = Validator::make($request->all(), [

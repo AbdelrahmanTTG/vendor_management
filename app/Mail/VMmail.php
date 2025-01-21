@@ -52,7 +52,6 @@ class VMmail extends Mailable
         ->with([
             'title' => $this->details['title'],
             'body'  => $this->details['body'],
-            'email'  => $this->details['email'],
             'brand'  => $this->details['brand'],
 
 
