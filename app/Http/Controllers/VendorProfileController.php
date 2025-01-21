@@ -1022,9 +1022,8 @@ class VendorProfileController extends Controller
             $vendor->save();
             $details = [
                 'subject' => 'Password ',
-                'title' => 'Create a password',
+                'title' => 'Create_password',
                 'body' =>  $password,
-                "type"=> "Create_password"
             ];
             Mail::to($email)->send(new VMmail($details));
             return response()->json(['message' => 'Password updated successfully'], 200);
