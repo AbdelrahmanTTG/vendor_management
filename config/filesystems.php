@@ -59,7 +59,8 @@ return [
       
             'external' => [
                 'driver' => 'local',
-                'root'   => '/var/www/html/erp/assets/uploads', 
+                'root'   => base_path('../erp/assets/uploads'), 
+    'visibility' => 'public',
             ],
      
 
