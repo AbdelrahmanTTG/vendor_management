@@ -53,6 +53,8 @@ class VMmail extends Mailable
             'title' => $this->details['title'],
             'body'  => $this->details['body'],
             'email'  => $this->details['email'],
+            'brand'  => $this->details['brand'],
+
 
         ]);
     }

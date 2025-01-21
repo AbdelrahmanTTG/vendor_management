@@ -45,11 +45,16 @@
         <p>Your new password is <strong>{{ $body }}</strong></p>
         <p>If you have any questions or feedback, we’re always keen to hear from you and assist you via  <a href="mailto:{{ $email }}">{{ $email }}</a>.</p>
 @endif
+@if( $details['title'] == 'notifications')
+        <p>New notifications</p>
+        <p>Your new password is <strong>{!! $body !!}</strong></p>
+        <p>If you have any questions or feedback, we’re always keen to hear from you and assist you via  <a href="mailto:{{ $email }}">{{ $email }}</a>.</p>
+@endif
     </div>
     <div class="email-footer">
         <p>Thank you,</p>
         <p>Vendor Management Team</p>
-        <p>lingo talents</p>
+        <p>$details['brand']?? " "</p>
     </div>
 </div>
 

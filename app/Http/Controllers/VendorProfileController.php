@@ -809,12 +809,17 @@ class VendorProfileController extends Controller
                 ]
             );
             if($status == 1){
+                $results = DB::table('vm_mail')
+                    ->where('name', 'notice')
+                    ->first();
                 $details = [
                     'subject' => 'New notifications ',
                     'title' => 'notifications',
                     'body' =>  $content,
+                    'email' => $results->emailSupport,
+                    'brand' => $results->brand,
                 ];
-                Mail::to($receiver_email)->send(new VMmail($details, $sender_email));
+                Mail::to($receiver_email)->send(new VMmail($details, $results->email));
             }
 
             //  event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
@@ -1028,6 +1033,8 @@ class VendorProfileController extends Controller
                 'title' => 'Create_password',
                 'body' =>  $password,
                 'email' => $results->emailSupport,
+                'brand' => $results->brand,
+
             ];
          
             
