@@ -36,7 +36,7 @@ class TimeZone extends Model
         $item->fill($data);
         $item->save();
         unset($item['status']);
-        $relatedRecord = countries::find($item->parent);
+        $relatedRecord = Countries::find($item->parent);
         return [
             'id' => $item->id,
             'zone' => $item->zone,

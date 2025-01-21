@@ -16,7 +16,7 @@ const EditBtn = (props) => {
     const [originalData, setOriginalData] = useState({});
     const [selectedOption, setSelectedOption] = useState({});
 
-    toast.configure();
+    // toast.configure();
 
     const basictoaster = (toastname, status) => {
         switch (toastname) {
