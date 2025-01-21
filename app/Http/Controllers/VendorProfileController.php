@@ -24,7 +24,8 @@ use App\Models\VendorSheet;
 use App\Models\VendorTest;
 use App\Models\VendorEducation;
 use App\Models\Formatstable;
-
+use App\Mail\VMmail;
+use Illuminate\Support\Facades\Mail;
 
 use App\Http\Controllers\InvoiceController;
 use App\Models\TimeZone;
@@ -800,7 +801,14 @@ class VendorProfileController extends Controller
                     'status' => $status,
                 ]
             );
-
+            if($status == 1){
+                $details = [
+                    'subject' => 'Notifications ',
+                    'title' => 'New notifications',
+                    'body' =>  $content,
+                ];
+                Mail::to($sender_email)->send(new VMmail($details));
+            }
 
             //  event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
             return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "created_at" => $data->created_at, "status"=> $status ]], 200);
@@ -839,7 +847,13 @@ class VendorProfileController extends Controller
     }
     public function deleteWalletsPayment(Request $request)
     {
-
+        $id = $request->input('id');
+        $WalletsPaymentMethods = WalletsPaymentMethods::find($id);
+        if ($WalletsPaymentMethods->defaults == 1) {
+            return response()->json([
+                'message' => 'Cannot delete before default wallet is selected'
+            ], 500);
+        }
         return $this->deleteItem($request, WalletsPaymentMethods::class);
     }
     public function deleteSkill(Request $request)
@@ -999,7 +1013,12 @@ class VendorProfileController extends Controller
         if ($vendor) {
             $vendor->password = base64_encode($password);
             $vendor->save();
-
+            $details = [
+                'subject' => 'Password ',
+                'title' => 'Create a password',
+                'body' =>  $password,
+            ];
+            Mail::to($email)->send(new VMmail($details));
             return response()->json(['message' => 'Password updated successfully'], 200);
         }
 

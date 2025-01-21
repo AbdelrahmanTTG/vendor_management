@@ -194,8 +194,11 @@ const Billing = (props) => {
 
             return data
         } catch (err) {
+            basictoaster("dangerToast", "Cannot delete before default wallet is selected .");
+
             const response = err.response;
             if (response && response.data) {
+
                 setErrorMessage(response.data.message || "An unexpected error occurred.");
             } else {
                 setErrorMessage("An unexpected error occurred.");
