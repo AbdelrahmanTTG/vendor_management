@@ -1023,7 +1023,7 @@ class VendorProfileController extends Controller
             $details = [
                 'subject' => 'Password ',
                 'title' => 'Create a password',
-                'password' =>  $password,
+                'body' =>  $password,
                 "type"=> "Create_password"
             ];
             Mail::to($email)->send(new VMmail($details));

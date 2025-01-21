@@ -44,7 +44,7 @@
     <div class="email-content">
 @if($type === 'Create_password')
         <p>A password has been created for your account.</p>
-        <p>Your new password is <strong>{{ $password }}</strong></p>
+        <p>Your new password is <strong>{{ $body }}</strong></p>
         <p>If you have any questions or feedback, we’re always keen to hear from you and assist you via  <a href="mailto:vm.support@thetranslationgate.com">vm.support@thetranslationgate.com</a>.</p>
 @endif
 
