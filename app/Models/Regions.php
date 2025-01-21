@@ -37,5 +37,8 @@ class Regions extends Model
     
     }
 
-
+    public static function getColumnValue($id)
+    {
+        return self::where('id', $id)->where('Active', 1)->get();
+    }
 }

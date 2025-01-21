@@ -1286,9 +1286,7 @@ const Vendor = (props) => {
 
                                         </Row>
                                         <Row>
-                                            {/* {(selectedSearchCol.indexOf("university_name") > -1 || selectedSearchCol.indexOf("latest_degree") > -1 || selectedSearchCol.indexOf("major") > -1 || selectedSearchCol.indexOf("year_of_graduation") > -1) && (
-                                                <label className='f-12'>Education Fields:   </label>
-                                            )} */}
+
                                             {selectedSearchCol.indexOf("university_name") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup id='university_nameInput'>
@@ -1314,17 +1312,24 @@ const Vendor = (props) => {
                                             }  {
                                                 selectedSearchCol.indexOf("major") > -1 &&
                                                 <Col md='3'>
-                                                    <FormGroup>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Major'}</Label>
-                                                        <Select name='major' id='major' required
-
-                                                            options={optionsMaj} className="js-example-basic-single"
-                                                            onInputChange={(inputValue) =>
-                                                                handleInputChange(inputValue, "major", "major", setoptionsMaj, optionsMaj)
-                                                            }
-                                                            isMulti />
+                                                        <FormGroup id='majorInput'>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='major'>{'Major'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'majorInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                                <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'majorInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                            <Input className='form-control form-control-sm majorInput mb-1' type='text' name='major' required />
                                                     </FormGroup>
                                                 </Col>
+                                                // <Col md='3'>
+                                                //     <FormGroup>
+                                                //         <Label className="col-form-label-sm f-12" htmlFor='name'>{'Major'}</Label>
+                                                //         <Select name='major' id='major' required
+
+                                                //             options={optionsMaj} className="js-example-basic-single"
+                                                //             onInputChange={(inputValue) =>
+                                                //                 handleInputChange(inputValue, "major", "major", setoptionsMaj, optionsMaj)
+                                                //             }
+                                                //             isMulti />
+                                                //     </FormGroup>
+                                                // </Col>
                                             }
                                             {selectedSearchCol.indexOf("year_of_graduation") > -1 &&
                                                 <Col md='3'>

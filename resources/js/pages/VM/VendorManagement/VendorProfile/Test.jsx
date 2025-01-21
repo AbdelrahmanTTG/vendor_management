@@ -12,12 +12,12 @@ const Test = (props) => {
         switch (toastname) {
             case 'successToast':
                 toast.success(status, {
-                    position: toast.POSITION.TOP_RIGHT
+                    position: "top-right"
                 });
                 break;
             case 'dangerToast':
                 toast.error(status, {
-                    position: toast.POSITION.TOP_RIGHT
+                    position: "top-right"
                 });
                 break;
             default:
@@ -36,6 +36,8 @@ const Test = (props) => {
     const [optionsTL, setOptionsTL] = useState([]);
     const [optionsSre, setOptionsSer] = useState([]);
     const [testFileName, setTestFileName] = useState(null);
+    const [testFile, setTestFile] = useState(false);
+
     const [selectedOption, setSelectedOption] = useState("1");
     const [testResult, setTestResult] = useState("1");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -194,6 +196,12 @@ const Test = (props) => {
                 const data = props.VendorTestData.VendorTestData
                 setSelectedOption(data?.test_type)
                 setTestResult(data?.test_result)
+                if (data.test_upload) {
+                    setTestFileName(data.test_upload)
+                    setTestFile(true)
+                 }
+
+
                 setValue("source_lang", renameKeys(data?.source_lang, { id: "value", name: "label" }))
                 setValue("target_lang", renameKeys(data?.target_lang, { id: "value", name: "label" }))
                 setValue("main_subject", renameKeys(data?.main_subject, { id: "value", name: "label" }))
@@ -202,6 +210,32 @@ const Test = (props) => {
             }
         }
     }, [props.VendorTestData])
+    const onError = (errors) => {
+        for (const [key, value] of Object.entries(errors)) {
+            switch (key) {
+                case "service":
+                    basictoaster("dangerToast", "Service is required");
+                    return;
+                case "sub_subject":
+                    basictoaster("dangerToast", "Sub subject is required");
+                    return;
+                case "main_subject":
+                    basictoaster("dangerToast", "Main subject is required");
+                    return;
+                case "target_lang":
+                    basictoaster("dangerToast", "Target lang is required");
+                    return;
+                case "source_lang":
+                    basictoaster("dangerToast", "Source lang is required");
+                    return;
+                case "file":
+                    basictoaster("dangerToast", "File is required");
+                    return;
+                default:
+                    break;
+            }
+        }
+    };
     return (
         <Fragment>
             <Card>
@@ -303,7 +337,7 @@ const Test = (props) => {
                                             <Controller
                                                 name="test"
                                                 control={control}
-                                                rules={{ required: "test is required" }}
+                                                rules={{ required: false }}
                                                 render={({ field }) => (
                                                     <input
                                                         type="file"
@@ -329,6 +363,23 @@ const Test = (props) => {
                                                 )}
                                             />
 
+                                            {testFile ? (
+                                                <span className="form-text text-muted py-2 m-1">Download.
+
+                                                <button
+                                                style={{
+                                                    backgroundColor: 'transparent',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    marginLeft: '10px'
+                                                }}
+                                                color="transparent"
+                                                onClick={() => handleDownload(testFileName)}
+                                            >
+                                                <i style={{ fontSize: '1.6em', marginTop: '3px' }} className="fa fa-cloud-download"></i>
+                                                    </button> </span>)  : (
+                                                <></>
+                                            )}
                                         </div>
 
                                     </Col>
@@ -513,7 +564,7 @@ const Test = (props) => {
                                     </Row>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                    <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit) }}>Submit</Btn>
+                                    <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit, onError) }}>Submit</Btn>
                                 </div>
                             </div>
                         }

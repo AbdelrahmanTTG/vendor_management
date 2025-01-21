@@ -107,8 +107,8 @@ const PersonalData = React.memo((props) => {
       const formattedOptions = data.map(item => ({
         value: item.id,
         label: item.name || item.gmt,
+        regions: item?.region
       }));
-
       setOptions(formattedOptions);
       if (!searchTerm) {
         setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
@@ -127,11 +127,11 @@ const PersonalData = React.memo((props) => {
     }
 
   };
-  const handelingSelectCountry = async (id) => {
+  const handelingRegions = async (id) => {
     if (!id) return
     try {
       setLoading(true);
-      const { data } = await axiosClient.get("GetCountry", {
+      const { data } = await axiosClient.get("GetRegions", {
         params: {
           id: id
         }
@@ -140,8 +140,11 @@ const PersonalData = React.memo((props) => {
         value: item.id,
         label: item.name,
       }));
+      setOptionsR(formattedOptions);
+      setSelectedOptionR(formattedOptions)
+      console.log(formattedOptions)
+      setValue("region", formattedOptions[0]?.value)
 
-      setOptionsC(formattedOptions);
       if (!searchTerm) {
         setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
       }
@@ -189,10 +192,10 @@ const PersonalData = React.memo((props) => {
     }
 
   };
-  useEffect(() => {
-    handelingSelect("regions", setOptionsR, "region");
-    handelingSelect("countries", setOptionsN, "Nationality");
-  }, []);
+  // useEffect(() => {
+  //   // handelingSelect("regions", setOptionsR, "region");
+  //   // handelingSelect("countries", setOptionsN, "Nationality");
+  // }, []);
   const columnMapping = {
     "LinkedIn": "contact_linked_in",
     "ProZ": "contact_ProZ",
@@ -731,11 +734,10 @@ const PersonalData = React.memo((props) => {
                             <Select
                               {...field}
                               value={selectedOptionR}
-
                               options={optionsR}
-                              onInputChange={(inputValue) =>
-                                handleInputChange(inputValue, "regions", "region", setOptionsR, optionsR)
-                              }
+                              // onInputChange={(inputValue) =>
+                              //   handleInputChange(inputValue, "regions", "region", setOptionsR, optionsR)
+                              // }
                               className="js-example-basic-single col-sm-12"
                               isSearchable
                               noOptionsMessage={() => loading ? (
@@ -746,7 +748,7 @@ const PersonalData = React.memo((props) => {
                               onChange={(option) => {
                                 setSelectedOptionR(option);
                                 field.onChange(option.value);
-                                handelingSelectCountry(option.value)
+                                // handelingSelectCountry(option.value)
                               }}
 
                             />
@@ -770,6 +772,9 @@ const PersonalData = React.memo((props) => {
                               options={optionsC}
                               className="js-example-basic-single col-sm-12"
                               isSearchable
+                              onInputChange={(inputValue) =>
+                                handleInputChange(inputValue, "countries", "Country", setOptionsC, optionsC)
+                              }
                               noOptionsMessage={() => loading ? (
                                 <div className="loader-box" >
                                   <Spinner attrSpinner={{ className: 'loader-6' }} />
@@ -778,7 +783,7 @@ const PersonalData = React.memo((props) => {
                               onChange={(option) => {
                                 setSelectedOptionC(option);
                                 handelingSelectTimeZone(option.value)
-
+                                handelingRegions(option.regions)
                                 field.onChange(option.value);
                               }}
 

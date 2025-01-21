@@ -10,13 +10,11 @@ const Portal_User = (props) => {
         switch (toastname) {
             case 'successToast':
                 toast.success(status, {
-                    position: toast.POSITION.TOP_RIGHT
-                });
+                    position: "top-right"                });
                 break;
             case 'dangerToast':
                 toast.error(status, {
-                    position: toast.POSITION.TOP_RIGHT
-                });
+                    position: "top-right"                });
                 break;
             default:
                 break;

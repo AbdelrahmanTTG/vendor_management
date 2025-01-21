@@ -551,30 +551,30 @@ export const VM = (allowedPermissions) => [
             </LazyWrapper>
         )
     },
-    {
-        path: 'Major',
-        element: (
-            <LazyWrapper>
-                <CodeTable
-                    key="Major"
-                    table="Major"
-                    permissions={allowedPermissions['Major']}
-                    dataTable="major"
-                    header={['ID', 'name', "Active", "Edit", "Delete"]}
-                    columns={["id", "name", "Active"]}
-                    fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
-                        {
-                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
-                    ]}
-                />
-            </LazyWrapper>
-        )
-    }
+    // {
+    //     path: 'Major',
+    //     element: (
+    //         <LazyWrapper>
+    //             <CodeTable
+    //                 key="Major"
+    //                 table="Major"
+    //                 permissions={allowedPermissions['Major']}
+    //                 dataTable="major"
+    //                 header={['ID', 'name', "Active", "Edit", "Delete"]}
+    //                 columns={["id", "name", "Active"]}
+    //                 fields={[
+    //                     { name: 'name', type: 'text', field: "input", label: "Name" },
+    //                     {
+    //                         name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
+    //                             { value: 1, label: 'Active' },
+    //                             { value: 0, label: 'Inactive' },
+    //                         ]
+    //                     }
+    //                 ]}
+    //             />
+    //         </LazyWrapper>
+    //     )
+    // }
 
 ]
 export const getAllowedRoutes = async () => {

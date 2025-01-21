@@ -41,7 +41,7 @@ const VMnote = (props) => {
 
 
     const showToast = (type, message) => {
-        toast[type](message, { position: toast.POSITION.TOP_RIGHT });
+        toast[type](message, { position: "top-right" });
     };
 
     const onSubmit = async (data) => {

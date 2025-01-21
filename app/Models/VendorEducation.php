@@ -15,9 +15,9 @@ class VendorEducation extends Model
         'major',
     ];
     //
-    public function major()
-    {
-        return $this->belongsTo(Major::class, 'major')->select('id','name');
-    }
+    // public function major()
+    // {
+    //     return $this->belongsTo(Major::class, 'major')->select('id','name');
+    // }
     
 }

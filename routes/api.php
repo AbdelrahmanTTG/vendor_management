@@ -121,6 +121,7 @@ Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () 
     Route::post('/EditVendor', [VendorProfileController::class, 'ModificationComplex']);
     Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
     Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
+    Route::get('/GetRegions', [VendorProfileController::class, 'findRegions']);
     Route::get('/GetSubSubject', [VendorProfileController::class, 'findSubSubject']);
     Route::get('/GetTimeZone', [VendorProfileController::class, 'findTimeZone']);
     Route::post('/refreshToken ', [AuthController::class, 'RegenrateToken']);

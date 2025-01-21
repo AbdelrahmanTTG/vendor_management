@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Countries;
+use App\Models\Regions;
 use App\Models\SubSubjectMatter;
 use App\Models\BillingData;
 use App\Models\BankDetails;
@@ -90,7 +91,7 @@ class VendorProfileController extends Controller
             'nationality' => ['id', 'name'],
             'region' => ['id', 'name'],
             "timezone" => ['id', 'gmt'],
-            "major" => ['id', 'name'],
+            // "major" => ['id', 'name'],
             "source_lang" => ['id', 'name'],
             "target_lang" => ['id', 'name'],
             "main_subject" => ['id', 'name'],
@@ -484,7 +485,12 @@ class VendorProfileController extends Controller
         $TaskType = TaskType::getColumnValue($id);
         return response()->json($TaskType, 201);
     }
-
+    public function findRegions(Request $request)
+    {
+        $id = $request->input('id');
+        $Regions = Regions::getColumnValue($id);
+        return response()->json($Regions, 201);
+    }
 
     public function store(Request $request)
     {
@@ -691,9 +697,9 @@ class VendorProfileController extends Controller
             }
 
             if ($request->input('BillingData')) {
-                
+
                 $InvoiceController = new InvoiceController();
-                 try {
+                try {
                     Crypt::decrypt($id);
                     $decID = $id;
                 } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
@@ -736,7 +742,7 @@ class VendorProfileController extends Controller
                 [
                     'Data' => $PersonalData ?? null,
                     "VMNotes" => $VMNotes ?? null,
-                    "pm" =>$pm ?? null,
+                    "pm" => $pm ?? null,
                     "BillingData" => $BillingData ?? null,
                     "Experience" => $VendorExperience ?? null,
                     "VendorFiles" => $VendorFiles ?? null,
@@ -768,9 +774,8 @@ class VendorProfileController extends Controller
         $pm = Vendor::where('id', $id)->value('PM');
 
         if ($pm) {
-            return $pm ;
+            return $pm;
         }
-
     }
 
     public function VMNotes($sender_email, $receiver_email)
@@ -788,7 +793,7 @@ class VendorProfileController extends Controller
                 'sender_id' => 'required|string|max:255',
                 'receiver_id' => 'required|string|max:255',
                 'content' => 'required|string',
-                "status"=> 'nullable|string',
+                "status" => 'nullable|string',
             ]);
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
@@ -808,18 +813,18 @@ class VendorProfileController extends Controller
                     'status' => $status,
                 ]
             );
-            if($status == 1){
+            if ($status == 1) {
                 $details = [
                     'subject' => 'New notifications ',
                     'title' => 'notifications',
                     'body' =>  $content,
-                    'brand' => env('BRAND' ,"Nexus"),
+                    'brand' => env('BRAND', "Nexus"),
                 ];
                 Mail::to($receiver_email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
             }
 
             //  event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
-            return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "created_at" => $data->created_at, "status"=> $status ]], 200);
+            return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "created_at" => $data->created_at, "status" => $status]], 200);
         } catch (\Exception $e) {
             return response()->json([
                 // 'error' => "Server error",
@@ -828,7 +833,8 @@ class VendorProfileController extends Controller
             ], 500);
         }
     }
-    public function Message_VM_to_PM(Request $request){
+    public function Message_VM_to_PM(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'id' => 'required|int',
             'PM' => 'required|string',
@@ -851,7 +857,6 @@ class VendorProfileController extends Controller
             'message' => 'Vendor updated successfully',
             'vendor' => $vendor
         ], 200);
-
     }
     public function deleteWalletsPayment(Request $request)
     {
@@ -1028,7 +1033,7 @@ class VendorProfileController extends Controller
                 'brand' => env('BRAND', "Nexus"),
 
             ];
-            Mail::to($email)->send(new VMmail($details , env('MAIL_FROM_ADDRESS')));
+            Mail::to($email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
             return response()->json(['message' => 'Password updated successfully'], 200);
         }
 
@@ -1321,6 +1326,7 @@ class VendorProfileController extends Controller
         $encryptedFileName = pathinfo($fileName, PATHINFO_FILENAME);
         try {
             $originalFileName = Crypt::decryptString($encryptedFileName);
+            $originalFileName = preg_replace('/^_+|_+$/', '', $originalFileName);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Invalid file encryption'], 400);
         }
@@ -1335,8 +1341,8 @@ class VendorProfileController extends Controller
             return response()->json(['message' => 'File not found in database'], 404);
         }
         $filePath = $file->file_path;
-        if (Storage::exists($filePath)) {
-            Storage::delete($filePath);
+        if (Storage::disk('external')->exists($filePath)) {
+            Storage::disk('external')->delete($filePath);
         } else {
             return response()->json(['message' => 'File not found on server'], 404);
         }
@@ -1373,10 +1379,11 @@ class VendorProfileController extends Controller
                 }
                 $path = storage_path('app/external/cv_files');
                 if (!file_exists($path)) {
-                    mkdir($path,
+                    mkdir(
+                        $path,
                         0777,
                         true
-                    ); 
+                    );
                 }
                 $originalFileName = $cvFile->getClientOriginalName();
                 $encryptedFileName = Crypt::encryptString($originalFileName);
@@ -1398,7 +1405,14 @@ class VendorProfileController extends Controller
                 if ($vendor->NDA && Storage::disk('external')->exists($vendor->NDA)) {
                     Storage::disk('external')->delete($vendor->NDA);
                 }
-
+                $path = storage_path('app/external/nda_files');
+                if (!file_exists($path)) {
+                    mkdir(
+                        $path,
+                        0777,
+                        true
+                    );
+                }
                 $originalFileNameN = $ndaFile->getClientOriginalName();
                 $encryptedFileName = Crypt::encryptString($originalFileNameN);
                 $ndaFilePath = $ndaFile->storeAs('nda_files', $encryptedFileName . '.' . $ndaFile->getClientOriginalExtension(), 'external');
@@ -1429,7 +1443,14 @@ class VendorProfileController extends Controller
                             if ($vendorFile->file_path && Storage::disk('external')->exists($vendorFile->file_path)) {
                                 Storage::disk('external')->delete($vendorFile->file_path);
                             }
-
+                            $path = storage_path('app/external/other_files');
+                            if (!file_exists($path)) {
+                                mkdir(
+                                    $path,
+                                    0777,
+                                    true
+                                );
+                            }
                             $originalFileName = $file->getClientOriginalName();
                             $encryptedFileName = Crypt::encryptString($originalFileName);
                             $filePath = $file->storeAs('other_files', $encryptedFileName . '.' . $file->getClientOriginalExtension(), 'external');
@@ -1443,6 +1464,14 @@ class VendorProfileController extends Controller
                         }
                     } else {
                         if ($file) {
+                            $path = storage_path('app/external/other_files');
+                            if (!file_exists($path)) {
+                                mkdir(
+                                    $path,
+                                    0777,
+                                    true
+                                );
+                            }
                             $originalFileName = $file->getClientOriginalName();
                             $encryptedFileName = Crypt::encryptString($originalFileName);
                             $filePath = $file->storeAs('other_files', $encryptedFileName . '.' . $file->getClientOriginalExtension(), 'external');
@@ -1695,11 +1724,7 @@ class VendorProfileController extends Controller
     }
     public function AddVendorTest(Request $request)
     {
-        if (!$request->hasFile('test')) {
-            return response()->json(['error' => 'Test file is required.'], 400);
-        }
-
-        $testFile = $request->file('test');
+       
 
         DB::beginTransaction();
         try {
@@ -1711,17 +1736,17 @@ class VendorProfileController extends Controller
             $main_subject = $request->input('main_subject');
             $sub_subject = $request->input('sub_subject');
             $service = $request->input('service');
-
             $vendor = VendorTest::where('vendor_id', $vendorId)->first();
 
             if (!$vendor) {
                 $vendor = new VendorTest();
                 $vendor->vendor_id = $vendorId;
-            } else {
-                if ($vendor->test_upload && Storage::disk('public')->exists($vendor->test_upload)) {
-                    Storage::disk('public')->delete($vendor->test_upload);
+                if (!$request->hasFile('test')) {
+                    return response()->json(['error' => 'Test file is required.'], 400);
                 }
-            }
+
+                $testFile = $request->file('test');
+            } 
 
             $vendor->test_type = $testType;
             $vendor->test_result = $testResult;
@@ -1730,9 +1755,24 @@ class VendorProfileController extends Controller
             $vendor->main_subject = $main_subject;
             $vendor->sub_subject = $sub_subject;
             $vendor->service = $service;
-
-            $path = $testFile->store('vendortests', 'public');
-            $vendor->test_upload = $path;
+            if($request->file('test')){
+                if ($vendor->test_upload && Storage::disk('external')->exists($vendor->test_upload)) {
+                    Storage::disk('external')->delete($vendor->test_upload);
+                }
+                $path = storage_path('app/external/vendortests');
+                if (!file_exists($path)) {
+                    mkdir(
+                        $path,
+                        0777,
+                        true
+                    );
+                }
+                $originalFileName = $testFile->getClientOriginalName();
+                $encryptedFileName = Crypt::encryptString($originalFileName);
+                $filePath = $testFile->storeAs('vendortests', $encryptedFileName . '.' . $testFile->getClientOriginalExtension(), 'external');
+                $vendor->test_upload = $filePath;
+            }
+           
 
             $vendor->save();
 
@@ -1819,7 +1859,7 @@ class VendorProfileController extends Controller
             'university_name' => 'required|string|max:255',
             'latest_degree' => 'required|integer|max:255',
             'year_of_graduation' => 'required|integer',
-            'major' => 'required|integer|max:255',
+            'major' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -1854,7 +1894,7 @@ class VendorProfileController extends Controller
     public function getEducationByVendorId($vendorId)
     {
         $education = VendorEducation::where('vendor_id', $vendorId)
-            ->with('major:id,name')
+            // ->with('major:id,name')
             ->first();
 
         if ($education) {

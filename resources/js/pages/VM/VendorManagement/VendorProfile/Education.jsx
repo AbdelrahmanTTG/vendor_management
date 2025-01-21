@@ -11,12 +11,12 @@ const Education = (props) => {
         switch (toastname) {
             case 'successToast':
                 toast.success(status, {
-                    position: toast.POSITION.TOP_RIGHT
+                    position: "top-right"
                 });
                 break;
             case 'dangerToast':
                 toast.error(status, {
-                    position: toast.POSITION.TOP_RIGHT
+                    position: "top-right"
                 });
                 break;
             default:
@@ -140,7 +140,7 @@ const Education = (props) => {
                 setValue("university_name", data?.university_name)
                 setValue("latest_degree", { value: data?.latest_degree, label: data?.latest_degree } )
                 setValue("year_of_graduation", data?.year_of_graduation)
-                setValue("major", renameKeys(data?.major, { id: "value", name: "label" }))
+                setValue("major", data?.major)
 
             }
         }
@@ -248,8 +248,16 @@ const Education = (props) => {
 
                                     <Label className="col-sm-3 col-form-label" for="validationCustom01">Major</Label>
                                     <Col sm="9">
-
-                                        <Controller
+                                        <Col sm="9">
+                                            <input
+                                                defaultValue=""
+                                                className="form-control"
+                                                type="text"
+                                                name="major"
+                                                {...register("major", { required: true })}
+                                            />
+                                        </Col>
+                                        {/* <Controller
                                             name="major"
                                             control={control}
                                             rules={{ required: true }}
@@ -274,7 +282,7 @@ const Education = (props) => {
 
                                                 />
                                             )}
-                                        />
+                                        /> */}
                                         </Col>
                                     </FormGroup>
                             </Col>
