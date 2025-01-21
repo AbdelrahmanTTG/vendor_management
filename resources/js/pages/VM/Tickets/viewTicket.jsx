@@ -410,7 +410,7 @@ const ViewTicket = () => {
                         )}
                         {/*  CV Request */}
                         {ticketData.request_type_val == 5 && (
-                            ticketData.statusVal <= 3 && ticketData.statusVal != 0 && (
+                             ticketData.statusVal != 0 && (
                                 ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ?
                                     ticketData['TicketResource'].map((item, i) => (
                                         <Row key={i} className="row mt-2">
