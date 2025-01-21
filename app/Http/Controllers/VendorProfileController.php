@@ -810,11 +810,11 @@ class VendorProfileController extends Controller
             );
             if($status == 1){
                 $details = [
-                    'subject' => 'Notifications ',
-                    'title' => 'New notifications',
+                    'subject' => 'New notifications ',
+                    'title' => 'notifications',
                     'body' =>  $content,
                 ];
-                Mail::to($receiver_email)->send(new VMmail($details));
+                Mail::to($receiver_email)->send(new VMmail($details, $sender_email));
             }
 
             //  event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
@@ -1025,7 +1025,7 @@ class VendorProfileController extends Controller
                 'title' => 'Create_password',
                 'body' =>  $password,
             ];
-            Mail::to($email)->send(new VMmail($details));
+            Mail::to($email)->send(new VMmail($details , "no-reply@aixnexus.com"));
             return response()->json(['message' => 'Password updated successfully'], 200);
         }
 

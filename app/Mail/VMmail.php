@@ -17,10 +17,13 @@ class VMmail extends Mailable
      * Create a new message instance.
      */
     public $details;
+    public $sender_email;
 
-    public function __construct($details)
+    public function __construct($details , $sender_email)
     {
         $this->details = $details;
+        $this->sender_email = $sender_email;
+
     }
 
     /**
@@ -44,7 +47,7 @@ class VMmail extends Mailable
     }
     public function build()
     {
-        return $this->from('vm.support@thetranslationgate.com')  
+        return $this->from($this->sender_email)
         ->view('emails.VMmail')
         ->with([
             'title' => $this->details['title'],
