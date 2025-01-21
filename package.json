@@ -98,6 +98,7 @@
         "styled-components": "^5.3.9",
         "sweetalert2": "^11.7.3",
         "web-vitals": "^3.3.0",
-        "world-map-geojson": "^1.0.2"
+        "world-map-geojson": "^1.0.2",
+        "react-dom": "^18.2.0"
     }
 }
