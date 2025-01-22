@@ -155,7 +155,7 @@ export const VM = (allowedPermissions) => [
                 <CodeTable
                     permissions={allowedPermissions['Time zone']}
                     key="Time zone"
-                    table="Time zone" dataTable="vendorTimeZone" header={["id", "zone", "gmt","Country", 'Active', "Edit", "Delete"]}
+                    table="Time zone" dataTable="vendortimezone" header={["id", "zone", "gmt","Country", 'Active', "Edit", "Delete"]}
                     fields={[
                         { name: 'zone', type: 'text', field: "input", label: "zone" },
                         { name: 'gmt', type: 'text', field: "input", label: "gmt" },
@@ -631,7 +631,7 @@ export const getAllowedRoutes = async () => {
 //             <LazyWrapper>
 //                 <CodeTable
 //                     key="Time zone"
-//                     table="Time zone" dataTable="vendorTimeZone" header={["id", "zone", "gmt", 'Active', "Edit", "Delete"]}
+//                     table="Time zone" dataTable="vendortimezone" header={["id", "zone", "gmt", 'Active', "Edit", "Delete"]}
 //                     fields={[
 //                         { name: 'zone', type: 'text', field: "input", label: "zone" },
 //                         { name: 'gmt', type: 'text', field: "input", label: "gmt" },
