@@ -452,7 +452,16 @@ class TaskController extends Controller
         if ($offer) {
             if ($request->file('file') != null) {
                 $file = $request->file('file');
-                $path = $file->store('uploads/jobTaskVendorFiles/', 'public');
+                // $path = $file->store('uploads/jobTaskVendorFiles/', 'public');
+                $folderPath = storage_path('app/external/jobTaskVendorFiles');
+                if (!file_exists($folderPath)) {
+                    mkdir(
+                        $folderPath,
+                        0777,
+                        true
+                    );
+                }
+                $path = $file->store('jobTaskVendorFiles/', 'external');
                 if (!$path) {
                     $msg['type'] = "error";
                     $message = "Error Uploading File, Please Try Again!";

@@ -63,7 +63,7 @@ const ViewTicket = (props) => {
 
     const handleDownload = async (filename) => {
         try {
-            const response = await axiosClient.post("downloadTicketFile", { filename }, { responseType: 'blob' });
+            const response = await axiosClient.post("download", { filename }, { responseType: 'blob' });
             const file = new Blob([response.data], { type: response.headers['content-type'] });
             const link = document.createElement('a');
             const url = window.URL.createObjectURL(file);
@@ -152,7 +152,9 @@ const ViewTicket = (props) => {
                                 toast.success(msg)
                         });
                         setTemp(!temp)
-                        setStatusInput('')
+                        setStatusInput('');
+                        setFileInput('');                       
+                        setCommentInput();                       
                         break;
                     case 'error':
                         toast.error(data.message);
@@ -353,7 +355,7 @@ const ViewTicket = (props) => {
                             </Row>
                         </CardHeader>
                         <CardBody>                           
-                            <form onSubmit={changeTicketStatus}>
+                            <form id="changeStatusForm" onSubmit={changeTicketStatus}>
                                 {ticketData.statusVal <= 5 && (
                                     <>
                                         <FormGroup className="row mt-2">
@@ -411,7 +413,7 @@ const ViewTicket = (props) => {
                                                 <Row key={i} className="row mt-2">
                                                     <Col>
                                                         <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
-                                                        <button type='reset' onClick={() => handleDownload(item.file)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2 '> <i className="fa fa-download"></i> {'Click Here'}</button>
+                                                        <button type='reset' onClick={() => handleDownload("tickets/"+item.file)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2 '> <i className="fa fa-download"></i> {'Click Here'}</button>
                                                     </Col>
                                                 </Row>
                                             ))
@@ -466,8 +468,7 @@ const ViewTicket = (props) => {
                                                             <th scope="col" >{'Contact'}</th>
                                                             <th scope="col" >{'Country of Residence'}</th>
                                                             <th scope="col">{'Mother Tongue'}</th>
-                                                            <th scope="col">{'Profile'}</th>
-                                                            <th scope="col">{'CV'}</th>
+                                                            <th scope="col">{'Profile'}</th>                                                          
                                                             <th scope="col">{'Source Language'}</th>
                                                             <th scope="col">{'Target Language'}</th>
                                                             <th scope="col">{'Dialect'}</th>
@@ -491,16 +492,7 @@ const ViewTicket = (props) => {
                                                                 <td>{item['vendor'].contact}</td>
                                                                 <td>{item['vendor']['country']?.name}</td>
                                                                 <td>{item['vendor'].mother_tongue}</td>
-                                                                <td>{item['vendor'].profile}</td>
-                                                                {item['vendor'].cv != null ?
-                                                                    <td>
-                                                                        <button type='reset' onClick={() => handleDownload(item['vendor'].cv)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>{'CV'}</button>
-                                                                    </td>
-                                                                    :
-                                                                    <td></td>
-                                                                }
-
-
+                                                                <td>{item['vendor'].profile}</td>                                                               
                                                                 <td>{item['vendor']['vendor_sheet']?.[0]?.['source_lang']?.name}</td>
                                                                 <td>{item['vendor']['vendor_sheet']?.[0]?.['target_lang']?.name}</td>
                                                                 <td>{item['vendor']['vendor_sheet']?.[0]?.dialect}</td>
@@ -524,7 +516,7 @@ const ViewTicket = (props) => {
                                 {ticketData.statusVal <= 3 && ticketData.statusVal != 0 && (
                                     <Row className='mt-2'>
                                         <Col className='text-end'>
-                                            <Btn attrBtn={{ color: 'primary', type: 'submit' }}><i class="fa fa-check-square-o"></i> {'Save Changes'}</Btn>
+                                            <Btn attrBtn={{ color: 'primary', type: 'submit' }}><i className="fa fa-check-square-o"></i> {'Save Changes'}</Btn>
                                         </Col>
                                     </Row>
                                 )}
@@ -570,7 +562,7 @@ const ViewTicket = (props) => {
                                                             <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />
                                                             <div className="clearfix"></div>
                                                             {item.fileLink != null && item.fileLink.trim() != '' && (
-                                                                <button onClick={() => handleDownload(item.fileLink)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>Attachment : <i className="fa fa-download"></i> {'View File'}</button>
+                                                                <button onClick={() => handleDownload("tickets/"+item.fileLink)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>Attachment : <i className="fa fa-download"></i> {'View File'}</button>
                                                             )}
                                                         </td>
                                                         <td scope="row">{item.created_at}</td>

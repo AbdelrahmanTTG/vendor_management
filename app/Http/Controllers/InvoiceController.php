@@ -119,7 +119,16 @@ class InvoiceController extends Controller
 
                 if ($request->file('file') != null) {
                     $file = $request->file('file');
-                    $path = $file->store('uploads/invoiceVendorFiles/', 'public');
+                    // $path = $file->store('uploads/invoiceVendorFiles/', 'public');
+                    $folderPath = storage_path('app/external/invoiceVendorFiles');
+                    if (!file_exists($folderPath)) {
+                        mkdir(
+                            $folderPath,
+                            0777,
+                            true
+                        );
+                    }
+                    $path = $file->store('invoiceVendorFiles/', 'external');
                     if (!$path) {
                         $msg['type'] = "error";
                         $msg['message'] = "Error Uploading File, Please Try Again!";

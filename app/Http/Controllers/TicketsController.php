@@ -19,6 +19,7 @@ use App\Mail\TicketMail;
 use App\Models\Permission;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -281,7 +282,7 @@ class TicketsController extends Controller
             if ($result->update($data)) {
                 if (empty($result->assigned_to)) {
                     $data2['assigned_to'] = $user;
-                    $result->update($data2);                
+                    $result->update($data2);
                 }
                 $this->addTicketTimeStatus($id, $user, 2);
             }
@@ -305,12 +306,24 @@ class TicketsController extends Controller
         if ($ticket) {
             if ($request->file('file') != null) {
                 $file = $request->file('file');
-                $path = $file->store('uploads/tickets/', 'public');
+                // $path = $file->store('uploads/tickets/', 'public');
+                $folderPath = storage_path('app/external/tickets');
+                if (!file_exists($folderPath)) {
+                    mkdir(
+                        $folderPath,
+                        0777,
+                        true
+                    );
+                }
+                $originalFileName = $file->getClientOriginalName();
+                $encryptedFileName = Crypt::encryptString($originalFileName);
+                $fullEncryptedFileName = $encryptedFileName . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('tickets/', $fullEncryptedFileName, 'external');              
                 if (!$path) {
                     $msg['type'] = "error";
                     $message = "Error Uploading File, Please Try Again!";
                 } else {
-                    $data['file'] = $file->hashName();
+                    $data['file'] = $fullEncryptedFileName;
                 }
             }
             if (VmTicketResponse::create($data)) {
@@ -342,7 +355,7 @@ class TicketsController extends Controller
     public function download(Request $request)
     {
         $fileName = $request->input("filename");
-        $filePath = storage_path("app/public/uploads/tickets/{$fileName}");
+        $filePath = Storage::disk('external')->path("/tickets/{$fileName}");
         if (!file_exists($filePath)) {
             // check external
             $external_path = Http::get(VmSetup::getUploadsFullLink() . "/tickets/$fileName");
@@ -409,11 +422,23 @@ class TicketsController extends Controller
                     if ($request->file('file') != null) {
                         $this->changeTicketToOpen($ticket_id, $user);
                         $file = $request->file('file');
-                        $path = $file->storeAs('uploads/tickets/', $file->getClientOriginalName(), 'public');
+                        // $path = $file->storeAs('uploads/tickets/', $file->getClientOriginalName(), 'public');
+                        $folderPath = storage_path('app/external/tickets');
+                        if (!file_exists($folderPath)) {
+                            mkdir(
+                                $folderPath,
+                                0777,
+                                true
+                            );
+                        }
+                        $originalFileName = $file->getClientOriginalName();
+                        $encryptedFileName = Crypt::encryptString($originalFileName);
+                        $fullEncryptedFileName = Crypt::encryptString($originalFileName);
+                        $path = $file->storeAs('tickets/', $fullEncryptedFileName, 'external');
                         if (!$path) {
                             return response()->json(['message' => 'Error Uploading File, Please Try Again!', 'type' => 'error']);
                         } else {
-                            $data['file'] = $file->getClientOriginalName();
+                            $data['file'] = $fullEncryptedFileName;
                             if (VmTicketResource::create($data)) {
                                 $message .= "Ticket Resource Added Successfully <br/>";
                             } else {
@@ -552,7 +577,7 @@ class TicketsController extends Controller
         $user = Crypt::decrypt($request->user);
         $ticket_id = $request->ticket;
         $vm_id = $request->vmUser;
-        $ticket = VmTicket::find($ticket_id);        
+        $ticket = VmTicket::find($ticket_id);
         if ($request->assignPermission == 1) {
             if (empty($ticket->assigned_to)) {
                 $data['assigned_to'] = $vm_id;

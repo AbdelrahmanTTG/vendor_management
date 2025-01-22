@@ -1328,7 +1328,8 @@ class VendorProfileController extends Controller
             $originalFileName = Crypt::decryptString($encryptedFileName);
             // $originalFileName = trim($originalFileName, '_');
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Invalid file encryption'], 400);
+            return response()->download($filePath, $fileName);
+             return response()->json(['message' => 'Invalid file encryption'], 400);
         }
         return response()->download($filePath, $originalFileName);
     }
