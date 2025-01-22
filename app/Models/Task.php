@@ -18,7 +18,7 @@ class Task extends Model
         'verified',
         'vpo_file',
         'invoice_created_at',
-        'invoice_id'
+        'invoice_id','brand'
 
     ];
 

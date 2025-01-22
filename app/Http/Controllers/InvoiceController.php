@@ -166,6 +166,7 @@ class InvoiceController extends Controller
                     $id = $jobs[$i];
                     $offer = Task::where('vendor', $request->vendor)->where('id', $id)->where('status', 1)->first();
                     $brand['brand_id'] = $offer->getTaskBrandId();
+                    $data['brand'] = !empty($offer->brand)?$offer->brand:$offer->getTaskBrandId();
                     $invoice->update($brand);
                     if ($offer->update($data)) {
                         Logger::addToLoggerUpdate('job_task', 'id', $id, $request->vendor);
