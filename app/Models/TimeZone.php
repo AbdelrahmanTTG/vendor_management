@@ -10,12 +10,10 @@ class TimeZone extends Model
     use HasFactory;
     protected $table = 'vendortimezone';
     public $timestamps = false;
-    protected $fillable = ['zone', 'gmt', 'parent','Active',"status"];
+    protected $fillable = ['zone', 'gmt', 'parent','Active'];
     public static function insert($data)
     {
-        $data['status'] = 0;
         $insertedData = self::create($data);
-        unset($insertedData['status']);
         $relatedRecord = countries::find($insertedData->parent);
         return [
             'id' => $insertedData->id,

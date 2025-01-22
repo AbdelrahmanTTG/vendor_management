@@ -801,7 +801,8 @@ const Vendor = (props) => {
             const link = document.createElement('a');
             const url = window.URL.createObjectURL(file);
             const contentDisposition = response.headers['content-disposition'];
-            const fileName = contentDisposition ? contentDisposition.split('filename=')[1] : filename;
+            const matches = contentDisposition ? contentDisposition.match(/filename="?([^"]+)"?/) : null;
+            const fileName = matches ? matches[1].trim().replace(/^_+|_+$/g, '') : filename;
             link.href = url;
             link.setAttribute('download', fileName);
             document.body.appendChild(link);
