@@ -476,6 +476,8 @@ const PersonalData = React.memo((props) => {
           setValue("address", data.address)
           setValue('reject_reason', data.reject_reason);
           setValue('note', data.note);
+          setValue('vendor_source', data.vendor_source);
+
           setLoading2(false);
 
         }
