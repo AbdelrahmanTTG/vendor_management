@@ -173,7 +173,7 @@ const ViewJob = () => {
                                                                 </tr>
                                                                 <tr >
                                                                     <th scope="row">{'Task Type'}</th>
-                                                                    <td>{pageTask.task_type?.name}</td>
+                                                                    <td>{pageTask.task_type}</td>
                                                                 </tr>
                                                                 <tr >
                                                                     <th scope="row">{'Rate'}</th>
