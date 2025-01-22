@@ -86,7 +86,7 @@ class VmTicket extends Model
 
     public function SubjectName()
     {
-        return  $this->belongsTo(MainSubjectMatter::class, 'subject');
+        return  $this->belongsTo(SubSubjectMatter::class, 'subject');
     }
 
     public function SoftwareName()
