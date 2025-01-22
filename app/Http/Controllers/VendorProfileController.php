@@ -1326,7 +1326,7 @@ class VendorProfileController extends Controller
         $encryptedFileName = pathinfo($fileName, PATHINFO_FILENAME);
         try {
             $originalFileName = Crypt::decryptString($encryptedFileName);
-            $originalFileName = preg_replace('/^_+|_+$/', '', $originalFileName);
+            $originalFileName = trim($originalFileName, '_');
         } catch (\Exception $e) {
             return response()->json(['message' => 'Invalid file encryption'], 400);
         }
