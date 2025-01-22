@@ -38,6 +38,7 @@ const ViewTicket = (props) => {
         user: user.id,
 
     };
+    console.log(props);
     useEffect(() => {
         if (!ticket) {
             setRedirect(true);
