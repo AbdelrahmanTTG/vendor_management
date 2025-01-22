@@ -114,6 +114,7 @@ class InvoiceController extends Controller
                 $message = "Please Enter Wallet Details!";
             } else {
                 $data['invoice_created_at'] = date("Y-m-d H:i:s");
+                $data['invoice_date'] = date("Y-m-d H:i:s");
                 $data['verified'] = 3;
                 $jobs = $request->jobs;
 
