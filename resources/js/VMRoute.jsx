@@ -68,7 +68,7 @@ export const VM = (allowedPermissions) => [
         path: 'ViewTicket',
         element: (
             <LazyWrapper>
-                <ViewTicket permissions={allowedPermissions['viewTicket']}/>
+                <ViewTicket permissions={allowedPermissions['ViewTicket']}/>
             </LazyWrapper>
         )
     },
