@@ -142,7 +142,6 @@ const PersonalData = React.memo((props) => {
       }));
       setOptionsR(formattedOptions);
       setSelectedOptionR(formattedOptions)
-      console.log(formattedOptions)
       setValue("region", formattedOptions[0]?.value)
 
       if (!searchTerm) {
