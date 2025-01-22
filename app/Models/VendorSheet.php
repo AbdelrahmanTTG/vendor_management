@@ -25,6 +25,7 @@ class VendorSheet extends Model
         'Status',
         'currency',
         'dialect_target'
+        ,'i','ticket_id'
     ];
     public function source_lang()
     {

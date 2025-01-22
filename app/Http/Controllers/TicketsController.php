@@ -223,12 +223,10 @@ class TicketsController extends Controller
                         'vendor' => function ($query) {
                             $query->select('id', 'name', 'email', 'profile', 'cv', 'country', 'contact', 'mother_tongue', 'created_by');
                         },
-                        'vendor.vendor_sheet' => function ($query) use ($ticket) {
+                        'vendor.vendor_sheet' => function ($query) use ($res,$ticket) {
                             $query->select('id', 'vendor', 'source_lang', 'target_lang', 'service', 'task_type', 'dialect', 'rate', 'currency', 'unit', 'i', 'subject')->limit(1)
-                                ->where('source_lang', $ticket->source_lang)
-                                ->where('target_lang', $ticket->target_lang)
-                                ->where('task_type', $ticket->task_type)
-                                ->where('service', $ticket->service);
+                                ->where('i', $res->id)
+                                ->where('ticket_id', $ticket->id);                                                              
                         },
                         'vendor.vendor_sheet.source_lang' => function ($query) {
                             $query->select('id', 'name');
@@ -495,6 +493,11 @@ class TicketsController extends Controller
                                 }
                                 $newVmTicketResource = VmTicketResource::create($data);
                                 if ($newVmTicketResource) {
+                                     VendorSheet::where('vendor', $vendor)
+                                    ->where('source_lang', $ticket->source_lang)
+                                    ->where('target_lang', $ticket->target_lang)
+                                    ->where('task_type', $ticket->task_type)
+                                    ->where('service', $ticket->service)->update(['i' => $newVmTicketResource->id,'ticket_id'=>$ticket_id]);
                                     // send new status to requster                    
                                     $mailData = [
                                         'user_name' =>  $user_name,
