@@ -46,7 +46,7 @@ const IncomeChartClass = (props) => {
                         item.status = "Heads-Up ( Marked as Not Available )";
                         break;
                     default:
-                        item.status = "Unknown";
+                        item.status = "";
                         break;
                 }
                 statuses.push(item.status);
@@ -84,7 +84,7 @@ const IncomeChartClass = (props) => {
                 <Card className="income-card">
                     <CardHeader>
                         <div className="header-top d-sm-flex align-items-center">
-                            <H5>Tickets type</H5>
+                            <H5>Task status</H5>
                         </div>
                     </CardHeader>
                     <CardBody className="p-0">
