@@ -42,21 +42,34 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
 
   return (
     <Fragment>
-      <UL attrUL={{ className: 'nav-menu custom-scrollbar' }}>
-        <LI attrLI={{ className: 'back-btn' }}>
-          <div className="mobile-back text-end"><span>Back</span><i className="fa fa-angle-right ps-2"></i></div>
+      <UL
+        attrUL={{
+          className: "nav-menu custom-scrollbar",
+          style: { overflowY: "auto", maxHeight: "100vh", paddingBottom: "10vh"
+},
+        }}
+      >
+        <LI attrLI={{ className: "back-btn" }}>
+          <div className="mobile-back text-end">
+            <span>Back</span>
+            <i className="fa fa-angle-right ps-2"></i>
+          </div>
         </LI>
         {MENUITEMS.map((Item, i) => (
           <Fragment key={i}>
             {Item.Items.map((menuItem, i) => (
-              <LI attrLI={{ className: 'dropdown' }} key={i}>
-                {menuItem.type === 'sub' && (
-                  <a href="javascript"
+              <LI attrLI={{ className: "dropdown" }} key={i}>
+                {menuItem.type === "sub" && (
+                  <a
+                    href="javascript"
                     id="nav-link"
-                    className={`nav-link menu-title ${activeMenu === menuItem ? 'active' : ''}`}
+                    className={`nav-link menu-title ${activeMenu === menuItem ? "active" : ""
+                      }`}
                     onClick={(event) => {
-                      event.preventDefault(); handleMenuClick(menuItem);
-                    }} >
+                      event.preventDefault();
+                      handleMenuClick(menuItem);
+                    }}
+                  >
                     {menuItem.icon !== undefined && <menuItem.icon />}
                     <span>{t(menuItem.title)}</span>
                     <div className="according-menu">
@@ -69,19 +82,28 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
                   </a>
                 )}
                 {menuItem.children && (
-                  <UL attrUL={{
-                    className: `collapse sidebar-submenu ${activeMenu === menuItem ? 'show' : ''}`,
-                  }}>
-                    <UL attrUL={{
-                      className: 'nav-submenu menu-content',
-                    }}>
+                  <UL
+                    attrUL={{
+                      className: `collapse sidebar-submenu ${activeMenu === menuItem ? "show" : ""
+                        }`,
+                      style: { overflowY: "auto", maxHeight: "100vh" }, 
+                    }}
+                  >
+                    <UL
+                      attrUL={{
+                        className: "nav-submenu menu-content",
+                        style: { overflowY: "auto", maxHeight: "100vh" }, 
+                      }}
+                    >
                       {menuItem.children.map((childrenItem, index) => (
                         <LI key={index}>
-                          {childrenItem.type === 'link' && (
+                          {childrenItem.type === "link" && (
                             <Link
                               to={childrenItem.url}
-                              className={`${childrenItem.active ? 'active' : ''}`}
-                              onClick={() => toggletNavActive(childrenItem)} >
+                              className={`${childrenItem.active ? "active" : ""
+                                }`}
+                              onClick={() => toggletNavActive(childrenItem)}
+                            >
                               {t(childrenItem.name)}
                             </Link>
                           )}
@@ -95,6 +117,7 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
           </Fragment>
         ))}
       </UL>
+
     </Fragment>
   );
 

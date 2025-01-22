@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class TimeZone extends Model
 {
     use HasFactory;
-    protected $table = 'time_zone';
+    protected $table = 'vendorTimeZone';
     public $timestamps = false;
     protected $fillable = ['zone', 'gmt', 'parent','Active',"status"];
     public static function insert($data)

@@ -720,7 +720,43 @@ const PersonalData = React.memo((props) => {
                         </div>
                       </Col>
                     </FormGroup>
-                  </Col>
+                    </Col>
+                    < Col md="6" >
+                      <FormGroup className="row" >
+                        <Label className="col-sm-3 col-form-label" for="validationCustom01" > Country of residence</Label>
+                        < Col sm="9" >
+                          <Controller
+                            name="country"
+                            control={control}
+                            rules={{ required: true }}
+                            render={({ field }) => (
+                              <Select
+                                {...field}
+                                value={selectedOptionC}
+                                options={optionsC}
+                                className="js-example-basic-single col-sm-12"
+                                isSearchable
+                                onInputChange={(inputValue) =>
+                                  handleInputChange(inputValue, "countries", "Country", setOptionsC, optionsC)
+                                }
+                                noOptionsMessage={() => loading ? (
+                                  <div className="loader-box" >
+                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                  </div>
+                                ) : 'No options found'}
+                                onChange={(option) => {
+                                  setSelectedOptionC(option);
+                                  handelingSelectTimeZone(option.value)
+                                  handelingRegions(option.regions)
+                                  field.onChange(option.value);
+                                }}
+
+                              />
+                            )}
+                          />
+                        </Col>
+                      </FormGroup>
+                    </Col>
                   < Col md="6" >
                     <FormGroup className="row" >
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > Region </Label>
@@ -743,7 +779,7 @@ const PersonalData = React.memo((props) => {
                                 <div className="loader-box" >
                                   <Spinner attrSpinner={{ className: 'loader-6' }} />
                                 </div>
-                              ) : 'No options found'}
+                              ) : 'Select Country first'}
                               onChange={(option) => {
                                 setSelectedOptionR(option);
                                 field.onChange(option.value);
@@ -756,42 +792,7 @@ const PersonalData = React.memo((props) => {
                       </Col>
                     </FormGroup>
                   </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Country of residence</Label>
-                      < Col sm="9" >
-                        <Controller
-                          name="country"
-                          control={control}
-                          rules={{ required: true }}
-                          render={({ field }) => (
-                            <Select
-                              {...field}
-                              value={selectedOptionC}
-                              options={optionsC}
-                              className="js-example-basic-single col-sm-12"
-                              isSearchable
-                              onInputChange={(inputValue) =>
-                                handleInputChange(inputValue, "countries", "Country", setOptionsC, optionsC)
-                              }
-                              noOptionsMessage={() => loading ? (
-                                <div className="loader-box" >
-                                  <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                </div>
-                              ) : 'Select region first '}
-                              onChange={(option) => {
-                                setSelectedOptionC(option);
-                                handelingSelectTimeZone(option.value)
-                                handelingRegions(option.regions)
-                                field.onChange(option.value);
-                              }}
-
-                            />
-                          )}
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
+                 
                   < Col md="6" >
                     <FormGroup className="row" >
                       <Label className="col-sm-3 col-form-label" for="validationCustom01" > Nationality </Label>
@@ -864,7 +865,7 @@ const PersonalData = React.memo((props) => {
                                 <div className="loader-box" >
                                   <Spinner attrSpinner={{ className: 'loader-6' }} />
                                 </div>
-                              ) : 'No options found'}
+                              ) : 'Select Country first'}
                               onChange={(option) => {
                                 setSelectedOptionT(option);
                                 field.onChange(option.value);
