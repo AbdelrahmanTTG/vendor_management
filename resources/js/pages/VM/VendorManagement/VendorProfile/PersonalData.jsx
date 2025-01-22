@@ -451,7 +451,7 @@ const PersonalData = React.memo((props) => {
           setValueContact('ProZ', data.contact_ProZ)
           setValueContact('other1', data.contact_other1)
           setValueContact('other2', data.contact_other2)
-          setValueContact('other2', data.contact_other3)
+          setValueContact('other3', data.contact_other3)
           const region = data.region ? {
             value: data.region.id,
             label: data.region.name

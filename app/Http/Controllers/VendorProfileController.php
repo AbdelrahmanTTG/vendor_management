@@ -505,6 +505,10 @@ class VendorProfileController extends Controller
             'phone_number' => 'required|string',
             'contact_linked_in' => 'nullable|string',
             'contact_ProZ' => 'nullable|string',
+            'contact_other1' => 'nullable|string',
+            'contact_other2' => 'nullable|string',
+            'contact_other3' => 'nullable|string',
+            'Anothernumber' => 'nullable|string',
             'region' => 'required|int',
             'country' => 'required|int',
             'vendor_source' => 'required|string',
@@ -520,7 +524,7 @@ class VendorProfileController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $vendor = Vendor::create($request->all());
+        $vendor = Vendor::create($validator->validated());
 
         return response()->json([
             'message' => 'Vendor created successfully!',
@@ -546,31 +550,35 @@ class VendorProfileController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'type' => 'required|string',
-            'status' => 'required|string',
-            'prfx_name' => 'nullable|string',
-            'contact_name' => 'nullable|string',
-            'legal_Name' => 'nullable|string',
-            'phone_number' => 'required|string',
-            'contact_linked_in' => 'nullable|string',
-            'contact_ProZ' => 'nullable|string',
-            'region' => 'required|int',
-            'country' => 'required|int',
-            'vendor_source' => 'required|string',
-            'nationality' => 'required|int',
-            'timezone' => 'required|int',
-            'street' => 'nullable|string',
-            'city' => 'nullable|string',
-            'address' => 'nullable|string',
-            'reject_reason' => 'nullable|string',
+            'name' => 'sometimes|required|string',
+            'type' => 'sometimes|required|string',
+            'status' => 'sometimes|required|string',
+            'prfx_name' => 'sometimes|nullable|string',
+            'contact_name' => 'sometimes|nullable|string',
+            'legal_Name' => 'sometimes|nullable|string',
+            'phone_number' => 'sometimes|required|string',
+            'contact_linked_in' => 'sometimes|nullable|string',
+            'contact_ProZ' => 'sometimes|nullable|string',
+            'contact_other1' => 'sometimes|nullable|string',
+            'contact_other2' => 'sometimes|nullable|string',
+            'contact_other3' => 'sometimes|nullable|string',
+            'Anothernumber' => 'sometimes|nullable|string',
+            'region' => 'sometimes|required|integer',
+            'country' => 'sometimes|required|integer',
+            'vendor_source' => 'sometimes|required|string',
+            'nationality' => 'sometimes|required|integer',
+            'timezone' => 'sometimes|required|integer',
+            'street' => 'sometimes|nullable|string',
+            'city' => 'sometimes|nullable|string',
+            'address' => 'sometimes|nullable|string',
+            'reject_reason' => 'sometimes|nullable|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $vendor->update($request->all());
+        $vendor->update($validator->validated());
 
         return response()->json([
             'message' => 'Vendor updated successfully!',
