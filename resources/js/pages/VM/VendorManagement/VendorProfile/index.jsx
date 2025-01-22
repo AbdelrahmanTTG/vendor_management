@@ -156,7 +156,7 @@ const Vendor = (props) => {
         handelingSelect("countries", setOptionsC, "country");
         handelingSelect("countries", setOptionsN, "nationality");
         handelingSelect("regions", setOptionsR, "region");
-        handelingSelect("time_zone", setOptionsT, "timeZone");
+        handelingSelect("vendortimezone", setOptionsT, "timeZone");
 
     }, []);
 

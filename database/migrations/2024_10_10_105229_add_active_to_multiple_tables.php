@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('regions', function (Blueprint $table) {
             $table->boolean('Active')->default(false);
         });
-        Schema::table('time_zone', function (Blueprint $table) {
+        Schema::table('vendortimezone', function (Blueprint $table) {
             $table->boolean('Active')->default(false);
         });
 
@@ -63,7 +63,7 @@ return new class extends Migration
             $table->dropColumn('Active');
         });
 
-        Schema::table('time_zone', function (Blueprint $table) {
+        Schema::table('vendortimezone', function (Blueprint $table) {
             $table->dropColumn('Active');
         });
 

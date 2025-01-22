@@ -28,13 +28,13 @@ use Illuminate\Support\Facades\DB;
  
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['MainSubjectMatter', "subSubject",'regions', 'services', 'languages', "time_zone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "University_Degree", "major", "skills",'brand','vendors', 'vendor_payment_methods'];
+    protected static $validTables = ['MainSubjectMatter', "subSubject",'regions', 'services', 'languages', "vendortimezone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "University_Degree", "major", "skills",'brand','vendors', 'vendor_payment_methods'];
 
     protected static $models = [
         'regions' => Regions::class,
         'services' => Service::class,
         'languages' => Language::class,
-        "time_zone" => TimeZone::class,
+        "vendortimezone" => TimeZone::class,
         "countries" => Countries::class,
         "messaging_types" => Messaging::class,
         "fields" => MainSubjectMatter::class,
