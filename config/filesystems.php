@@ -59,7 +59,7 @@ return [
       
             'external' => [
                 'driver' => 'local',
-                'root'   => base_path('../erp/assets/uploads'), 
+                'root'   => base_path(env('FILES_UPLOAD')), 
     'visibility' => 'public',
             ],
      
