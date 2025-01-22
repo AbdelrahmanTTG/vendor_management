@@ -316,7 +316,7 @@ class TicketsController extends Controller
                 $originalFileName = $file->getClientOriginalName();
                 $encryptedFileName = Crypt::encryptString($originalFileName);
                 $fullEncryptedFileName = $encryptedFileName . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('tickets/', $fullEncryptedFileName, 'external');              
+                $path = $file->storeAs('tickets', $fullEncryptedFileName, 'external');              
                 if (!$path) {
                     $msg['type'] = "error";
                     $message = "Error Uploading File, Please Try Again!";
@@ -431,8 +431,8 @@ class TicketsController extends Controller
                         }
                         $originalFileName = $file->getClientOriginalName();
                         $encryptedFileName = Crypt::encryptString($originalFileName);
-                        $fullEncryptedFileName = Crypt::encryptString($originalFileName);
-                        $path = $file->storeAs('tickets/', $fullEncryptedFileName, 'external');
+                        $fullEncryptedFileName = $encryptedFileName . '.' . $file->getClientOriginalExtension();
+                        $path = $file->storeAs('tickets', $fullEncryptedFileName, 'external');
                         if (!$path) {
                             return response()->json(['message' => 'Error Uploading File, Please Try Again!', 'type' => 'error']);
                         } else {
