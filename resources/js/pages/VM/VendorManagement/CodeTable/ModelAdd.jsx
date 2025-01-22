@@ -17,12 +17,12 @@ const AddNewBtn = (props) => {
         switch (toastname) {
             case 'successToast':
                 toast.success(status, {
-                    position: toast.POSITION.TOP_RIGHT
+                    position: "top-right" 
                 });
                 break;
             case 'dangerToast':
                 toast.error(status, {
-                    position: toast.POSITION.TOP_RIGHT
+                    position: "top-right" 
                 });
                 break;
             default:
@@ -46,14 +46,16 @@ const AddNewBtn = (props) => {
                     table: props.dataTable
                 };
                 const { data } = await axiosClient.post("SubmetData", formData);
+                
+                const inputs = document.getElementsByClassName("inp");
+                for (let i = 0; i < inputs.length; i++) {
+                    inputs[i].value = "";
+                }
                 props.onAddData(data);
                 toggle();
                 basictoaster("successToast", `Added successfully`)
                 reset()
-                const inputs = document.getElementsByClassName("form-control");
-                for (let i = 0; i < inputs.length; i++) {
-                    inputs[i].value = "";
-                }
+               
             } catch (err) {
                 const response = err.response;
                 if (response && response.data) {
@@ -61,6 +63,7 @@ const AddNewBtn = (props) => {
                 } else {
                     setErrorMessage("An unexpected error occurred.");
                 }
+                // console.log(err)
                 basictoaster("dangerToast", response.data.message)
 
             }
@@ -194,10 +197,11 @@ const AddNewBtn = (props) => {
                                                 )}
                                                 {fieldObj.field === "input" && (
                                                     <input
-                                                        className="form-control"
+                                                        className="form-control inp"
                                                         id={fieldObj.name}
                                                         type={fieldObj.type}
                                                         name={fieldObj.name}
+                                                    defaultValue=""
                                                         {...register(fieldObj.name, { required: true })}
                                                     />
                                                 )}
