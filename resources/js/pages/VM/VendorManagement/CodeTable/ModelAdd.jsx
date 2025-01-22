@@ -31,14 +31,15 @@ const AddNewBtn = (props) => {
     };
     const toggle = () => setModal(!modal);
     const { control, register, handleSubmit, reset , formState: { errors } } = useForm();
-
+    const resetForm = () => {
+        setSelectedOptions({});
+    };
     const capitalizeWords = (str) => {
         if (!str) return '';
         return str.replace(/\b\w/g, char => char.toUpperCase());
     };
 
     const onSubmit = async (form) => {
-       
         if (form !== '') {
             try {
                 const formData = {
@@ -46,7 +47,7 @@ const AddNewBtn = (props) => {
                     table: props.dataTable
                 };
                 const { data } = await axiosClient.post("SubmetData", formData);
-                
+                resetForm()
                 const inputs = document.getElementsByClassName("inp");
                 for (let i = 0; i < inputs.length; i++) {
                     inputs[i].value = "";
@@ -107,6 +108,13 @@ const AddNewBtn = (props) => {
         }
 
     };
+    const [selectedOptions, setSelectedOptions] = useState({});
+    const handleSelectChange = (name, option) => {
+        setSelectedOptions(prevState => ({
+            ...prevState,
+            [name]: option 
+        }));
+    };
 
     return (
         <Fragment>
@@ -118,13 +126,13 @@ const AddNewBtn = (props) => {
                         {props.fields ? (
                             props.fields.map((fieldObj, index) => {
                                 const [options, setOptions] = useState([]);
-                                const [selectedOption, setSelectedOption] = useState(null);
+                                // const [selectedOption, setSelectedOption] = useState(null);
 
-                                useEffect(() => {
-                                    if (fieldObj.tableData) {
-                                        handelingSelect(fieldObj.tableData, setOptions, fieldObj.name);
-                                    }
-                                }, [fieldObj.tableData]);
+                                // useEffect(() => {
+                                //     if (fieldObj.tableData) {
+                                //         handelingSelect(fieldObj.tableData, setOptions, fieldObj.name);
+                                //     }
+                                // }, [fieldObj.tableData]);
 
                                 const handleInputChange = (inputValue) => {
 
@@ -157,8 +165,7 @@ const AddNewBtn = (props) => {
                                                         render={({ field }) => (
                                                             <Select
                                                                 {...field}
-                                                                value={selectedOption} 
-                                                                options={options}
+                                                                value={selectedOptions[fieldObj.name] || null}                                                                options={options}
                                                                 onInputChange={handleInputChange}
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
@@ -166,9 +173,10 @@ const AddNewBtn = (props) => {
                                                                     <Spinner attrSpinner={{ className: 'loader-6' }} />
                                                                 </div> : 'No options found'}
                                                                 onChange={(option) => {   
-                                                                    setSelectedOption(option); 
+                                                                    handleSelectChange(fieldObj.name, option);
                                                                     field.onChange(option.value);    
                                                                 }}
+                                                                
                                                             />
                                                         )}
                                                     />
@@ -182,12 +190,12 @@ const AddNewBtn = (props) => {
                                                         render={({ field }) => (
                                                             <Select
                                                                 {...field}
-                                                                value={selectedOption} 
+                                                                value={selectedOptions[fieldObj.name] || null} 
                                                                 options={fieldObj.static}
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
                                                                 onChange={(option) => {
-                                                                    setSelectedOption(option);     
+                                                                    handleSelectChange(fieldObj.name, option);
                                                                     field.onChange(option.value);
                                                                 }}
                                                             />
