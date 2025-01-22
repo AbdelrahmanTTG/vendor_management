@@ -3,7 +3,7 @@ import { Link, Navigate, useLocation } from 'react-router-dom';
 import axiosClient from "../../AxiosClint";
 import { useStateContext } from '../../context/contextAuth';
 import { Card, CardBody, CardHeader, Col, Input, Label, Row, Table } from 'reactstrap';
-import { Btn, H5, P } from '../../../AbstractElements';
+import { Btn, H5, P, Spinner } from '../../../AbstractElements';
 import ResponseModal from './ResponseModal';
 import VmResponseModal from './VmResponseModal';
 import { FormGroup } from 'react-bootstrap';
@@ -13,7 +13,7 @@ import SweetAlert from 'sweetalert2';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
-const ViewTicket = () => {
+const ViewTicket = (props) => {
     const [redirect, setRedirect] = useState(false);
     const location = useLocation();
     const [ticketData, setTicketData] = useState([]);
@@ -31,6 +31,8 @@ const ViewTicket = () => {
     const [optionsV, setOptionsV] = useState([]);
     const [resourceVendors, setResourceVendors] = useState([]);
     const [vmUsers, setVmUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const assignPermission = props.permissions?.assign;
     const res = {
         ticket_id: ticket.id,
         user: user.id,
@@ -46,6 +48,7 @@ const ViewTicket = () => {
                     setTicketData(data.data?.ticket);
                     setResourceVendors(data.data?.resourceVendors);
                     setVmUsers(data.data?.vmUsers);
+                    setLoading(false);
                 } catch (error) {
                     console.error('Error fetching Data:', error);
                 }
@@ -164,12 +167,13 @@ const ViewTicket = () => {
         const res = {
             ...Object.fromEntries(formData),
             'ticket': ticket.id,
-            'user': user.id, 
+            'user': user.id,
+            'assignPermission': assignPermission,
         };
         axiosClient.post("assignTicket", res).then(({ data }) => {
             switch (data.type) {
-                case 'success':                   
-                    toast.success(data.message);                  
+                case 'success':
+                    toast.success(data.message);
                     setTemp(!temp)
                     break;
                 case 'error':
@@ -223,456 +227,475 @@ const ViewTicket = () => {
 
     return (
         <Fragment>
-            <Card>
-                <CardHeader className=' b-l-primary p-b-0'>
-                    <H5>Ticket Details</H5>
-                </CardHeader>
-                <CardBody>
-                    <div className="table-responsive">
-                        <Table className='table-bordered mb-10'>
-                            <thead>
-                                <tr>
-                                    <th scope="col" >{'Ticket Number'}</th>
-                                    <th scope="col" >{'Request Type'}</th>
-                                    <th scope="col" >{'Brand'}</th>
-                                    <th scope="col" >{'Number Of Rescource'}</th>
-                                    <th scope="col">{'Service'}</th>
-                                    <th scope="col">{'Task Type	'}</th>
-                                    <th scope="col">{'Rate'}</th>
-                                    <th scope="col">{'Count'}</th>
-                                    <th scope="col">{'Unit'}</th>
-                                    <th scope="col">{'Currency'}</th>
-                                    <th scope="col">{'Source Language'}</th>
-                                    <th scope="col">{'Target Language'}</th>
-                                    <th scope="col">{'Start Date'}</th>
-                                    <th scope="col">{'Delivery Date'}</th>
-                                    <th scope="col">{'Subject Matter'}</th>
-                                    <th scope="col">{'Software'}</th>
-                                    <th scope="col">{'File Attachment'}</th>
-                                    <th scope="col">{'Status'}</th>
-                                    <th scope="col">{'Created By'}</th>
-                                    <th scope="col">{'Created At'}</th>
-
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>{ticketData.id}</td>
-                                    <td>{ticketData.request_type}</td>
-                                    <td>{ticket.brand.name}</td>
-                                    <td>{ticketData.number_of_resource}</td>
-                                    <td>{ticketData.service}</td>
-                                    <td>{ticketData.task_type}</td>
-                                    <td>{ticketData.rate}</td>
-                                    <td>{ticketData.count}</td>
-                                    <td>{ticketData.unit}</td>
-                                    <td>{ticketData.currency}</td>
-                                    <td>{ticketData.source_lang}</td>
-                                    <td>{ticketData.target_lang}</td>
-                                    <td>{ticketData.start_date}</td>
-                                    <td>{ticketData.delivery_date}</td>
-                                    <td>{ticketData.subject}</td>
-                                    <td>{ticketData.software}</td>
-                                    <td>
-                                        {ticketData.fileLink != null ? (
-                                            <Link to={ticketData.fileLink} className='txt-dangers'>{'View File'}</Link>
-                                        ) : (
-                                            'No File Found'
-                                        )}
-                                    </td>
-                                    <td>{ticketData.status}</td>
-                                    <td>{ticketData.created_by}</td>
-                                    <td>{ticketData.created_at}</td>
-                                </tr>
-                                <tr>
-                                    <th>{'Comment'}</th>
-                                    <td colSpan={19} dangerouslySetInnerHTML={{ __html: ticketData.comment }} ></td>
-                                </tr>
-                                {ticketData.statusVal == 0 &&
-                                    <tr>
-                                        <th>{'Rejection Reason'}</th>
-                                        <td colSpan={19} dangerouslySetInnerHTML={{ __html: ticketData.rejection_reason }} ></td>
-                                    </tr>
-                                }
-                                {ticketData.assignedUser != 0 &&
-                                    <tr>
-                                        <th>{'Assigned To'}</th>
-                                        <td colSpan={19}>{ ticketData.assignedUser }</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </Table>
-                    </div>
-                </CardBody>
-            </Card>
-            {/*  response */}
-            <Card>
-                <CardHeader className='b-t-primary p-b-0'>
-                    <Row>
-                        <Col sm="9">
-                            <H5>  Ticket Response   </H5>
-                        </Col>
-                        <Col sm="3">
-                            {ticketData.statusVal != 4 && (
-                                <>
-                                    <ResponseModal isOpen={modal} title={'Add Response'} toggler={toggle} fromInuts={res} sendDataToParent={toggle} changeTicketData={changeData}  ></ResponseModal>
-                                    <div className="pro-shop text-end">
-                                        <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle }}><i className="icofont icofont-ui-messaging me-2"></i> {'Add Response'}</Btn>
-                                    </div>
-                                </>
-                            )}
-                        </Col>
-                    </Row>
-                </CardHeader>
-                <CardBody>
-                    <div className="table-responsive">
-                        <Table className='table-bordered mb-10'>
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Response</th>
-                                    <th>Created At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {ticketData['Response'] ? (
-                                    <>
-                                        {ticketData['Response'].map((item, index) => (
-                                            <tr key={index}>
-                                                <td scope="row">{item.created_by}</td>
-                                                <td scope="row">
-                                                    <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />
-                                                    <div className="clearfix"></div>
-                                                    {item.fileLink != null && item.fileLink.trim() != '' && (
-                                                        <button onClick={() => handleDownload(item.fileLink)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>Attachment : <i className="fa fa-download"></i> {'View File'}</button>
-                                                    )}
-                                                </td>
-                                                <td scope="row">{item.created_at}</td>
-                                            </tr>
-                                        ))}
-                                    </>
-                                ) :
-                                    <>
+            {loading ? (
+                <div className="loader-box" >
+                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                </div>
+            ) :
+                <>
+                    <Card>
+                        <CardHeader className=' b-l-primary p-b-0'>
+                            <H5>Ticket Details</H5>
+                        </CardHeader>
+                        <CardBody>
+                            <div className="table-responsive">
+                                <Table className='table-bordered mb-10'>
+                                    <thead>
                                         <tr>
-                                            <td colSpan="3" className='text-center'>NO Data Found</td>
+                                            <th scope="col" >{'Ticket Number'}</th>
+                                            <th scope="col" >{'Request Type'}</th>
+                                            <th scope="col" >{'Brand'}</th>
+                                            <th scope="col" >{'Number Of Rescource'}</th>
+                                            <th scope="col">{'Service'}</th>
+                                            <th scope="col">{'Task Type	'}</th>
+                                            <th scope="col">{'Rate'}</th>
+                                            <th scope="col">{'Count'}</th>
+                                            <th scope="col">{'Unit'}</th>
+                                            <th scope="col">{'Currency'}</th>
+                                            <th scope="col">{'Source Language'}</th>
+                                            <th scope="col">{'Target Language'}</th>
+                                            <th scope="col">{'Start Date'}</th>
+                                            <th scope="col">{'Delivery Date'}</th>
+                                            <th scope="col">{'Subject Matter'}</th>
+                                            <th scope="col">{'Software'}</th>
+                                            <th scope="col">{'File Attachment'}</th>
+                                            <th scope="col">{'Status'}</th>
+                                            <th scope="col">{'Created By'}</th>
+                                            <th scope="col">{'Created At'}</th>
+
                                         </tr>
-                                    </>
-                                }
-                            </tbody>
-                        </Table>
-                    </div>
-                </CardBody>
-            </Card>
-            {/*  action */}
-            <Card>
-                <CardHeader className='b-t-primary p-b-0'>
-                    <Row>
-                        <Col sm="9">
-                            <H5>  Ticket Action   </H5>
-                        </Col>
-                    </Row>
-                </CardHeader>
-                <CardBody>
-                    {ticketData.statusVal == 1 && ticketData.assignedUser == 0 && (
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{ticketData.id}</td>
+                                            <td>{ticketData.request_type}</td>
+                                            <td>{ticket.brand.name}</td>
+                                            <td>{ticketData.number_of_resource}</td>
+                                            <td>{ticketData.service}</td>
+                                            <td>{ticketData.task_type}</td>
+                                            <td>{ticketData.rate}</td>
+                                            <td>{ticketData.count}</td>
+                                            <td>{ticketData.unit}</td>
+                                            <td>{ticketData.currency}</td>
+                                            <td>{ticketData.source_lang}</td>
+                                            <td>{ticketData.target_lang}</td>
+                                            <td>{ticketData.start_date}</td>
+                                            <td>{ticketData.delivery_date}</td>
+                                            <td>{ticketData.subject}</td>
+                                            <td>{ticketData.software}</td>
+                                            <td>
+                                                {ticketData.fileLink != null ? (
+                                                    <Link to={ticketData.fileLink} className='txt-dangers'>{'View File'}</Link>
+                                                ) : (
+                                                    'No File Found'
+                                                )}
+                                            </td>
+                                            <td>{ticketData.status}</td>
+                                            <td>{ticketData.created_by}</td>
+                                            <td>{ticketData.created_at}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{'Comment'}</th>
+                                            <td colSpan={19} dangerouslySetInnerHTML={{ __html: ticketData.comment }} ></td>
+                                        </tr>
+                                        {ticketData.statusVal == 0 &&
+                                            <tr>
+                                                <th>{'Rejection Reason'}</th>
+                                                <td colSpan={19} dangerouslySetInnerHTML={{ __html: ticketData.rejection_reason }} ></td>
+                                            </tr>
+                                        }
+                                        {ticketData.assignedUser != 0 &&
+                                            <tr>
+                                                <th>{'Assigned To'}</th>
+                                                <td colSpan={19}>{ticketData.assignedUser}</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </Table>
+                            </div>
+                        </CardBody>
+                    </Card>
+                      {/*  Assign Ticket */}
+                      {ticketData.statusVal == 1 && ticketData.assignedUser == 0 && assignPermission == 1 && (
                         <>
-                            <form onSubmit={AssignTicket}>
-                                <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label">{'Assign Ticket To'}</Label>
-                                    <Col sm="7">
-                                        <Select name='vmUser' id='vmUser' required
-                                            options={vmUsers} className="js-example-basic-single" />
-                                    </Col>
-                                    <Col sm="2">
-                                        <Btn attrBtn={{ color: 'primary', type: 'submit' }}>{'Send'}</Btn>
-                                    </Col>
-                                </FormGroup>
-                            </form>
-                            <hr />
-                        </>
-                    )}
-                    <form onSubmit={changeTicketStatus}>
-                        {ticketData.statusVal <= 5 && (
-                            <>
-                                <FormGroup className="row mt-2">
-                                    <Label className="col-sm-3 col-form-label">{'Ticket Status'}</Label>
-                                    <Col sm="9">
-                                        <Input type="select" name="status" className="custom-select form-control" defaultValue={ticketData.statusVal} onChange={e => setStatusInput(e.target.value)}>
-                                            {ticketData.statusVal == 1 &&
-                                                <>
-                                                    <option value="1" disabled>{'New'}</option>
-                                                    <option value="2">{'Opened'}</option>
-                                                    <option value="0">{'reject'}</option>
-                                                </>
-                                            }{ticketData.statusVal == 2 &&
-                                                <>
-                                                    <option value="2">{'Opened'}</option>
-                                                    <option value="3">{'Partly Closed'}</option>
-                                                </>
-                                            }{ticketData.statusVal == 3 &&
-                                                <>
-                                                    <option value="3">{'Partly Closed'}</option>
-                                                    <option value="4">{'Closed'}</option>
-                                                </>
-                                            }{ticketData.statusVal == 5 &&
-                                                <option value="5" disabled >{'Waiting Requester Acceptance'}</option>
-                                            }{ticketData.statusVal == 4 &&
-                                                <option value="4" disabled >{'Closed'}</option>
-                                            }{ticketData.statusVal == 0 &&
-                                                <option value="0" disabled >{'Rejected'}</option>
-                                            }
-                                        </Input>
-                                    </Col>
-                                </FormGroup>
-                                {statusInput == '0' &&
-                                    <FormGroup className="row mt-2">
-                                        <Label className="col-sm-3 col-form-label">{'Rejection Reason '}</Label>
+                            <Card>
+                                <CardHeader className='b-t-primary p-b-0'>
+                                    <Row>
                                         <Col sm="9">
-                                            <CKEditor name="comment" required
-                                                editor={ClassicEditor}
-                                                onChange={(e, editor) => {
-                                                    const data = editor.getData();
-                                                    setCommentInput(data);
-                                                }}
-                                            />
+                                            <H5>  Assign Ticket To Vm Team </H5>
                                         </Col>
-                                    </FormGroup>
-                                }
-                                <hr />
-                            </>
-                        )}
-                        {/*  CV Request */}
-                        {ticketData.request_type_val == 5 && (
-                            ticketData.statusVal != 0 && (
-                                ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ?
-                                    ticketData['TicketResource'].map((item, i) => (
-                                        <Row key={i} className="row mt-2">
-                                            <Col>
-                                                <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
-                                                <button type='reset' onClick={() => handleDownload(item.file)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2 '> <i className="fa fa-download"></i> {'Click Here'}</button>
+                                    </Row>
+                                </CardHeader>
+                                <CardBody>
+                                    <form onSubmit={AssignTicket}>
+                                        <FormGroup className="row">
+                                            <Label className="col-sm-3 col-form-label">{'Assign Ticket To'}</Label>
+                                            <Col sm="7">
+                                                <Select name='vmUser' id='vmUser' required
+                                                    options={vmUsers} className="js-example-basic-single" />
                                             </Col>
-                                        </Row>
-                                    ))
-                                    :
-                                    <FormGroup className="row mt-2">
-                                        <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
-                                        <Col sm="9">
-                                            <Input className="form-control" type="file" onChange={e => setFileInput(e.target.files[0])} required={ticketData.statusVal == 1 ? false : true} />
-                                        </Col>
-                                    </FormGroup>
-                            )
-                        )}
-                        {/*  Resource Availabilty */}
-                        {ticketData.request_type_val == 4 && (
-                            ticketData.statusVal <= 3 && ticketData.statusVal != 0 ?
-                                <FormGroup className="row mt-2">
-                                    <Label className="col-sm-3 col-form-label">{'Number Of Resources'}</Label>
-                                    <Col sm="9">
-                                        <Input className="form-control" type="number" name='number_of_resource' defaultValue={ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ? ticketData['TicketResource'][0]['number_of_resource'] : ''} required={ticketData.statusVal == 1 ? false : true} />
-                                    </Col>
-                                </FormGroup>
-                                :
-                                <FormGroup className="row mt-2">
-                                    <Label className="col-sm-3 col-form-label">{'Number Of Resources'}</Label>
-                                    <Col sm="9">
-                                        <Input className="form-control" defaultValue={ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ? ticketData['TicketResource'][0]['number_of_resource'] : ''} disabled />
-                                    </Col>
-                                </FormGroup>
-                        )}
-                        {/*  new Resource  */}
-                        {(ticketData.request_type_val == 1 || ticketData.request_type_val == 3) &&
-                            (ticketData.statusVal != 4 && ticketData.statusVal != 0) &&
-                            <>
-                                <FormGroup className="row mt-2">
-                                    <Label className="col-sm-3 col-form-label">{'Select Vendor'}</Label>
-                                    <Col sm="9">
-                                        <Select name='vendor' id='vendor' required={resourceVendors != null || ticketData.statusVal == 1 ? false : true}
-                                            options={optionsV} className="js-example-basic-single "
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "vendors", "vendor", setOptionsV, optionsV)
-                                            }
-                                            isMulti />
-                                    </Col>
-                                </FormGroup>
-                                {resourceVendors != null && (resourceVendors).length > 0 &&
-                                    <div className="table-responsive mt-5">
-                                        <Table className='table-bordered mb-10'>
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col" >{'Name'}</th>
-                                                    <th scope="col" >{'Email'}</th>
-                                                    <th scope="col" >{'Contact'}</th>
-                                                    <th scope="col" >{'Country of Residence'}</th>
-                                                    <th scope="col">{'Mother Tongue'}</th>
-                                                    <th scope="col">{'Profile'}</th>
-                                                    <th scope="col">{'CV'}</th>
-                                                    <th scope="col">{'Source Language'}</th>
-                                                    <th scope="col">{'Target Language'}</th>
-                                                    <th scope="col">{'Dialect'}</th>
-                                                    <th scope="col">{'Service'}</th>
-                                                    <th scope="col">{'Task Type'}</th>
-                                                    <th scope="col">{'Unit'}</th>
-                                                    <th scope="col">{'Rate'}</th>
-                                                    <th scope="col">{'Currency'}</th>
-                                                    <th scope="col">{'Created By'}</th>
-                                                    {ticketData.statusVal != 4 &&
-                                                        <th scope="col">{'Delete'}</th>
-                                                    }
-
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {resourceVendors.map((item, i) => (
-                                                    <tr key={i}>
-                                                        <td>{item['vendor'].name}</td>
-                                                        <td>{item['vendor'].email}</td>
-                                                        <td>{item['vendor'].contact}</td>
-                                                        <td>{item['vendor']['country']?.name}</td>
-                                                        <td>{item['vendor'].mother_tongue}</td>
-                                                        <td>{item['vendor'].profile}</td>
-                                                        {item['vendor'].cv != null ?
-                                                            <td>
-                                                                <button type='reset' onClick={() => handleDownload(item['vendor'].cv)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>{'CV'}</button>
-                                                            </td>
-                                                            :
-                                                            <td></td>
-                                                        }
-
-
-                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['source_lang']?.name}</td>
-                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['target_lang']?.name}</td>
-                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.dialect}</td>
-                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['service']?.name}</td>
-                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['task_type']?.name}</td>
-                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['unit']?.name}</td>
-                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.rate}</td>
-                                                        <td>{item['vendor']['vendor_sheet']?.[0]?.['currency']?.name}</td>
-                                                        <td>{item['vendor']?.['created_by']?.user_name}</td>
-                                                        {ticketData.statusVal != 4 &&
-                                                            <td>  <button type='reset' onClick={() => deleteRes(item.id)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'> <i className="icofont icofont-ui-delete"></i></button></td>
-                                                        }
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </Table>
-                                    </div>
-                                }
-                            </>
-                        }
-                        {ticketData.statusVal <= 3 && ticketData.statusVal != 0 && (
-                            <Row className='mt-2'>
-                                <Col className='text-end'>
-                                    <Btn attrBtn={{ color: 'primary', type: 'submit' }}>{'Save Changes'}</Btn>
+                                            <Col sm="2">
+                                                <Btn attrBtn={{ color: 'primary', type: 'submit' }}><i className="fa fa-send-o"></i> {'Send'}</Btn>
+                                            </Col>
+                                        </FormGroup>
+                                    </form>
+                                    
+                                </CardBody>
+                            </Card>
+                        </>)}
+                    {/*  action */}
+                    <Card>
+                        <CardHeader className='b-t-primary p-b-0'>
+                            <Row>
+                                <Col sm="9">
+                                    <H5>  Ticket Action   </H5>
                                 </Col>
                             </Row>
-                        )}
-                    </form>
-                </CardBody>
-            </Card>
-            {/*  vm response */}
-            <Card>
-                <CardHeader className='b-t-primary p-b-0'>
-                    <Row>
-                        <Col sm="9">
-                            <H5>  VM Team Ticket Comments  </H5>
-                        </Col>
-                        <Col sm="3">
-                            {ticketData.statusVal != 4 && (
-                                <>
-                                    <VmResponseModal isOpen={modal2} title={'Add Comment'} toggler={toggle2} fromInuts={res} sendDataToParent={toggle2} changeTicketData={changeData}></VmResponseModal>
-                                    <div className="pro-shop text-end">
-                                        <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle2 }}><i className="icofont icofont-ui-messaging me-2"></i> {'Add Comment'}</Btn>
-                                    </div>
-                                </>
-                            )}
-                        </Col>
-                    </Row>
-                </CardHeader>
-                <CardBody>
-                    <div className="table-responsive">
-                        <Table className='table-bordered mb-10'>
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Response</th>
-                                    <th>Created At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {ticketData['TeamResponse'] ? (
+                        </CardHeader>
+                        <CardBody>                           
+                            <form onSubmit={changeTicketStatus}>
+                                {ticketData.statusVal <= 5 && (
                                     <>
-                                        {ticketData['TeamResponse'].map((item, index) => (
-                                            <tr key={index}>
-                                                <td scope="row">{item.created_by}</td>
-                                                <td scope="row">
-                                                    <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />
-                                                </td>
-                                                <td scope="row">{item.created_at}</td>
-                                            </tr>
-                                        ))}
-                                    </>
-                                ) :
-                                    <>
-                                        <tr>
-                                            <td colSpan="3" className='text-center'>NO Data Found</td>
-                                        </tr>
-                                    </>
-                                }
-                            </tbody>
-                        </Table>
-                    </div>
-                </CardBody>
-            </Card>
-            {/*  time */}
-            <Card>
-                <CardHeader className='b-t-primary p-b-0'>
-                    <Row>
-                        <Col sm="12">
-                            <H5>  Ticket Log  </H5>
-                        </Col>
-                    </Row>
-                </CardHeader>
-                <CardBody>
-                    <div className="table-responsive">
-                        <Table className='table-bordered mb-10'>
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Ticket Status</th>
-                                    <th>Created At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr >
-                                    <td>
-                                        {ticketData.created_by}
-                                    </td>
-                                    <td>New</td>
-                                    <td>
-                                        {ticketData.created_at}
-                                    </td>
-                                </tr>
-                                {ticketData['Time'] && (
-                                    <>
-                                        {ticketData['Time'].map((item, index) => (
-                                            <tr key={index}>
-                                                <td scope="row">{item.created_by}</td>
-                                                <td scope="row">
-                                                    {item.status}
-                                                </td>
-                                                <td scope="row">{item.created_at}</td>
-                                            </tr>
-                                        ))}
+                                        <FormGroup className="row mt-2">
+                                            <Label className="col-sm-3 col-form-label">{'Ticket Status'}</Label>
+                                            <Col sm="9">
+                                                <Input type="select" name="status" className="custom-select form-control" defaultValue={ticketData.statusVal} onChange={e => setStatusInput(e.target.value)}>
+                                                    {ticketData.statusVal == 1 &&
+                                                        <>
+                                                            <option value="1" disabled>{'New'}</option>
+                                                            <option value="2">{'Opened'}</option>
+                                                            <option value="0">{'reject'}</option>
+                                                        </>
+                                                    }{ticketData.statusVal == 2 &&
+                                                        <>
+                                                            <option value="2">{'Opened'}</option>
+                                                            <option value="3">{'Partly Closed'}</option>
+                                                        </>
+                                                    }{ticketData.statusVal == 3 &&
+                                                        <>
+                                                            <option value="3">{'Partly Closed'}</option>
+                                                            <option value="4">{'Closed'}</option>
+                                                        </>
+                                                    }{ticketData.statusVal == 5 &&
+                                                        <option value="5" disabled >{'Waiting Requester Acceptance'}</option>
+                                                    }{ticketData.statusVal == 4 &&
+                                                        <option value="4" disabled >{'Closed'}</option>
+                                                    }{ticketData.statusVal == 0 &&
+                                                        <option value="0" disabled >{'Rejected'}</option>
+                                                    }
+                                                </Input>
+                                            </Col>
+                                        </FormGroup>
+                                        {statusInput == '0' &&
+                                            <FormGroup className="row mt-2">
+                                                <Label className="col-sm-3 col-form-label">{'Rejection Reason '}</Label>
+                                                <Col sm="9">
+                                                    <CKEditor name="comment" required
+                                                        editor={ClassicEditor}
+                                                        onChange={(e, editor) => {
+                                                            const data = editor.getData();
+                                                            setCommentInput(data);
+                                                        }}
+                                                    />
+                                                </Col>
+                                            </FormGroup>
+                                        }
+                                        <hr />
                                     </>
                                 )}
-                                <tr className='bg-light '>
-                                    <th>Time taken</th>
-                                    <td colSpan={2}>{ticketData.TimeTaken}</td>
-                                </tr>
-                            </tbody>
-                        </Table>
-                    </div>
-                </CardBody>
-            </Card>
+                                {/*  CV Request */}
+                                {ticketData.request_type_val == 5 && (
+                                    ticketData.statusVal != 0 && (
+                                        ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ?
+                                            ticketData['TicketResource'].map((item, i) => (
+                                                <Row key={i} className="row mt-2">
+                                                    <Col>
+                                                        <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
+                                                        <button type='reset' onClick={() => handleDownload(item.file)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2 '> <i className="fa fa-download"></i> {'Click Here'}</button>
+                                                    </Col>
+                                                </Row>
+                                            ))
+                                            :
+                                            <FormGroup className="row mt-2">
+                                                <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
+                                                <Col sm="9">
+                                                    <Input className="form-control" type="file" onChange={e => setFileInput(e.target.files[0])} required={ticketData.statusVal == 1 ? false : true} />
+                                                </Col>
+                                            </FormGroup>
+                                    )
+                                )}
+                                {/*  Resource Availabilty */}
+                                {ticketData.request_type_val == 4 && (
+                                    ticketData.statusVal <= 3 && ticketData.statusVal != 0 ?
+                                        <FormGroup className="row mt-2">
+                                            <Label className="col-sm-3 col-form-label">{'Number Of Resources'}</Label>
+                                            <Col sm="9">
+                                                <Input className="form-control" type="number" name='number_of_resource' defaultValue={ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ? ticketData['TicketResource'][0]['number_of_resource'] : ''} required={ticketData.statusVal == 1 ? false : true} />
+                                            </Col>
+                                        </FormGroup>
+                                        :
+                                        <FormGroup className="row mt-2">
+                                            <Label className="col-sm-3 col-form-label">{'Number Of Resources'}</Label>
+                                            <Col sm="9">
+                                                <Input className="form-control" defaultValue={ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ? ticketData['TicketResource'][0]['number_of_resource'] : ''} disabled />
+                                            </Col>
+                                        </FormGroup>
+                                )}
+                                {/*  new Resource  */}
+                                {(ticketData.request_type_val == 1 || ticketData.request_type_val == 3) &&
+                                    (ticketData.statusVal != 4 && ticketData.statusVal != 0) &&
+                                    <>
+                                        <FormGroup className="row mt-2">
+                                            <Label className="col-sm-3 col-form-label">{'Select Vendor'}</Label>
+                                            <Col sm="9">
+                                                <Select name='vendor' id='vendor' required={resourceVendors != null || ticketData.statusVal == 1 ? false : true}
+                                                    options={optionsV} className="js-example-basic-single "
+                                                    onInputChange={(inputValue) =>
+                                                        handleInputChange(inputValue, "vendors", "vendor", setOptionsV, optionsV)
+                                                    }
+                                                    isMulti />
+                                            </Col>
+                                        </FormGroup>
+                                        {resourceVendors != null && (resourceVendors).length > 0 &&
+                                            <div className="table-responsive mt-5">
+                                                <Table className='table-bordered mb-10'>
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col" >{'Name'}</th>
+                                                            <th scope="col" >{'Email'}</th>
+                                                            <th scope="col" >{'Contact'}</th>
+                                                            <th scope="col" >{'Country of Residence'}</th>
+                                                            <th scope="col">{'Mother Tongue'}</th>
+                                                            <th scope="col">{'Profile'}</th>
+                                                            <th scope="col">{'CV'}</th>
+                                                            <th scope="col">{'Source Language'}</th>
+                                                            <th scope="col">{'Target Language'}</th>
+                                                            <th scope="col">{'Dialect'}</th>
+                                                            <th scope="col">{'Service'}</th>
+                                                            <th scope="col">{'Task Type'}</th>
+                                                            <th scope="col">{'Unit'}</th>
+                                                            <th scope="col">{'Rate'}</th>
+                                                            <th scope="col">{'Currency'}</th>
+                                                            <th scope="col">{'Created By'}</th>
+                                                            {ticketData.statusVal != 4 &&
+                                                                <th scope="col">{'Delete'}</th>
+                                                            }
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {resourceVendors.map((item, i) => (
+                                                            <tr key={i}>
+                                                                <td>{item['vendor'].name}</td>
+                                                                <td>{item['vendor'].email}</td>
+                                                                <td>{item['vendor'].contact}</td>
+                                                                <td>{item['vendor']['country']?.name}</td>
+                                                                <td>{item['vendor'].mother_tongue}</td>
+                                                                <td>{item['vendor'].profile}</td>
+                                                                {item['vendor'].cv != null ?
+                                                                    <td>
+                                                                        <button type='reset' onClick={() => handleDownload(item['vendor'].cv)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>{'CV'}</button>
+                                                                    </td>
+                                                                    :
+                                                                    <td></td>
+                                                                }
+
+
+                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['source_lang']?.name}</td>
+                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['target_lang']?.name}</td>
+                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.dialect}</td>
+                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['service']?.name}</td>
+                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['task_type']?.name}</td>
+                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['unit']?.name}</td>
+                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.rate}</td>
+                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['currency']?.name}</td>
+                                                                <td>{item['vendor']?.['created_by']?.user_name}</td>
+                                                                {ticketData.statusVal != 4 &&
+                                                                    <td>  <button type='reset' onClick={() => deleteRes(item.id)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'> <i className="icofont icofont-ui-delete"></i></button></td>
+                                                                }
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </Table>
+                                            </div>
+                                        }
+                                    </>
+                                }
+                                {ticketData.statusVal <= 3 && ticketData.statusVal != 0 && (
+                                    <Row className='mt-2'>
+                                        <Col className='text-end'>
+                                            <Btn attrBtn={{ color: 'primary', type: 'submit' }}><i class="fa fa-check-square-o"></i> {'Save Changes'}</Btn>
+                                        </Col>
+                                    </Row>
+                                )}
+                            </form>
+                        </CardBody>
+                    </Card>
+                    {/*  response */}
+                    <Card>
+                        <CardHeader className='b-t-primary p-b-0'>
+                            <Row>
+                                <Col sm="9">
+                                    <H5>  Ticket Response   </H5>
+                                </Col>
+                                <Col sm="3">
+                                    {ticketData.statusVal != 4 && (
+                                        <>
+                                            <ResponseModal isOpen={modal} title={'Add Response'} toggler={toggle} fromInuts={res} sendDataToParent={toggle} changeTicketData={changeData}  ></ResponseModal>
+                                            <div className="pro-shop text-end">
+                                                <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle }}><i className="icofont icofont-ui-messaging me-2"></i> {'Add Response'}</Btn>
+                                            </div>
+                                        </>
+                                    )}
+                                </Col>
+                            </Row>
+                        </CardHeader>
+                        <CardBody>
+                            <div className="table-responsive">
+                                <Table className='table-bordered mb-10'>
+                                    <thead>
+                                        <tr>
+                                            <th>Username</th>
+                                            <th>Response</th>
+                                            <th>Created At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {ticketData['Response'] ? (
+                                            <>
+                                                {ticketData['Response'].map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td scope="row">{item.created_by}</td>
+                                                        <td scope="row">
+                                                            <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />
+                                                            <div className="clearfix"></div>
+                                                            {item.fileLink != null && item.fileLink.trim() != '' && (
+                                                                <button onClick={() => handleDownload(item.fileLink)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>Attachment : <i className="fa fa-download"></i> {'View File'}</button>
+                                                            )}
+                                                        </td>
+                                                        <td scope="row">{item.created_at}</td>
+                                                    </tr>
+                                                ))}
+                                            </>
+                                        ) :
+                                            <>
+                                                <tr>
+                                                    <td colSpan="3" className='text-center'>NO Data Found</td>
+                                                </tr>
+                                            </>
+                                        }
+                                    </tbody>
+                                </Table>
+                            </div>
+                        </CardBody>
+                    </Card>                  
+                    {/*  vm response */}
+                    <Card>
+                        <CardHeader className='b-t-primary p-b-0'>
+                            <Row>
+                                <Col sm="9">
+                                    <H5>  VM Team Ticket Comments  </H5>
+                                </Col>
+                                <Col sm="3">
+                                    {ticketData.statusVal != 4 && (
+                                        <>
+                                            <VmResponseModal isOpen={modal2} title={'Add Comment'} toggler={toggle2} fromInuts={res} sendDataToParent={toggle2} changeTicketData={changeData}></VmResponseModal>
+                                            <div className="pro-shop text-end">
+                                                <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle2 }}><i className="icofont icofont-ui-messaging me-2"></i> {'Add Comment'}</Btn>
+                                            </div>
+                                        </>
+                                    )}
+                                </Col>
+                            </Row>
+                        </CardHeader>
+                        <CardBody>
+                            <div className="table-responsive">
+                                <Table className='table-bordered mb-10'>
+                                    <thead>
+                                        <tr>
+                                            <th>Username</th>
+                                            <th>Response</th>
+                                            <th>Created At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {ticketData['TeamResponse'] ? (
+                                            <>
+                                                {ticketData['TeamResponse'].map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td scope="row">{item.created_by}</td>
+                                                        <td scope="row">
+                                                            <p className='mb-0 m-t-20' dangerouslySetInnerHTML={{ __html: item.response }} />
+                                                        </td>
+                                                        <td scope="row">{item.created_at}</td>
+                                                    </tr>
+                                                ))}
+                                            </>
+                                        ) :
+                                            <>
+                                                <tr>
+                                                    <td colSpan="3" className='text-center'>NO Data Found</td>
+                                                </tr>
+                                            </>
+                                        }
+                                    </tbody>
+                                </Table>
+                            </div>
+                        </CardBody>
+                    </Card>
+                    {/*  time */}
+                    <Card>
+                        <CardHeader className='b-t-primary p-b-0'>
+                            <Row>
+                                <Col sm="12">
+                                    <H5>  Ticket Log  </H5>
+                                </Col>
+                            </Row>
+                        </CardHeader>
+                        <CardBody>
+                            <div className="table-responsive">
+                                <Table className='table-bordered mb-10'>
+                                    <thead>
+                                        <tr>
+                                            <th>Username</th>
+                                            <th>Ticket Status</th>
+                                            <th>Created At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr >
+                                            <td>
+                                                {ticketData.created_by}
+                                            </td>
+                                            <td>New</td>
+                                            <td>
+                                                {ticketData.created_at}
+                                            </td>
+                                        </tr>
+                                        {ticketData['Time'] && (
+                                            <>
+                                                {ticketData['Time'].map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td scope="row">{item.created_by}</td>
+                                                        <td scope="row">
+                                                            {item.status}
+                                                        </td>
+                                                        <td scope="row">{item.created_at}</td>
+                                                    </tr>
+                                                ))}
+                                            </>
+                                        )}
+                                        <tr className='bg-light '>
+                                            <th>Time taken</th>
+                                            <td colSpan={2}>{ticketData.TimeTaken}</td>
+                                        </tr>
+                                    </tbody>
+                                </Table>
+                            </div>
+                        </CardBody>
+                    </Card>
+                </>
+            }
         </Fragment>
     );
 };

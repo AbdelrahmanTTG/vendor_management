@@ -235,7 +235,8 @@ class AuthController extends Controller
                     DB::raw('1 as `add`'),
                     DB::raw('1 as `edit`'),
                     DB::raw('1 as `delete`'),
-                    DB::raw('1 as `view`')
+                    DB::raw('1 as `view`'),
+                    DB::raw('1 as `assign`')
                 )
                 ->get();
         } else {
@@ -257,7 +258,7 @@ class AuthController extends Controller
                 ->join('screen', 'permission.screen', '=', 'screen.id')
                 ->where('permission.role', $role)
                 ->whereIn('screen.use_system', ['VM', 'ERP,VM'])
-                ->select('screen.url', 'permission.add as add', 'permission.edit as edit', 'permission.delete as delete', 'permission.view as view')
+                ->select('screen.url', 'permission.add as add', 'permission.edit as edit', 'permission.delete as delete', 'permission.view as view', 'permission.assign as assign')
                 ->get();
         }
 

@@ -116,3 +116,4 @@ ON DELETE CASCADE;
 
 ALTER TABLE `vm_ticket` ADD `rejection_reason` TEXT NULL; 
 ALTER TABLE `vm_ticket` ADD `assigned_to` INT(11) NULL; 
+ALTER TABLE `permission` ADD `assign` TINYINT NOT NULL DEFAULT '0'; 

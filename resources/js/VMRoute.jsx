@@ -68,7 +68,7 @@ export const VM = (allowedPermissions) => [
         path: 'ViewTicket',
         element: (
             <LazyWrapper>
-                <ViewTicket />
+                <ViewTicket permissions={allowedPermissions['viewTicket']}/>
             </LazyWrapper>
         )
     },
@@ -587,6 +587,7 @@ export const getAllowedRoutes = async () => {
             edit: route?.edit || null,
             delete: route?.delete || null,
             view: route?.view || null,
+            assign: route?.assign || 0,
         };
         return acc;
     }, {});

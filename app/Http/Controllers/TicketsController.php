@@ -16,6 +16,7 @@ use App\Models\VmTicketTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TicketMail;
+use App\Models\Permission;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
@@ -278,12 +279,11 @@ class TicketsController extends Controller
         if ($result->status == 1) {
             $data['status'] = 2;
             if ($result->update($data)) {
+                if (empty($result->assigned_to)) {
+                    $data2['assigned_to'] = $user;
+                    $result->update($data2);                
+                }
                 $this->addTicketTimeStatus($id, $user, 2);
-            }
-            if (empty($result->assigned_to)) {
-                $data['assigned_to'] = $user;
-                if ($result->update($data)) 
-                    $this->addTicketTimeStatus($id, $user, 6);
             }
         }
     }
@@ -552,30 +552,33 @@ class TicketsController extends Controller
         $user = Crypt::decrypt($request->user);
         $ticket_id = $request->ticket;
         $vm_id = $request->vmUser;
-        $ticket = VmTicket::find($ticket_id);
-        if (empty($ticket->assigned_to)) {
-            $data['assigned_to'] = $vm_id;
-            if ($ticket->update($data)) {
-                $this->addTicketTimeStatus($ticket_id, $user, 6);
-                // send email to user assigned to  
-                // setup mail data         
-                $to = BrandUsers::select('email', 'user_name')->where('id', $vm_id)->first();
-                $ccEmail = BrandUsers::select('email')->where('id', $user)->first()->email;
-                $toEmail = $to->email;
-                $user_name = $to->user_name;
-                //end setup mail                 
-                $mailData = [
-                    'user_name' =>  $user_name,
-                    'subject' => "New Ticket Assigned : # " . $ticket_id,
-                    'body' =>  "New Ticket Assigned to you at " . date("Y-m-d H:i:s") . ", please Check ...",
-                ];
-                Mail::to($toEmail)->cc($ccEmail)->send(new TicketMail($mailData));
-                //end                               
-                return response()->json(['message' => 'Ticket Assigned Successfully', 'type' => 'success']);
-                
+        $ticket = VmTicket::find($ticket_id);        
+        if ($request->assignPermission == 1) {
+            if (empty($ticket->assigned_to)) {
+                $data['assigned_to'] = $vm_id;
+                if ($ticket->update($data)) {
+                    $this->addTicketTimeStatus($ticket_id, $user, 6);
+                    // send email to user assigned to  
+                    // setup mail data         
+                    $to = BrandUsers::select('email', 'user_name')->where('id', $vm_id)->first();
+                    $ccEmail = BrandUsers::select('email')->where('id', $user)->first()->email;
+                    $toEmail = $to->email;
+                    $user_name = $to->user_name;
+                    //end setup mail                 
+                    $mailData = [
+                        'user_name' =>  $user_name,
+                        'subject' => "New Ticket Assigned : # " . $ticket_id,
+                        'body' =>  "New Ticket Assigned to you at " . date("Y-m-d H:i:s") . ", please Check ...",
+                    ];
+                    Mail::to($toEmail)->cc($ccEmail)->send(new TicketMail($mailData));
+                    //end                               
+                    return response()->json(['message' => 'Ticket Assigned Successfully', 'type' => 'success']);
+                }
+            } else {
+                return response()->json(['message' => 'Ticket Already Assigned, please Check', 'type' => 'error']);
             }
         } else {
-            return response()->json(['message' => 'Ticket Already Assigned, please Check', 'type' => 'error']);
+            return response()->json(['message' => 'You Have No Permission', 'type' => 'error']);
         }
     }
 }
