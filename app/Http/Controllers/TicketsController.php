@@ -400,7 +400,7 @@ class TicketsController extends Controller
             $toEmail = $to->email;
             $user_name = $to->user_name;
             //end setup mail
-            if ($status == 0) {
+            if ($status === 0) {
                 $comment = $request->comment;
                 if ($ticket->update(['status' => $status, 'rejection_reason' => $comment])) {
                     $this->addTicketTimeStatus($ticket_id, $user, $status);

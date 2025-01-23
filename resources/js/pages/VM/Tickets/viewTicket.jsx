@@ -361,7 +361,8 @@ const ViewTicket = (props) => {
                                         <FormGroup className="row mt-2">
                                             <Label className="col-sm-3 col-form-label">{'Ticket Status'}</Label>
                                             <Col sm="9">
-                                                <Input type="select" name="status" className="custom-select form-control" defaultValue={ticketData.statusVal} onChange={e => setStatusInput(e.target.value)}>
+                                                <Input type="select" name="status" className="custom-select form-control" defaultValue={ticketData.statusVal} onChange={e => setStatusInput(e.target.value)} 
+                                                disabled={ticketData.statusVal == 5 || ticketData.statusVal == 0 || ticketData.statusVal == 4 ? true:false}>
                                                     {ticketData.statusVal == 1 &&
                                                         <>
                                                             <option value="1" disabled>{'New'}</option>
@@ -379,11 +380,11 @@ const ViewTicket = (props) => {
                                                             <option value="4">{'Closed'}</option>
                                                         </>
                                                     }{ticketData.statusVal == 5 &&
-                                                        <option value="5" disabled >{'Waiting Requester Acceptance'}</option>
+                                                        <option value="5" >{'Waiting Requester Acceptance'}</option>
                                                     }{ticketData.statusVal == 4 &&
-                                                        <option value="4" disabled >{'Closed'}</option>
+                                                        <option value="4" >{'Closed'}</option>
                                                     }{ticketData.statusVal == 0 &&
-                                                        <option value="0" disabled >{'Rejected'}</option>
+                                                        <option value="0" >{'Rejected'}</option>
                                                     }
                                                 </Input>
                                             </Col>
