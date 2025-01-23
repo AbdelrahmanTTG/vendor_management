@@ -471,7 +471,7 @@ const Experience = (props) => {
                                                     />
                                                     <input
                                                         type="hidden" disabled
-                                                        {...register('summary', { required: true })}
+                                                        {...register('summary', { required: false })}
                                                     />
                                                 </Col>
                                             </FormGroup>

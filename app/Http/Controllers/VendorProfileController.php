@@ -1052,7 +1052,7 @@ class VendorProfileController extends Controller
             'vendor_id' => 'required|integer',
             'started_working' => 'required|digits:4',
             'experience_year' => 'required|integer',
-            'summary' => 'required|string|max:255',
+            'summary' => 'nullable|string|max:255',
             'skills' => 'sometimes|required|array|min:1',
             'skills.*.skill' => 'required',
         ]);
@@ -1091,7 +1091,7 @@ class VendorProfileController extends Controller
             'experience' => 'nullable|integer',
             'started_working' => 'required|digits:4',
             'experience_year' => 'required|integer',
-            'summary' => 'required|string|max:255',
+            'summary' => 'nullable|string|max:255',
             'skills' => 'sometimes|required|array|min:1',
             'skills.*.skill' => 'required',
         ]);

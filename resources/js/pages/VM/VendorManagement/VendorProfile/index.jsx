@@ -1823,11 +1823,19 @@ const Vendor = (props) => {
                                                                                             .filter((key) => key !== 'vendor')
                                                                                             .map((key, i) => (
                                                                                                 <td key={i}>
-                                                                                                    {typeof detail[key] === 'object' && detail[key] !== null
-                                                                                                        ? detail[key]?.name || detail[key]?.dialect || "N/A"
-                                                                                                        : detail[key] || "N/A"}
+                                                                                                    {key === 'Status' ? (
+                                                                                                        detail[key] == "0" ? 'Active' :
+                                                                                                            detail[key] == "1" ? 'Not Active' :
+                                                                                                                detail[key] == "2" ? 'Pending by PM' :
+                                                                                                                    ''
+                                                                                                    ) : (
+                                                                                                        typeof detail[key] === 'object' && detail[key] !== null
+                                                                                                            ? detail[key]?.name || detail[key]?.dialect || "N/A"
+                                                                                                            : detail[key] || "N/A"
+                                                                                                    )}
                                                                                                 </td>
                                                                                             ))}
+
                                                                                         <td>
                                                                                             {props.permissions?.edit == 1 && (
                                                                                                 <LazyWrapper>

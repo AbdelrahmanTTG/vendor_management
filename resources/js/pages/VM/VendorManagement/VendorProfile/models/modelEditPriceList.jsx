@@ -46,6 +46,7 @@ const EditNewBtn = (props) => {
     const [loading, setLoading] = useState(false);
     const [optionsC, setOptionsC] = useState([]);
     const [priceList, setPriceList] = useState([]);
+    const [loading2, setLoading2] = useState(false);
 
     const onSubmit = async (data) => {
         const formDate = Object.fromEntries(
@@ -83,20 +84,31 @@ const EditNewBtn = (props) => {
         }
     };
     useEffect(() => {
+        let isMounted = true; 
         const fetchData = async (id) => {
-            const payload = { id: id, }
+            const payload = { id: id };
             try {
+                setLoading2(true);
                 const { data } = await axiosClient.post("getPriceList", payload);
-                setPriceList(data);
+          
+                    setPriceList(data);
+                
             } catch (err) {
-                console.error(err);
+                if (isMounted) console.error(err);
             } finally {
+                if (isMounted) setLoading2(false); 
             }
         };
+
         if (props?.id) {
             fetchData(props?.id);
         }
+
+        return () => {
+            isMounted = false;
+        };
     }, [props?.id]);
+
     useEffect(() => {
         if (props?.data || priceList?.length) {
             var data = props?.data || priceList[0];
@@ -260,7 +272,13 @@ const EditNewBtn = (props) => {
         <Fragment>
             <Btn attrBtn={{ color: 'btn btn-primary-light', onClick: toggle }} className="me-2" > <i className="icofont icofont-ui-edit"></i></Btn>
             <CommonModal isOpen={modal} title='Edit price list' icon={<><i className="fa fa-info-circle" style={{ fontSize: '18px', color: 'darkred', marginRight: '1%' }}>  </i><span style={{ fontSize: '14px', color: 'darkred' }}>Type in the fields to search.</span></>} toggler={toggle} size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
-                <Row className="g-3 mb-3">
+               
+                  {
+                             loading2 ? (
+                               <div className="loader-box" >
+                                 <Spinner attrSpinner={{ className: 'loader-6' }} />
+                               </div>
+                             ) :  <Row className="g-3 mb-3">
                     <Col md="6">
                         <FormGroup className="row">
                             <Label className="col-sm-4 col-form-label" for="validationCustom01">Main-Subject Matter</Label>
@@ -739,7 +757,7 @@ const EditNewBtn = (props) => {
                         </FormGroup>
                     </Col>
                  
-                </Row>
+                    </Row>}
                 {/* <Row className="g-0">
                     <Col  >
                         <Label htmlFor="validationDefault01">Language</Label>

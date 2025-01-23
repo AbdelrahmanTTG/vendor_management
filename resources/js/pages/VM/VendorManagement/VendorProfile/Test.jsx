@@ -144,6 +144,10 @@ const Test = (props) => {
             basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
             return;
         }
+        if (!testFileName) {
+            basictoaster("dangerToast", " The test file must be attached.");
+            return;
+        }
         if (!props.backPermissions?.add) {
             basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
             return;
