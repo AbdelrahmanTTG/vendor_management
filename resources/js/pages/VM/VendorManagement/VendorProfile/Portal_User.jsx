@@ -88,7 +88,17 @@ const Portal_User = (props) => {
     useEffect(() => {
         setValueemail(props.email)
     }, [props.email])
-
+    const onError = (errors) => {
+        for (const [key, value] of Object.entries(errors)) {
+            switch (key) {
+                case "password":
+                    basictoaster("dangerToast", "password is required");
+                    return;
+                default:
+                    break;
+            }
+        }
+    };
     return (
         <Fragment>
             <Card>
@@ -143,7 +153,7 @@ const Portal_User = (props) => {
                             <FormGroup className="row d-flex">
                                 <Col sm="2" className="col-form-label" />
                                 <Col sm="6" className="d-flex">
-                                    <Btn attrBtn={{ color: 'primary', style: { flex: 1, marginRight: '10px' }, onClick: handleSubmit(onSubmit) }}>Send Email</Btn>
+                                    <Btn attrBtn={{ color: 'primary', style: { flex: 1, marginRight: '10px' }, onClick: handleSubmit(onSubmit, onError) }}>Send Email</Btn>
 
                                     <Btn attrBtn={{ color: 'info', style: { flex: 1 }, onClick: Generate }}>Generate Password</Btn>
                                 </Col>

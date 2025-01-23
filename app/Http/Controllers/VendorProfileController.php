@@ -27,6 +27,7 @@ use App\Models\VendorEducation;
 use App\Models\Formatstable;
 use App\Mail\VMmail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 use App\Http\Controllers\InvoiceController;
 use App\Models\TimeZone;
@@ -557,7 +558,12 @@ class VendorProfileController extends Controller
             'contact_name' => 'sometimes|nullable|string',
             'legal_Name' => 'sometimes|nullable|string',
             'phone_number' => 'sometimes|required|string',
-            'contact_linked_in' => 'sometimes|nullable|string',
+            'email' => [
+                'sometimes',
+                'required',
+                'email',
+                Rule::unique('vendor', 'email')->ignore($vendor->id) 
+            ],            'contact_linked_in' => 'sometimes|nullable|string',
             'contact_ProZ' => 'sometimes|nullable|string',
             'contact_other1' => 'sometimes|nullable|string',
             'contact_other2' => 'sometimes|nullable|string',
@@ -1336,7 +1342,7 @@ class VendorProfileController extends Controller
             // $originalFileName = trim($originalFileName, '_');
         } catch (\Exception $e) {
             return response()->download($filePath, $fileName);
-             return response()->json(['message' => 'Invalid file encryption'], 400);
+            return response()->json(['message' => 'Invalid file encryption'], 400);
         }
         return response()->download($filePath, $originalFileName);
     }
@@ -1611,7 +1617,7 @@ class VendorProfileController extends Controller
             return response()->json($validator->errors(), 422);
         }
         $vendorSheet = VendorSheet::create($request->all());
-        $vendorSheet->load([
+        $vendorSheet->loadExists([
             'source_lang:id,name',
             'target_lang:id,name',
             'dialect:id,dialect',
@@ -1623,6 +1629,7 @@ class VendorProfileController extends Controller
             'subject:id,name',
             'sub_subject:id,name'
         ]);
+
         return response()->json($vendorSheet, 201);
     }
     public function getpriceListByVendorId($vendorId)
@@ -1677,7 +1684,7 @@ class VendorProfileController extends Controller
 
         $vendorSheet = VendorSheet::findOrFail($request->input("id"));
         $vendorSheet->update($request->except(['vendor']));
-        $vendorSheet->load([
+        $vendorSheet->loadExists([
             'source_lang:id,name',
             'target_lang:id,name',
             'dialect:id,dialect',
@@ -1689,6 +1696,21 @@ class VendorProfileController extends Controller
             'subject:id,name',
             'sub_subject:id,name'
         ]);
+
+        $vendorSheet->makeHidden([
+            'created_at',
+            'created_by',
+            'sheet_fields',
+            'sheet_tools',
+            'comment',
+            'copied',
+
+            'tools',
+            'ticket_id',
+            'i',
+
+        ]);
+
         return response()->json($vendorSheet, 200);
     }
     public function AddVendorstools(Request $request)
@@ -1732,7 +1754,7 @@ class VendorProfileController extends Controller
     }
     public function AddVendorTest(Request $request)
     {
-       
+
 
         DB::beginTransaction();
         try {
@@ -1754,7 +1776,7 @@ class VendorProfileController extends Controller
                 }
 
                 $testFile = $request->file('test');
-            } 
+            }
 
             $vendor->test_type = $testType;
             $vendor->test_result = $testResult;
@@ -1763,7 +1785,7 @@ class VendorProfileController extends Controller
             $vendor->main_subject = $main_subject;
             $vendor->sub_subject = $sub_subject;
             $vendor->service = $service;
-            if($request->file('test')){
+            if ($request->file('test')) {
                 if ($vendor->test_upload && Storage::disk('external')->exists($vendor->test_upload)) {
                     Storage::disk('external')->delete($vendor->test_upload);
                 }
@@ -1780,7 +1802,7 @@ class VendorProfileController extends Controller
                 $filePath = $testFile->storeAs('vendortests', $encryptedFileName . '.' . $testFile->getClientOriginalExtension(), 'external');
                 $vendor->test_upload = $filePath;
             }
-           
+
 
             $vendor->save();
 
