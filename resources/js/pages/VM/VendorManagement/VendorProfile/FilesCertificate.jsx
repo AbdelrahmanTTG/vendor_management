@@ -166,8 +166,8 @@ const FilesCertificate = (props) => {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
-                setCvFileName(response.data.files.vendor.cv);
-                setNdaFileName(response.data.files.vendor.nda)
+                // setCvFileName(response.data.files.vendor.cv);
+                // setNdaFileName(response.data.files.vendor.nda)
                 const data = response.data.files.files
                 setRows([])
                 setRows(data?.map((file, index) => ({
@@ -179,8 +179,15 @@ const FilesCertificate = (props) => {
                 })));
                 basictoaster("successToast", "Added successfully !");
                 setIsSubmitting(true)
-                // setCvFileName(null)
-                // setNdaFileName(null)
+                if (response?.data?.files?.vendor?.cv) {
+                    setCvFileName(response?.data?.files?.vendor?.cv);
+                    setCvFileNames(true)
+                }
+                if (response?.data?.files?.vendor?.nda) {
+                    setNdaFileName(response?.data?.files?.vendor?.nda)
+                    setNdaFileNames(true)
+
+                }
             } catch (err) {
                 basictoaster("dangerToast", err.message);
                 console.error("Error:", err.response ? err.response.data : err.message);
@@ -273,8 +280,18 @@ const FilesCertificate = (props) => {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            setCvFileName(response.data.files.vendor.cv);
-            setNdaFileName(response.data.files.vendor.nda)
+            if (response?.data?.files?.vendor?.cv) {
+                setCvFileName(response?.data?.files?.vendor?.cv);
+                setCvFileNames(true)
+            }
+            if (response?.data?.files?.vendor?.nda) {
+                setNdaFileName(response?.data?.files?.vendor?.nda)
+                setNdaFileNames(true)
+
+            }
+            // setCvFileName(response.data.files.vendor.cv);
+            // setNdaFileName(response.data.files.vendor.nda)
+          
             const data = response.data.files.files
             setRows([])
             setRows(data?.map((file, index) => ({
@@ -287,7 +304,7 @@ const FilesCertificate = (props) => {
             basictoaster("successToast", "Updated successfully !");
            
         } catch (err) {
-            console.error("Error:", err.response ? err.response.data : err.message);
+            // console.error("Error:", err.response ? err.response.data : err.message);
             basictoaster("dangerToast", err.message);
             setLoading(false)
 
