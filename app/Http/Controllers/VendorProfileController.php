@@ -1616,8 +1616,17 @@ class VendorProfileController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-        $vendorSheet = VendorSheet::create($request->all());
-        $vendorSheet->loadExists([
+        $data = $request->all();
+        $data['dialect'] = $data['dialect'] ?? null;  
+        $data['dialect_target'] = $data['dialect_target'] ?? null; 
+        $data['currency'] = $data['currency'] ?? null; 
+        $data['sub_subject'] = $data['sub_subject'] ?? null; 
+
+        // Create the VendorSheet
+        $vendorSheet = VendorSheet::create($data);
+
+        // Load related data
+        $vendorSheet->load([
             'source_lang:id,name',
             'target_lang:id,name',
             'dialect:id,dialect',
@@ -1683,8 +1692,16 @@ class VendorProfileController extends Controller
         }
 
         $vendorSheet = VendorSheet::findOrFail($request->input("id"));
-        $vendorSheet->update($request->except(['vendor']));
-        $vendorSheet->loadExists([
+        $data = $request->except(['vendor']);  
+        $data['dialect'] = $data['dialect'] ?? null;  
+        $data['dialect_target'] = $data['dialect_target'] ?? null; 
+        $data['currency'] = $data['currency'] ?? null; 
+        $data['sub_subject'] = $data['sub_subject'] ?? null;
+        // Update the VendorSheet with the new data
+        $vendorSheet->update($data);
+
+        // Reload the related data
+        $vendorSheet->load([
             'source_lang:id,name',
             'target_lang:id,name',
             'dialect:id,dialect',
@@ -1704,7 +1721,6 @@ class VendorProfileController extends Controller
             'sheet_tools',
             'comment',
             'copied',
-
             'tools',
             'ticket_id',
             'i',
