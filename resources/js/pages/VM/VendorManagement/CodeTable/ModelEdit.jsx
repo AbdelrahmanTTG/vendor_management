@@ -169,6 +169,7 @@ const EditBtn = (props) => {
                         {props.fields ? (
                             props.fields.map((fieldObj, index) => {
                                 const [options, setOptions] = useState([]);
+                                const [inputValU, setInputU] = useState('');
                                 const initialValue = selectedOption[fieldObj.name] || (() => {
                                     const value = props.selectedRow[fieldObj.name];
                                     if (typeof value === 'object' && value !== null) {
@@ -218,7 +219,15 @@ const EditBtn = (props) => {
                                                                 {...field}
                                                                 value={initialValue}
                                                                 options={options}
-                                                                onInputChange={handleInputChange}
+                                                                inputValue={inputValU}
+
+                                                                onInputChange={(newInputValue, { action }) => {
+                                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                                        setInputU(newInputValue);
+                                                                    }
+                                                                    handleInputChange
+                                                                }}
+                                                                // onInputChange={handleInputChange}
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
                                                                 noOptionsMessage={() => loading ? <div className="loader-box">
@@ -227,6 +236,11 @@ const EditBtn = (props) => {
                                                                 onChange={(option) => {
                                                                     setSelectedOption(prev => ({ ...prev, [fieldObj.name]: option }));
                                                                     field.onChange(option);
+                                                                }}
+                                                                onFocus={() => {
+                                                                    if (field.value) {
+                                                                        setInputU(field.value.label);
+                                                                    }
                                                                 }}
                                                             />
                                                         )}
