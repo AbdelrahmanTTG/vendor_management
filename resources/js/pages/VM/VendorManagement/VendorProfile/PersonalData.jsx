@@ -511,7 +511,7 @@ const PersonalData = React.memo((props) => {
                 <Row className="g-3 mb-3" >
                   <Col md="6" id="type-wrapper" >
                     <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Vendor Type </Label>
+                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Vendor Type </Label>
                       < Col sm="9" >
                         <Controller
                           name="type"
@@ -544,7 +544,7 @@ const PersonalData = React.memo((props) => {
                   </Col>
                   < Col md="6" id="status-wrapper" style={{ display: props?.permission?.status ? "none" : "block" }} >
                     <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Status </Label>
+                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Status </Label>
                       < Col sm="9" >
                         <Controller
                           name="status"
@@ -575,7 +575,7 @@ const PersonalData = React.memo((props) => {
                   < Col md="6" id="name-wrapper" >
                     <FormGroup className="row" >
 
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > {nameLabel} </Label>
+                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> {nameLabel} </Label>
                       < Col sm="9" >
                         <input
                           defaultValue=""
@@ -725,7 +725,7 @@ const PersonalData = React.memo((props) => {
                     </Col>
                     < Col md="6" >
                       <FormGroup className="row" >
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01" > Country of residence</Label>
+                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Country of residence</Label>
                         < Col sm="9" >
                           <Controller
                             name="country"
@@ -761,7 +761,7 @@ const PersonalData = React.memo((props) => {
                     </Col>
                   < Col md="6" >
                     <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Region </Label>
+                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Region </Label>
                       < Col sm="9" >
                         <Controller
                           name="region"
@@ -797,7 +797,7 @@ const PersonalData = React.memo((props) => {
                  
                   < Col md="6" >
                     <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Nationality </Label>
+                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Nationality </Label>
                       < Col sm="9" >
                         <Controller
                           name="nationality"
@@ -849,7 +849,7 @@ const PersonalData = React.memo((props) => {
                   </Col>
                   < Col md="6" >
                     <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Time Zone </Label>
+                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Time Zone </Label>
                       < Col sm="9" >
                         <Controller
                           name="timezone"
@@ -916,7 +916,7 @@ const PersonalData = React.memo((props) => {
                   </Col>
                   < Col md="6" >
                     <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Vendor Source </Label>
+                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Vendor Source </Label>
                       < Col sm="9" >
                         <input
                           className="form-control"
@@ -980,7 +980,7 @@ const PersonalData = React.memo((props) => {
                       <Col md="12" id="reject_reason-wrapper">
                         <FormGroup className="row">
                           <Label className="col-form-label" style={{ width: '12.5%' }} for="validationCustom01">
-                            Rejection Reason
+                              <span style={{ color: 'red', fontSize: "18px" }}>*</span> Rejection Reason
                           </Label>
 
 

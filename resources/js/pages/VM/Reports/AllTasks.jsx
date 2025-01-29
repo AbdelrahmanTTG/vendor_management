@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState, useCallback  } from 'react';
+import React, { Fragment, useEffect, useState, useCallback } from 'react';
 import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../AxiosClint";
 import { Btn, H5, Spinner } from '../../../AbstractElements';
@@ -27,6 +27,8 @@ const Report = (props) => {
     const [fields, setFields] = useState([]);
     const [formats, setFormats] = useState(null);
     const [formatsChanged, setFormatsChanged] = useState(false);
+    const [sortConfig, setSortConfig] = useState({ key: "created_at", direction: 'desc' });
+
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
@@ -157,7 +159,9 @@ const Report = (props) => {
             per_page: 10,
             page: currentPage,
             queryParams: queryParams,
-            table: "job_task",           
+            sortBy: sortConfig.key,
+            sortDirection: sortConfig.direction,
+            table: "job_task",
             export: ex,
             view: props.permissions?.view
 
@@ -168,12 +172,12 @@ const Report = (props) => {
                 .then(({ data }) => {
                     if (data.type == 'error') {
                         toast.error(data.message);
-                    } else {                        
+                    } else {
                         setFormats(data?.formats);
                         setFields(data?.fields);
                         // console.log(data.AllTasks)
                         if (data.AllTasks) { exportToExcel(data.AllTasks) }
-                        else{
+                        else {
                             setTasks(data?.Tasks);
                             setPageLinks(data?.Links);
                         }
@@ -185,10 +189,16 @@ const Report = (props) => {
         }
     });
 
-    useEffect(() => {       
+    useEffect(() => {
         fetchData();
-    }, [currentPage, queryParams, formatsChanged]);
-
+    }, [currentPage, queryParams, sortConfig,formatsChanged]);
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
     const handlePageChange = (newPage) => {
         let tempPage = currentPage;
         if (newPage > 0) {
@@ -249,7 +259,7 @@ const Report = (props) => {
                             processedItem[key] == 7 ? processedItem[key] = 'Heads-Up' : "";
                             processedItem[key] == 8 ? processedItem[key] = 'Heads-Up ( Marked as Available )' : "";
                             processedItem[key] == 9 ? processedItem[key] = 'Heads-Up ( Marked as Not Available )' : "";
-           
+
                         }
                     }
                     return processedItem;
@@ -276,7 +286,7 @@ const Report = (props) => {
         worksheet.columns = headersArray.map((key) => {
             return {
                 header: key.replace('_name', '')
-                .split(/[_-]/)
+                    .split(/[_-]/)
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' '),
                 key: key,
@@ -315,7 +325,7 @@ const Report = (props) => {
 
         data.forEach(rowData => {
             const row = worksheet.addRow(rowData);
-            row.eachCell((cell) => {                
+            row.eachCell((cell) => {
                 cell.border = {
                     top: { style: 'thin' },
                     left: { style: 'thin' },
@@ -336,44 +346,44 @@ const Report = (props) => {
         });
     };
     useEffect(() => {
-          formatData(formats);
+        formatData(formats);
     }, [formats]);
-      const formatData = (format) => {
-  
-          const labelMapping = {
-         
-              'subject': 'Subject',
-              'task_type': 'Task Type',
-              'vendor': 'Vendor',
-              'source_name': 'Source',
-              'target_name': 'Target',
-              'count': 'Count',
-              'unit': 'Unit',
-              'rate': 'Rate',
-              'total_cost': 'Total Cost',
-              'currency': 'Currency',
-              'start_date': 'Start Date',
-              'delivery_date': 'Delivery Date',
-              'status': 'Status',
-              'closed_date': 'Closed Date',
-              'created_by': 'Created by',
-              'created_at': 'Created at',
-              'brand_name': 'Brand'
-         
-          };
-          format?.flatMap(element =>
-              element.format = element.format.split(',').map(value => {
-                  const trimmedValue = value.trim();
-                  return {
-                      value: trimmedValue,
-                      label: labelMapping[trimmedValue] || trimmedValue
-                  };
-              })
-          );
-          // return data;
-  
-      }
-   
+    const formatData = (format) => {
+
+        const labelMapping = {
+
+            'subject': 'Subject',
+            'task_type': 'Task Type',
+            'vendor': 'Vendor',
+            'source_name': 'Source',
+            'target_name': 'Target',
+            'count': 'Count',
+            'unit': 'Unit',
+            'rate': 'Rate',
+            'total_cost': 'Total Cost',
+            'currency': 'Currency',
+            'start_date': 'Start Date',
+            'delivery_date': 'Delivery Date',
+            'status': 'Status',
+            'closed_date': 'Closed Date',
+            'created_by': 'Created by',
+            'created_at': 'Created at',
+            'brand_name': 'Brand'
+
+        };
+        format?.flatMap(element =>
+            element.format = element.format.split(',').map(value => {
+                const trimmedValue = value.trim();
+                return {
+                    value: trimmedValue,
+                    label: labelMapping[trimmedValue] || trimmedValue
+                };
+            })
+        );
+        // return data;
+
+    }
+
     return (
         <Fragment >
             <Col>
@@ -582,8 +592,9 @@ const Report = (props) => {
                                     <thead>
                                         <tr>
                                             {fields.map((field, fieldIndex) => (
-                                                <th key={fieldIndex}>
-                                                    {formatString(field)}
+                                                <th key={fieldIndex} onClick={() => handleSort(field)}>
+                                                    {formatString(field)}{sortConfig.key === field && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+
                                                 </th>
                                             ))}
                                         </tr>
@@ -610,7 +621,7 @@ const Report = (props) => {
                                             </>
                                         ) : (
                                             <tr >
-                                                <td scope="row" colSpan={fields.length??'18'} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                                <td scope="row" colSpan={fields.length ?? '18'} className='text-center bg-light f-14' >{'No Data Available'}</td>
                                             </tr>
                                         )
                                         }

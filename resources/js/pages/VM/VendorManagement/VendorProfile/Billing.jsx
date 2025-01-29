@@ -582,7 +582,7 @@ const Billing = (props) => {
                                                 <Col md="6" className="mb-3">
                                                     <FormGroup className="row">
 
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Billing Legal Name</Label>
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Billing Legal Name</Label>
                                                         <Col sm="9">
                                                             <input
                                                                 defaultValue={isChecked.billing_legal_name}
@@ -598,7 +598,7 @@ const Billing = (props) => {
                                                 <Col md="6" className="mb-3">
                                                     <FormGroup className="row">
 
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Billing Currency</Label>
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Billing Currency</Label>
                                                         <Col sm="9">
                                                             <Controller
                                                                 name="billing_currency"
@@ -632,7 +632,7 @@ const Billing = (props) => {
                                                 <Col md="6" className="mb-3">
                                                     <FormGroup className="row">
 
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">City / state</Label>
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> City / state</Label>
                                                         <Col sm="9">
                                                             <input
                                                                 defaultValue={isChecked.city}
@@ -646,7 +646,7 @@ const Billing = (props) => {
                                                 <Col md="6" className="mb-3">
                                                     <FormGroup className="row">
 
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Street</Label>
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Street</Label>
                                                         <Col sm="9">
                                                             <input
                                                                 defaultValue={isChecked.street}
@@ -661,7 +661,7 @@ const Billing = (props) => {
                                                 </Col>
                                                 <Col md="6" className="mb-3">
                                                     <FormGroup className="row">
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Billing Address</Label>
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Billing Address</Label>
                                                         <Col sm="9">
                                                             <CKEditor
                                                                 editor={ClassicEditor}

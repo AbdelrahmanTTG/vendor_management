@@ -23,6 +23,8 @@ const Report = (props) => {
     const [headerFields, setHeaderFields] = useState([]);
     const [formats, setFormats] = useState(null);
     const [formatsChanged, setFormatsChanged] = useState(false);
+    const [sortConfig, setSortConfig] = useState({ key: "id", direction: 'desc' });
+
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
@@ -32,6 +34,25 @@ const Report = (props) => {
     useEffect(() => {
         formatData(formats);
     }, [formats]);
+    const columns = {
+        'Ticket Number': 'id',
+        'Requester Name': 'created_by',
+        'Source Language': 'source_lang',
+        'Target Language': 'target_lang',
+        'Request Time': 'created_at',
+        'Taken Time': 'Timetaken',
+        'New Vendors': 'new',
+        'Existing Vendors': 'existing',
+        'Existing Vendors with New Pairs': 'existing_pair'
+    };
+    const handleSort = (key) => {
+        key = columns[key]; 
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
     const formatData = (format) => {
 
         const labelMapping = {
@@ -123,6 +144,8 @@ const Report = (props) => {
             page: currentPage,
             queryParams: queryParams,
             permissions: props.permissions,
+            sortBy: sortConfig.key,
+            sortDirection: sortConfig.direction,
             user: user.id,
             table: "vm_activity",
             export: ex,
@@ -146,13 +169,13 @@ const Report = (props) => {
                     setLoading(false);
                 });
         } catch (err) {
-            console.error(err);
+            // console.error(err);
         }
     });
     useEffect(() => {
         // if (queryParams != null)
         fetchData();
-    }, [currentPage, queryParams, formatsChanged]);
+    }, [currentPage, queryParams, sortConfig, formatsChanged]);
 
     const handlePageChange = (newPage) => {
         let tempPage = currentPage;
@@ -393,8 +416,8 @@ const Report = (props) => {
                                     <thead>
                                         <tr>
                                             {headerFields.map((field, fieldIndex) => (
-                                                <th key={fieldIndex}>
-                                                    {formatString(field)}
+                                                <th key={fieldIndex} onClick={() => handleSort(field)}>
+                                                    {formatString(field)}{sortConfig.key === field && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                                                 </th>
                                             ))}
                                         </tr>

@@ -182,7 +182,7 @@ const Education = (props) => {
                         <Row className="g-3 mb-3">
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Institute Name</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Institute Name</Label>
                                     <Col sm="9">
                                         {/* <Input className="form-control" type="text" placeholder="University name" /> */}
                                         <input
@@ -198,7 +198,7 @@ const Education = (props) => {
 
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">last Degree</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> last Degree</Label>
                                     <Col sm="9">
                                         <Controller
                                             name="latest_degree"
@@ -231,7 +231,7 @@ const Education = (props) => {
                             </Col>
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Year of graduation</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Year of graduation</Label>
                                     <Col sm="9">
                                         <input
                                             defaultValue=""
@@ -246,7 +246,7 @@ const Education = (props) => {
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
 
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">Major</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Major</Label>
                                     <Col sm="9">
                                         <Col sm="9">
                                             <input

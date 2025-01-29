@@ -217,12 +217,12 @@ const AddNewBtn = (props) => {
                 <Row className="g-3 mb-3">
                     <Col md="6">
                         <FormGroup className="row">
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Main-Subject Matter</Label>
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Main-Subject Matter</Label>
                             <Col sm="8">
                                 <Controller
                                     name="subject"
                                     control={control}
-                                    rules={{ required: false }}
+                                    rules={{ required: true }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -285,14 +285,14 @@ const AddNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Service</Label>
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Service</Label>
                             <Col sm="8">
 
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Service --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
                                     name="service"
                                     control={control}
-                                    rules={{ required: false }}
+                                    rules={{ required: true }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -322,13 +322,13 @@ const AddNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Task Type</Label>
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Task Type</Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Task Type --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
                                     name="task_type"
                                     control={control}
-                                    rules={{ required: false }}
+                                    rules={{ required: true }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -354,13 +354,13 @@ const AddNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Source Language</Label>
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Source Language</Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Source Language --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
                                     name="source_lang"
                                     control={control}
-                                    rules={{ required: false }}
+                                    rules={{ required: true }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -389,13 +389,13 @@ const AddNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Target Language</Label>
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Target Language</Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Target Language --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
                                     name="target_lang"
                                     control={control}
-                                    rules={{ required: false }}
+                                    rules={{ required: true }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -494,13 +494,13 @@ const AddNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Unit</Label>
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Unit</Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Unit --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
                                     name="unit"
                                     control={control}
-                                    rules={{ required: false }}
+                                    rules={{ required: true }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -529,7 +529,7 @@ const AddNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Rate</Label>
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Rate</Label>
                             <Col sm="8">
                                 {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
                                 <input
@@ -538,7 +538,7 @@ const AddNewBtn = (props) => {
                                     className="form-control"
                                     type="number"
                                     name="rate"
-                                    {...register("rate", { required: false })}
+                                    {...register("rate", { required: true })}
 
                                 />
                             </Col>
@@ -564,13 +564,13 @@ const AddNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Status</Label>
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Status</Label>
                             <Col sm="8">
 
                                 <Controller
                                     name="Status"
                                     control={control}
-                                    rules={{ required: false }}
+                                    rules={{ required: true }}
                                     render={({ field }) => (
                                         <Select
                                             id='Status'

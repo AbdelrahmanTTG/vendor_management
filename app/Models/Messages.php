@@ -37,7 +37,8 @@ class Messages extends Model
     {
         return self::where(function ($query) use ($receiver_email) {
             $query->where('is_read', 0)
-                ->where('receiver_email', $receiver_email);
+                ->where('receiver_email', $receiver_email)
+                ->where('status', 1);
         })
             ->latest('created_at')
             ->select('content') 

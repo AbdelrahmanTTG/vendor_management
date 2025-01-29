@@ -97,8 +97,10 @@ class PortalAdminController extends Controller
             
     }
     public function getVmNotes(Request $request)
-    {       
-        $messages = Messages::where('receiver_email',app('decrypt')(base64_decode($request->email)))->get();
+    {
+        $messages = Messages::where('receiver_email', app('decrypt')(base64_decode($request->email)))
+            ->where('status', 1)
+            ->get();
         return response()->json(['Notes' =>$messages], 200);
             
     }

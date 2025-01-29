@@ -415,7 +415,7 @@ const Experience = (props) => {
                                     <Row className="g-3 mb-3">
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Started working from year</Label>
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Started working from year</Label>
                                                 <Col sm="9">
                                                     <Controller
                                                         name="started_working"
@@ -440,7 +440,7 @@ const Experience = (props) => {
                                         </Col>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Experience year</Label>
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Experience year</Label>
                                                 <Col sm="9">
                                                     <input
                                                         readOnly

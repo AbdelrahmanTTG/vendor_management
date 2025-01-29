@@ -328,7 +328,7 @@ const FilesCertificate = (props) => {
                         <Row className="g-3 mb-3">
                             <Col md="6">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label">CV</Label>
+                                    <Label className="col-sm-3 col-form-label"><span style={{ color: 'red', fontSize: "18px" }}>*</span>CV</Label>
 
 
                                     <Col sm="9">
@@ -383,7 +383,7 @@ const FilesCertificate = (props) => {
                             </Col>
                             <Col md="6">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label">NDA</Label>
+                                    <Label className="col-sm-3 col-form-label"><span style={{ color: 'red', fontSize: "18px" }}>*</span>NDA</Label>
                                     <Col sm="9">
                                         <Controller
                                             name="NDA"

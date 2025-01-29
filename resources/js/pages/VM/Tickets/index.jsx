@@ -36,6 +36,8 @@ const TicketsList = (props) => {
     const [headerFields, setHeaderFields] = useState([]);
     const [formats, setFormats] = useState(null);
     const [formatsChanged, setFormatsChanged] = useState(false);
+    const [sortConfig, setSortConfig] = useState({ key: "id", direction: 'desc' });
+    
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
@@ -187,12 +189,21 @@ const TicketsList = (props) => {
             setLoading(false);
         }, 10);
     };
-
+    const handleSort = (key) => {
+        if (key == "Ticket Number"){key = "id"}
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
     const fetchData = useCallback(async (ex) => {
         const payload = {
             per_page: 10,
             page: currentPage,
             queryParams: queryParams,
+            sortBy: sortConfig.key,
+            sortDirection: sortConfig.direction,
             table: "vm_tickets",
             export: ex,
             view: props.permissions?.view
@@ -215,7 +226,7 @@ const TicketsList = (props) => {
     });
     useEffect(() => {
         fetchData();
-    }, [currentPage, queryParams, formatsChanged]);
+    }, [currentPage, queryParams,sortConfig,formatsChanged]);
     useEffect(() => {
         formatData(formats);
     }, [formats]);
@@ -688,8 +699,8 @@ const TicketsList = (props) => {
                                     <thead>
                                         <tr>
                                             {headerFields.map((field, fieldIndex) => (
-                                                <th key={fieldIndex}>
-                                                    {formatString(field)}
+                                                <th key={fieldIndex} onClick={() => handleSort(field)}>
+                                                    {formatString(field)}{sortConfig.key === field && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                                                 </th>
                                             ))}
                                             <th scope="col">{'View Ticket'}</th>

@@ -224,7 +224,7 @@ const PriceList = (props) => {
                     <CardBody>
                         <Row className="g-3 mb-3">
                             <Col md="10" className="mb-3">
-                                <Label className="form-label" for="validationCustom01">Tools</Label>
+                                <Label className="form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Tools</Label>
                                 {/* <Input className="form-control" type="text" placeholder="" /> */}
                                 <Controller
                                     name="tool"
@@ -258,7 +258,7 @@ const PriceList = (props) => {
 
                         </Row>
                         <Col md="6" className="mb-3">
-                                <Label className="col-sm-4 col-form-label" for="validationCustom01">Currency</Label>
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Currency</Label>
                                 <Col sm="8">
                                     <Controller
                                         name="currency"

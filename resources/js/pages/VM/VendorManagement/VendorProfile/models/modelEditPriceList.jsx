@@ -281,7 +281,7 @@ const EditNewBtn = (props) => {
                              ) :  <Row className="g-3 mb-3">
                     <Col md="6">
                         <FormGroup className="row">
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Main-Subject Matter</Label>
+                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Main-Subject Matter</Label>
                             <Col sm="8">
                                 <Controller
                                     name="subject"
@@ -373,7 +373,7 @@ const EditNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Service</Label>
+                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Service</Label>
                             <Col sm="8">
 
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Service --' }} className="js-example-basic-single col-sm-12" /> */}
@@ -422,7 +422,7 @@ const EditNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Task Type</Label>
+                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Task Type</Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Task Type --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -466,7 +466,7 @@ const EditNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Source Language</Label>
+                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Source Language</Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Source Language --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -511,7 +511,7 @@ const EditNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Target Language</Label>
+                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Target Language</Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Target Language --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -649,7 +649,7 @@ const EditNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Unit</Label>
+                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Unit</Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Unit --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -695,7 +695,7 @@ const EditNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Rate</Label>
+                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Rate</Label>
                             <Col sm="8">
                                 {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
                                 <input
@@ -729,7 +729,7 @@ const EditNewBtn = (props) => {
                     <Col md="6">
                         <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Status</Label>
+                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Status</Label>
                             <Col sm="8">
 
                                 <Controller

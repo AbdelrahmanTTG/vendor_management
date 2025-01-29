@@ -18,14 +18,14 @@ const UsersSidebar = ({ user, onLogout, onClose }) => {
                 }} />
                 {/* src: user ? user.picture : man, alt: '' */}
 
-                <Link to={`${BASE_URL}/app/users/userProfile`}>
+                {/* <Link to={`${BASE_URL}/app/users/userProfile`}> */}
 
                     {/* <div className="badge-bottom">
                         <div className="badge badge-primary">New
                         </div>
                     </div> */}
                     <H6 attrH6={{ className: 'mt-3 f-14 f-w-600' }} >{user ? user.username : ''}</H6>
-                </Link>
+                {/* </Link> */}
                 {/* <P attrPara={{ className: 'mb-0 font-roboto' }} >{user.email ? user.email : ''}</P> */}
                 <P attrPara={{ className: 'mb-0 font-roboto' }} >{user.department ? user.department : ''}</P>
 

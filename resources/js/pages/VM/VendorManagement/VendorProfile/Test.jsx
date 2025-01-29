@@ -270,7 +270,7 @@ const Test = (props) => {
                                     <Label className="col-form-label m-r-10">Test Status</Label>
                                     <Col className="d-flex align-items-center ms-5 gap-4 mt-3">
                                         <Label className="col-form-label m-0" style={{ lineHeight: '1.5' }}>
-                                            Test Type :
+                                            <span style={{ color: 'red', fontSize: "18px" }}>*</span> Test Type :
                                         </Label>
                                         <div className="radio radio-primary me-3 ms-4">
                                             <Input
@@ -304,7 +304,7 @@ const Test = (props) => {
 
                                     <Col className="d-flex align-items-center ms-5 gap-4 mt-3">
                                         <Label className="col-form-label m-0" style={{ lineHeight: '1.5' }}>
-                                            Test result :
+                                            <span style={{ color: 'red', fontSize: "18px" }}>*</span> Test result :
                                         </Label>
                                         <div className="radio radio-primary me-3 ms-3">
                                             <Input
@@ -335,7 +335,7 @@ const Test = (props) => {
                                     </Col>
                                     <Col className="d-flex align-items-center ms-5 gap-4 mt-3">
                                         <Label className="col-form-label m-0" style={{ lineHeight: '1.5' }}>
-                                            Test Upload :
+                                            <span style={{ color: 'red', fontSize: "18px" }}>*</span> Test Upload :
                                         </Label>
                                         <div className="radio radio-primary me-3">
                                             <Controller
@@ -397,7 +397,7 @@ const Test = (props) => {
                                     <Row>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Source</Label>
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Source</Label>
                                                 <Col sm="9">
 
                                                     <Controller
@@ -433,7 +433,7 @@ const Test = (props) => {
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
 
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Target</Label>
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Target</Label>
                                                 <Col sm="9">
 
 
@@ -469,7 +469,7 @@ const Test = (props) => {
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
 
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Main-Subject Matter</Label>
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Main-Subject Matter</Label>
                                                 <Col sm="9">
                                                     <Controller
                                                         name="main_subject"
@@ -505,7 +505,7 @@ const Test = (props) => {
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
 
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Sub–Subject Matter</Label>
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Sub–Subject Matter</Label>
                                                 <Col sm="9">
                                                     <Controller
                                                         name="sub_subject"
@@ -534,7 +534,7 @@ const Test = (props) => {
                                             </FormGroup></Col>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01">Service</Label>
+                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Service</Label>
                                                 <Col sm="9">
                                                     <Controller
                                                         name="service"

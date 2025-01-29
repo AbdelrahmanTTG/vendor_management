@@ -133,7 +133,7 @@ const Portal_User = (props) => {
 
                         <Col md="9" className="mb-3">
                             <FormGroup className="row">
-                                <Label className="col-sm-2 col-form-label" for="validationCustom02">Login Password</Label>
+                                <Label className="col-sm-2 col-form-label" for="validationCustom02"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Login Password</Label>
                                 <Col sm="6">
                                     <input
                                         value={""}

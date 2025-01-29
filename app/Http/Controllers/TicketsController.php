@@ -87,8 +87,8 @@ class TicketsController extends Controller
         }
         // start get data    
         $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
-            ->select('vm_ticket.*', 'users.brand AS brand')
-            ->orderBy('vm_ticket.id', 'desc');
+            ->select('vm_ticket.*', 'users.brand AS brand');
+            // ->orderBy('vm_ticket.id', 'desc');
         // if ($user->use_type != 2 && $view != 3) {
         //     $tickets->whereIn('created_by', $piv);
         //     if (count($piv) > 1) {
@@ -182,6 +182,14 @@ class TicketsController extends Controller
             $tickets->chunk(100, function ($chunk) use (&$AllTickets) {
                 $AllTickets = $AllTickets->merge($chunk);
             });
+        }
+        if ($request->has('sortBy') && $request->has('sortDirection')) {
+            $sortBy = $request->input('sortBy');
+            $sortDirection = $request->input('sortDirection');
+
+            if (in_array($sortDirection, ['asc', 'desc'])) {
+                $tickets = $tickets->orderBy($sortBy, $sortDirection);
+            }
         }
         $perPage = $request->input('per_page', 10);
         $tickets = $tickets->paginate($perPage);

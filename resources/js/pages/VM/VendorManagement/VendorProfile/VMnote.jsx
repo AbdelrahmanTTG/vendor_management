@@ -29,7 +29,7 @@ const VMnote = (props) => {
                     props.lastMessage.VMNotes.content = content.replace(/<[^>]*>/g, '');
                     setMessages([props.lastMessage.VMNotes]);
                 } catch (error) {
-                    console.error(error);
+                    // console.error(error);
                 } finally {
                     setLoading(false);
                 }
@@ -59,8 +59,13 @@ const VMnote = (props) => {
             const user = JSON.parse(localStorage.getItem('USER'));
             const formData = { ...data, sender_id: user.email, receiver_id: props.email };
             const response = await axios.post('/SendMessage', formData);
-            response.data.data.content = response.data.data.content.replace(/<[^>]*>/g, '');
-            setMessages([response.data.data]);
+            if (response.data.data.content) { 
+                response.data.data.content = response?.data?.data?.content?.replace(/<[^>]*>/g, '');
+                setMessages([response.data.data]);
+            } else {
+                setMessages([]);
+            }
+           
         } catch (error) {
             console.error('Failed to send message:', error);
             showToast('error', "Failed to send message. Please try again.");
@@ -73,6 +78,10 @@ const VMnote = (props) => {
         onSubmit(type)
     };
     const Send = (data) => {
+        if (!data.content) {
+            showToast('error', "Make sure to write the content of the message.");
+            return;
+        }
         const type = { ...data, status: "1" }
         onSubmit(type)
     }
@@ -178,7 +187,7 @@ const VMnote = (props) => {
                                 <div className="d-flex justify-content-between align-items-center mb-3">
                                     <Label className="form-label">VM/Vendor</Label>
                                     <ButtonGroup>
-                                        <Btn attrBtn={{ color: 'secondary', onClick: handleSubmit(Submit, onError), disabled: isSubmitting }}>
+                                        <Btn attrBtn={{ color: 'secondary', onClick: handleSubmit(Submit), disabled: isSubmitting }}>
                                             Submit
                                         </Btn>
                                         <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(Send, onError), disabled: isSubmitting }}>
@@ -193,7 +202,7 @@ const VMnote = (props) => {
                                     data={props?.lastMessage?.VMNotes?.status == "0" ? props?.lastMessage?.VMNotes?.content : ""}
                                     onChange={(event, editor) => setValue('content', editor.getData())}
                                 />
-                                <input hidden disabled {...register('content', { required: true })} />
+                                <input hidden disabled {...register('content', { required: false })} />
 
                                 <div className="border border-default p-3 mb-3" style={{ borderStyle: "dashed" }}>
                                     {
@@ -250,7 +259,7 @@ const VMnote = (props) => {
                                     editor={ClassicEditor}
                                     onChange={(event, editor) => setValuePM('PM', editor.getData())}
                                 />
-                                <input hidden disabled {...registerPM('PM', { required: true })} />
+                                <input hidden disabled {...registerPM('PM', { required: false })} />
 
                             </Col>
                         </Row>

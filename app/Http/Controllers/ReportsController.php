@@ -115,7 +115,7 @@ class ReportsController extends Controller
                             ->where('r1.type', 2);
                     })
                     ->select('vm_ticket.*', 'users.brand AS brand', 't.created_by AS opened_by', 't.created_at AS open_time', 't2.created_by AS closed_by', 't3.created_at AS closed_time')
-                    ->orderBy('vm_ticket.id', 'desc')
+                    // ->orderBy('vm_ticket.id', 'desc')
                     ->groupBy('vm_ticket.id')
                     ->whereBetween('vm_ticket.created_at', [$start_date, $end_date]);
 
@@ -125,6 +125,14 @@ class ReportsController extends Controller
                     $created_by = $request->queryParams['created_by'];
                     $tickets->whereIn('t.created_by', $created_by);
                 }
+                if ($request->has('sortBy') && $request->has('sortDirection')) {
+                    $sortBy = $request->input('sortBy');
+                    $sortDirection = $request->input('sortDirection');
+
+                    if (in_array($sortDirection, ['asc', 'desc'])) {
+                        $tickets = $tickets->orderBy($sortBy, $sortDirection);
+                    }
+                }
                 // if export
                 if ($request->has('export') && $request->input('export') === true) {
                     $AllTickets = TicketResource::collection($tickets->get());
@@ -133,6 +141,7 @@ class ReportsController extends Controller
                     $tickets = $tickets->paginate($perPage);
                     $links = $tickets->linkCollection();
                 }
+                
             }
         }
 
@@ -309,7 +318,7 @@ class ReportsController extends Controller
             $selectArray = array_intersect($tableColumns, $formatArray);
             $tasks = $tasks->select('id', 'job_id', 'code', 'status', 'rate', 'count', 'created_by')->addSelect(DB::raw(implode(',', $selectArray)));
         }
-        $tasks = $tasks->orderBy('created_at', 'desc');
+        // $tasks = $tasks->orderBy('created_at', 'desc');
         // if export
         if ($request->has('export') && $request->input('export') === true) {
             $data = DB::table('job_task')
@@ -347,8 +356,15 @@ class ReportsController extends Controller
             // $AllTasks = TaskResource::collection($tasks->get());
             $AllTasks = $data->get();
 
-        } 
-       
+        }
+        if ($request->has('sortBy') && $request->has('sortDirection')) {
+            $sortBy = $request->input('sortBy');
+            $sortDirection = $request->input('sortDirection');
+
+            if (in_array($sortDirection, ['asc', 'desc'])) {
+                $tasks = $tasks->orderBy($sortBy, $sortDirection);
+            }
+        }
         $perPage = $request->input('per_page', 10);
         $tasks = $tasks->paginate($perPage);
         $links = $tasks->linkCollection();

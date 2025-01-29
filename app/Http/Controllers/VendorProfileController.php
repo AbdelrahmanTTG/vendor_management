@@ -805,7 +805,7 @@ class VendorProfileController extends Controller
             $validator = Validator::make($request->all(), [
                 'sender_id' => 'required|string|max:255',
                 'receiver_id' => 'required|string|max:255',
-                'content' => 'required|string',
+                'content' => 'nullable|string',
                 "status" => 'nullable|string',
             ]);
             if ($validator->fails()) {
@@ -850,7 +850,7 @@ class VendorProfileController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required|int',
-            'PM' => 'required|string',
+            'PM' => 'nullable|string',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
