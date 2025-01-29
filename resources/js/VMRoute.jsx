@@ -300,7 +300,7 @@ export const VM = (allowedPermissions) => [
                     header={["id", " name", "Main Subject Matter", "Active", "Edit", "Delete"]}
                     fields={[
                         { name: 'name', type: 'text', field: "input", label: "Name" },
-                        { name: 'parent', type: 'text', field: "selec", tableData: "fields", label: "Main Subject Matter" },
+                        { name: 'parent', type: 'text', field: "selec", tableData: "MainSubjectMatter", label: "Main Subject Matter" },
                         {
                             name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
                                 { value: 1, label: 'Active' },

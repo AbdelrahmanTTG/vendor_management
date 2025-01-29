@@ -37,7 +37,7 @@ class CodingTableController extends Controller
         "vendortimezone" => TimeZone::class,
         "countries" => Countries::class,
         "messaging_types" => Messaging::class,
-        "fields" => MainSubjectMatter::class,
+        "fields" => SubSubjectMatter::class,
         "task_type" => TaskType::class,
         "currency" => Currency::class,
         "tools" => Tools::class,

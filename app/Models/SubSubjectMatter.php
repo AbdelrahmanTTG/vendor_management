@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SubSubjectMatter extends Model
 {
     protected $fillable = ['name', 'Active', "parent"];
+    public $timestamps = false;
 
     protected $table = 'fields';
     public static function insert($data)
