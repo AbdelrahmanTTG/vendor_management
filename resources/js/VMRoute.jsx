@@ -104,7 +104,7 @@ export const VM = (allowedPermissions) => [
                     permissions={{
                         Profile: allowedPermissions['vendors/Profiletest'],
                         PersonalData: allowedPermissions['PersonalData'],
-                        messaging: allowedPermissions['messaging'],
+                        Messaging: allowedPermissions['Messaging type'],
                         VMnote: allowedPermissions['VMnote'],
                         FilesCertificate: allowedPermissions['FilesCertificate'],
                         Education: allowedPermissions['Education'],
@@ -130,7 +130,7 @@ export const VM = (allowedPermissions) => [
                     {
                         Profile: allowedPermissions['vendors/editprofiletest'],
                         PersonalData: allowedPermissions['PersonalData'],
-                        messaging: allowedPermissions['messaging'],
+                        Messaging: allowedPermissions['Messaging type'],
                         VMnote: allowedPermissions['VMnote'],
                         FilesCertificate: allowedPermissions['FilesCertificate'],
                         Education: allowedPermissions['Education'],

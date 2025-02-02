@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 import SweetAlert from 'sweetalert2'
 
 const Messaging = (props) => {
-    toast.configure();
+    // toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
             case 'successToast':

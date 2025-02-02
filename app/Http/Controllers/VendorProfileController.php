@@ -398,7 +398,6 @@ class VendorProfileController extends Controller
             "formats" => $formats,
             "totalVendors" => $totalVendors,
             "AllVendors" => !empty($AllVendors) ? [$diffFormatArrayEx, $AllVendors] : null,
-            "t" => $piv,
         ], 200);
     }
     function flattenVendorsWithSheets($vendors)
@@ -563,7 +562,8 @@ class VendorProfileController extends Controller
                 'required',
                 'email',
                 Rule::unique('vendor', 'email')->ignore($vendor->id) 
-            ],            'contact_linked_in' => 'sometimes|nullable|string',
+            ],            
+            'contact_linked_in' => 'sometimes|nullable|string',
             'contact_ProZ' => 'sometimes|nullable|string',
             'contact_other1' => 'sometimes|nullable|string',
             'contact_other2' => 'sometimes|nullable|string',
@@ -596,6 +596,7 @@ class VendorProfileController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required|integer',
+            'billing_currency' => 'required|integer',
             'billing_legal_name' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'street' => 'required|string|max:255',
@@ -603,7 +604,6 @@ class VendorProfileController extends Controller
             'Wallets Payment methods.*.method' => 'int|max:10',
             'Wallets Payment methods.*.account' => 'string|max:255',
             'Wallets Payment defaults.*.defaults' => 'int|max:1',
-
         ]);
 
         $validator->after(function ($validator) use ($request) {
@@ -1028,7 +1028,7 @@ class VendorProfileController extends Controller
     {
         $request->validate([
             'email' => 'required|email|exists:vendor,email',
-            'password' => 'required|min:6',
+            'password' => 'required|min:8',
         ]);
 
         $email = $request->input('email');
