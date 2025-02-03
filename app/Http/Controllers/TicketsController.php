@@ -408,158 +408,160 @@ class TicketsController extends Controller
             $toEmail = $to->email;
             $user_name = $to->user_name;
             //end setup mail
-            if ($status == 0) {
-                $comment = $request->comment;
-                if ($ticket->update(['status' => $status, 'rejection_reason' => $comment])) {
-                    $this->addTicketTimeStatus($ticket_id, $user, $status);
-                    // send rejection to requster                   
-                    $mailData = [
-                        'user_name' =>  $user_name,
-                        'subject' => "Rejected Request : # " . $ticket_id,
-                        'body' =>  'VM Team rejected your ticket.',
-                        'comment' =>  "Reason: " . $comment,
-                    ];
-                    Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
-                    $message = "Ticket Rejected Successfully ...";
-                }
-            } else {
-                // if type is cv request
-                if ($ticket->request_type == 5) {
-                    if ($request->file('file') != null) {
-                        $this->changeTicketToOpen($ticket_id, $user);
-                        $file = $request->file('file');
-                        // $path = $file->storeAs('uploads/tickets/', $file->getClientOriginalName(), 'public');
-                        $folderPath = storage_path('app/external/tickets');
-                        if (!file_exists($folderPath)) {
-                            mkdir(
-                                $folderPath,
-                                0777,
-                                true
-                            );
-                        }
-                        $originalFileName = $file->getClientOriginalName();
-                        $encryptedFileName = Crypt::encryptString($originalFileName);
-                        $fullEncryptedFileName = $encryptedFileName . '.' . $file->getClientOriginalExtension();
-                        $path = $file->storeAs('tickets', $fullEncryptedFileName, 'external');
-                        if (!$path) {
-                            return response()->json(['message' => 'Error Uploading File, Please Try Again!', 'type' => 'error']);
-                        } else {
-                            $data['file'] = $fullEncryptedFileName;
-                            if (VmTicketResource::create($data)) {
-                                $message .= "Ticket Resource Added Successfully <br/>";
+            if (isset($request->status)) {
+                if ($status == 0) {
+                    $comment = $request->comment;
+                    if ($ticket->update(['status' => $status, 'rejection_reason' => $comment])) {
+                        $this->addTicketTimeStatus($ticket_id, $user, $status);
+                        // send rejection to requster                   
+                        $mailData = [
+                            'user_name' =>  $user_name,
+                            'subject' => "Rejected Request : # " . $ticket_id,
+                            'body' =>  'VM Team rejected your ticket.',
+                            'comment' =>  "Reason: " . $comment,
+                        ];
+                        Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
+                        $message = "Ticket Rejected Successfully ...";
+                    }
+                } else {
+                    // if type is cv request
+                    if ($ticket->request_type == 5) {
+                        if ($request->file('file') != null) {
+                            $this->changeTicketToOpen($ticket_id, $user);
+                            $file = $request->file('file');
+                            // $path = $file->storeAs('uploads/tickets/', $file->getClientOriginalName(), 'public');
+                            $folderPath = storage_path('app/external/tickets');
+                            if (!file_exists($folderPath)) {
+                                mkdir(
+                                    $folderPath,
+                                    0777,
+                                    true
+                                );
+                            }
+                            $originalFileName = $file->getClientOriginalName();
+                            $encryptedFileName = Crypt::encryptString($originalFileName);
+                            $fullEncryptedFileName = $encryptedFileName . '.' . $file->getClientOriginalExtension();
+                            $path = $file->storeAs('tickets', $fullEncryptedFileName, 'external');
+                            if (!$path) {
+                                return response()->json(['message' => 'Error Uploading File, Please Try Again!', 'type' => 'error']);
                             } else {
-                                return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
+                                $data['file'] = $fullEncryptedFileName;
+                                if (VmTicketResource::create($data)) {
+                                    $message .= "Ticket Resource Added Successfully <br/>";
+                                } else {
+                                    return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
+                                }
                             }
                         }
                     }
-                }
-                /*  Resource Availabilty */
-                if ($ticket->request_type == 4) {
-                    if (is_numeric($request->number_of_resource)) {
-                        $this->changeTicketToOpen($ticket_id, $user);
-                        $data['number_of_resource'] = $request->number_of_resource;
-                        if (count($ticket->TicketResource) == 0) {
-                            if (VmTicketResource::create($data)) {
-                                $message .= "Ticket Resource Added Successfully <br/>";
+                    /*  Resource Availabilty */
+                    if ($ticket->request_type == 4) {
+                        if (is_numeric($request->number_of_resource)) {
+                            $this->changeTicketToOpen($ticket_id, $user);
+                            $data['number_of_resource'] = $request->number_of_resource;
+                            if (count($ticket->TicketResource) == 0) {
+                                if (VmTicketResource::create($data)) {
+                                    $message .= "Ticket Resource Added Successfully <br/>";
+                                } else {
+                                    return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
+                                }
                             } else {
-                                return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
-                            }
-                        } else {
-                            $ticket_res = VmTicketResource::where('ticket', $ticket_id)->firstOrFail();
-                            if ($ticket_res->update($data)) {
-                                $message .= "Ticket Resource updated Successfully <br/>";
-                            } else {
-                                return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
+                                $ticket_res = VmTicketResource::where('ticket', $ticket_id)->firstOrFail();
+                                if ($ticket_res->update($data)) {
+                                    $message .= "Ticket Resource updated Successfully <br/>";
+                                } else {
+                                    return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
+                                }
                             }
                         }
                     }
-                }
-                /*  new Resource */
-                if ($ticket->request_type == 1 || $ticket->request_type == 3) {
-                    if (isset($request->vendor)) {
-                        $vendors = $request->vendor;
-                        foreach ($vendors as $i => $vendor) {
-                            if (!empty($vendor)) {
-                                $this->changeTicketToOpen($ticket_id, $user);
-                                $check = VmTicketResource::where('vendor', $vendor)->where('ticket', $ticket_id)->count();
-                                if ($check == 0) {
-                                    $data['vendor'] = $vendor;
-                                    $data['i'] = ++$i;
-                                    $vendorCount = Vendor::where('id', $vendor)->where('created_by', $user)->count();
-                                    if ($vendorCount > 0) {
-                                        $data['type'] = 1;
-                                    } else {
-                                        $vendorSheetCount = VendorSheet::where('vendor', $vendor)
-                                            ->where('source_lang', $ticket->source_lang)
-                                            ->where('target_lang', $ticket->target_lang)
-                                            ->where('task_type', $ticket->task_type)
-                                            ->where('service', $ticket->service)
-                                            ->where('created_by', $user)->count();
-                                        if ($vendorSheetCount > 0)
-                                            $data['type'] = 3;
-                                        else
-                                            $data['type'] = 2;
-                                    }
-                                    $newVmTicketResource = VmTicketResource::create($data);
-                                    if ($newVmTicketResource) {
-                                        VendorSheet::where('vendor', $vendor)
-                                            ->where('source_lang', $ticket->source_lang)
-                                            ->where('target_lang', $ticket->target_lang)
-                                            ->where('task_type', $ticket->task_type)
-                                            ->where('service', $ticket->service)->update(['i' => $newVmTicketResource->id, 'ticket_id' => $ticket_id]);
-                                        // send new status to requster                    
-                                        $mailData = [
-                                            'user_name' =>  $user_name,
-                                            'subject' => "New Resource : # " . $ticket_id,
-                                            'body' =>  "Your Ticket has been updated with a new resource , please check. Date : " . date("Y-m-d H:i:s"),
-                                        ];
-                                        Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
-                                        //end                                           
-                                        $message = "Ticket Resource Added Successfully <br/>";
-                                    } else {
-                                        return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
+                    /*  new Resource */
+                    if ($ticket->request_type == 1 || $ticket->request_type == 3) {
+                        if (isset($request->vendor)) {
+                            $vendors = $request->vendor;
+                            foreach ($vendors as $i => $vendor) {
+                                if (!empty($vendor)) {
+                                    $this->changeTicketToOpen($ticket_id, $user);
+                                    $check = VmTicketResource::where('vendor', $vendor)->where('ticket', $ticket_id)->count();
+                                    if ($check == 0) {
+                                        $data['vendor'] = $vendor;
+                                        $data['i'] = ++$i;
+                                        $vendorCount = Vendor::where('id', $vendor)->where('created_by', $user)->count();
+                                        if ($vendorCount > 0) {
+                                            $data['type'] = 1;
+                                        } else {
+                                            $vendorSheetCount = VendorSheet::where('vendor', $vendor)
+                                                ->where('source_lang', $ticket->source_lang)
+                                                ->where('target_lang', $ticket->target_lang)
+                                                ->where('task_type', $ticket->task_type)
+                                                ->where('service', $ticket->service)
+                                                ->where('created_by', $user)->count();
+                                            if ($vendorSheetCount > 0)
+                                                $data['type'] = 3;
+                                            else
+                                                $data['type'] = 2;
+                                        }
+                                        $newVmTicketResource = VmTicketResource::create($data);
+                                        if ($newVmTicketResource) {
+                                            VendorSheet::where('vendor', $vendor)
+                                                ->where('source_lang', $ticket->source_lang)
+                                                ->where('target_lang', $ticket->target_lang)
+                                                ->where('task_type', $ticket->task_type)
+                                                ->where('service', $ticket->service)->update(['i' => $newVmTicketResource->id, 'ticket_id' => $ticket_id]);
+                                            // send new status to requster                    
+                                            $mailData = [
+                                                'user_name' =>  $user_name,
+                                                'subject' => "New Resource : # " . $ticket_id,
+                                                'body' =>  "Your Ticket has been updated with a new resource , please check. Date : " . date("Y-m-d H:i:s"),
+                                            ];
+                                            Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
+                                            //end                                           
+                                            $message = "Ticket Resource Added Successfully <br/>";
+                                        } else {
+                                            return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
-                // start change status
-                if ($status == 3) {
-                    if ($ticket->update(['status' => 5])) {
-                        $this->addTicketTimeStatus($ticket_id, $user, 5);
-                        // send new status to requster                    
-                        $mailData = [
-                            'user_name' =>  $user_name,
-                            'subject' => "Partly Closed Request for Ticket : # " . $ticket_id,
-                            'body' =>  'VM Team send a request to close your ticket please send your action.',
-                        ];
-                        Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
-                        //end                       
+                    // start change status
+                    if ($status == 3) {
+                        if ($ticket->update(['status' => 5])) {
+                            $this->addTicketTimeStatus($ticket_id, $user, 5);
+                            // send new status to requster                    
+                            $mailData = [
+                                'user_name' =>  $user_name,
+                                'subject' => "Partly Closed Request for Ticket : # " . $ticket_id,
+                                'body' =>  'VM Team send a request to close your ticket please send your action.',
+                            ];
+                            Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
+                            //end                       
+                            $message .= "Ticket Status Changed Successfully ...";
+                        } else {
+                            return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
+                        }
+                    } elseif ($status == 4) {
+                        if ($ticket->update(['status' => $status])) {
+                            $this->addTicketTimeStatus($ticket_id, $user, $status);
+                            // send new status to requster                    
+                            $mailData = [
+                                'user_name' =>  $user_name,
+                                'subject' => "Ticket Closed : # " . $ticket_id,
+                                'body' =>  "Your Ticket Closed at " . date("Y-m-d H:i:s") . "-" . $ticket->ticket_subject,
+                            ];
+                            Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
+                            //end                               
+                            $message .= "Ticket Status Changed Successfully ...";
+                        } else {
+                            return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
+                        }
+                    } elseif ($status == 2) {
+                        $this->changeTicketToOpen($ticket_id, $user);
                         $message .= "Ticket Status Changed Successfully ...";
-                    } else {
-                        return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
-                    }
-                } elseif ($status == 4) {
-                    if ($ticket->update(['status' => $status])) {
-                        $this->addTicketTimeStatus($ticket_id, $user, $status);
-                        // send new status to requster                    
-                        $mailData = [
-                            'user_name' =>  $user_name,
-                            'subject' => "Ticket Closed : # " . $ticket_id,
-                            'body' =>  "Your Ticket Closed at " . date("Y-m-d H:i:s") . "-" . $ticket->ticket_subject,
-                        ];
-                        Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
-                        //end                               
+                    } elseif ($status == 5) {
                         $message .= "Ticket Status Changed Successfully ...";
-                    } else {
-                        return response()->json(['message' => 'Error, Please Try Again!', 'type' => 'error']);
                     }
-                } elseif ($status == 2) {
-                    $this->changeTicketToOpen($ticket_id, $user);
-                    $message .= "Ticket Status Changed Successfully ...";
-                } elseif ($status == 5) {
-                    $message .= "Ticket Status Changed Successfully ...";
                 }
             }
             // if no change 
