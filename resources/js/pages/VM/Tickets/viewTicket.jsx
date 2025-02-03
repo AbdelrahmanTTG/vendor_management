@@ -407,7 +407,7 @@ const ViewTicket = (props) => {
                                     </>
                                 )}
                                 {/*  CV Request */}
-                                {ticketData.request_type_val == 5 && (
+                                {statusInput != '0' && ticketData.request_type_val == 5 && (
                                     ticketData.statusVal != 0 && (
                                         ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ?
                                             ticketData['TicketResource'].map((item, i) => (
@@ -428,7 +428,7 @@ const ViewTicket = (props) => {
                                     )
                                 )}
                                 {/*  Resource Availabilty */}
-                                {ticketData.request_type_val == 4 && (
+                                {statusInput != '0' && ticketData.request_type_val == 4 && (
                                     ticketData.statusVal <= 3 && ticketData.statusVal != 0 ?
                                         <FormGroup className="row mt-2">
                                             <Label className="col-sm-3 col-form-label">{'Number Of Resources'}</Label>
@@ -445,7 +445,7 @@ const ViewTicket = (props) => {
                                         </FormGroup>
                                 )}
                                 {/*  new Resource  */}
-                                {(ticketData.request_type_val == 1 || ticketData.request_type_val == 3) &&
+                                {statusInput != '0' && (ticketData.request_type_val == 1 || ticketData.request_type_val == 3) &&
                                     (ticketData.statusVal != 4 && ticketData.statusVal != 0) &&
                                     <>
                                         <FormGroup className="row mt-2">
