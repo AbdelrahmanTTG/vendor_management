@@ -367,7 +367,7 @@ const ViewTicket = (props) => {
                                                         <>
                                                             <option value="1" disabled>{'New'}</option>
                                                             <option value="2">{'Opened'}</option>
-                                                            <option value="0">{'reject'}</option>
+                                                            <option value="0">{'Reject'}</option>
                                                         </>
                                                     }{ticketData.statusVal == 2 &&
                                                         <>

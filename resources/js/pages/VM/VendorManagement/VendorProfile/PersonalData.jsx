@@ -261,7 +261,7 @@ const PersonalData = React.memo((props) => {
     try {
       const response = await axiosClient.post("updatePersonalInformation", formData);
       basictoaster("successToast", response.data.message);
-      // props.onDataSend(response.data.vendor)
+      props.onDataSend(response.data.vendor.vendor)
     } catch (err) {
       const response = err.response;
       if (response && response.data) {

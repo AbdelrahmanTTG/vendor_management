@@ -120,7 +120,7 @@ const Portal_User = (props) => {
                                 <Col sm="6">
                                     <input
                                         readOnly
-                                        defaultValue={value || ""}
+                                        defaultValue={value || "" || props?.email}
                                         className="form-control"
                                         type="email"
                                         name="email"

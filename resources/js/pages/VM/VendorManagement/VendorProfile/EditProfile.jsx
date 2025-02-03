@@ -37,11 +37,17 @@ const EditProfile = (props) => {
     const [marginBottom, setMarginBottom] = useState('18vh');
     const [Currancydata, setCurrancy] = useState(null);
     const [Cur, setCUR] = useState(null);
+    const [data, setdata] = useState([]);
+
     const getCurrancy = (Currancystat, Cur) => {
         setBillingData({ BillingData:Currancystat })
         setCurrancy(Currancystat);
         setCUR(Cur)
     }
+    const handleDataSend = (data) => {
+        // console.log(data)
+        setPersonalData({ PersonalData:data });
+    };
     const LazyWrapper = ({ children }) => (
         <Suspense fallback={
             <div className="loader-box"  >
@@ -128,7 +134,7 @@ const EditProfile = (props) => {
                     <LazyWrapper>
 
                         <div id="personal-data">
-                            <PersonalData onSubmit="onUpdate" mode="edit"
+                            <PersonalData onSubmit="onUpdate" mode="edit" onDataSend={handleDataSend}
                                  backPermissions={props.permissions?.PersonalData} vendorPersonalData={vendorPersonalData}
                             />
                         </div>
@@ -193,7 +199,7 @@ const EditProfile = (props) => {
                     <LazyWrapper>
 
                         <div id='Portal_User' >
-                            <Portal_User email={vendor?.email || vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.Portal_User} onSubmit="onUpdate" mode="edit" />
+                            <Portal_User email={ vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.Portal_User} onSubmit="onUpdate" mode="edit" />
                         </div>
                     </LazyWrapper>
                 )}

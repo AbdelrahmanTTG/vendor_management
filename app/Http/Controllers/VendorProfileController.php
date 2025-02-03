@@ -588,7 +588,7 @@ class VendorProfileController extends Controller
 
         return response()->json([
             'message' => 'Vendor updated successfully!',
-            'vendor' => ['id' => $vendor->id]
+            'vendor' => ['id' => $vendor->id , "vendor" => $this->PersonalData($vendor->id)]
         ], 200);
     }
 
