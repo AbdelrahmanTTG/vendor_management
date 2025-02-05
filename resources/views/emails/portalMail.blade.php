@@ -200,7 +200,7 @@
                             </tr>
                             <tr>
                                 <td width="1200">
-                                    <p><strong>Method :</strong> {{$mailData['invoiveData']->wallet_method }} </p>
+                                    <p><strong>Method :</strong> {{$mailData['invoiveData']->walletMethod->name }} </p>
                                 </td>
                             <tr>
                                 <td width="1200">

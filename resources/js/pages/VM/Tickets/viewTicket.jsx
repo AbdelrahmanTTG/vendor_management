@@ -318,7 +318,7 @@ const ViewTicket = (props) => {
                         </CardBody>
                     </Card>
                       {/*  Assign Ticket */}
-                      {ticketData.statusVal == 1 && ticketData.assignedUser == 0 && assignPermission == 1 && (
+                      {assignPermission == 1 && (
                         <>
                             <Card>
                                 <CardHeader className='b-t-primary p-b-0'>

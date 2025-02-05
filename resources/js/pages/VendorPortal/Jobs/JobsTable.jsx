@@ -29,6 +29,7 @@ const JobsTable = (props) => {
                     <thead className="bg-primary">
                         <tr>
                             <th scope="col">{'#'}</th>
+                            <th scope="col">{'Brand'}</th>
                             {viewVendor == true && (
                                 <th scope="col">{'Vendor'}</th>
                             )}
@@ -45,7 +46,7 @@ const JobsTable = (props) => {
                             {viewStatus == "true" && (
                                 <th scope="col">{'Status'}</th>
                             )}                            
-                            <th scope="col">{'Brand'}</th>
+                            <th scope="col">{'PM Name'}</th>
                             <th scope="col">{'Actions'}</th>
                         </tr>
                     </thead>
@@ -55,6 +56,7 @@ const JobsTable = (props) => {
                                 {props.pageTasks.map((item, i) => (
                                     <tr key={item.id}>
                                         <th scope="row">{item.id}</th>
+                                        <td>{item.brand_name}</td>
                                         {viewVendor == true && (
                                             <td>{item.vendor}{item.vendor_list??''}</td>
                                         )}
@@ -71,7 +73,7 @@ const JobsTable = (props) => {
                                         {viewStatus == "true" && (
                                             <td>{item.statusData}</td>
                                         )}                                      
-                                        <td>{item.brand_name}</td>
+                                        <td>{item.created_by}</td>
                                         <td>
                                             {item.type == 'job_offer' ? (
                                                 <Link to={`/Vendor/Jobs/viewOffer`} state={{id:item.id,type: item.offer_type}}>
@@ -94,7 +96,7 @@ const JobsTable = (props) => {
                             </>
                         ) : (
                             <tr >
-                                <td scope="row" colSpan={viewStatus == "true"?14:13} className='text-center bg-light f-14' >{'No Data Available'}</td>
+                                <td scope="row" colSpan={viewStatus == "true"?15:14} className='text-center bg-light f-14' >{'No Data Available'}</td>
                             </tr>
                         )
                         }

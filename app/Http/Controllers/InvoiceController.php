@@ -7,6 +7,7 @@ use App\Http\Resources\TaskResource;
 use App\Mail\PortalMail;
 use App\Models\BankDetails;
 use App\Models\BillingData;
+use App\Models\Brand;
 use App\Models\Logger;
 use App\Models\Task;
 use App\Models\Vendor;
@@ -72,9 +73,14 @@ class InvoiceController extends Controller
     public function selectCompletedJobs(Request $request)
     {
         $request['vendor'] = Crypt::decrypt($request->vendor);
+        $brand_id = $request->brand;
         $jobs = Task::select('id', 'code')->where('vendor',  $request->vendor)->where('job_portal', 1)->where('status', 1)->where(function ($query) {
             $query->where('verified', '=', 2)
                 ->orWhereNull('verified');
+        })->where(function ($query)use ($brand_id) {
+            $query->whereHas('job.project.customer', function ($q) use ($brand_id) {
+                $q->where('brand', $brand_id);
+            })->orWhere('brand',$brand_id);
         })->get();
         return response()->json(["CompletedJobs" => $jobs]);
     }
@@ -166,8 +172,8 @@ class InvoiceController extends Controller
                 for ($i = 0; $i < count($jobs); $i++) {
                     $id = $jobs[$i];
                     $offer = Task::where('vendor', $request->vendor)->where('id', $id)->where('status', 1)->first();
-                    $brand['brand_id'] = $offer->getTaskBrandId();
-                    $data['brand'] = !empty($offer->brand)?$offer->brand:$offer->getTaskBrandId();
+                    $brand['brand_id'] = !empty($offer->brand) ? $offer->brand : $offer->getTaskBrandId();
+                    $data['brand'] = !empty($offer->brand) ? $offer->brand : $offer->getTaskBrandId();
                     $invoice->update($brand);
                     if ($offer->update($data)) {
                         Logger::addToLoggerUpdate('job_task', 'id', $id, $request->vendor);
@@ -192,7 +198,7 @@ class InvoiceController extends Controller
                         'invoiveData' => VendorInvoice::find($insert_id)
 
                     ];
-                    Mail::to($vendorEmail)->cc($vmConfig->accounting_email)->send(new PortalMail($mailData));
+                    print_r(Mail::to($vendorEmail)->cc($vmConfig->accounting_email)->send(new PortalMail($mailData)));
                 }
             }
         }
@@ -227,5 +233,27 @@ class InvoiceController extends Controller
             "bankData" => $bankData,
             "walletData" => $walletData,
         ];
+    }
+
+    public function getPendingTasksCount(Request $request)
+    {
+        $request['vendor'] = Crypt::decrypt($request->vendor);        
+        $brands = Brand::select('id', 'name')->get();
+        foreach ($brands as $brand) {
+            $pendingTasks[$brand->id]['brand_id'] = $brand->id;
+            $pendingTasks[$brand->id]['brand_name'] = $brand->name;
+            $pendingTasks[$brand->id]['count'] = Task::where('job_portal', 1)->where('status', 1)->where(function ($query) {
+                $query->where('verified', '=', 2)
+                    ->orWhereNull('verified');
+            })->where(function ($query)use ($brand) {
+                $query->whereHas('job.project.customer', function ($q) use ($brand) {
+                    $q->where('brand', $brand->id);
+                })->orWhere('brand',$brand->id);
+            })->count();          
+        }
+        $data = array_filter($pendingTasks, function ($item) {
+            return $item['count'] >= 1;
+        });
+        return response()->json($data);
     }
 }

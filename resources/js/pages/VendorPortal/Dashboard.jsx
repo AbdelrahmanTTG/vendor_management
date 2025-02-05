@@ -232,7 +232,7 @@ const Dashboard = () => {
         </Col>
       </Row>
       <Row>
-        <Col sm="8" lg="8" xl="9">
+        <Col sm="12" lg="12" xl="12">
           <Card>
             <CardHeader className='b-t-primary p-3'>
               <Row>
@@ -308,26 +308,7 @@ const Dashboard = () => {
               }
             </CardBody>
           </Card>
-        </Col>
-        <Col sm="4" lg="4" xl="3" >
-          <Row>
-            <Col xl="12" className="xl-100 box-col-12 box-shadow">
-              <Card>
-                <div className="mobile-clock-widget">
-                  <div className="bg-svg">
-                    <CloudLightning />
-                  </div>
-                  <div>
-                    <Clock value={value} />
-                    <div id="date" className="date f-24 mb-2">
-                      <span>{dateshow}</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </Col>
-          </Row>
-        </Col>
+        </Col>       
         <Col sm='12' xl='12'>
           <Card>
             <CardHeader title='Recent Stats' />

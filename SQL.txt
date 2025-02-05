@@ -325,3 +325,5 @@ INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUE
 INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '301', '21', '1', '1', '1', '1', '1', '0') ;
 INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '301', '1', '1', '1', '1', '1', '1', '0') ;
 INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '301', '32', '1', '1', '1', '1', '1', '0') ;
+
+ALTER TABLE `vendor_invoices` CHANGE `wallet_method` `wallet_method` INT(11) NULL DEFAULT NULL;

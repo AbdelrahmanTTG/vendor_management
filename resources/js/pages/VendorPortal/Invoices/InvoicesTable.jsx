@@ -21,7 +21,8 @@ const InvoicesTable = (props) => {
                 <Table>
                     <thead className="bg-primary">
                         <tr>
-                            <th scope="col">{'#'}</th>
+                            <th scope="col">{'ID'}</th>
+                            <th scope="col">{'Brand'}</th>
                             {viewVendor == true && (
                                 <th scope="col">{'Vendor Name'}</th>
                             )}
@@ -29,7 +30,7 @@ const InvoicesTable = (props) => {
                             <th scope="col">{'Invoice Date'}</th>
                             <th scope="col">{'Total'}</th>
                             <th scope="col">{'Payment Method'}</th>
-                            <th scope="col">{'Brand'}</th>
+                           
                             <th scope="col">{'Status'}</th>
 
                         </tr>
@@ -40,14 +41,14 @@ const InvoicesTable = (props) => {
                                 {props.pageInvoices.map((item, i) => (
                                     <tr key={item.id}>
                                         <td>{item.id}</td>
+                                        <td>{item.brand_name}</td>
                                         {viewVendor == true && (
                                             <td>{item.vendor}</td>
                                         )}
                                         <td>{item.billing_legal_name}</td>                                      
                                         <td>{item.invoice_date}</td>
                                         <td>{item.total}</td>
-                                        <td>{item.payment_method}</td>
-                                        <td>{item.brand_name}</td>
+                                        <td>{item.payment_method}</td>                                       
                                         <td>{item.statusData}</td>
                                     </tr>
                                 ))

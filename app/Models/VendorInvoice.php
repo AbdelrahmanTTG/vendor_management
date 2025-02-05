@@ -57,4 +57,9 @@ class VendorInvoice extends Model
     {
         return  $this->belongsTo(Currency::class, 'billing_currency');
     }
+
+    public function walletMethod()
+    {
+        return $this->belongsTo(VendorPaymentMethod::class, 'wallet_method')->select('id', 'name'); 
+    }
 }

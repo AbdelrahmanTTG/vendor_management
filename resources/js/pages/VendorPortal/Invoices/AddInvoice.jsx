@@ -1,10 +1,12 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, CardHeader, CardBody, Label, FormGroup, Input, Table, CardFooter } from 'reactstrap';
-import { BreadcrumbsPortal, H5, Btn, H6 } from '../../../AbstractElements';
+import { BreadcrumbsPortal, H5, Btn, H6, P, H4 } from '../../../AbstractElements';
 import axiosClient from '../../AxiosClint';
 import { useStateContext } from '../../../pages/context/contextAuth';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import CountUp from 'react-countup';
+import { Database } from 'react-feather';
 
 
 const AddInvoice = () => {
@@ -17,57 +19,86 @@ const AddInvoice = () => {
     const [completedJobs, setCompletedJobs] = useState([]);
     const [jobsData, setJobsData] = useState([]);
     const [selectedTaskInput, setSelectedTaskInput] = useState([]);
+    const [pendingTasks, setPendingTasks] = useState([]);
+    const [brandInput, setSelectedBrandInput] = useState("0");
 
     const [fileInput, setFileInput] = useState("");
     const [totalInput, setTotalInput] = useState(0);
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
     const [paymentMethodInput, setPaymentMethodInput] = useState("");
+    const [walletAccountValue, setWalletAccountValue] = useState("");
+    const [walletMethodValue, setWalletMethodValue] = useState(0);
 
     useEffect(() => {
         if (user) {
             const payload = {
                 'vendor': user.id
             };
-            axiosClient.post(baseURL + "selectCompletedJobs", payload)
+            axiosClient.post(baseURL + "getPendingTasksCount", payload)
                 .then(({ data }) => {
-                    const [completedJobs] = [(data?.CompletedJobs)];
-                    setCompletedJobs(completedJobs);
+                    const result = Object.values(data);
+                    setPendingTasks(result);
                 });
             // get billing data 
-            axiosClient.post("/EditVendor", {               
-                    id: user.id,
-                    BillingData: "Billing Data",              
+            axiosClient.post("/EditVendor", {
+                id: user.id,
+                BillingData: "Billing Data",
             })
                 .then(({ data }) => {
                     setBillingData(data?.BillingData?.billingData);
                     setBankData(data?.BillingData?.bankData?.[0]);
-                    setWalletData(data?.BillingData?.walletData?.[0]);
+                    // setWalletData(data?.BillingData?.walletData?.[0]);
+                    setWalletData(data?.BillingData?.walletData);
                 });
         }
     }, [user]);
 
-    const TaskRes = {
-        'vendor': user.id,
-        'task_id': selectedTaskInput,
-    };
-    const getSelectedJobData = () => {
-        if (selectedTaskInput != '') {
-            axiosClient.post(baseURL + "getSelectedJobData", TaskRes)
-                .then(({ data }) => {
-                    if (jobsData.length > 0)
-                        setJobsData(jobsData => [...jobsData, data.Task]);
-                    else
-                        setJobsData([data.Task]);
-                });
-            // remove this from select input 
-            setCompletedJobs(completedJobs.filter(item => item.id !== parseInt(selectedTaskInput)));
-            setSelectedTaskInput('');
-        } else {
-            alert('Please Select Job From List')
-        }
+
+    const getWalletAccountData = (e) => {
+        const wallet_method = e.target.value;
+        setWalletMethodValue(e.target.value);
+        const found = walletData.find((element) => element.method.id == wallet_method);
+        const account = found.account;
+        setWalletAccountValue(account);
     };
 
-    const handlePoOnChange = (id) => {
+    const getSelectedJobData = (e) => {
+        const task_id = e.target.value;
+        axiosClient.post(baseURL + "getSelectedJobData", {
+            'vendor': user.id,
+            'task_id': task_id,
+        }).then(({ data }) => {
+            let jobs = [];
+            if (jobsData.length > 0)
+                jobs = [...jobsData, data.Task];
+            // setJobsData(jobsData => [...jobsData, data.Task]);       
+            else
+                jobs = [data.Task];
+            setJobsData(jobs);
+            handlePoOnChange(task_id, jobs);
+        });
+        // remove this from select input 
+        setCompletedJobs(completedJobs.filter(item => item.id !== parseInt(task_id)));
+        setSelectedTaskInput('');
+    };
+
+    const getCompletedJobs = (e) => {
+        setSelectedBrandInput(e.target.value);
+        axiosClient.post(baseURL + "selectCompletedJobs", {
+            'vendor': user.id,
+            'brand': e.target.value,
+        }).then(({ data }) => {
+            const [completedJobs] = [(data?.CompletedJobs)];
+            setCompletedJobs(completedJobs);
+            // 
+            setJobsData([]);
+            setSelectedCheckboxes([]);
+            setTotalInput(0);
+        });
+    };
+
+    const handlePoOnChange = (task_id, jobs) => {
+        const id = Number(task_id);
         const checkBoxArray = selectedCheckboxes;
         // Find index
         const findIdx = checkBoxArray.indexOf(id);
@@ -79,8 +110,8 @@ const AddInvoice = () => {
             checkBoxArray.push(id);
         }
         setSelectedCheckboxes(checkBoxArray);
-        // cal. total 
-        const totalPrice = jobsData.reduce(
+        // cal. total        
+        const totalPrice = jobs.reduce(
             (sum, job) => {
                 if (selectedCheckboxes.includes(job.id))
                     return sum + job.total_cost;
@@ -92,7 +123,13 @@ const AddInvoice = () => {
         setTotalInput(totalPrice);
     };
 
-
+    const removeJob = (jobId, jobCode) => {
+        // remove this from jobs data
+        const jobs = jobsData.filter(item => item.id !== parseInt(jobId));
+        handlePoOnChange(jobId, jobs);
+        setJobsData(jobs);
+        completedJobs.push({ 'id': jobId, 'code': jobCode });
+    }
 
     const saveInvoice = (event) => {
         event.preventDefault();
@@ -103,8 +140,8 @@ const AddInvoice = () => {
             'jobs': selectedCheckboxes,
             'total': totalInput,
             'file': fileInput,
-
         };
+        console.log(selectedCheckboxes);
         if (selectedCheckboxes.length == 0) {
             toast.error("Please Select Jobs.....");
         }
@@ -135,9 +172,27 @@ const AddInvoice = () => {
             <BreadcrumbsPortal mainTitle="Add New Invoice" parent="My Invoices" title="Add New Invoice" />
             <Container fluid={true}>
                 <Row>
+                {pendingTasks.map((item, i) => (   
+                    <Col sm="4" lg="6" xl="3" key={i}>
+                        <Card className="o-hidden border-0">
+                            <CardBody className={i%2==0?'bg-primary':'bg-secondary'}>
+                                <div className="media static-top-widget">
+                                    <div className="align-self-center text-center">
+                                        <Database />
+                                    </div>
+                                    <div className="media-body">
+                                        <span className="m-0">{'Ready To Invoice In '}<b>{item.brand_name}</b></span>
+                                        <H4 attrH4={{ className: 'mb-0 counter px-2' }} >{item.count}</H4>
+                                        <Database className="icon-bg" />
+                                    </div>
+                                </div>
+                            </CardBody>
+                        </Card>
+                    </Col>
+                     ))}
                     <form onSubmit={saveInvoice}>
-                        <Col sm="12">
-                            <Card className='mb-3'>
+                        <Col sm="12">                            
+                            <Card className='mb-3 pt-0'>
                                 <CardHeader className=' b-l-primary pb-3'>
                                     <H6 >1 - Select Jobs To Be Invoiced</H6>
                                 </CardHeader>
@@ -145,19 +200,29 @@ const AddInvoice = () => {
                                     <Row>
                                         <Col>
                                             <FormGroup className="row">
+                                                <Label className="col-sm-3 col-form-label">{'Select Brand '}</Label>
+                                                <Col sm="6">
+                                                    <Input type="select" name='brand' className="custom-select form-control" defaultValue={brandInput} onChange={e => getCompletedJobs(e)}>
+                                                        <option value='0' disabled>{'Select Brand'}</option>
+                                                        {pendingTasks.map((item) => (
+                                                            <option key={item.brand_id} value={item.brand_id}>{item.brand_name}</option>
+                                                        ))}
+                                                    </Input>
+                                                </Col>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col>
+                                            <FormGroup className="row">
                                                 <Label className="col-sm-3 col-form-label">{'Select Job '}</Label>
                                                 <Col sm="6">
-                                                    <Input type="select" id='task_id' className="custom-select form-control" onChange={e => setSelectedTaskInput(e.target.value)}>
+                                                    <Input type="select" id='task_id' className="custom-select form-control" onChange={e => getSelectedJobData(e)} disabled={completedJobs.length > 0 ? false : true}>
                                                         <option value=''>{'Select Job'}</option>
                                                         {completedJobs.map((item) => (
                                                             <option key={item.id} value={item.id}>{item.code}</option>
                                                         ))}
                                                     </Input>
-                                                </Col>
-                                                <Col sm="3">
-                                                    <Btn attrBtn={{ className: "btn btn-outline-primary btn-sm", color: "default", onClick: () => getSelectedJobData(), }}>
-                                                        {'Add Job To Invoice'}
-                                                    </Btn>
                                                 </Col>
                                             </FormGroup>
                                         </Col>
@@ -176,7 +241,6 @@ const AddInvoice = () => {
                                                 <Table>
                                                     <thead className="bg-primary">
                                                         <tr>
-                                                            <th scope="col">{'#'}</th>
                                                             <th scope="col">{'Code'}</th>
                                                             <th scope="col">{'Subject'}</th>
                                                             <th scope="col">{'Task Type'}</th>
@@ -185,12 +249,12 @@ const AddInvoice = () => {
                                                             <th scope="col">{'Unit'}</th>
                                                             <th scope="col">{'Total Cost'}</th>
                                                             <th scope="col">{'Currency'}</th>
+                                                            <th scope="col">{'Cancel'}</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {jobsData.map((item, index) => (
                                                             <tr key={item.id}>
-                                                                <td><input type='checkbox' key={item.id} id={`custom-checkbox-${index}`} className='checkPo' value={item.id} onChange={() => handlePoOnChange(item.id)} selected={selectedCheckboxes.includes(item.id)} /></td>
                                                                 <td>{item.code}</td>
                                                                 <td>{item.subject}</td>
                                                                 <td>{item.task_type}</td>
@@ -199,6 +263,9 @@ const AddInvoice = () => {
                                                                 <td>{item.unit}</td>
                                                                 <td>{item.total_cost}</td>
                                                                 <td>{item.currency}</td>
+                                                                <td> <Btn attrBtn={{ className: "btn btn-outline-danger btn-sm", color: "default", onClick: () => removeJob(item.id, item.code) }}>
+                                                                    <i className="fa fa-minus-circle"></i>
+                                                                </Btn></td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
@@ -273,7 +340,7 @@ const AddInvoice = () => {
                                             <FormGroup className="row">
                                                 <Label className="col-sm-4 col-form-label">{'Billing Currency'}</Label>
                                                 <Col sm="8">
-                                                    <Input type="text" name="billing_currency" className="form-control" readOnly disabled defaultValue={billingData?.billing_currency} />
+                                                    <Input type="text" name="billing_currency" className="form-control" readOnly disabled defaultValue={billingData?.billing_currency?.name} />
                                                 </Col>
                                             </FormGroup>
                                         </Col>
@@ -286,7 +353,6 @@ const AddInvoice = () => {
                                 </CardHeader>
                                 <CardBody className='py-2'>
                                     <Row>
-
                                         <Col sm="12">
                                             <FormGroup className="form-group m-checkbox-inline custom-radio-ml p-l-25">
                                                 <div className="radio radio-primary">
@@ -339,13 +405,18 @@ const AddInvoice = () => {
                                                     <FormGroup className="row">
                                                         <Label className="col-sm-4 col-form-label">{'Method'}</Label>
                                                         <Col sm="8">
-                                                            <Input type="text" name="wallet_method" className="form-control" defaultValue={walletData?.method} />
+                                                            <Input type="select" name='wallet_method' className="custom-select form-control" defaultValue={walletMethodValue} onChange={e => getWalletAccountData(e)}>
+                                                                <option value='0' disabled>{'Select Method'}</option>
+                                                                {walletData.map((item, i) => (
+                                                                    <option key={i} value={item.method?.id}>{item.method?.name}</option>
+                                                                ))}
+                                                            </Input>
                                                         </Col>
                                                     </FormGroup>
                                                     <FormGroup className="row">
                                                         <Label className="col-sm-4 col-form-label">{'Account'}</Label>
                                                         <Col sm="8">
-                                                            <Input type="text" name="wallet_account" className="form-control" defaultValue={walletData?.account} />
+                                                            <Input type="text" name="wallet_account" className="form-control" defaultValue={walletAccountValue} />
                                                         </Col>
                                                     </FormGroup>
                                                 </>)}
@@ -360,7 +431,7 @@ const AddInvoice = () => {
                     </form>
                 </Row>
             </Container>
-        </Fragment>
+        </Fragment >
     );
 };
 

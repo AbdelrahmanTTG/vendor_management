@@ -98,6 +98,7 @@ Route::middleware([App\Http\Middleware\AdminAuth::class])->prefix('Portal')->gro
         Route::post('getSelectedJobData', [InvoiceController::class, 'getSelectedJobData'])->name('Portal.getSelectedJobData');
         Route::post('saveInvoice', [InvoiceController::class, 'saveInvoice'])->name('Portal.saveInvoice');
         Route::post('getVendorBillingData', [InvoiceController::class, 'getVendorBillingData'])->name('Portal.getVendorBillingData');
+        Route::post('getPendingTasksCount', [InvoiceController::class, 'getPendingTasksCount'])->name('Portal.getPendingTasksCount');
         Route::post('dashboardData', [TaskController::class, 'index'])->name('Portal.dashboardData');
         Route::post('getAvailabilityList', [AvailabilityController::class, 'index'])->name('Portal.getAvailabilityList');
         Route::post('viewAvailabilityCheck', [AvailabilityController::class, 'viewAvailabilityCheck'])->name('Portal.viewAvailabilityCheck');
