@@ -54,4 +54,8 @@ class OfferList extends Model
         }
         return  $vendorNames;
     }
+    public function user()
+    {
+        return  $this->belongsTo(BrandUsers::class, 'created_by');
+    }
 }
