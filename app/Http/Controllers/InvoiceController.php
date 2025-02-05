@@ -198,7 +198,7 @@ class InvoiceController extends Controller
                         'invoiveData' => VendorInvoice::find($insert_id)
 
                     ];
-                    print_r(Mail::to($vendorEmail)->cc($vmConfig->accounting_email)->send(new PortalMail($mailData)));
+                    Mail::to($vendorEmail)->cc($vmConfig->accounting_email)->send(new PortalMail($mailData));
                 }
             }
         }
