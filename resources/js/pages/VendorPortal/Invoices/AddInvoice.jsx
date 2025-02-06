@@ -180,7 +180,7 @@ const AddInvoice = () => {
             <Container fluid={true}>
                 <Row>
                 {pendingTasks.map((item, i) => (   
-                    <Col sm="4" lg="6" xl="3" key={i}>
+                    <Col sm="6" lg="4" xl="3" key={i}>
                         <Card className="o-hidden border-0">
                             <CardBody className={i%2==0?'bg-primary':'bg-secondary'}>
                                 <div className="media static-top-widget">
@@ -188,7 +188,7 @@ const AddInvoice = () => {
                                         <Database />
                                     </div>
                                     <div className="media-body">
-                                        <span className="m-0">{'Ready To Invoice In '}<b>{item.brand_name}</b></span>
+                                        <span className="m-0">{'Ready To Invoice In '}<br/><b>{item.brand_name}</b></span>
                                         <H4 attrH4={{ className: 'mb-0 counter px-2' }} >{item.count}</H4>
                                         <Database className="icon-bg" />
                                     </div>
