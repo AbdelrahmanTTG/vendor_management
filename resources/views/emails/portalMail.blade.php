@@ -149,6 +149,11 @@
                     <tbody>                       
                         <tr>
                             <td width="1200">
+                                <p><strong>Brand:</strong> {{$mailData['invoiveData']->brand->name}} </p>
+                            </td>
+                        </tr> 
+                        <tr>
+                            <td width="1200">
                                 <p><strong>Billing Legal Name:</strong> {{$mailData['invoiveData']->billing_legal_name}} </p>
                             </td>
                         </tr> 

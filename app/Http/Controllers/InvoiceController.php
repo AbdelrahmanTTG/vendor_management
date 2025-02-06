@@ -242,7 +242,7 @@ class InvoiceController extends Controller
         foreach ($brands as $brand) {
             $pendingTasks[$brand->id]['brand_id'] = $brand->id;
             $pendingTasks[$brand->id]['brand_name'] = $brand->name;
-            $pendingTasks[$brand->id]['count'] = Task::where('job_portal', 1)->where('status', 1)->where(function ($query) {
+            $pendingTasks[$brand->id]['count'] = Task::where('vendor',  $request->vendor)->where('job_portal', 1)->where('status', 1)->where(function ($query) {
                 $query->where('verified', '=', 2)
                     ->orWhereNull('verified');
             })->where(function ($query)use ($brand) {
