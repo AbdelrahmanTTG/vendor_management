@@ -16,6 +16,7 @@ const AddInvoice = () => {
     const [billingData, setBillingData] = useState([]);
     const [bankData, setBankData] = useState([]);
     const [walletData, setWalletData] = useState([]);
+    const [paymentMethods, setPaymentMethods] = useState([]);
     const [completedJobs, setCompletedJobs] = useState([]);
     const [jobsData, setJobsData] = useState([]);
     const [selectedTaskInput, setSelectedTaskInput] = useState([]);
@@ -49,6 +50,8 @@ const AddInvoice = () => {
                     setBankData(data?.BillingData?.bankData?.[0]);
                     // setWalletData(data?.BillingData?.walletData?.[0]);
                     setWalletData(data?.BillingData?.walletData);
+                    setPaymentMethods(data?.BillingData?.vendor_payment_methods);
+                    
                 });
         }
     }, [user]);
@@ -58,8 +61,12 @@ const AddInvoice = () => {
         const wallet_method = e.target.value;
         setWalletMethodValue(e.target.value);
         const found = walletData.find((element) => element.method.id == wallet_method);
-        const account = found.account;
-        setWalletAccountValue(account);
+        if(found !== undefined){
+            setWalletAccountValue(found.account);           
+        }else{
+            setWalletAccountValue('');     
+        }
+       
     };
 
     const getSelectedJobData = (e) => {
@@ -407,8 +414,8 @@ const AddInvoice = () => {
                                                         <Col sm="8">
                                                             <Input type="select" name='wallet_method' className="custom-select form-control" defaultValue={walletMethodValue} onChange={e => getWalletAccountData(e)}>
                                                                 <option value='0' disabled>{'Select Method'}</option>
-                                                                {walletData.map((item, i) => (
-                                                                    <option key={i} value={item.method?.id}>{item.method?.name}</option>
+                                                                {paymentMethods.map((item, i) => (
+                                                                    <option key={i} value={item.id}>{item.name}</option>
                                                                 ))}
                                                             </Input>
                                                         </Col>

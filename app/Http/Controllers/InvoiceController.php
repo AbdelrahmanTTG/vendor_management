@@ -12,6 +12,7 @@ use App\Models\Logger;
 use App\Models\Task;
 use App\Models\Vendor;
 use App\Models\VendorInvoice;
+use App\Models\VendorPaymentMethod;
 use App\Models\VmSetup;
 use App\Models\WalletsPaymentMethods;
 use Illuminate\Http\Request;
@@ -211,7 +212,7 @@ class InvoiceController extends Controller
     {
 
         $id = Crypt::decrypt($id);
-
+        $vendor_payment_methods = VendorPaymentMethod::select('id','name')->where('Active',1)->get();
         $billingData = BillingData::where('vendor_id', $id)
             ->with(['bankDetail', 'walletPaymentMethod.method', 'currency:id,name'])
             ->first();
@@ -232,6 +233,7 @@ class InvoiceController extends Controller
             "billingData" => $billingData ?? '',
             "bankData" => $bankData,
             "walletData" => $walletData,
+            "vendor_payment_methods" => $vendor_payment_methods,
         ];
     }
 
