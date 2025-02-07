@@ -17,7 +17,7 @@ class Task extends Model
         'plan_comment',
         'verified',
         'vpo_file',
-        'invoice_created_at',
+        'invoice_created_at','invoice_date',
         'invoice_id','brand'
 
     ];
