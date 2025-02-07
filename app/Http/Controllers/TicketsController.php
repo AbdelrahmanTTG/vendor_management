@@ -83,6 +83,7 @@ class TicketsController extends Controller
                 'status',
                 'created_by',
                 'created_at',
+                'requester_function'
             ];
         }
         // start get data    

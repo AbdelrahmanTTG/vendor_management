@@ -145,6 +145,7 @@ const TicketsList = (props) => {
         { value: 'software', label: 'Software' },
         { value: 'status', label: 'Status' },
         { value: 'created_by', label: 'Requester Name' },
+        { value: 'requester_function', label: 'Requester Function' },
         { value: 'date', label: 'Date' },
 
     ];
@@ -250,6 +251,7 @@ const TicketsList = (props) => {
             'software': 'Software',
             'status': 'Status',
             'created_by': 'Created By',
+            'requester_function': 'Requester Function',
             'created_at': 'Created At',
 
         };
@@ -328,6 +330,11 @@ const TicketsList = (props) => {
                             processedItem[key] == 3 ? processedItem[key] = 'General' : "";
                             processedItem[key] == 4 ? processedItem[key] = 'Resources Availability' : "";
                             processedItem[key] == 5 ? processedItem[key] = 'CV Request' : "";
+
+                        }
+                        if (key === 'requester_function') {
+                            processedItem[key] == 1 ? processedItem[key] = 'SAM' : "";
+                            processedItem[key] == 2 ? processedItem[key] = 'PM' : "";                         
 
                         }
              
@@ -596,9 +603,23 @@ const TicketsList = (props) => {
                                                                 ]} className="js-example-basic-multiple typeInput mb-1" isMulti
                                                         />
                                                     </FormGroup>
+                                                </Col>                                            
+                                            }{
+                                                selectedSearchCol.indexOf("requester_function") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Requester Function'}</Label>
+                                                        <Select id='requester_function' required
+                                                            name='requester_function'
+                                                            options={
+                                                                [                                                                   
+                                                                    { value: '1', label: 'SAM' },
+                                                                    { value: '2', label: 'PM' }                                                                   
+                                                                ]} className="js-example-basic-multiple mb-1" isMulti
+                                                        />
+                                                    </FormGroup>
                                                 </Col>
-                                            }
-                                            {
+                                            } {
                                                 selectedSearchCol.indexOf("created_by") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
@@ -659,7 +680,7 @@ const TicketsList = (props) => {
                     <CardHeader className="px-3 d-flex justify-content-between align-items-center py-3">
                         <div className="w-100 text-end">
                             <ButtonGroup >
-                                <FormatTable title="Add Tasks table formatting"
+                                <FormatTable title="Tickets table formatting"
                                     Columns={[
                                         { value: 'brand', label: 'Brand' },
                                         { value: 'request_type', label: 'Request Type' },
@@ -677,6 +698,7 @@ const TicketsList = (props) => {
                                         { value: 'software', label: 'Software' },
                                         { value: 'status', label: 'Status' },
                                         { value: 'created_by', label: 'Created By' },
+                                        { value: 'requester_function', label: 'Requester Function' },
                                         { value: 'created_at', label: 'Created At' },
 
                                     ]} table="vm_tickets"

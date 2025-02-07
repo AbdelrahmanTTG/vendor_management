@@ -37,7 +37,7 @@ const ViewTicket = (props) => {
         ticket_id: ticket.id,
         user: user.id,
 
-    };   
+    };
     useEffect(() => {
         if (!ticket) {
             setRedirect(true);
@@ -153,8 +153,8 @@ const ViewTicket = (props) => {
                         });
                         setTemp(!temp)
                         setStatusInput('');
-                        setFileInput('');                       
-                        setCommentInput();                       
+                        setFileInput('');
+                        setCommentInput();
                         break;
                     case 'error':
                         toast.error(data.message);
@@ -297,19 +297,23 @@ const ViewTicket = (props) => {
                                             <td>{ticketData.created_at}</td>
                                         </tr>
                                         <tr>
-                                            <th>{'Comment'}</th>
-                                            <td colSpan={19} dangerouslySetInnerHTML={{ __html: ticketData.comment }} ></td>
+                                            <th colSpan={2}>{'Requester Function'}</th>
+                                            <td colSpan={18} > {ticketData.requester_function} </td>
+                                        </tr>
+                                        <tr>
+                                            <th colSpan={2}>{'Comment'}</th>
+                                            <td colSpan={18} dangerouslySetInnerHTML={{ __html: ticketData.comment }} ></td>
                                         </tr>
                                         {ticketData.statusVal == 0 &&
                                             <tr>
-                                                <th>{'Rejection Reason'}</th>
-                                                <td colSpan={19} dangerouslySetInnerHTML={{ __html: ticketData.rejection_reason }} ></td>
+                                                <th colSpan={2}>{'Rejection Reason'}</th>
+                                                <td colSpan={18} dangerouslySetInnerHTML={{ __html: ticketData.rejection_reason }} ></td>
                                             </tr>
                                         }
                                         {ticketData.assignedUser != 0 &&
                                             <tr>
-                                                <th>{'Assigned To'}</th>
-                                                <td colSpan={19}>{ticketData.assignedUser}</td>
+                                                <th colSpan={2}>{'Assigned To'}</th>
+                                                <td colSpan={18}>{ticketData.assignedUser}</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -317,8 +321,8 @@ const ViewTicket = (props) => {
                             </div>
                         </CardBody>
                     </Card>
-                      {/*  Assign Ticket */}
-                      {assignPermission == 1 && (
+                    {/*  Assign Ticket */}
+                    {assignPermission == 1 && statusInput != '0' && (ticketData.statusVal == 1 || ticketData.statusVal == 2 ) &&  (
                         <>
                             <Card>
                                 <CardHeader className='b-t-primary p-b-0'>
@@ -341,7 +345,7 @@ const ViewTicket = (props) => {
                                             </Col>
                                         </FormGroup>
                                     </form>
-                                    
+
                                 </CardBody>
                             </Card>
                         </>)}
@@ -354,15 +358,15 @@ const ViewTicket = (props) => {
                                 </Col>
                             </Row>
                         </CardHeader>
-                        <CardBody>                           
+                        <CardBody>
                             <form id="changeStatusForm" onSubmit={changeTicketStatus}>
                                 {ticketData.statusVal <= 5 && (
                                     <>
                                         <FormGroup className="row mt-2">
                                             <Label className="col-sm-3 col-form-label">{'Ticket Status'}</Label>
                                             <Col sm="9">
-                                                <Input type="select" name="status" className="custom-select form-control" defaultValue={ticketData.statusVal} onChange={e => setStatusInput(e.target.value)} 
-                                                disabled={ticketData.statusVal == 5 || ticketData.statusVal == 0 || ticketData.statusVal == 4 ? true:false}>
+                                                <Input type="select" name="status" className="custom-select form-control" defaultValue={ticketData.statusVal} onChange={e => setStatusInput(e.target.value)}
+                                                    disabled={ticketData.statusVal == 5 || ticketData.statusVal == 0 || ticketData.statusVal == 4 ? true : false}>
                                                     {ticketData.statusVal == 1 &&
                                                         <>
                                                             <option value="1" disabled>{'New'}</option>
@@ -407,29 +411,28 @@ const ViewTicket = (props) => {
                                     </>
                                 )}
                                 {/*  CV Request */}
-                                {statusInput != '0' && ticketData.request_type_val == 5 && (
-                                    ticketData.statusVal != 0 && (
-                                        ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ?
-                                            ticketData['TicketResource'].map((item, i) => (
-                                                <Row key={i} className="row mt-2">
-                                                    <Col>
-                                                        <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
-                                                        <button type='reset' onClick={() => handleDownload("tickets/"+item.file)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2 '> <i className="fa fa-download"></i> {'Click Here'}</button>
-                                                    </Col>
-                                                </Row>
-                                            ))
-                                            :
-                                            <FormGroup className="row mt-2">
-                                                <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
-                                                <Col sm="9">
-                                                    <Input className="form-control" type="file" onChange={e => setFileInput(e.target.files[0])} required={ticketData.statusVal == 1 ? false : true} />
+                                {statusInput != '0' && ticketData.request_type_val == 5 && ticketData.statusVal > 1 && (
+                                    ticketData.statusVal == 2 ?
+                                        <FormGroup className="row mt-2">
+                                            <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
+                                            <Col sm="9">
+                                                <Input className="form-control" type="file" onChange={e => setFileInput(e.target.files[0])} required={ticketData.statusVal == 1 ? false : true} />
+                                            </Col>
+                                        </FormGroup>
+                                        :
+                                        ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 &&
+                                        ticketData['TicketResource'].map((item, i) => (
+                                            <Row key={i} className="row mt-2">
+                                                <Col>
+                                                    <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
+                                                    <button type='reset' onClick={() => handleDownload("tickets/" + item.file)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2 '> <i className="fa fa-download"></i> {'Click Here'}</button>
                                                 </Col>
-                                            </FormGroup>
-                                    )
+                                            </Row>
+                                        ))
                                 )}
                                 {/*  Resource Availabilty */}
-                                {statusInput != '0' && ticketData.request_type_val == 4 && (
-                                    ticketData.statusVal <= 3 && ticketData.statusVal != 0 ?
+                                {statusInput != '0' && ticketData.request_type_val == 4 && ticketData.statusVal > 1 && (
+                                    ticketData.statusVal == 2 ?
                                         <FormGroup className="row mt-2">
                                             <Label className="col-sm-3 col-form-label">{'Number Of Resources'}</Label>
                                             <Col sm="9">
@@ -445,20 +448,21 @@ const ViewTicket = (props) => {
                                         </FormGroup>
                                 )}
                                 {/*  new Resource  */}
-                                {statusInput != '0' && (ticketData.request_type_val == 1 || ticketData.request_type_val == 3) &&
-                                    (ticketData.statusVal != 4 && ticketData.statusVal != 0) &&
+                                {statusInput != '0' && (ticketData.request_type_val == 1 || ticketData.request_type_val == 3) && ticketData.statusVal > 1 &&
                                     <>
-                                        <FormGroup className="row mt-2">
-                                            <Label className="col-sm-3 col-form-label">{'Select Vendor'}</Label>
-                                            <Col sm="9">
-                                                <Select name='vendor' id='vendor' required={resourceVendors != null || ticketData.statusVal == 1 ? false : true}
-                                                    options={optionsV} className="js-example-basic-single "
-                                                    onInputChange={(inputValue) =>
-                                                        handleInputChange(inputValue, "vendors", "vendor", setOptionsV, optionsV)
-                                                    }
-                                                    isMulti />
-                                            </Col>
-                                        </FormGroup>
+                                        {ticketData.statusVal == 2 &&
+                                            <FormGroup className="row mt-2">
+                                                <Label className="col-sm-3 col-form-label">{'Select Vendor'}</Label>
+                                                <Col sm="9">
+                                                    <Select name='vendor' id='vendor' required={resourceVendors != null || ticketData.statusVal == 1 ? false : true}
+                                                        options={optionsV} className="js-example-basic-single "
+                                                        onInputChange={(inputValue) =>
+                                                            handleInputChange(inputValue, "vendors", "vendor", setOptionsV, optionsV)
+                                                        }
+                                                        isMulti />
+                                                </Col>
+                                            </FormGroup>
+                                        }
                                         {resourceVendors != null && (resourceVendors).length > 0 &&
                                             <div className="table-responsive mt-5">
                                                 <Table className='table-bordered mb-10'>
@@ -469,7 +473,7 @@ const ViewTicket = (props) => {
                                                             <th scope="col" >{'Contact'}</th>
                                                             <th scope="col" >{'Country of Residence'}</th>
                                                             <th scope="col">{'Mother Tongue'}</th>
-                                                            <th scope="col">{'Profile'}</th>                                                          
+                                                            <th scope="col">{'Profile'}</th>
                                                             <th scope="col">{'Source Language'}</th>
                                                             <th scope="col">{'Target Language'}</th>
                                                             <th scope="col">{'Dialect'}</th>
@@ -493,7 +497,7 @@ const ViewTicket = (props) => {
                                                                 <td>{item['vendor'].contact}</td>
                                                                 <td>{item['vendor']['country']?.name}</td>
                                                                 <td>{item['vendor'].mother_tongue}</td>
-                                                                <td>{item['vendor'].profile}</td>                                                               
+                                                                <td>{item['vendor'].profile}</td>
                                                                 <td>{item['vendor']['vendor_sheet']?.[0]?.['source_lang']?.name}</td>
                                                                 <td>{item['vendor']['vendor_sheet']?.[0]?.['target_lang']?.name}</td>
                                                                 <td>{item['vendor']['vendor_sheet']?.[0]?.dialect}</td>
@@ -532,9 +536,9 @@ const ViewTicket = (props) => {
                                     <H5>  Ticket Response   </H5>
                                 </Col>
                                 <Col sm="3">
-                                    {ticketData.statusVal != 4 && (
+                                    {ticketData.statusVal == 2 && statusInput != '0' && (
                                         <>
-                                            <ResponseModal isOpen={modal} title={'Add Response'} toggler={toggle} fromInuts={res} sendDataToParent={toggle} changeTicketData={changeData}  ></ResponseModal>
+                                            <ResponseModal isOpen={modal} title={'Add Response'} toggler={toggle} fromInuts={res} sendDataToParent={toggle} changeTicketData={changeData} size="xl" ></ResponseModal>
                                             <div className="pro-shop text-end">
                                                 <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle }}><i className="icofont icofont-ui-messaging me-2"></i> {'Add Response'}</Btn>
                                             </div>
@@ -563,7 +567,7 @@ const ViewTicket = (props) => {
                                                             <p className='mb-0' dangerouslySetInnerHTML={{ __html: item.response }} />
                                                             <div className="clearfix"></div>
                                                             {item.fileLink != null && item.fileLink.trim() != '' && (
-                                                                <button onClick={() => handleDownload("tickets/"+item.fileLink)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>Attachment : <i className="fa fa-download"></i> {'View File'}</button>
+                                                                <button onClick={() => handleDownload("tickets/" + item.fileLink)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>Attachment : <i className="fa fa-download"></i> {'View File'}</button>
                                                             )}
                                                         </td>
                                                         <td scope="row">{item.created_at}</td>
@@ -581,7 +585,7 @@ const ViewTicket = (props) => {
                                 </Table>
                             </div>
                         </CardBody>
-                    </Card>                  
+                    </Card>
                     {/*  vm response */}
                     <Card>
                         <CardHeader className='b-t-primary p-b-0'>
@@ -590,9 +594,9 @@ const ViewTicket = (props) => {
                                     <H5>  VM Team Ticket Comments  </H5>
                                 </Col>
                                 <Col sm="3">
-                                    {ticketData.statusVal != 4 && (
+                                    {ticketData.statusVal == 2 && statusInput != '0' && (
                                         <>
-                                            <VmResponseModal isOpen={modal2} title={'Add Comment'} toggler={toggle2} fromInuts={res} sendDataToParent={toggle2} changeTicketData={changeData}></VmResponseModal>
+                                            <VmResponseModal isOpen={modal2} title={'Add Comment'} toggler={toggle2} fromInuts={res} sendDataToParent={toggle2} changeTicketData={changeData} size="xl"></VmResponseModal>
                                             <div className="pro-shop text-end">
                                                 <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle2 }}><i className="icofont icofont-ui-messaging me-2"></i> {'Add Comment'}</Btn>
                                             </div>

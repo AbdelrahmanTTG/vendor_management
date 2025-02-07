@@ -22,6 +22,13 @@ class TicketResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        if($this->requester_function == 1){
+            $requester_function = 'SAM';
+        }else if($this->requester_function == 2){
+            $requester_function = 'PM';    
+        }else{
+            $requester_function = '';   
+        }
         return [
             'id' => $this->id,
             'request_type' => $this->getTicketType(),
@@ -61,6 +68,7 @@ class TicketResource extends JsonResource
             'TicketResource'=> $this->whenLoaded('TicketResource')?$this->TicketResource:null,
             'rejection_reason'=> $this->rejection_reason,
             'assignedUser'=> $this->assigned_to?$this->assigned_to_user->user_name:0,
+            'requester_function'=> $requester_function,
 
                     
                         
