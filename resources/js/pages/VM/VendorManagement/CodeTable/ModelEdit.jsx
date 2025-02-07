@@ -34,10 +34,23 @@ const EditBtn = (props) => {
                 break;
         }
     };
-    const toggle = () => setModal(!modal);
+    const toggle = () => {
+        setModal(!modal);
+        setTimeout(() => {
+            props.handleEditClick(null);
+        }, 500);
+    }
+    
+    useEffect(() => {
+        if (props.data) {
+            setModal(props.data)
+        }
+    },[props.data])
     const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
     useEffect(() => {
+        
         if (props.selectedRow) {
+
             const { id, ...rest } = props.selectedRow;
             setOriginalData(rest);
 
@@ -66,12 +79,15 @@ const EditBtn = (props) => {
 
                     finalData[fieldObj.name] = initialValue;
                 }
+                if (fieldObj.field === "input") {
+                    setValue(fieldObj.name, props.selectedRow[fieldObj.name]);
+                }
             });
 
             setOriginalData(finalData)
 
         }
-    }, [props.selectedRow, setValue]);
+    }, [props.selectedRow, setValue, modal]);
 
 
 
@@ -158,9 +174,9 @@ const EditBtn = (props) => {
 
     return (
         <Fragment>
-            <button onClick={toggle} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+            {/* <button onClick={toggle} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
                 <i className="icofont icofont-ui-edit"></i>
-            </button>
+            </button> */}
 
             <CommonModal isOpen={modal} title={props.titelModel} toggler={toggle} onSave={handleSubmit(onSubmit)}>
 

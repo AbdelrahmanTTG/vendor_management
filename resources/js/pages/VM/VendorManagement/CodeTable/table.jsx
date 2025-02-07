@@ -175,7 +175,12 @@ const table = (props) => {
                 // basictoaster("dangerToast", response.data.message)
             }
     };
+    const [activeItem, setActiveItem] = useState(null);
 
+    const handleEditClick = (id) => {
+        setActiveItem(id === activeItem ? null : id); 
+        // setActiveItem(null)
+    };
     return (
         <Fragment>
             <Col sm="12">
@@ -259,14 +264,28 @@ const table = (props) => {
                                                 </td>
                                                 {props.permissions?.edit == 1 && (
                                                     <td>
-
-                                                        <Edit
+                                                        <button onClick={() => handleEditClick(item.id)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                                            <i className="icofont icofont-ui-edit"></i>
+                                                        </button>
+                                                        
+                                                        {activeItem === item.id && <Edit
+                                                            data={true}
+                                                            handleEditClick={handleEditClick}
                                                             titelModel={`Edit ${props.table}`}
                                                             fields={props.fields}
                                                             dataTable={props.dataTable}
                                                             selectedRow={item}
                                                             onUpdateData={onUpdateData}
-                                                        />
+                                                        />}
+                                                        {/* <Edit
+                                                            onClick={handleEditClick}
+                                                            data={value}
+                                                            titelModel={`Edit ${props.table}`}
+                                                            fields={props.fields}
+                                                            dataTable={props.dataTable}
+                                                            selectedRow={item}
+                                                            onUpdateData={onUpdateData}
+                                                        /> */}
                                                     </td>
                                                 )}
                                                 {props.permissions?.delete == 1 && (

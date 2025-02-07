@@ -141,12 +141,11 @@ class ReportsController extends Controller
                     $tickets = $tickets->paginate($perPage);
                     $links = $tickets->linkCollection();
                 }
-                
             }
         }
 
         return response()->json([
-            "Tickets" => isset($tickets)?TicketResource::collection($tickets):[],
+            "Tickets" => isset($tickets) ? TicketResource::collection($tickets) : [],
             "AllTickets" => $AllTickets ?? null,
             "Links" => $links ?? [],
             "fields" => $formatArray ?? $defaultArray,
@@ -194,8 +193,8 @@ class ReportsController extends Controller
         // }
         // default columns array to display
         $tableColumns = DB::getSchemaBuilder()->getColumnListing('job_task');
-      
-        $renameArrayForSearch = ['job.priceList.source' => 'source_name', 'job.priceList.target' => 'target_name', 'user.brand' => 'brand_name','brand'=> 'brand_name'];
+
+        $renameArrayForSearch = ['job.priceList.source' => 'source_name', 'job.priceList.target' => 'target_name', 'user.brand' => 'brand_name', 'brand' => 'brand_name'];
         // check for special format
         $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
@@ -206,7 +205,7 @@ class ReportsController extends Controller
             $formatArray = array_merge(...array_map(function ($item) {
                 return explode(',', $item);
             }, $formatArray));
-        }else{
+        } else {
             $formatArray = [
                 'code',
                 'subject',
@@ -245,11 +244,11 @@ class ReportsController extends Controller
             } else {
                 if (!empty($request->queryParams)) {
                     foreach ($request->queryParams as $key => $val) {
-                        if (!in_array($key, $formatArray) && ($key != 'start_date' && $key != 'end_date')){
-                         if(isset($renameArrayForSearch[$key]) && !in_array($renameArrayForSearch[$key],$formatArray)) { 
-                            $formatArray[] = $renameArrayForSearch[$key] ?? $key;
-                            }         
-                        }                  
+                        if (!in_array($key, $formatArray) && ($key != 'start_date' && $key != 'end_date')) {
+                            if (isset($renameArrayForSearch[$key]) && !in_array($renameArrayForSearch[$key], $formatArray)) {
+                                $formatArray[] = $renameArrayForSearch[$key] ?? $key;
+                            }
+                        }
                         if (!empty($val)) {
                             if (is_array($val)) {
                                 if (str_contains($key, '.')) {
@@ -332,19 +331,29 @@ class ReportsController extends Controller
                 ->leftJoin('task_type as task_type', 'job_task.task_type', '=', 'task_type.id')
                 ->leftJoin('users as users', 'job_task.created_by', '=', 'users.id')
                 ->leftJoin('brand as brand', 'users.brand', '=', 'brand.id')
-                ->select('source_lang.name as source_name', 'target_lang.name as target_name', "job_task.code", "job_task.subject",  "vendor.name as vendor",
-                "job_task.count" , "unit.name as unit","job_task.rate","task_type.name as task_type","task_type.name as task_type",
-                "job_task.start_date",
-                "job_task.delivery_date",
-                "job_task.status",
-                "job_task.closed_date",
-                "users.user_name as created_by",
-                "brand.name as brand_name",
-                "job_task.created_at",
-                DB::raw('job_task.count * job_task.rate as total_cost') )
+                ->select(
+                    'source_lang.name as source_name',
+                    'target_lang.name as target_name',
+                    "job_task.code",
+                    "job_task.subject",
+                    "vendor.name as vendor",
+                    "job_task.count",
+                    "unit.name as unit",
+                    "job_task.rate",
+                    "task_type.name as task_type",
+                    "task_type.name as task_type",
+                    "job_task.start_date",
+                    "job_task.delivery_date",
+                    "job_task.status",
+                    "job_task.closed_date",
+                    "users.user_name as created_by",
+                    "brand.name as brand_name",
+                    "job_task.created_at",
+                    DB::raw('job_task.count * job_task.rate as total_cost')
+                )
                 ->orderBy('job_task.created_at', 'desc');
-             
-                // ->get();
+
+            // ->get();
 
             // foreach ($relationships as $relation => $columns) {
             //     if (in_array($relation, $formatArray)) {
@@ -355,7 +364,6 @@ class ReportsController extends Controller
             // }
             // $AllTasks = TaskResource::collection($tasks->get());
             $AllTasks = $data->get();
-
         }
         if ($request->has('sortBy') && $request->has('sortDirection')) {
             $sortBy = $request->input('sortBy');
@@ -369,11 +377,150 @@ class ReportsController extends Controller
         $tasks = $tasks->paginate($perPage);
         $links = $tasks->linkCollection();
         return response()->json([
-            "Tasks" => $tasks?TaskResource::collection($tasks):[],
-            "Links" => $links??[],
+            "Tasks" => $tasks ? TaskResource::collection($tasks) : [],
+            "Links" => $links ?? [],
             "fields" => $formatArray,
             "formats" => $formats,
             "AllTasks" => $AllTasks ?? null,
         ]);
+    }
+    public function VPOs(Request $request)
+    {
+        $stander_format = [
+            "payment_status" => "p.status AS payment_status",
+            "user_name" => 'u.user_name',
+            "code" => 't.code',
+            "status" => 't.status',
+            "closed_date" => 't.closed_date',
+            "vpo_file" => 't.vpo_file',
+            "po_verified" => "CASE WHEN (po.verified = '1') THEN 'Verified' ELSE '' END AS po_verified",
+            "po_verified_at" => 'po.verified_at as po_verified_at',
+            "vendor_name" => 'v.name as vendor_name',
+            "source_lang" => 'slang.name as source_lang',
+            "target_lang" => 'tlang.name as target_lang',
+            "task_type_name" => 'tp.name as task_type_name',
+            "count" => "t.count",
+            "unit_name" => 'un.name as unit_name',
+            "rate" => 't.rate',
+            "currency_name" => 'c.name as currency_name',
+            "totalamount" => '(ifnull(t.rate,0) * ifnull(t.count,0)) as totalamount',
+            "verifiedStat" => "case when (t.verified = '1' and t.verified is not null) then 'Verified' 
+                          when (t.verified = '2' and t.verified is not null) then 'Has Error' 
+                          else '' end as verifiedStat",
+            "invoice_dated" => "STR_TO_DATE(t.invoice_date,\"%m/%d/%Y\") as invoice_dated",
+            "date45" => "case when (t.invoice_date <> '' and t.invoice_date is not null) then DATE_ADD(STR_TO_DATE(t.invoice_date,\"%m/%d/%Y\"), INTERVAL 45 DAY) else '' end as date45",
+            "date60" => "case when (t.invoice_date <> '' and t.invoice_date is not null) then DATE_ADD(STR_TO_DATE(t.invoice_date,\"%m/%d/%Y\"), INTERVAL 60 DAY) else '' end as date60",
+            "PaidStat" => "case when (p.status = '1' and p.status is not null) then 'Paid'  else '' end as PaidStat",
+            "payment_date" => "ifnull(p.payment_date,'') AS payment_date",
+            "payment_method_name" => "ifnull(pm.name,'') as payment_method_name",
+            "portalStat" => "case when (t.job_portal = '1' and t.job_portal is not null) then 'Nexus System' else '' end as portalStat",
+            "job_portal" => 't.job_portal',
+        ];
+
+        $formats = (new VendorProfileController)->format($request);
+        $filteredFormats = $formats->filter(function ($format) {
+            return $format->status == 1;
+        });
+        if ($filteredFormats->isNotEmpty()) {
+            $formatArray = $filteredFormats->pluck('format')->toArray();
+            $formatArray = array_merge(...array_map(function ($item) {
+                return explode(',', $item);
+            }, $formatArray));
+            $formatArray = array_map(fn($item) => $stander_format[$item] ?? $item, $formatArray);
+
+        } else {
+            $formatArray = array_values($stander_format);
+        }
+        $renameMap = [
+            'p.status AS payment_status' => ["Payment status", "payment_status"],
+            'u.user_name' => ["PM name", "user_name"],
+            't.code' => ['P.O Number', 'code'],
+            't.status' => ['VPO status', 'status'],
+            't.vpo_file' => ['VPO file', 'vpo_file'],
+            't.closed_date' => ['VPO date', 'closed_date'],
+            "CASE WHEN (po.verified = '1') THEN 'Verified' ELSE '' END AS po_verified" => ['CPO verified', 'po_verified'],
+            'po.verified_at as po_verified_at' => ['CPO verified date', 'po_verified_at'],
+            'v.name as vendor_name' => ['Vendor name', 'vendor_name'],
+            'slang.name as source_lang' => ['Source language', 'source_lang'],
+            'tlang.name as target_lang' => ['Target language', 'target_lang'],
+            'tp.name as task_type_name' => ['Task type', 'task_type_name'],
+            'v.name as vendor_name' => ['Vendor name', 'vendor_name'],
+            't.count' => ['count', 'count'],
+            't.rate' => ['rate', 'rate'],
+            't.job_portal' => [null, null],
+            'un.name as unit_name' => ['unit', "unit_name"],
+            'c.name as currency_name' => ['currency', "currency_name"],
+            '(ifnull(t.rate,0) * ifnull(t.count,0)) as totalamount' => ['P.O amount', "totalamount"],
+            "case when (t.verified = '1' and t.verified is not null) then 'Verified' 
+             when (t.verified = '2' and t.verified is not null) then 'Has Error' 
+             else '' end as verifiedStat" => ['Invoice Status', "verifiedStat"],
+            "STR_TO_DATE(t.invoice_date,\"%m/%d/%Y\") as invoice_dated" => ['invoice date', "invoice_dated"],
+            "case when (t.invoice_date <> '' and t.invoice_date is not null) then DATE_ADD(STR_TO_DATE(t.invoice_date,\"%m/%d/%Y\"), INTERVAL 45 DAY) else '' end as date45" => ['Due Date (45 days)', "date45"],
+            "case when (t.invoice_date <> '' and t.invoice_date is not null) then DATE_ADD(STR_TO_DATE(t.invoice_date,\"%m/%d/%Y\"), INTERVAL 60 DAY) else '' end as date60" => ['Max Due Date (60 days)', "date60"],
+            "case when (p.status = '1' and p.status is not null) then 'Paid'  else '' end as PaidStat" => ['Payment Status', "PaidStat"],
+            "ifnull(p.payment_date,'') AS payment_date" =>['Payment date', "payment_date"],
+            "ifnull(pm.name,'') as payment_method_name" => ['Payment method', "payment_method_name"],
+            "case when (t.job_portal = '1' and t.job_portal is not null) then 'Nexus System' else '' end as portalStat"=>['System',"portalStat"],
+        ];
+
+        $renamedFormatArray = array_values(array_filter(array_map(function ($item) use ($renameMap) {
+            return $renameMap[$item] ?? null;
+        }, $formatArray)));
+        $columns = implode(', ', $formatArray);
+        $query = Task::query()
+            ->from('job_task as t')
+            ->leftJoin('vendor_payment as p', 'p.task', '=', 't.id')
+            ->leftJoin('payment_method As pm', 'pm.id', '=', 'p.payment_method')
+            ->leftJoin('users AS u', 't.created_by', '=', 'u.id')
+            ->leftJoin('vendor As v', 't.vendor', '=', 'v.id')
+            ->leftJoin('task_type AS tp', 't.task_type', '=', 'tp.id')
+            ->leftJoin('unit As un', 't.unit', '=', 'un.id')
+            ->leftJoin('currency As c', 't.currency', '=', 'c.id')
+            ->leftJoin('job As j', 't.job_id', '=', 'j.id')
+            ->leftJoin('job_price_list AS jo', 'j.price_list', '=', 'jo.id')
+            ->leftJoin('languages As slang', 'jo.source', '=', 'slang.id')
+            ->leftJoin('languages As tlang', 'jo.target', '=', 'tlang.id')
+            ->leftJoin('po as po', 'j.po', '=', 'po.id')
+            ->selectRaw($columns);
+        if ($request->has('queryParams') && is_array($request->queryParams)) {
+            $queryParams = $request->queryParams;
+            foreach ($queryParams as $key => $val) {
+                if ($stander_format[$key] !== 'filters' && !empty($val)) {
+                    if (!in_array($stander_format[$key], $formatArray)) {
+                        $query->addSelect($stander_format[$key]);
+                        // $formatArray[] = $key;
+                    }
+                    if (is_array($val)) {
+                        $query->where(function ($query) use ($key, $val, $stander_format) {
+                            foreach ($val as $k => $v) {
+                                if ($k == 0) {
+                                    $query->where($stander_format[$key], "like", "%" . $v . "%");
+                                } else {
+                                    $query->orWhere($stander_format[$key], "like", "%" . $v . "%");
+                                }
+                            }
+                        });
+                    } else {
+                        $query->where($stander_format[$key], "like", "%" . $val . "%");
+                    }
+                }
+            }
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $q = $query->paginate($perPage);
+        $links = $q->linkCollection();
+        
+        return response()->json(
+            [
+                "data" => $q,
+                "fields" => $renamedFormatArray,
+                "Links" => $links ?? [],
+                "formats" => $formats,
+                "totalVendors" => $q->total(),
+
+            ]
+
+        );
     }
 }

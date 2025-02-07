@@ -1,6 +1,5 @@
 import Home from './pages/Home'
 import React, { Suspense } from "react";
-const Languages = React.lazy(() => import('./pages/VM/Admin/Languages'));
 const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/AddProfile'));
 const ProfileIndex = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
 const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/EditProfile'));
@@ -9,6 +8,8 @@ const Tickets = React.lazy(() => import('./pages/VM/Tickets/index'));
 const ViewTicket = React.lazy(() => import('./pages/VM/Tickets/viewTicket'));
 const AllTasks = React.lazy(() => import('./pages/VM/Reports/AllTasks'));
 const VmActivity = React.lazy(() => import('./pages/VM/Reports/VmActivity'));
+const VPOs = React.lazy(() => import('./pages/VM/Reports/VPOS'));
+
 import axios from './pages/AxiosClint';
 import { Spinner } from './AbstractElements';
 
@@ -61,6 +62,14 @@ export const VM = (allowedPermissions) => [
         element: (
             <LazyWrapper>
                 <Tickets permissions={allowedPermissions['Tickets']} />
+            </LazyWrapper>
+        )
+    },
+    {
+        path: 'accounting/vpoStatus',
+        element: (
+            <LazyWrapper>
+                <VPOs permissions={allowedPermissions['accounting/vpoStatus']} />
             </LazyWrapper>
         )
     },

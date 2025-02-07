@@ -137,7 +137,7 @@ const EditNewBtn = (props) => {
 
         }
 
-    }, [props?.data, priceList, props?.id])
+    }, [props?.data, priceList, props?.id, modal])
     const renameKeys = (obj, keysMap) => {
         if (!obj) { return }
         return Object?.keys(obj)?.reduce((acc, key) => {
