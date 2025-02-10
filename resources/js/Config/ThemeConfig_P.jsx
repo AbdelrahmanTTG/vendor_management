@@ -1,7 +1,7 @@
 export class ConfigDB {
     static data = {
       settings: {
-        layout_type: "box-layout",
+        layout_type: "ltr",
         sidebar: {
           type: "horizontal-wrapper",
         },
