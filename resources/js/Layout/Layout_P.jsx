@@ -23,7 +23,7 @@ const AppLayout = ({ children, classNames, ...rest }) => {
   const animationTheme = localStorage.getItem("animation") || animation || ConfigDB.data.router_animation;
   document.body.classList.add('ltr');
   document.body.classList.remove('box-layout');
-  localStorage.setItem('mix_background_layout','light-only');
+  // localStorage.setItem('mix_background_layout','light-only');
 
   const nodeRef = useRef(null);
 
