@@ -483,25 +483,26 @@ class ReportsController extends Controller
             ->leftJoin('po as po', 'j.po', '=', 'po.id')
             ->selectRaw($columns);
         if ($request->has('queryParams') && is_array($request->queryParams)) {
+            $stander_format_Search = ["code" => 't.code', "payment_status" => "p.status", "status" => 't.status' ];
             $queryParams = $request->queryParams;
             foreach ($queryParams as $key => $val) {
-                if ($stander_format[$key] !== 'filters' && !empty($val)) {
-                    if (!in_array($stander_format[$key], $formatArray)) {
-                        $query->addSelect($stander_format[$key]);
+                if ($stander_format_Search[$key] !== 'filters' && !empty($val)) {
+                    if (!in_array($stander_format_Search[$key], $formatArray)) {
+                        $query->addSelect($stander_format_Search[$key]);
                         // $formatArray[] = $key;
                     }
                     if (is_array($val)) {
-                        $query->where(function ($query) use ($key, $val, $stander_format) {
+                        $query->where(function ($query) use ($key, $val, $stander_format_Search) {
                             foreach ($val as $k => $v) {
                                 if ($k == 0) {
-                                    $query->where($stander_format[$key], "like", "%" . $v . "%");
+                                    $query->where($stander_format_Search[$key], "like", "%" . $v . "%");
                                 } else {
-                                    $query->orWhere($stander_format[$key], "like", "%" . $v . "%");
+                                    $query->orWhere($stander_format_Search[$key], "like", "%" . $v . "%");
                                 }
                             }
                         });
                     } else {
-                        $query->where($stander_format[$key], "like", "%" . $val . "%");
+                        $query->where($stander_format_Search[$key], "like", "%" . $val . "%");
                     }
                 }
             }

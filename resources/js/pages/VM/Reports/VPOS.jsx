@@ -3,10 +3,7 @@ import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeade
 import axiosClient from "../../AxiosClint";
 import { Btn, H5, Spinner } from '../../../AbstractElements';
 import Select from 'react-select';
-import { toast } from 'react-toastify';
 import FormatTable from "../Format";
-import SweetAlert from 'sweetalert2';
-import ExcelJS from 'exceljs';
 const VPOs = (props) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -20,8 +17,9 @@ const VPOs = (props) => {
     const [queryParams, setQueryParams] = useState(null);
 
     const options = [
-        { value: 'code', label: 'Task Code' },
-     
+        { value: 'code', label: 'P.o number' },
+        { value: 'payment_status', label: 'Payment status' },
+        { value: 'status', label: 'VPO status' },
 
     ];
     const addBtn = (event, divID) => {
@@ -92,10 +90,21 @@ const VPOs = (props) => {
         if (!input || typeof input !== 'string') return '';
         return input.replace('_name', '')
             .split(/[_-]/)
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .map(word => word.toUpperCase()) 
             .join(' ');
-    }
-    const vpo_status = ["Running", "Delivered", "Cancelled", "Rejected", "Waiting Vendor Acceptance", "Waiting PM Confirmation", "Not Started Yet", "Heads Up", "Heads Up ( Marked as Available )", "Heads Up ( Marked as Not Available )"];
+    };
+
+    const vpo_status = [
+        "Running",
+        "Delivered",
+        "Cancelled",
+        "Rejected",
+        "Waiting Vendor Acceptance",
+        "Waiting PM Confirmation",
+        "Not Started Yet",
+        "Heads Up",
+        "Heads Up ( Marked as Available )",
+        "Heads Up ( Marked as Not Available )"];
     const searchVPOs = (event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
@@ -134,9 +143,49 @@ const VPOs = (props) => {
                                             {selectedSearchCol.indexOf("code") > -1 &&
                                                 <Col md='4'>
                                                     <FormGroup id='codeInput'>
-                                                        <Label className="col-form-label-sm f-12">{'Task Code'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'codeInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                        <Label className="col-form-label-sm f-12">{'P.o number'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'codeInput') }}><i className="fa fa-plus-circle"></i></Btn>
                                                             <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'codeInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
                                                         <Input className='form-control form-control-sm codeInput mb-1' type='text' name='code' placeholder='Enter Task Code...' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("payment_status") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Payment status'}</Label>
+                                                            <Select id='payment_status' required
+                                                                name='payment_status'
+                                                            options={
+                                                                [
+                                                                    { value: '1', label: "Paid" },
+                                                                    { value: '0', label: "Unpaid" },
+                                                                ]} className="js-example-basic-multiple mb-1" isMulti
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("status") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'VPO status'}</Label>
+                                                            <Select id='status' required
+                                                                name='status'
+                                                            options={
+                                                                [
+                                                                    { value: '0', label: "Running" },
+                                                                    { value: '1', label: "Delivered" },
+                                                                    { value: '2', label: "Cancelled" },
+                                                                    { value: '3', label: "Rejected" },
+                                                                    { value: '4', label: "Waiting Vendor Acceptance" },
+                                                                    { value: '5', label: "Waiting PM Confirmation" },
+                                                                    { value: '6', label: "Not Started Yet" },
+                                                                    { value: '7', label: "Heads Up" },
+                                                                    { value: '8', label: "Heads Up ( Marked as Available )" },
+                                                                    { value: '9', label: "Heads Up ( Marked as Not Available )" },
+
+                                                                ]} className="js-example-basic-multiple mb-1" isMulti
+                                                        />
                                                     </FormGroup>
                                                 </Col>
                                             }
