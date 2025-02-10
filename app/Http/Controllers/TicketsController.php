@@ -82,8 +82,9 @@ class TicketsController extends Controller
                 'software',
                 'status',
                 'created_by',
+                'requester_function',
                 'created_at',
-                'requester_function'
+                
             ];
         }
         // start get data    

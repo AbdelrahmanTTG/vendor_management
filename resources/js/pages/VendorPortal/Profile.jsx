@@ -9,6 +9,11 @@ import axiosClient from '../AxiosClint';
 import { toast } from 'react-toastify';
 import EditMyProfile from '../VM/VendorManagement/VendorProfile/PersonalData';
 import Billing from '../VM/VendorManagement/VendorProfile/Billing';
+const Price_List = React.lazy(() => import('../VM/VendorManagement/VendorProfile/Price_List'));
+const Messaging = React.lazy(() => import('../VM/VendorManagement/VendorProfile/Messaging'));
+const FilesCertificate = React.lazy(() => import('../VM/VendorManagement/VendorProfile/FilesCertificate'));
+const Education = React.lazy(() => import('../VM/VendorManagement/VendorProfile/Education'));
+const Experience = React.lazy(() => import('../VM/VendorManagement/VendorProfile/Experience'));
 
 const Profile = () => {
   const baseURL = "/Portal/Admin/";
@@ -33,6 +38,7 @@ const Profile = () => {
               id: user.id,
               PersonalData: "Personal Data",
               BillingData: "Billing Data",
+             InstantMessaging: "InstantMessaging",
           });
           setPersonalData({ PersonalData: data.data.Data });
           setBillingData({ BillingData: data.data.BillingData })
@@ -121,17 +127,47 @@ const Profile = () => {
             </Col>
             <Col xl="9">
               <Card>
-                <CardBody className='b-t-primary'>
-                  <Nav tabs className="border-tab">
+                <CardBody className='b-t-primary px-1'>
+                  <Nav tabs className="border-tab portal-profile ">
                     <NavItem id="myTab" role="tablist">
-                      <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} onClick={() => setActiveTab('1')}>
+                      <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('1')}>
                         <i className="icofont icofont-list me-1"></i>{'Personal Data'}
                       </NavLink>
                       <div className="material-border"></div>
                     </NavItem>
                     <NavItem id="myTab" role="tablist">
-                      <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} onClick={() => setActiveTab('2')}>
+                      <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('2')}>
                         <i className="icofont icofont-bank-alt me-1"></i>{'Billing Information'}
+                      </NavLink>
+                      <div className="material-border"></div>
+                    </NavItem>
+                    <NavItem id="myTab" role="tablist">
+                      <NavLink href="#javascript" className={activeTab === '3' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('3')}>
+                        <i className="icofont icofont-list me-1"></i>{'Price List'}
+                      </NavLink>
+                      <div className="material-border"></div>
+                    </NavItem>
+                    <NavItem id="myTab" role="tablist">
+                      <NavLink href="#javascript" className={activeTab === '4' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('4')}>
+                        <i className="icofont icofont-ui-messaging me-1"></i>{'Messaging'}
+                      </NavLink>
+                      <div className="material-border"></div>
+                    </NavItem>
+                    <NavItem id="myTab" role="tablist">
+                      <NavLink href="#javascript" className={activeTab === '5' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('5')}>
+                        <i className="icofont icofont-certificate-alt-1 me-1"></i>{'Files & Certificate'}
+                      </NavLink>
+                      <div className="material-border"></div>
+                    </NavItem>
+                    <NavItem id="myTab" role="tablist">
+                      <NavLink href="#javascript" className={activeTab === '6' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('6')}>
+                        <i className="icofont icofont-book-alt me-1"></i>{'Education'}
+                      </NavLink>
+                      <div className="material-border"></div>
+                    </NavItem>
+                    <NavItem id="myTab" role="tablist">
+                      <NavLink href="#javascript" className={activeTab === '7' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('7')}>
+                        <i className="icofont icofont-listing-box me-1"></i>{'Experience'}
                       </NavLink>
                       <div className="material-border"></div>
                     </NavItem>
@@ -145,6 +181,21 @@ const Profile = () => {
                     </TabPane>
                     <TabPane tabId="2">
                       <Billing backPermissions={{edit:1}}  permission={permissions} ID={id} />
+                    </TabPane>
+                    <TabPane tabId="3">                    
+                      {/* <Price_List backPermissions={{view:1}} id={id} /> */}
+                    </TabPane>
+                    <TabPane tabId="4">                    
+                      {/* <Messaging backPermissions={{view:1}} id={id} /> */}
+                    </TabPane>
+                    <TabPane tabId="5">                    
+                      {/* <FilesCertificate backPermissions={{view:1}} id={id} /> */}
+                    </TabPane>
+                    <TabPane tabId="6">                    
+                      {/* <Education backPermissions={{view:1}} id={id} /> */}
+                    </TabPane>
+                    <TabPane tabId="7">                    
+                      {/* <Experience backPermissions={{view:1}} id={id} /> */}
                     </TabPane>
                   </TabContent>
                 </CardBody>
