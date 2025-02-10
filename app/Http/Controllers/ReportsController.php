@@ -483,20 +483,32 @@ class ReportsController extends Controller
             ->leftJoin('po as po', 'j.po', '=', 'po.id')
             ->selectRaw($columns);
         if ($request->has('queryParams') && is_array($request->queryParams)) {
-            $stander_format_Search = ["code" => 't.code', "payment_status" => "p.status", "status" => 't.status' ];
+            $stander_format_Search = ["code" => 't.code', "source_lang"=> "slang.name", "vendor"=> "t.vendor", "po_verified_at" => 'po.verified_at', "po_verified" => "po.verified", "payment_status" => "p.status", "status" => 't.status', "user_name" => 't.created_by', "closed_date" => 't.closed_date', ];
             $queryParams = $request->queryParams;
             foreach ($queryParams as $key => $val) {
                 if ($stander_format_Search[$key] !== 'filters' && !empty($val)) {
                     if (!in_array($stander_format_Search[$key], $formatArray)) {
                         $query->addSelect($stander_format_Search[$key]);
-                        // $formatArray[] = $key;
                     }
-                    if (is_array($val)) {
+
+                    if ($key === 'closed_date' || $key === 'po_verified_at') {
+                        if( is_array($val) && count($val) === 2){
+                            if (!empty($val[0]) && !empty($val[1])) {
+                                $query->whereBetween($stander_format_Search[$key], [$val[0], $val[1]]);
+                            } elseif (!empty($val[0])) {
+                                $query->where($stander_format_Search[$key], '>=', $val[0]);
+                            } elseif (!empty($val[1])) {
+                                $query->where($stander_format_Search[$key], '<=', $val[1]);
+                            }
+                        }
+                       
+                    } elseif (is_array($val)) {
                         $query->where(function ($query) use ($key, $val, $stander_format_Search) {
                             foreach ($val as $k => $v) {
                                 if ($key === 'payment_status' && $v == 2) {
                                     $v = null;
                                 }
+
                                 if ($k == 0) {
                                     if (is_null($v)) {
                                         $query->whereNull($stander_format_Search[$key]);
@@ -505,7 +517,7 @@ class ReportsController extends Controller
                                     }
                                 } else {
                                     if (is_null($v)) {
-                                        $query->orWhereNull($stander_format_Search[$key]); 
+                                        $query->orWhereNull($stander_format_Search[$key]);
                                     } else {
                                         $query->orWhere($stander_format_Search[$key], "like", "%" . $v . "%");
                                     }
@@ -519,9 +531,9 @@ class ReportsController extends Controller
                             $query->where($stander_format_Search[$key], "like", "%" . $val . "%");
                         }
                     }
-
                 }
             }
+
         }
 
         $perPage = $request->input('per_page', 10);

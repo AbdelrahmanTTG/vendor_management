@@ -15,11 +15,21 @@ const VPOs = (props) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedSearchCol, setSelectedSearchCol] = useState([]);
     const [queryParams, setQueryParams] = useState(null);
+    const [optionsU, setOptionsU] = useState([]);
+    const [optionsV, setOptionsV] = useState([]);
+    const [initialOptions, setInitialOptions] = useState({});
+    const [optionsSL, setOptionsSL] = useState([]);
 
     const options = [
         { value: 'code', label: 'P.o number' },
         { value: 'payment_status', label: 'Payment status' },
         { value: 'status', label: 'VPO status' },
+        { value: 'user_name', label: 'PM name' },
+        { value: 'closed_date', label: 'VPO date' },
+        { value: 'po_verified', label: 'CPO verified' },
+        { value: 'po_verified_at', label: 'CPO verified date' },
+        { value: 'vendor', label: 'Vendor' },
+        { value: 'source_lang', label: 'Source Language' },
 
     ];
     const addBtn = (event, divID) => {
@@ -90,10 +100,32 @@ const VPOs = (props) => {
         if (!input || typeof input !== 'string') return '';
         return input.replace('_name', '')
             .split(/[_-]/)
-            .map(word => word.toUpperCase()) 
+            .map(word => word.toUpperCase())
             .join(' ');
     };
+    const handelingSelectUsers = async () => {
+        try {
+            const { data } = await axiosClient.post("getPmData");
+            const formattedOptions = data.map(item => ({
+                value: item.id,
+                label: item.user_name,
+            }));
+            setOptionsU(formattedOptions);
+        } catch (err) {
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+        }
 
+    };
+    useEffect(() => {
+        handelingSelectUsers();
+    }, []);
     const vpo_status = [
         "Running",
         "Delivered",
@@ -110,14 +142,69 @@ const VPOs = (props) => {
         const formData = new FormData(event.currentTarget);
         const data = {};
         for (let keyValue of formData.entries()) {
-            // if (keyValue[0] == 'start_date' || keyValue[0] == 'end_date')
-            //     data[keyValue[0]] = formData.get(keyValue[0]);
-            // else
+            if (keyValue[0] === "closed_date_from" || keyValue[0] === "closed_date_to") {
+                if (!data["closed_date"]) {
+                    data["closed_date"] = [];
+                }
+                data["closed_date"].push(keyValue[1]);
+            } else if (keyValue[0] === "po_verified_at_from" || keyValue[0] === "po_verified_at_to") {
+                if (!data["po_verified_at"]) {
+                    data["po_verified_at"] = [];
+                }
+                data["po_verified_at"].push(keyValue[1]);
+            }
+            else {
                 data[keyValue[0]] = formData.getAll(keyValue[0]);
+            }
         }
+
+        console.log(data)
+
         setQueryParams(data);
         setCurrentPage(1);
     }
+    const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
+        if (inputValue.length === 0) {
+            setOptions(initialOptions[fieldName] || []);
+        } else if (inputValue.length >= 1) {
+            const existingOption = options.some(option =>
+                option.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+            if (!existingOption) {
+                handelingSelect(tableName, setOptions, fieldName, inputValue);
+            }
+        }
+    };
+    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
+        if (!tablename) return
+        try {
+            const { data } = await axiosClient.get("SelectDatat", {
+                params: {
+                    search: searchTerm,
+                    table: tablename
+                }
+            });
+            const formattedOptions = data.map(item => ({
+                value: item.id,
+                label: item.name || item.gmt,
+            }));
+
+            setOptions(formattedOptions);
+            if (!searchTerm) {
+                setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
+            }
+        } catch (err) {
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+        }
+
+    };
     return (
         <Fragment >
             <Col>
@@ -152,9 +239,9 @@ const VPOs = (props) => {
                                                 selectedSearchCol.indexOf("payment_status") > -1 &&
                                                 <Col md='4'>
                                                     <FormGroup>
-                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Payment status'}</Label>
-                                                            <Select id='payment_status' required
-                                                                name='payment_status'
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Payment status'}</Label>
+                                                        <Select id='payment_status' required
+                                                            name='payment_status'
                                                             options={
                                                                 [
                                                                     { value: '1', label: "Paid" },
@@ -168,9 +255,9 @@ const VPOs = (props) => {
                                                 selectedSearchCol.indexOf("status") > -1 &&
                                                 <Col md='4'>
                                                     <FormGroup>
-                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'VPO status'}</Label>
-                                                            <Select id='status' required
-                                                                name='status'
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'VPO status'}</Label>
+                                                        <Select id='status' required
+                                                            name='status'
                                                             options={
                                                                 [
                                                                     { value: '0', label: "Running" },
@@ -186,6 +273,107 @@ const VPOs = (props) => {
 
                                                                 ]} className="js-example-basic-multiple mb-1" isMulti
                                                         />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("user_name") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Created by'}</Label>
+                                                        <Select name='user_name' id='user_name' required
+                                                            options={optionsU} className="js-example-basic-single "
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }   {
+                                                selectedSearchCol.indexOf("closed_date") > -1 &&
+                                                <>
+                                                    <Row>
+                                                        <Col md='12'>
+                                                            <Label className="col-form-label-sm f-14 font-weight-bold">{'VPO date range'}</Label>
+                                                        </Col>
+                                                    </Row>
+                                                    <Row>
+
+                                                        <Col md='4'>
+                                                            <FormGroup>
+                                                                <Label className="col-form-label-sm f-12" >{'Date From'}</Label>
+                                                                <Input className='form-control digits' type='date' defaultValue='' name='closed_date_from' required />
+                                                            </FormGroup>
+                                                        </Col>
+                                                        <Col md='4'>
+                                                            <FormGroup>
+                                                                <Label className="col-form-label-sm f-12" >{'Date To'}</Label>
+                                                                <Input className='form-control digits' type='date' defaultValue='' name='closed_date_to' required />
+                                                            </FormGroup>
+                                                        </Col>
+                                                    </Row>
+                                                </>
+                                            }{
+                                                selectedSearchCol.indexOf("po_verified") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'CPO verified'}</Label>
+                                                        <Select id='po_verified' required
+                                                            name='po_verified'
+                                                            options={
+                                                                [
+                                                                    { value: '1', label: "Verified" },
+                                                                ]} className="js-example-basic-multiple mb-1" isMulti
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("po_verified_at") > -1 &&
+                                                <>
+                                                    <Row>
+                                                        <Col md='12'>
+                                                            <Label className="col-form-label-sm f-14 font-weight-bold">{'CPO verified date range'}</Label>
+                                                        </Col>
+                                                    </Row>
+                                                    <Row>
+                                                        <Col md='4'>
+                                                            <FormGroup>
+                                                                <Label className="col-form-label-sm f-12">{'Date From'}</Label>
+                                                                <Input className='form-control digits' type='date' defaultValue='' name='po_verified_at_from' required />
+                                                            </FormGroup>
+                                                        </Col>
+                                                        <Col md='4'>
+                                                            <FormGroup>
+                                                                <Label className="col-form-label-sm f-12">{'Date To'}</Label>
+                                                                <Input className='form-control digits' type='date' defaultValue='' name='po_verified_at_to' required />
+                                                            </FormGroup>
+                                                        </Col>
+                                                    </Row>
+                                                </>
+
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("vendor") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Vendor'}</Label>
+                                                        <Select name='vendor' id='vendor' required
+                                                            options={optionsV} className="js-example-basic-single "
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "vendors", "vendor", setOptionsV, optionsV)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
+                                                selectedSearchCol.indexOf("source_lang") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Source Language'}</Label>
+                                                        <Select name='job.priceList.source' id='source_lang' required
+                                                            options={optionsSL} className="js-example-basic-single "
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "languages", "source_lang", setOptionsSL, optionsSL)
+                                                            }
+                                                            isMulti />
                                                     </FormGroup>
                                                 </Col>
                                             }
