@@ -494,16 +494,32 @@ class ReportsController extends Controller
                     if (is_array($val)) {
                         $query->where(function ($query) use ($key, $val, $stander_format_Search) {
                             foreach ($val as $k => $v) {
+                                if ($key === 'payment_status' && $v == 2) {
+                                    $v = null;
+                                }
                                 if ($k == 0) {
-                                    $query->where($stander_format_Search[$key], "like", "%" . $v . "%");
+                                    if (is_null($v)) {
+                                        $query->whereNull($stander_format_Search[$key]);
+                                    } else {
+                                        $query->where($stander_format_Search[$key], "like", "%" . $v . "%");
+                                    }
                                 } else {
-                                    $query->orWhere($stander_format_Search[$key], "like", "%" . $v . "%");
+                                    if (is_null($v)) {
+                                        $query->orWhereNull($stander_format_Search[$key]); 
+                                    } else {
+                                        $query->orWhere($stander_format_Search[$key], "like", "%" . $v . "%");
+                                    }
                                 }
                             }
                         });
                     } else {
-                        $query->where($stander_format_Search[$key], "like", "%" . $val . "%");
+                        if ($key === 'payment_status' && $val == 2) {
+                            $query->whereNull($stander_format_Search[$key]);
+                        } else {
+                            $query->where($stander_format_Search[$key], "like", "%" . $val . "%");
+                        }
                     }
+
                 }
             }
         }
