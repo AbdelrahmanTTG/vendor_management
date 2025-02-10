@@ -158,7 +158,7 @@ const VPOs = (props) => {
                                                             options={
                                                                 [
                                                                     { value: '1', label: "Paid" },
-                                                                    { value: '2', label: "Unpaid" },
+                                                                    { value: '', label: "Unpaid" },
                                                                 ]} className="js-example-basic-multiple mb-1" isMulti
                                                         />
                                                     </FormGroup>
