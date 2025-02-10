@@ -185,7 +185,7 @@ const VPOs = (props) => {
                 }
             });
             const formattedOptions = data.map(item => ({
-                value: item.id,
+                value: item.name,
                 label: item.name || item.gmt,
             }));
 
@@ -368,7 +368,7 @@ const VPOs = (props) => {
                                                 <Col md='4'>
                                                     <FormGroup>
                                                         <Label className="col-form-label-sm f-12" htmlFor='name'>{'Source Language'}</Label>
-                                                        <Select name='job.priceList.source' id='source_lang' required
+                                                            <Select name='source_lang' id='source_lang' required
                                                             options={optionsSL} className="js-example-basic-single "
                                                             onInputChange={(inputValue) =>
                                                                 handleInputChange(inputValue, "languages", "source_lang", setOptionsSL, optionsSL)

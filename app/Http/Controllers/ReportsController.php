@@ -444,7 +444,7 @@ class ReportsController extends Controller
             'slang.name as source_lang' => ['Source language', 'source_lang'],
             'tlang.name as target_lang' => ['Target language', 'target_lang'],
             'tp.name as task_type_name' => ['Task type', 'task_type_name'],
-            'v.name as vendor_name' => ['Vendor name', 'vendor_name'],
+            // 'v.name as vendor_name' => ['Vendor name', 'vendor_name'],
             't.count' => ['count', 'count'],
             't.rate' => ['rate', 'rate'],
             't.job_portal' => [null, null],
@@ -483,14 +483,13 @@ class ReportsController extends Controller
             ->leftJoin('po as po', 'j.po', '=', 'po.id')
             ->selectRaw($columns);
         if ($request->has('queryParams') && is_array($request->queryParams)) {
-            $stander_format_Search = ["code" => 't.code', "source_lang"=> "slang.name", "vendor"=> "t.vendor", "po_verified_at" => 'po.verified_at', "po_verified" => "po.verified", "payment_status" => "p.status", "status" => 't.status', "user_name" => 't.created_by', "closed_date" => 't.closed_date', ];
+            $stander_format_Search = ["code" => 't.code', "source_lang"=> "slang.name", "vendor"=> "v.name", "po_verified_at" => 'po.verified_at', "po_verified" => "po.verified", "payment_status" => "p.status", "status" => 't.status', "user_name" => 't.created_by', "closed_date" => 't.closed_date', ];
             $queryParams = $request->queryParams;
             foreach ($queryParams as $key => $val) {
                 if ($stander_format_Search[$key] !== 'filters' && !empty($val)) {
                     if (!in_array($stander_format_Search[$key], $formatArray)) {
                         $query->addSelect($stander_format_Search[$key]);
                     }
-
                     if ($key === 'closed_date' || $key === 'po_verified_at') {
                         if( is_array($val) && count($val) === 2){
                             if (!empty($val[0]) && !empty($val[1])) {
