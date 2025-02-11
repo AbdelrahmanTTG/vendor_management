@@ -87,7 +87,6 @@ const VPOs = (props) => {
             setLoading(true);
             await axiosClient.post("VPOS", payload)
                 .then(({ data }) => {
-                    console.log(data.AllData)
                     setFields(data?.fields);
                     setPageLinks(data?.Links);
                     setVPOs(data?.data?.data)
