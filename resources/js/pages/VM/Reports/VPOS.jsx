@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState, useCallback } from 'react';
-import { Card, Table, Col, Pagination, PaginationItem, PaginationLink, CardHeader, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
+import { Card, Table, Col, Pagination, PaginationItem, Progress, PaginationLink, CardHeader, CardBody, Label, FormGroup, Input, Row, Collapse, DropdownMenu, DropdownItem, ButtonGroup, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 import axiosClient from "../../AxiosClint";
 import { Btn, H5, Spinner } from '../../../AbstractElements';
 import Select from 'react-select';
@@ -87,12 +87,12 @@ const VPOs = (props) => {
             setLoading(true);
             await axiosClient.post("VPOS", payload)
                 .then(({ data }) => {
-                    console.log(data)
+                    console.log(data.AllData)
                     setFields(data?.fields);
                     setPageLinks(data?.Links);
                     setVPOs(data?.data?.data)
                     setFormats(data?.formats);
-                    if (data.AllData) { exportToExcel(data.AllTasks) }
+                    if (data.AllData) { exportToExcel(data.AllData) }
 
                     setLoading(false);
                 });
@@ -252,7 +252,7 @@ const VPOs = (props) => {
     
             SweetAlert.fire({
                 title: 'Are you sure?',
-                text: `Do you want to export all tasks ?`,
+                text: `Do you want to export all VPOs ?`,
                 icon: 'warning',
                 confirmButtonText: 'Export',
                 showCancelButton: true,
@@ -267,108 +267,100 @@ const VPOs = (props) => {
             });
     };
        const exportToExcel = async (exportEx) => {
-            let data = [];
-            if (exportEx) {
-                data = exportEx.map(item => {
-                    // if (typeof item === 'object' && item !== null) {
-                        const processedItem = { ...item };
-                        for (const key in processedItem) {
-                            if (typeof processedItem[key] === 'object' && processedItem[key] !== null) {
-                                processedItem[key] = String(processedItem[key]?.name || processedItem[key]?.user_name || '');
-                            } else if (processedItem[key] === null || processedItem[key] === undefined) {
-                                processedItem[key] = '';
-                            } else if (typeof processedItem[key] === 'number') {
-                                processedItem[key] = processedItem[key];
-                            } else {
-                                processedItem[key] = String(processedItem[key]);
-                            }
-                            if (key === 'status') {
-                                processedItem[key] == vpo_status?.[processedItem[key]];
-                            }
-                        }
-                        return processedItem;
-                    // }
-                });
-            }
-            // else {
-            //     const tableRows = document.querySelectorAll("table tbody tr");
-            //     tableRows.forEach(row => {
-            //         const rowData = [];
-            //         const cells = row.querySelectorAll("td");
-            //         const dataWithoutLastTwo = Array.from(cells);
-            //         dataWithoutLastTwo.forEach(cell => {
-            //             rowData.push(cell.innerText);
-            //         });
-            //         data.push(rowData);
-            //     });
-            // }
-    
-            const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('Sheet 1');
-            const headersArray = [...fields[1]];
-    
-            worksheet.columns = headersArray.map((key) => {
-                return {
-                    header: key.replace('_name', '')
-                        .split(/[_-]/)
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(' '),
-                    key: key,
-                    width: 20,
-                };
-            });
-    
-            worksheet.mergeCells('A1:' + String.fromCharCode(65 + headersArray.length - 1) + '1');
-            worksheet.getCell('A1').value = ' Tasks List';
-            worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
-            worksheet.getCell('A1').font = { bold: true };
-    
-            const headerRow = worksheet.getRow(2);
-            headersArray.forEach((header, index) => {
-                headerRow.getCell(index + 1).value = header.replace(/_/g, ' ')
-                    .split(' ')
-                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(' ');
-            });
-    
-            headerRow.eachCell((cell) => {
-                cell.fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'D3D3D3' },
-                };
-                cell.font = { bold: true };
-                cell.alignment = { vertical: 'middle', horizontal: 'center' };
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'thin' },
-                    right: { style: 'thin' }
-                };
-            });
-            // console.log(data)
-            data.forEach(rowData => {
-                const row = worksheet.addRow(rowData);
-                row.eachCell((cell) => {
-                    cell.border = {
-                        top: { style: 'thin' },
-                        left: { style: 'thin' },
-                        bottom: { style: 'thin' },
-                        right: { style: 'thin' }
-                    };
-                });
-            });
-    
-            workbook.xlsx.writeBuffer().then(buffer => {
-                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'Tasks-List.xlsx';
-                a.click();
-                window.URL.revokeObjectURL(url);
-            });
-        };
+           if (!exportEx || exportEx.length === 0) return;
+
+           setIsExporting(true);
+           setProgress(0);
+
+           let data = exportEx.map(item => {
+               if (typeof item === 'object' && item !== null) {
+                   const processedItem = { ...item };
+                   for (const key in processedItem) {
+                       if (typeof processedItem[key] === 'object' && processedItem[key] !== null) {
+                           processedItem[key] = String(processedItem[key]?.name || processedItem[key]?.user_name || '');
+                       } else if (processedItem[key] === null || processedItem[key] === undefined) {
+                           processedItem[key] = '';
+                       } else if (typeof processedItem[key] === 'number') {
+                           processedItem[key] = processedItem[key];
+                       } else {
+                           processedItem[key] = String(processedItem[key]);
+                       }
+                       if (key === 'status') {
+                           processedItem[key] = vpo_status?.[processedItem[key]];
+                       }
+                       if (key === 'payment_status') {
+                           processedItem[key] = processedItem[key] == 1 ? "✅" : "❌";
+                       }
+                   }
+                   return processedItem;
+               }
+               return null;
+           }).filter(Boolean); 
+
+           const workbook = new ExcelJS.Workbook();
+           const worksheet = workbook.addWorksheet('Sheet 1');
+           const headersArray = fields.map(field => field[0]).filter(header => header !== "VPO file");
+           const headersArray2 = fields.map(field => field[1]).filter(header => header !== "vpo_file");
+
+           worksheet.columns = headersArray2.map((key) => ({
+               header: key?.replace('_name', '').split(/[_-]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+               key: key,
+               width: 20,
+           }));
+
+           worksheet.mergeCells('A1:' + String.fromCharCode(65 + headersArray.length - 1) + '1');
+           worksheet.getCell('A1').value = 'VPOs List';
+           worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+           worksheet.getCell('A1').font = { bold: true };
+
+           const headerRow = worksheet.getRow(2);
+           headersArray.forEach((header, index) => {
+               headerRow.getCell(index + 1).value = header?.replace(/_/g, ' ').split(' ')
+                   .map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+           });
+
+           headerRow.eachCell((cell) => {
+               cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'D3D3D3' } };
+               cell.font = { bold: true };
+               cell.alignment = { vertical: 'middle', horizontal: 'center' };
+               cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+           });
+
+           const totalRows = data.length;
+           data.forEach((rowData, index) => {
+               worksheet.addRow(rowData);
+               setProgress(Math.round(((index + 1) / totalRows) * 50)); 
+           });
+
+           const buffer = await workbook.xlsx.writeBuffer();
+           const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+           const reader = new FileReader();
+           reader.onprogress = (event) => {
+               if (event.lengthComputable) {
+                   const percent = Math.round((event.loaded / event.total) * 50) + 50; 
+                   setProgress(percent);
+               }
+           };
+
+           reader.onloadend = () => {
+               const url = window.URL.createObjectURL(blob);
+               const a = document.createElement('a');
+               a.href = url;
+               a.download = 'VPOs-List.xlsx';
+               a.click();
+               window.URL.revokeObjectURL(url);
+
+               setTimeout(() => {
+                   setIsExporting(false);
+                   setProgress(0);
+               }, 1000);
+           };
+
+           reader.readAsArrayBuffer(blob);
+       };
+    const [progress, setProgress] = useState(0);
+    const [isExporting, setIsExporting] = useState(false);
     return (
         <Fragment >
             <Col>
@@ -658,7 +650,15 @@ const VPOs = (props) => {
             </Col>
             <Col sm="12">
                 <Card>
+                    <div>
+                        {isExporting > 0 && (
+                            <div className="mt-3">
+                                <Progress value={progress} color="success">{progress}%</Progress>
+                            </div>
+                        )}
+                    </div>
                     <CardHeader className="px-3 d-flex justify-content-between align-items-center py-3">
+                      
                         <div className="w-100 text-end">
                             <ButtonGroup >
                                 <FormatTable title="Add VPOS table formatting"
@@ -693,7 +693,8 @@ const VPOs = (props) => {
                                     ]} table="VPOS"
                                     formats={formats} FormatsChanged={handleFormatsChanged}
                                 />
-                                <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: EX }}  >Export to Excel</Btn>
+                                <Btn attrBtn={{
+                                    color: 'btn btn-primary-gradien', onClick: EX, disabled: loading  }}  >Export to Excel</Btn>
 
                             </ButtonGroup>
 
