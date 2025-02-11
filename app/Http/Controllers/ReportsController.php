@@ -577,13 +577,24 @@ class ReportsController extends Controller
     {
         $fileName = $request->input("filename");
         $status = $request->input("status");
-        if(isset($status) == 0 ){
-            $filePath = Storage::disk('external')->path("/vpo/{$fileName}");
-        }elseif (isset($status) == 1){
-            $filePath = Storage::disk('external')->path("/invoiceVendorFiles/{$fileName}");
+
+        if (!$fileName) {
+            return response()->json(['message' => 'Filename is required'], 400);
         }
 
-       
+        if ($status === "0") {
+            $filePath = Storage::disk('external')->path("/vpo/{$fileName}");
+        } elseif ($status === "1") {
+            $filePath = Storage::disk('external')->path("/invoiceVendorFiles/{$fileName}");
+        } else {
+            return response()->json(['message' => 'Invalid status'], 400);
+        }
+
+        if (!file_exists($filePath)) {
+            return response()->json(['message' => 'File not found'], 404);
+        }
+
         return response()->download($filePath, $fileName);
     }
+
 }
