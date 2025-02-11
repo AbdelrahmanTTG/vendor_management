@@ -227,9 +227,9 @@ const VPOs = (props) => {
         }
 
     };
-    const handleDownload = async (status , path) => { 
+    const handleDownload = async (status, filename) => { 
         try {
-            const response = await axiosClient.post("downloadVPO", { status , path }, { responseType: 'blob' });
+            const response = await axiosClient.post("downloadVPO", { status, filename }, { responseType: 'blob' });
             const file = new Blob([response.data], { type: response.headers['content-type'] });
             const link = document.createElement('a');
             const url = window.URL.createObjectURL(file);
