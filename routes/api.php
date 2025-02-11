@@ -74,6 +74,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/getDashboardChart', [VendorProfileController::class, 'getDashboardChart']);
     Route::post('/MessagePM', [VendorProfileController::class, 'Message_VM_to_PM']);
     Route::post('/VPOS', [ReportsController::class, 'VPOs']);
+    Route::post('/downloadVPO', [ReportsController::class, 'download']);
 
 
 

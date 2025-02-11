@@ -4,6 +4,9 @@ import axiosClient from "../../AxiosClint";
 import { Btn, H5, Spinner } from '../../../AbstractElements';
 import Select from 'react-select';
 import FormatTable from "../Format";
+import SweetAlert from 'sweetalert2';
+import ExcelJS from 'exceljs';
+
 const VPOs = (props) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -19,17 +22,33 @@ const VPOs = (props) => {
     const [optionsV, setOptionsV] = useState([]);
     const [initialOptions, setInitialOptions] = useState({});
     const [optionsSL, setOptionsSL] = useState([]);
+    const [optionsTL, setOptionsTL] = useState([]);
+    const [optionsTY, setOptionsTY] = useState([]);
+    const [optionsUnit, setOptionsUnit] = useState([]);
+    const [optionsCU, setOptionsCU] = useState([]);
 
+    
     const options = [
         { value: 'code', label: 'P.o number' },
-        { value: 'payment_status', label: 'Payment status' },
-        { value: 'status', label: 'VPO status' },
-        { value: 'user_name', label: 'PM name' },
-        { value: 'closed_date', label: 'VPO date' },
-        { value: 'po_verified', label: 'CPO verified' },
-        { value: 'po_verified_at', label: 'CPO verified date' },
+        { value: 'payment_status', label: 'Payment status'},
+        { value: 'status', label: 'VPO status'},
+        { value: 'user_name', label: 'PM name'},
+        { value: 'closed_date', label: 'VPO date'},
+        { value: 'po_verified', label: 'CPO verified'},
+        { value: 'po_verified_at', label: 'CPO verified date'},
         { value: 'vendor', label: 'Vendor' },
-        { value: 'source_lang', label: 'Source Language' },
+        { value: 'source_lang', label: 'Source Language'},
+        { value: 'target_lang', label: 'Target Language'},
+        { value: 'task_type', label: 'Task Type' },
+        { value: 'count', label: 'Count' },
+        { value: 'unit', label: 'Unit' },
+        { value: 'rate', label: 'Rate' },
+        { value: 'currency', label: 'Currency' },
+        { value: 'totalamount', label: 'P.O amount' },
+        { value: 'invoice_dated', label: 'Invoice date ' },
+
+        
+
 
     ];
     const addBtn = (event, divID) => {
@@ -73,6 +92,7 @@ const VPOs = (props) => {
                     setPageLinks(data?.Links);
                     setVPOs(data?.data?.data)
                     setFormats(data?.formats);
+                    if (data.AllData) { exportToExcel(data.AllTasks) }
 
                     setLoading(false);
                 });
@@ -152,14 +172,16 @@ const VPOs = (props) => {
                     data["po_verified_at"] = [];
                 }
                 data["po_verified_at"].push(keyValue[1]);
+            } else if (keyValue[0] === "invoice_dated_from" || keyValue[0] === "invoice_dated_to" ) {
+                if (!data["invoice_dated"]) {
+                    data["invoice_dated"] = [];
+                }
+                data["invoice_dated"].push(keyValue[1]);
             }
             else {
                 data[keyValue[0]] = formData.getAll(keyValue[0]);
             }
         }
-
-        console.log(data)
-
         setQueryParams(data);
         setCurrentPage(1);
     }
@@ -205,6 +227,148 @@ const VPOs = (props) => {
         }
 
     };
+    const handleDownload = async (status , path) => { 
+        try {
+            const response = await axiosClient.post("downloadVPO", { status , path }, { responseType: 'blob' });
+            const file = new Blob([response.data], { type: response.headers['content-type'] });
+            const link = document.createElement('a');
+            const url = window.URL.createObjectURL(file);
+            const contentDisposition = response.headers['content-disposition'];
+            const matches = contentDisposition ? contentDisposition.match(/filename="?([^"]+)"?/) : null;
+            const fileName = matches ? matches[1].trim().replace(/^_+|_+$/g, '') : filename;
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            const response = err.response;
+            console.error(response);
+            alert('Error downloading the file: ' + (response?.data?.message || 'Unknown error'));
+        }
+    }
+      const EX = () => {
+    
+            SweetAlert.fire({
+                title: 'Are you sure?',
+                text: `Do you want to export all tasks ?`,
+                icon: 'warning',
+                confirmButtonText: 'Export',
+                showCancelButton: true,
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+    
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetchData(true)
+                }
+            });
+    };
+       const exportToExcel = async (exportEx) => {
+            let data = [];
+            if (exportEx) {
+                data = exportEx.map(item => {
+                    // if (typeof item === 'object' && item !== null) {
+                        const processedItem = { ...item };
+                        for (const key in processedItem) {
+                            if (typeof processedItem[key] === 'object' && processedItem[key] !== null) {
+                                processedItem[key] = String(processedItem[key]?.name || processedItem[key]?.user_name || '');
+                            } else if (processedItem[key] === null || processedItem[key] === undefined) {
+                                processedItem[key] = '';
+                            } else if (typeof processedItem[key] === 'number') {
+                                processedItem[key] = processedItem[key];
+                            } else {
+                                processedItem[key] = String(processedItem[key]);
+                            }
+                            if (key === 'status') {
+                                processedItem[key] == vpo_status?.[processedItem[key]];
+                            }
+                        }
+                        return processedItem;
+                    // }
+                });
+            }
+            // else {
+            //     const tableRows = document.querySelectorAll("table tbody tr");
+            //     tableRows.forEach(row => {
+            //         const rowData = [];
+            //         const cells = row.querySelectorAll("td");
+            //         const dataWithoutLastTwo = Array.from(cells);
+            //         dataWithoutLastTwo.forEach(cell => {
+            //             rowData.push(cell.innerText);
+            //         });
+            //         data.push(rowData);
+            //     });
+            // }
+    
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Sheet 1');
+            const headersArray = [...fields[1]];
+    
+            worksheet.columns = headersArray.map((key) => {
+                return {
+                    header: key.replace('_name', '')
+                        .split(/[_-]/)
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' '),
+                    key: key,
+                    width: 20,
+                };
+            });
+    
+            worksheet.mergeCells('A1:' + String.fromCharCode(65 + headersArray.length - 1) + '1');
+            worksheet.getCell('A1').value = ' Tasks List';
+            worksheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+            worksheet.getCell('A1').font = { bold: true };
+    
+            const headerRow = worksheet.getRow(2);
+            headersArray.forEach((header, index) => {
+                headerRow.getCell(index + 1).value = header.replace(/_/g, ' ')
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+            });
+    
+            headerRow.eachCell((cell) => {
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'D3D3D3' },
+                };
+                cell.font = { bold: true };
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            });
+            // console.log(data)
+            data.forEach(rowData => {
+                const row = worksheet.addRow(rowData);
+                row.eachCell((cell) => {
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                });
+            });
+    
+            workbook.xlsx.writeBuffer().then(buffer => {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Tasks-List.xlsx';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        };
     return (
         <Fragment >
             <Col>
@@ -232,7 +396,31 @@ const VPOs = (props) => {
                                                     <FormGroup id='codeInput'>
                                                         <Label className="col-form-label-sm f-12">{'P.o number'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'codeInput') }}><i className="fa fa-plus-circle"></i></Btn>
                                                             <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'codeInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                        <Input className='form-control form-control-sm codeInput mb-1' type='text' name='code' placeholder='Enter Task Code...' required />
+                                                        <Input className='form-control form-control-sm codeInput mb-1' type='text' name='code' placeholder='Enter P.o number...' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            } {selectedSearchCol.indexOf("count") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup id='countInput'>
+                                                        <Label className="col-form-label-sm f-12">{'count'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'countInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'countInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm countInput mb-1' type='text' name='count' placeholder='Enter count...' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{selectedSearchCol.indexOf("rate") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup id='rateInput'>
+                                                        <Label className="col-form-label-sm f-12">{'Rate'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'rateInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'rateInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm rateInput mb-1' type="number" step="0.01" min="0" name='rate' placeholder='Enter rate...' required />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{selectedSearchCol.indexOf("totalamount") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup id='amountInput'>
+                                                        <Label className="col-form-label-sm f-12">{'P.O amount'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'amountInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'amountInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm amountInput mb-1' type="number" step="0.01" min="0" name='totalamount' placeholder='Enter amount...' required />
                                                     </FormGroup>
                                                 </Col>
                                             }{
@@ -250,8 +438,7 @@ const VPOs = (props) => {
                                                         />
                                                     </FormGroup>
                                                 </Col>
-                                            }
-                                            {
+                                            }{
                                                 selectedSearchCol.indexOf("status") > -1 &&
                                                 <Col md='4'>
                                                     <FormGroup>
@@ -285,7 +472,7 @@ const VPOs = (props) => {
                                                             isMulti />
                                                     </FormGroup>
                                                 </Col>
-                                            }   {
+                                            }{
                                                 selectedSearchCol.indexOf("closed_date") > -1 &&
                                                 <>
                                                     <Row>
@@ -310,6 +497,30 @@ const VPOs = (props) => {
                                                     </Row>
                                                 </>
                                             }{
+                                                selectedSearchCol.indexOf("invoice_dated") > -1 &&
+                                                <>
+                                                    <Row>
+                                                        <Col md='12'>
+                                                            <Label className="col-form-label-sm f-14 font-weight-bold">{'Invoice date range'}</Label>
+                                                        </Col>
+                                                    </Row>
+                                                    <Row>
+
+                                                        <Col md='4'>
+                                                            <FormGroup>
+                                                                <Label className="col-form-label-sm f-12" >{'Date From'}</Label>
+                                                                <Input className='form-control digits' type='date' defaultValue='' name='invoice_dated_from' required />
+                                                            </FormGroup>
+                                                        </Col>
+                                                        <Col md='4'>
+                                                            <FormGroup>
+                                                                <Label className="col-form-label-sm f-12" >{'Date To'}</Label>
+                                                                <Input className='form-control digits' type='date' defaultValue='' name='invoice_dated_to' required />
+                                                            </FormGroup>
+                                                        </Col>
+                                                    </Row>
+                                                </>
+                                            }{
                                                 selectedSearchCol.indexOf("po_verified") > -1 &&
                                                 <Col md='4'>
                                                     <FormGroup>
@@ -323,8 +534,7 @@ const VPOs = (props) => {
                                                         />
                                                     </FormGroup>
                                                 </Col>
-                                            }
-                                            {
+                                            }{
                                                 selectedSearchCol.indexOf("po_verified_at") > -1 &&
                                                 <>
                                                     <Row>
@@ -348,8 +558,7 @@ const VPOs = (props) => {
                                                     </Row>
                                                 </>
 
-                                            }
-                                            {
+                                            }{
                                                 selectedSearchCol.indexOf("vendor") > -1 &&
                                                 <Col md='4'>
                                                     <FormGroup>
@@ -362,8 +571,7 @@ const VPOs = (props) => {
                                                             isMulti />
                                                     </FormGroup>
                                                 </Col>
-                                            }
-                                            {
+                                            }{
                                                 selectedSearchCol.indexOf("source_lang") > -1 &&
                                                 <Col md='4'>
                                                     <FormGroup>
@@ -376,7 +584,63 @@ const VPOs = (props) => {
                                                             isMulti />
                                                     </FormGroup>
                                                 </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("target_lang") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Target Language'}</Label>
+                                                            <Select name='target_lang' id='target_lang' required
+                                                            options={optionsTL} className="js-example-basic-single "
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "languages", "target_lang", setOptionsTL, optionsTL)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("task_type") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Task Type'}</Label>
+                                                        <Select id='task_type' required
+                                                            name='task_type'
+                                                            options={optionsTY} className="js-example-basic-single "
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "task_type", "task_type", setOptionsTY, optionsTY)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("unit") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Unit'}</Label>
+                                                            <Select id='unit' required
+                                                                name='unit'
+                                                                options={optionsUnit} className="js-example-basic-single "
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "unit", "unit", setOptionsUnit, optionsUnit)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("currency") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Currency'}</Label>
+                                                            <Select id='currency' required
+                                                                name='currency'
+                                                                options={optionsCU} className="js-example-basic-single "
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "currency", "Currency", setOptionsCU, optionsCU)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
                                             }
+
                                         </Row>
                                         <Row className='b-t-primary p-t-20'>
                                             <Col>
@@ -429,7 +693,7 @@ const VPOs = (props) => {
                                     ]} table="VPOS"
                                     formats={formats} FormatsChanged={handleFormatsChanged}
                                 />
-                                {/* <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: EX }}  >Export to Excel</Btn> */}
+                                <Btn attrBtn={{ color: 'btn btn-primary-gradien', onClick: EX }}  >Export to Excel</Btn>
 
                             </ButtonGroup>
 
@@ -465,10 +729,31 @@ const VPOs = (props) => {
                                                                 value = vpo_status?.[item[field[1]]];
                                                             } else if (field[1] === "payment_status") {
                                                                 value = item[field[1]] == "1" ? "✅" : "❌";
+                                                            } else if (field[1] === "vpo_file") {
+                                                                if (item[field[1]]) {
+                                                                    value = (
+                                                                        <button
+                                                                            onClick={() => handleDownload(item.job_portal, item[field[1]])}
+                                                                            className="text-2xl px-4 py-2 bg-blue-500 text-black rounded-lg hover:bg-blue-600"
+                                                                            rel="noopener noreferrer"
+                                                                            style={{
+                                                                                backgroundColor: 'transparent',
+                                                                                border: 'none',
+                                                                                cursor: 'pointer',
+                                                                                fontSize:"20px"
+                                                                            }}
+                                                                        >
+                                                                            <i className="fa fa-cloud-download" aria-hidden="true"></i>
+                                                                        </button>
+                                                                    );
+                                                                } else {
+                                                                    value = "🚫";
+                                                                }
                                                             }
 
                                                             return <td key={fieldIndex}>{value}</td>;
                                                         })}
+
 
                                                     </tr>
                                                 ))}

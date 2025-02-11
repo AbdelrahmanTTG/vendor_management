@@ -16,6 +16,7 @@ use App\Http\Controllers\VendorProfileController;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Storage;
 
 class ReportsController extends Controller
 {
@@ -483,14 +484,32 @@ class ReportsController extends Controller
             ->leftJoin('po as po', 'j.po', '=', 'po.id')
             ->selectRaw($columns);
         if ($request->has('queryParams') && is_array($request->queryParams)) {
-            $stander_format_Search = ["code" => 't.code', "source_lang"=> "slang.name", "vendor"=> "v.name", "po_verified_at" => 'po.verified_at', "po_verified" => "po.verified", "payment_status" => "p.status", "status" => 't.status', "user_name" => 't.created_by', "closed_date" => 't.closed_date', ];
-            $queryParams = $request->queryParams;
+            $stander_format_Search = [
+                "code" => 't.code',
+                "rate" => "t.rate",
+                "totalamount" => DB::raw("(ifnull(t.rate,0) * ifnull(t.count,0))"),
+                "currency" => "c.name",
+                "count" => "t.count",
+                "unit" => "un.name",
+                "source_lang" => "slang.name",
+                "target_lang" => "tlang.name",
+                "task_type" => "tp.name",
+                "vendor" => "v.name",
+                "po_verified_at" => 'po.verified_at',
+                "po_verified" => "po.verified",
+                "payment_status" => "p.status",
+                "status" => 't.status',
+                "user_name" => 't.created_by',
+                "closed_date" => 't.closed_date',
+                "invoice_dated"=> "t.invoice_date",
+            ];
+             $queryParams = $request->queryParams;
             foreach ($queryParams as $key => $val) {
                 if ($stander_format_Search[$key] !== 'filters' && !empty($val)) {
                     if (!in_array($stander_format_Search[$key], $formatArray)) {
                         $query->addSelect($stander_format_Search[$key]);
                     }
-                    if ($key === 'closed_date' || $key === 'po_verified_at') {
+                    if ($key === 'closed_date' || $key === 'po_verified_at' || $key === 'invoice_dated' ) {
                         if( is_array($val) && count($val) === 2){
                             if (!empty($val[0]) && !empty($val[1])) {
                                 $query->whereBetween($stander_format_Search[$key], [$val[0], $val[1]]);
@@ -534,7 +553,9 @@ class ReportsController extends Controller
             }
 
         }
-
+        if ($request->has('export') && $request->input('export') === true) {
+            $AllData = $query->get();
+        }
         $perPage = $request->input('per_page', 10);
         $q = $query->paginate($perPage);
         $links = $q->linkCollection();
@@ -546,9 +567,23 @@ class ReportsController extends Controller
                 "Links" => $links ?? [],
                 "formats" => $formats,
                 "totalVendors" => $q->total(),
+                "AllData" => $AllData ?? null,
 
             ]
 
         );
+    }
+    public function download(Request $request)
+    {
+        $fileName = $request->input("filename");
+        $status = $request->input("status");
+        if(isset($status) == 0 ){
+            $filePath = Storage::disk('external')->path("/vpo/{$fileName}");
+        }elseif (isset($status) == 1){
+            $filePath = Storage::disk('external')->path("/invoiceVendorFiles/{$fileName}");
+        }
+
+       
+        return response()->download($filePath, $fileName);
     }
 }
