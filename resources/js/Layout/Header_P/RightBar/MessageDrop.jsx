@@ -31,19 +31,10 @@ const MessageDrop = () => {
                 //     });
                 echo.channel("test")
                     .listen('.newMessage', (e) => {
-                        console.log("Received event:", e);
+                        console.log(e);
                     })
                     .error((error) => {
                         console.error("WebSocket Error:", error);
-                    })
-                    .subscribed(() => {
-                        console.log("Successfully subscribed to the channel.");
-                    })
-                    .connecting(() => {
-                        console.log("WebSocket is connecting...");
-                    })
-                    .reconnecting((attemptNumber) => {
-                        console.log(`WebSocket is reconnecting (attempt ${attemptNumber})...`);
                     });
             }
             setLoading(false);

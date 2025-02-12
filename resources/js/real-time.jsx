@@ -10,8 +10,8 @@ const createEcho = () => {
         wsHost:"portal.lingotalents.com",
         wsPort: 6001,
         wssPort: 6001,
-        forceTLS: true,
-        enabledTransports: ['ws', 'wss'],
+        forceTLS: false,
+        enabledTransports: ['ws'],
         auth: {
             headers: {
                 Authorization: 'Bearer ' + localStorage.getItem("ACCESS_TOKEN"),
