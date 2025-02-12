@@ -120,7 +120,7 @@ return [
 
         'reverb' => [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
-            'port' => env('REVERB_SERVER_PORT', 6001),
+            'port' => env('REVERB_SERVER_PORT', 443),
             'hostname' => env('REVERB_HOST', "portal.lingotalents.com"),
             'options' => [
                 'tls' => [],
