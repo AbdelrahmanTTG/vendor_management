@@ -121,7 +121,7 @@ return [
         'reverb' => [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
             'port' => env('REVERB_SERVER_PORT', 6001),
-            'hostname' => env('REVERB_HOST', "stage.aixnexus.com"),
+            'hostname' => env('REVERB_HOST', "portal.lingotalents.com"),
             'options' => [
                 'tls' => [],
             ],
