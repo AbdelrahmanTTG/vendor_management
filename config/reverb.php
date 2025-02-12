@@ -121,11 +121,9 @@ return [
         'reverb' => [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
             'port' => env('REVERB_SERVER_PORT', 443),
-            'hostname' => env('REVERB_HOST'),
+            'hostname' => env('REVERB_HOST', "stage.aixnexus.com"),
             'options' => [
-                'tls' => [
-             
-                ],
+                'tls' => [],
             ],
            'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
            'scaling' => [
@@ -155,7 +153,7 @@ return [
                 'secret' => env('REVERB_APP_SECRET', "pbcycd8psvfrxkv2qkuf"),
                 'app_id' => env('REVERB_APP_ID', '897670'),
                 'options' => [
-                    'host' => env('REVERB_HOST', 'stage.aixnexus.com #portal.lingotalents.com'),
+                    'host' => env('REVERB_HOST', 'stage.aixnexus.com'),
                     'port' => env('REVERB_PORT', 443),
                     'scheme' => env('REVERB_SCHEME', 'https'),
                     'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
