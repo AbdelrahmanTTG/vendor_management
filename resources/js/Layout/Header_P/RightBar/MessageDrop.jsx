@@ -21,12 +21,18 @@ const MessageDrop = () => {
                         setNotifications(NOData);
                     });
                 // start real time
-                echo.private(`newMessage-private-channel.User.${userId.email}`)
+                // echo.private(`newMessage-private-channel.User.${userId.email}`)
+                //     .listen('.newMessage', (e) => {
+                //         console.log(e)
+                //         const msg = e.data;
+                //         const newMsg = msg.replace(/(<([^>]+)>)/gi, "").substring(0, 70);
+                //         setNotifications(notifications => [...notifications, newMsg]);
+
+                //     });
+                echo.channel("test")
                     .listen('.newMessage', (e) => {
                         console.log(e)
-                        const msg = e.data;
-                        const newMsg = msg.replace(/(<([^>]+)>)/gi, "").substring(0, 70);
-                        setNotifications(notifications => [...notifications, newMsg]);
+               
 
                     });
             }

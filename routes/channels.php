@@ -7,5 +7,7 @@ Broadcast::channel('newMessage-private-channel.User.{email}', function ($user, $
     $decEmail = app('decrypt')(base64_decode($email));
     return  $user->email === $decEmail ;
 }, ['guards' => ['api', 'vendor']]);
-
+Broadcast::channel('test', function () {
+ 
+});
 
