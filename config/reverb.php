@@ -30,7 +30,7 @@
 
 //         'reverb' => [
 //             'host' =>  '0.0.0.0',
-//             'port' =>  6001,
+//             'port' =>  8003,
 //             'hostname' =>  "127.0.0.1",
 //             'options' => [
 //                 'tls' => ['cert' =>  "/etc/letsencrypt/live/dev.aixnexus.com/fullchain.pem", 'key' => "/etc/letsencrypt/live/dev.aixnexus.com/privkey.pem"],
@@ -76,7 +76,7 @@
 //                 'app_id' =>  "897670",
 //                 'options' => [
 //                     'host' =>  "127.0.0.1",
-//                     'port' =>  6001,
+//                     'port' =>  8003,
 //                     'scheme' =>  'https',
 //                     'useTLS' => true,
 //                 ],
@@ -120,7 +120,7 @@ return [
 
         'reverb' => [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
-            'port' => env('REVERB_SERVER_PORT', 6001),
+            'port' => env('REVERB_SERVER_PORT', 8003),
             'hostname' => env('REVERB_HOST', "portal.lingotalents.com"),
             'options' => [
                 'tls' => [],
@@ -154,7 +154,7 @@ return [
                 'app_id' => env('REVERB_APP_ID', '897670'),
                 'options' => [
                     'host' => env('REVERB_HOST', 'portal.lingotalents.com'),
-                    'port' => env('REVERB_PORT', 6001),
+                    'port' => env('REVERB_PORT', 8003),
                     'scheme' => env('REVERB_SCHEME', 'https'),
                     'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
                 ],

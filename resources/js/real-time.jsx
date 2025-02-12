@@ -8,8 +8,8 @@ const createEcho = () => {
         broadcaster: 'reverb',
         key: "qm42aq7xixjvpowejavl",
         wsHost:"portal.lingotalents.com",
-        wsPort: 6001,
-        wssPort: 6001,
+        wsPort: 8003,
+        wssPort: 8003,
         forceTLS: true,
         enabledTransports: ['ws', 'wss'],
         auth: {
