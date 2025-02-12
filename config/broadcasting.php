@@ -15,8 +15,7 @@ return [
     |
     */
 
-    /* 'default' => env('BROADCAST_CONNECTION', 'reverb'),*/
-    'default' =>  'reverb',
+    'default' => env('BROADCAST_CONNECTION', 'reverb'),
     /*
     |--------------------------------------------------------------------------
     | Broadcast Connections
@@ -32,17 +31,16 @@ return [
 
         'reverb' => [
             'driver' => 'reverb',
-            'key' =>  'qm42aq7xixjvpowejavl',
-            'secret' => 'pbcycd8psvfrxkv2qkuf',
-            'app_id' =>  '897670',
+            'key' => env('REVERB_APP_KEY'),
+            'secret' => env('REVERB_APP_SECRET'),
+            'app_id' => env('REVERB_APP_ID'),
             'options' => [
-                'host' =>  'dev.aixnexus.com',
-                'port' =>  6001,
-                'scheme' =>  'https',
-                'useTLS' =>  true,
+                'host' => env('REVERB_HOST', "stage.aixnexus.com"),
+                'port' => env('REVERB_PORT', 443),
+                'scheme' => env('REVERB_SCHEME', 'https'),
+                'useTLS' => env('REVERB_USE_TLS', true),
             ],
-            'client_options' => [
-            ],
+            'client_options' => [],
         ],
 
         'ably' => [

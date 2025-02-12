@@ -119,21 +119,20 @@ return [
     'servers' => [
 
         'reverb' => [
-            'host' =>  '0.0.0.0',
-            'port' =>  6001,
-            'hostname' =>  "dev.aixnexus.com",
+            'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
+            'port' => env('REVERB_SERVER_PORT', 443),
+            'hostname' => env('REVERB_HOST'),
             'options' => [
                 'tls' => [
-                    'cert' =>  "/etc/letsencrypt/live/dev.aixnexus.com/fullchain.pem",
-                    'key' => "/etc/letsencrypt/live/dev.aixnexus.com/privkey.pem"
+             
                 ],
             ],
-            'scaling' => [
-                'enabled' => env('REVERB_SCALING_ENABLED', false),
-                'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
-            ],
-            'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
-            'pulse_ingest_interval' =>  15,
+           'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
+           'scaling' => [
+               'enabled' => env('REVERB_SCALING_ENABLED', false),
+               'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
+           ],
+           'pulse_ingest_interval' => env('REVERB_PULSE_INGEST_INTERVAL', 15),
         ],
 
     ],
@@ -148,7 +147,6 @@ return [
     | your server will support, including their connection credentials.
     |
     */
-
     'apps' => [
         'provider' => 'config',
         'apps' => [
@@ -163,9 +161,10 @@ return [
                     'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
                 ],
                 'allowed_origins' => ['*'],
-                'ping_interval' =>  60,
-                'max_message_size' =>  10_000,
+                'ping_interval' => env('REVERB_APP_PING_INTERVAL', 60),
+                'max_message_size' => env('REVERB_APP_MAX_MESSAGE_SIZE', 10_000),
             ],
-        ],
+        ]
     ],
+    
 ];
