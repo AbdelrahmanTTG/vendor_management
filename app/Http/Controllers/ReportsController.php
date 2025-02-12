@@ -464,9 +464,7 @@ class ReportsController extends Controller
             "case when (t.job_portal = '1' and t.job_portal is not null) then 'Nexus System' else '' end as portalStat"=>['System',"portalStat"],
         ];
 
-        $renamedFormatArray = array_values(array_filter(array_map(function ($item) use ($renameMap) {
-            return $renameMap[$item] ?? null;
-        }, $formatArray)));
+       
         $columns = implode(', ', $formatArray);
         $query = Task::query()
             ->from('job_task as t')
@@ -485,38 +483,41 @@ class ReportsController extends Controller
             ->selectRaw($columns);
         if ($request->has('queryParams') && is_array($request->queryParams)) {
             $stander_format_Search = [
-                "code" => 't.code',
-                "rate" => "t.rate",
-                "totalamount" => DB::raw("(ifnull(t.rate,0) * ifnull(t.count,0))"),
-                "currency" => "c.name",
-                "count" => "t.count",
-                "unit" => "un.name",
-                "source_lang" => "slang.name",
-                "target_lang" => "tlang.name",
-                "task_type" => "tp.name",
-                "vendor" => "v.name",
-                "po_verified_at" => 'po.verified_at',
-                "po_verified" => "po.verified",
-                "payment_status" => "p.status",
-                "status" => 't.status',
-                "user_name" => 't.created_by',
-                "closed_date" => 't.closed_date',
-                "invoice_dated"=> "t.invoice_date",
+                "code" => ['t.code', DB::raw("t.code AS code") ,"t.code"],
+                "rate" => ["t.rate" , DB::raw("t.rate AS rate") ,"t.rate"],
+                "totalamount" => [DB::raw("(ifnull(t.rate,0) * ifnull(t.count,0))"), DB::raw("(ifnull(t.rate,0) * ifnull(t.count,0)) as totalamount"),"(ifnull(t.rate,0) * ifnull(t.count,0)) as totalamount"],
+                "currency" => ["c.name", DB::raw("c.name AS currency_name"),'c.name as currency_name'],
+                "count" => ["t.count", DB::raw("t.count AS count") , "t.count" ],
+                "unit" => ["un.name" , DB::raw("un.name AS unit_name") ,"un.name as unit_name"],
+                "source_lang" => ["slang.name" , DB::raw("slang.name AS source_lang") ,"slang.name as source_lang"],
+                "target_lang" => ["tlang.name", DB::raw("tlang.name AS target_lang"), 'tlang.name as target_lang'],
+                "task_type" => ["tp.name", DB::raw("tp.name AS task_type_name") , 'tp.name as task_type_name'],
+                "vendor" => ["v.name", DB::raw("v.name as vendor_name"),"v.name as vendor_name"],
+                "po_verified_at" => ['po.verified_at', DB::raw("po.verified_at as po_verified_at"),'po.verified_at as po_verified_at'],
+                "po_verified" => ["po.verified", DB::raw("po.verified as po_verified") ,"CASE WHEN (po.verified = '1') THEN 'Verified' ELSE '' END AS po_verified"],
+                "payment_status" => ["p.status", DB::raw("p.status as payment_status"), 'p.status AS payment_status'],
+                "status" => ['t.status', DB::raw("po.verified as status"), 't.status'],
+                "user_name" => ['t.created_by', DB::raw("u.user_name as user_name"), 'u.user_name'],
+                "closed_date" => ['t.closed_date', DB::raw("t.closed_date as closed_date"), 't.closed_date'],
+                "invoice_dated"=> ["t.invoice_date", DB::raw("t.invoice_date as invoice_dated"), "STR_TO_DATE(t.invoice_date,\"%m/%d/%Y\") as invoice_dated"],
             ];
+           
+
              $queryParams = $request->queryParams;
             foreach ($queryParams as $key => $val) {
                 if ($stander_format_Search[$key] !== 'filters' && !empty($val)) {
-                    if (!in_array($stander_format_Search[$key], $formatArray)) {
-                        $query->addSelect($stander_format_Search[$key]);
+                    if (!in_array($stander_format_Search[$key][0], $formatArray)) {
+                        $query->addSelect($stander_format_Search[$key][1]);
+                        $formatArray[] = $stander_format_Search[$key][2];
                     }
                     if ($key === 'closed_date' || $key === 'po_verified_at' || $key === 'invoice_dated' ) {
                         if( is_array($val) && count($val) === 2){
                             if (!empty($val[0]) && !empty($val[1])) {
-                                $query->whereBetween($stander_format_Search[$key], [$val[0], $val[1]]);
+                                $query->whereBetween($stander_format_Search[$key][0], [$val[0], $val[1]]);
                             } elseif (!empty($val[0])) {
-                                $query->where($stander_format_Search[$key], '>=', $val[0]);
+                                $query->where($stander_format_Search[$key][0], '>=', $val[0]);
                             } elseif (!empty($val[1])) {
-                                $query->where($stander_format_Search[$key], '<=', $val[1]);
+                                $query->where($stander_format_Search[$key][0], '<=', $val[1]);
                             }
                         }
                        
@@ -529,30 +530,33 @@ class ReportsController extends Controller
 
                                 if ($k == 0) {
                                     if (is_null($v)) {
-                                        $query->whereNull($stander_format_Search[$key]);
+                                        $query->whereNull($stander_format_Search[$key][0]);
                                     } else {
-                                        $query->where($stander_format_Search[$key], "like", "%" . $v . "%");
+                                        $query->where($stander_format_Search[$key][0], "like", "%" . $v . "%");
                                     }
                                 } else {
                                     if (is_null($v)) {
-                                        $query->orWhereNull($stander_format_Search[$key]);
+                                        $query->orWhereNull($stander_format_Search[$key][0]);
                                     } else {
-                                        $query->orWhere($stander_format_Search[$key], "like", "%" . $v . "%");
+                                        $query->orWhere($stander_format_Search[$key][0], "like", "%" . $v . "%");
                                     }
                                 }
                             }
                         });
                     } else {
                         if ($key === 'payment_status' && $val == 2) {
-                            $query->whereNull($stander_format_Search[$key]);
+                            $query->whereNull($stander_format_Search[$key][0]);
                         } else {
-                            $query->where($stander_format_Search[$key], "like", "%" . $val . "%");
+                            $query->where($stander_format_Search[$key][0], "like", "%" . $val . "%");
                         }
                     }
                 }
             }
 
         }
+        $renamedFormatArray = array_values(array_filter(array_map(function ($item) use ($renameMap) {
+            return $renameMap[$item] ?? null;
+        }, $formatArray)));
         if ($request->has('export') && $request->input('export') === true) {
             $AllData = $query->get();
         }

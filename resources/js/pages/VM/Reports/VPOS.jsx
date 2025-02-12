@@ -360,6 +360,49 @@ const VPOs = (props) => {
        };
     const [progress, setProgress] = useState(0);
     const [isExporting, setIsExporting] = useState(false);
+     useEffect(() => {
+            formatData(formats);
+        }, [formats]);
+        const formatData = (format) => {
+            const labelMapping = {
+                'payment_status': 'Payment status',
+                'user_name': 'PM name',
+                'code': 'P.O Number',
+                'status': 'VPO status',
+                'vpo_file': 'VPO file',
+                'closed_date': 'VPO date',
+                'CPO verified': 'po_verified',
+                'CPO verified date': 'po_verified_at',
+                'vendor_name': 'Vendor name',
+                'source_lang': 'Source language',
+                'target_lang': 'Target language',
+                'task_type_name': 'Task type',
+                'count': 'count',
+                'rate': 'rate',
+                'unit_name': 'unit',
+                'currency_name': 'currency',
+                'totalamount': 'P.O amount',
+                'verifiedStat': 'Invoice Status',
+                'invoice date': 'invoice_dated',
+                'Due Date (45 days)': 'date45',
+                'Max Due Date (60 days)': 'date60',
+                'Payment Status': 'PaidStat',
+                'Payment method': 'payment_date',
+                'System': 'portalStat',
+
+            };
+            format?.flatMap(element =>
+                element.format = element.format.split(',').map(value => {
+                    const trimmedValue = value.trim();
+                    return {
+                        value: trimmedValue,
+                        label: labelMapping[trimmedValue] || trimmedValue
+                    };
+                })
+            );
+            // return data;
+    
+        }
     return (
         <Fragment >
             <Col>
