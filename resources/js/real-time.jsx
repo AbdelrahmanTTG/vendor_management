@@ -9,7 +9,7 @@ const createEcho = () => {
         key: "qm42aq7xixjvpowejavl",
         wsHost:"stage.aixnexus.com",
         wsPort: 6001,
-        wssPort:  443,
+        wssPort:  6001,
         forceTLS: true,
         enabledTransports: ['ws', 'wss'],
         auth: {

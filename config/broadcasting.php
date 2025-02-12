@@ -36,7 +36,7 @@ return [
             'app_id' => env('REVERB_APP_ID', '897670'),
             'options' => [
                 'host' => env('REVERB_HOST', "stage.aixnexus.com"),
-                'port' => env('REVERB_PORT', 443),
+                'port' => env('REVERB_PORT', 6001),
                 'scheme' => env('REVERB_SCHEME', 'https'),
                 'useTLS' => env('REVERB_USE_TLS', true),
             ],
