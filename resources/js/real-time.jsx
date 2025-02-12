@@ -11,7 +11,7 @@ const createEcho = () => {
         wsPort: 6001,
         wssPort: 6001,
         forceTLS: true,
-        enabledTransports: ['ws', 'wss'],
+        enabledTransports: ['ws'],
         auth: {
             headers: {
                 Authorization: 'Bearer ' + localStorage.getItem("ACCESS_TOKEN"),
