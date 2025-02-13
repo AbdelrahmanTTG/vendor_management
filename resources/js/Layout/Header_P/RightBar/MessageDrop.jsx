@@ -21,21 +21,21 @@ const MessageDrop = () => {
                         setNotifications(NOData);
                     });
                 // start real time
-                echo.private(`newMessage-private-channel.User.${userId.email}`)
-                    .listen('.newMessage', (e) => {
-                        console.log(e)
-                        const msg = e.data;
-                        const newMsg = msg.replace(/(<([^>]+)>)/gi, "").substring(0, 70);
-                        setNotifications(notifications => [...notifications, newMsg]);
-
-                    });
-                // echo.channel("test")
+                // echo.private(`newMessage-private-channel.User.${userId.email}`)
                 //     .listen('.newMessage', (e) => {
-                //         console.log(e);
-                //     })
-                //     .error((error) => {
-                //         console.error("WebSocket Error:", error);
+                //         console.log(e)
+                //         const msg = e.data;
+                //         const newMsg = msg.replace(/(<([^>]+)>)/gi, "").substring(0, 70);
+                //         setNotifications(notifications => [...notifications, newMsg]);
+
                 //     });
+                echo.channel("test")
+                    .listen('.newMessage', (e) => {
+                        console.log(e);
+                    })
+                    .error((error) => {
+                        console.error("WebSocket Error:", error);
+                    });
             }
             setLoading(false);
         };
