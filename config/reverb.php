@@ -123,16 +123,15 @@ return [
             'port' => env('REVERB_SERVER_PORT', 6001),
             'hostname' => env('REVERB_HOST', "portal.lingotalents.com"),
             'options' => [
-                'tls' => [],
+                'tls' => null, 
             ],
-           'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
-           'scaling' => [
-               'enabled' => env('REVERB_SCALING_ENABLED', false),
-               'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
-           ],
-           'pulse_ingest_interval' => env('REVERB_PULSE_INGEST_INTERVAL', 15),
+            'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
+            'scaling' => [
+                'enabled' => env('REVERB_SCALING_ENABLED', false),
+                'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
+            ],
+            'pulse_ingest_interval' => env('REVERB_PULSE_INGEST_INTERVAL', 15),
         ],
-
     ],
 
     /*
@@ -154,11 +153,9 @@ return [
                 'app_id' => env('REVERB_APP_ID', '897670'),
                 'options' => [
                     'host' => env('REVERB_HOST', 'portal.lingotalents.com'),
-                    'port' => env('REVERB_PORT', 6001),
-                    'scheme' => env('REVERB_SCHEME', 'https'),
-                    'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
-                    // 'useTLS' => false,
-
+                    'port' => 443,
+                    'scheme' => 'https', 
+                    'useTLS' => true, 
                 ],
                 'allowed_origins' => ['*'],
                 'ping_interval' => env('REVERB_APP_PING_INTERVAL', 60),
