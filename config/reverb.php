@@ -156,8 +156,8 @@ return [
                     'host' => env('REVERB_HOST', 'portal.lingotalents.com'),
                     'port' => env('REVERB_PORT', 6001),
                     'scheme' => env('REVERB_SCHEME', 'http'),
-                    // 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
-                    'useTLS' => false,
+                    'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+                    // 'useTLS' => false,
 
                 ],
                 'allowed_origins' => ['*'],
