@@ -120,7 +120,7 @@ return [
 
         'reverb' => [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
-            'port' => env('REVERB_SERVER_PORT', 6001),
+            'port' => env('REVERB_SERVER_PORT', 443),
             'hostname' => env('REVERB_HOST', "portal.lingotalents.com"),
             'options' => [
                 'tls' => [],
@@ -155,9 +155,9 @@ return [
                 'options' => [
                     'host' => env('REVERB_HOST', 'portal.lingotalents.com'),
                     'port' => env('REVERB_PORT', 6001),
-                    'scheme' => env('REVERB_SCHEME', 'http'),
-                    // 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
-                    'useTLS' => false,
+                    'scheme' => env('REVERB_SCHEME', 'https'),
+                    'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+                    // 'useTLS' => false,
 
                 ],
                 'allowed_origins' => ['*'],
