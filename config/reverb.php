@@ -120,20 +120,25 @@ return [
 
         'reverb' => [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
-            'port' => env('REVERB_SERVER_PORT', 443),
+            'port' => env('REVERB_SERVER_PORT', 6001),
             'hostname' => env('REVERB_HOST', "portal.lingotalents.com"),
             'options' => [
-                'tls' => [],
+                'tls' => [
+                    'local_cert' => '/etc/letsencrypt/live/portal.lingotalents.com/fullchain.pem',
+                    'local_pk'   => '/etc/letsencrypt/live/portal.lingotalents.com/privkey.pem',
+                    'verify_peer' => false,
+                ],
             ],
-           'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
-           'scaling' => [
-               'enabled' => env('REVERB_SCALING_ENABLED', false),
-               'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
-           ],
-           'pulse_ingest_interval' => env('REVERB_PULSE_INGEST_INTERVAL', 15),
+            'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
+            'scaling' => [
+                'enabled' => env('REVERB_SCALING_ENABLED', false),
+                'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
+            ],
+            'pulse_ingest_interval' => env('REVERB_PULSE_INGEST_INTERVAL', 15),
         ],
 
     ],
+
 
     /*
     |--------------------------------------------------------------------------
@@ -156,7 +161,7 @@ return [
                     'host' => env('REVERB_HOST', 'portal.lingotalents.com'),
                     'port' => env('REVERB_PORT', 6001),
                     'scheme' => env('REVERB_SCHEME', 'https'),
-                    'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+                    'useTLS' => true,
                     // 'useTLS' => false,
 
                 ],
@@ -166,5 +171,6 @@ return [
             ],
         ]
     ],
+
     
 ];
