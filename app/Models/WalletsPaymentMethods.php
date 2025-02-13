@@ -24,4 +24,8 @@ class WalletsPaymentMethods extends Model
     {
         return $this->belongsTo(VendorPaymentMethod::class, 'method')->select('id', 'name'); // assuming 'method' هو المفتاح الذي يرتبط بـ PaymentMethods
     }
+    public function methodName()
+    {
+        return $this->belongsTo(VendorPaymentMethod::class, 'method')->select('name'); 
+    }
 }

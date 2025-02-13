@@ -456,6 +456,7 @@ const Billing = (props) => {
         newFormData['BillingData_id'] = BillingData_id;
         newFormData['BankData_id'] = BankData_id;
         newFormData['vendor_id'] = props.id;
+        newFormData['VendorSide'] =  props?.VendorSide ? true: false;
         delete newFormData.method;
         delete newFormData.account;
         delete newFormData.defaults;

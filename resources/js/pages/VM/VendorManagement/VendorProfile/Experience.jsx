@@ -15,11 +15,13 @@ const Experience = (props) => {
         switch (toastname) {
             case 'successToast':
                 toast.success(status, {
-                    position: "top-right"                });
+                    position: "top-right"
+                });
                 break;
             case 'dangerToast':
                 toast.error(status, {
-                    position: "top-right"                });
+                    position: "top-right"
+                });
                 break;
             default:
                 break;
@@ -137,7 +139,7 @@ const Experience = (props) => {
                 }
             }
         }
-    }, [props.Experience, setValue ,dataE]);
+    }, [props.Experience, setValue, dataE]);
     const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
         if (inputValue.length === 0) {
             setOptions(initialOptions[fieldName] || []);
@@ -303,7 +305,7 @@ const Experience = (props) => {
         }
 
     }
-    const Update = async (data) => { 
+    const Update = async (data) => {
         if (!props.backPermissions?.edit) {
             basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
             return;
@@ -322,7 +324,7 @@ const Experience = (props) => {
             const newFormData = {
                 ...formData,
                 vendor_id: props.id,
-                experience:expID
+                experience: expID
             };
             if (result && result.length > 0) {
                 newFormData['skills'] = result;
@@ -415,8 +417,12 @@ const Experience = (props) => {
                                     <Row className="g-3 mb-3">
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Started working from year</Label>
-                                                <Col sm="9">
+                                                <Label className="col-sm-6 col-form-label" for="validationCustom01">
+                                                {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                                    <span style={{ color: 'red', fontSize: "18px" }}>*</span>
+                                                }
+                                                     Started working from year :</Label>
+                                                <Col sm="6">
                                                     <Controller
                                                         name="started_working"
                                                         control={control}
@@ -429,8 +435,9 @@ const Experience = (props) => {
                                                                 className="js-example-basic-single col-sm-12"
                                                                 onChange={(option) => {
                                                                     handleYearChange(option);
-                                                                    field.onChange(option);
+                                                                    field.onChange(option);                                                                    
                                                                 }}
+                                                                isDisabled={props.backPermissions?.add != 1&&props.backPermissions?.edit != 1}
                                                             />
                                                         )}
                                                     />
@@ -440,8 +447,12 @@ const Experience = (props) => {
                                         </Col>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Experience year</Label>
-                                                <Col sm="9">
+                                                <Label className="col-sm-4 col-form-label" for="validationCustom01">
+                                                {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                                    <span style={{ color: 'red', fontSize: "18px" }}>*</span>
+                                                }
+                                                     Experience year :</Label>
+                                                <Col sm="6">
                                                     <input
                                                         readOnly
                                                         defaultValue={experienceYears}
@@ -452,6 +463,7 @@ const Experience = (props) => {
 
                                                         {...register("experience_year", { required: true })}
                                                         placeholder="experience year"
+                                                        disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
                                                     />
                                                 </Col>
                                             </FormGroup>
@@ -459,9 +471,10 @@ const Experience = (props) => {
 
                                         <Col md="12" className="mb-3">
                                             <FormGroup className="row">
-                                                <Label className="col-sm-2 col-form-label" for="validationCustom01">Summary of Experience</Label>
+                                                <Label className="col-sm-2 col-form-label" for="validationCustom01">Summary of Experience:</Label>
                                                 <Col sm="10">
-                                                    <CKEditor
+                                                {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) ?
+                                                   <> <CKEditor
                                                         editor={ClassicEditor}
                                                         data={props.Experience?.Experience?.summary}
                                                         onChange={(event, editor) => {
@@ -473,78 +486,90 @@ const Experience = (props) => {
                                                         type="hidden" disabled
                                                         {...register('summary', { required: false })}
                                                     />
+                                                    </> : 
+                                                   <p dangerouslySetInnerHTML={{ __html: props.Experience?.Experience?.summary }} />
+                                                }
                                                 </Col>
                                             </FormGroup>
                                         </Col>
                                     </Row>
-                                    <Label className="form-label" for="validationCustom01">Skill</Label>
+                                    <Label className="form-label" for="validationCustom01">Skills</Label>
                                     <Table hover>
                                         <thead>
                                             <tr>
-                                                <th scope="col">{'#'}</th>
+                                                <th scope="col" style={{ width: "10%" }}>{'#'}</th>
                                                 <th scope="col">{'Skill'}</th>
-                                                <th
-                                                    style={{ width: "10%" }} scope="col" onClick={addRow}>
-                                                    <Btn attrBtn={{ color: 'btn btn-light' }} >
-                                                        <i className="fa fa-plus-circle"></i>
-                                                    </Btn>
-                                                </th>
+                                                {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                                    <th
+                                                        style={{ width: "10%" }} scope="col" onClick={addRow}>
+                                                        <Btn attrBtn={{ color: 'btn btn-light' }} >
+                                                            <i className="fa fa-plus-circle"></i>
+                                                        </Btn>
+                                                    </th>
+                                                }
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {rows.map((row, index) => (
                                                 <tr key={row.id}>
                                                     <td>{index + 1}</td>
-                                                    <td >
-                                                        <Controller
-                                                            name={`skill-${row.id}`}
-                                                            control={control}
-                                                            rules={{ required: true }}
-                                                            render={({ field }) => (
-                                                                <CreatableSelect
-                                                                    {...field}
-                                                                    value={selectedOptions[row.id] || null}
-                                                                    options={optionsN}
-                                                                    onInputChange={(inputValue) =>
-                                                                        handleInputChange(inputValue, "skills", `skill`, setOptionsN, optionsN)
-                                                                    }
-                                                                    isSearchable
-                                                                    noOptionsMessage={() => loading ? (
-                                                                        <div className="loader-box">
-                                                                            <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                                        </div>
-                                                                    ) : 'No options found'}
-                                                                    onChange={(option) => {
-                                                                        handleSelectChange(option, row.id);
-                                                                        field.onChange(option.value);
-                                                                    }}
-                                                                    isValidNewOption={(inputValue) => inputValue.trim() !== ''}
-                                                                    formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
-                                                                    onCreateOption={(inputValue) => {
-                                                                        const newOption = { value: inputValue, label: inputValue };
-                                                                        setOptionsN([...optionsN, newOption]);
-                                                                        handleSelectChange(newOption, row.id);
-                                                                        field.onChange(inputValue);
-                                                                    }}
+                                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) ?
+                                                        <>
+                                                            <td >
+                                                                <Controller
+                                                                    name={`skill-${row.id}`}
+                                                                    control={control}
+                                                                    rules={{ required: true }}
+                                                                    render={({ field }) => (
+                                                                        <CreatableSelect
+                                                                            {...field}
+                                                                            value={selectedOptions[row.id] || null}
+                                                                            options={optionsN}
+                                                                            onInputChange={(inputValue) =>
+                                                                                handleInputChange(inputValue, "skills", `skill`, setOptionsN, optionsN)
+                                                                            }
+                                                                            isSearchable
+                                                                            noOptionsMessage={() => loading ? (
+                                                                                <div className="loader-box">
+                                                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                                </div>
+                                                                            ) : 'No options found'}
+                                                                            onChange={(option) => {
+                                                                                handleSelectChange(option, row.id);
+                                                                                field.onChange(option.value);
+                                                                            }}
+                                                                            isValidNewOption={(inputValue) => inputValue.trim() !== ''}
+                                                                            formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
+                                                                            onCreateOption={(inputValue) => {
+                                                                                const newOption = { value: inputValue, label: inputValue };
+                                                                                setOptionsN([...optionsN, newOption]);
+                                                                                handleSelectChange(newOption, row.id);
+                                                                                field.onChange(inputValue);
+                                                                            }}
+                                                                        />
+                                                                    )}
                                                                 />
-                                                            )}
-                                                        />
-                                                    </td>
-                                                    <td onClick={(event) => {
-                                                        event.preventDefault();
-                                                        deleteRow(row.id, row.idUpdate)
-                                                    }}  >
-                                                        <Btn attrBtn={{ color: 'btn btn-danger'}}>
-                                                            <i className="fa fa-trash"></i>
-                                                        </Btn>
-                                                    </td>
+                                                            </td>
+                                                            <td onClick={(event) => {
+                                                                event.preventDefault();
+                                                                deleteRow(row.id, row.idUpdate)
+                                                            }}  >
+                                                                <Btn attrBtn={{ color: 'btn btn-danger' }}>
+                                                                    <i className="fa fa-trash"></i>
+                                                                </Btn>
+                                                            </td>
+                                                        </> : (
+                                                            <td>{row.skill.label}</td>
+                                                        )}
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </Table>
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: "2%" }}>
-                                        <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError)}}>Submit</Btn>
-                                    </div>
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: "2%" }}>
+                                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError) }}>Submit</Btn>
+                                        </div>
+                                    }
                                 </div>
                         }
 

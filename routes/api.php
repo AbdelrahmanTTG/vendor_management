@@ -26,17 +26,16 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/updateeData', [CodingTableController::class, 'update']);
     // Route::get('/GetCountry', [VendorProfileController::class, 'findCountry']);
     Route::post('/PersonalInformation', [VendorProfileController::class, 'store']);
-    Route::post('/updatePersonalInformation', [VendorProfileController::class, 'updatePersonalInfo']);
     Route::post('/storeBilling', [VendorProfileController::class, 'storeBilling']);
     Route::post('/Vendors', [VendorProfileController::class, 'Vendors']);
     Route::delete('/deleteWallet', [VendorProfileController::class, 'deleteWalletsPayment']);
     Route::delete('/deleteSkill', [VendorProfileController::class, 'deleteSkill']);
-    Route::post('/UpdateBillingData', [VendorProfileController::class, 'updateBillingData']);
+   
     Route::post('/GeneratePassword', [VendorProfileController::class, 'setPassword']);
     Route::post('/AddExperience', [VendorProfileController::class, 'AddExperience']);
     Route::post('/UpdateExperience', [VendorProfileController::class, 'UpdateExperience']);
     Route::post('/uploadFiles', [VendorProfileController::class, 'uploadFiles']);
-    Route::post('/download', [VendorProfileController::class, 'download']);
+   
     Route::delete('/delete', [VendorProfileController::class, 'deleteFile']);
     Route::post('/updateFiles', [VendorProfileController::class, 'updateFiles']);
     // Route::post('/instantMessaging', [VendorProfileController::class, 'AddinstantMessaging']);
@@ -129,5 +128,8 @@ Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () 
     Route::get('/GetTimeZone', [VendorProfileController::class, 'findTimeZone']);
     Route::post('/refreshToken ', [AuthController::class, 'RegenrateToken']);
     Route::post('/SendMessage ', [VendorProfileController::class, 'Message_VM_to_Vendor']);
+    Route::post('/download', [VendorProfileController::class, 'download']);    
+    Route::post('/updatePersonalInformation', [VendorProfileController::class, 'updatePersonalInfo']);
+    Route::post('/UpdateBillingData', [VendorProfileController::class, 'updateBillingData']);
 });
   

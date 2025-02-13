@@ -258,6 +258,7 @@ const PersonalData = React.memo((props) => {
     formData.status = formData.status.value;
     delete formData.contacts;
     idVendor ? formData.id = idVendor : false;
+    formData.VendorSide = props?.VendorSide ? true: false;
     try {
       const response = await axiosClient.post("updatePersonalInformation", formData);
       basictoaster("successToast", response.data.message);

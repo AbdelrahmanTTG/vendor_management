@@ -32,6 +32,15 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->belongsTo(Countries::class, 'nationality'); 
     }
+    public function countryName()
+    {
+        return $this->belongsTo(Countries::class, 'country')->select('name');; 
+    }
+
+    public function nationalityName()
+    {
+        return $this->belongsTo(Countries::class, 'nationality')->select('name');; 
+    }
    public function source_lang()
     {
         return $this->hasOne (Language::class, "id","source_lang");
@@ -60,6 +69,14 @@ class Vendor extends Authenticatable  implements JWTSubject
     public function timezone()
     {
         return $this->belongsTo(TimeZone::class, 'timezone');
+    }
+    public function regionName()
+    {
+        return $this->belongsTo(Regions::class, 'region')->select('name');
+    }
+    public function timeZoneName()
+    {
+        return $this->belongsTo(TimeZone::class, 'timezone')->select('gmt');
     }
     public function vendorFiles()
     {

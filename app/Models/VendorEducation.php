@@ -19,5 +19,8 @@ class VendorEducation extends Model
     // {
     //     return $this->belongsTo(Major::class, 'major')->select('id','name');
     // }
-    
+    public function latest_degree()
+    {
+        return $this->belongsTo(UniversityDegree::class, 'latest_degree')->select('id','name');
+    }
 }

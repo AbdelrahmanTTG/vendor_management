@@ -30,7 +30,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 use App\Http\Controllers\InvoiceController;
+use App\Mail\UpdateDataMail;
 use App\Models\TimeZone;
+use App\Models\VmSetup;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -585,7 +587,16 @@ class VendorProfileController extends Controller
         }
 
         $vendor->update($validator->validated());
+        if($request->VendorSide == true){
+            $vmConfig = VmSetup::first();
+            $mailData = [
+                'subject' => 'Portal - Vendor Profile Updates',
+                'title' => 'The vendor has made changes to their data',               
+                'personalData' => $this->PersonalData($vendor->id),                
 
+            ];           
+            Mail::to($vmConfig->vm_email)->send(new UpdateDataMail($mailData));
+        }
         return response()->json([
             'message' => 'Vendor updated successfully!',
             'vendor' => ['id' => $vendor->id , "vendor" => $this->PersonalData($vendor->id)]
@@ -732,23 +743,48 @@ class VendorProfileController extends Controller
                 $pm = $this->getPM($id);
             }
             if ($request->input('Experience')) {
-                $VendorExperience = $this->getVendorExperience($id);
+                try {
+                    $decID = Crypt::decrypt($id);
+                } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                    $decID = $id;
+                }
+                $VendorExperience = $this->getVendorExperience($decID);
             }
             if ($request->input('VendorFiles')) {
-                $VendorFiles = $this->getVendorFiles($id);
+                try {
+                    $decID = Crypt::decrypt($id);
+                } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                    $decID = $id;
+                }
+                $VendorFiles = $this->getVendorFiles($decID);
             }
             if ($request->input('InstantMessaging')) {
-                $InstantMessaging = $this->getMessagesByVendorId($id);
+                try {
+                    $decID = Crypt::decrypt($id);
+                } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                    $decID = $id;
+                }
+                $InstantMessaging = $this->getMessagesByVendorId($decID);
             }
             if ($request->input('priceList')) {
-                $VendorTools = $this->getVendorTools($id);
-                $priceList = $this->getpriceListByVendorId($id);
+                try {
+                    $decID = Crypt::decrypt($id);
+                } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                    $decID = $id;
+                }
+                $VendorTools = $this->getVendorTools($decID);
+                $priceList = $this->getpriceListByVendorId($decID);
             }
             if ($request->input('VendorTestData')) {
                 $VendorTestData = $this->getVendorTestData($id);
             }
             if ($request->input('EducationVendor')) {
-                $EducationVendor = $this->getEducationByVendorId($id);
+                try {
+                    $decID = Crypt::decrypt($id);
+                } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                    $decID = $id;
+                }
+                $EducationVendor = $this->getEducationByVendorId($decID);
             }
 
             return response()->json(
@@ -890,7 +926,12 @@ class VendorProfileController extends Controller
     {
         $hasBankDetails = $request->filled('bank_name') && $request->filled('account_holder') && $request->filled('swift_bic') && $request->filled('iban');
         $hasWalletMethods = $request->has('Wallets Payment methods') && is_array($request->input('Wallets Payment methods')) && count($request->input('Wallets Payment methods')) > 0;
-
+        try {
+            $request['vendor_id'] = Crypt::decrypt($request->vendor_id);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            $request['vendor_id'] = $request->vendor_id;
+        }
+       
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required|integer',
             'BillingData_id' => 'nullable|integer',
@@ -1021,8 +1062,19 @@ class VendorProfileController extends Controller
 
         $InvoiceController = new InvoiceController();
         $decID = Crypt::encrypt($request->input('vendor_id'));
-        $BillingData = $InvoiceController->getVendorBillingData($decID);
-        return response()->json($BillingData, 200);
+        $BillingData = $InvoiceController->getVendorBillingData($decID);       
+        if($request->VendorSide == true){
+            $vmConfig = VmSetup::first();
+            $mailData = [
+                'subject' => 'Portal - Vendor Profile Updates',
+                'title' => 'The vendor has made changes to their data',               
+                'billingData' => $BillingData,                
+
+            ];
+            Mail::to($vmConfig->vm_email)->send(new UpdateDataMail($mailData));
+            
+        }
+          return response()->json($BillingData, 200);
     }
     public function setPassword(Request $request)
     {
@@ -1940,7 +1992,7 @@ class VendorProfileController extends Controller
     public function getEducationByVendorId($vendorId)
     {
         $education = VendorEducation::where('vendor_id', $vendorId)
-            // ->with('major:id,name')
+            ->with('latest_degree:id,name')
             ->first();
 
         if ($education) {

@@ -328,10 +328,16 @@ const FilesCertificate = (props) => {
                         <Row className="g-3 mb-3">
                             <Col md="6">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label"><span style={{ color: 'red', fontSize: "18px" }}>*</span>CV</Label>
+                                    <Label className="col-sm-3 col-form-label">
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                        <span style={{ color: 'red', fontSize: "18px" }}>*</span>
+                                    }
+                                    CV</Label>
 
 
                                     <Col sm="9">
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) ? 
+                                    <>
                                         <Controller
                                             name="cv"
                                             control={control}
@@ -377,14 +383,35 @@ const FilesCertificate = (props) => {
                                                 <></>
                                             )}
                                         </span>
-                              
+                                     </>     :
+                                       cvFileNames ? (     <button
+                                        style={{
+                                            backgroundColor: 'transparent',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            marginLeft: '10px' 
+                                        }}
+                                        color="transparent"
+                                        onClick={() => handleDownload(cvFileName)}
+                                    >
+                                     <i style={{ fontSize: '1.6em', marginTop: '3px' }} className="fa fa-cloud-download"></i> Click to Download the file  
+                                    </button>) : (
+                                        <></>
+                                    )  
+                                }
                                     </Col>
                                 </FormGroup>
                             </Col>
                             <Col md="6">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label"><span style={{ color: 'red', fontSize: "18px" }}>*</span>NDA</Label>
+                                    <Label className="col-sm-3 col-form-label">
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) && 
+                                        <span style={{ color: 'red', fontSize: "18px" }}>*</span>
+                                    }
+                                    NDA</Label>
                                     <Col sm="9">
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) ? 
+                                    <>
                                         <Controller
                                             name="NDA"
                                             control={control}
@@ -431,6 +458,22 @@ const FilesCertificate = (props) => {
                                             )}
 
                                         </span>
+                                        </> :
+                                         ndaFileNames ? (<button
+                                            style={{
+                                                backgroundColor: 'transparent',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                marginLeft: '10px'
+                                            }}
+                                            color="transparent"
+                                            onClick={() => handleDownload(ndaFileName)}
+                                        >
+                                        <i style={{ fontSize: '1.6em', marginTop: '3px' }} className="fa fa-cloud-download"></i> Click to Download the file 
+                                        </button>) : (
+                                            <></>
+                                        )
+                                    }
                                     </Col>
                                 </FormGroup>
                             </Col>
@@ -442,11 +485,13 @@ const FilesCertificate = (props) => {
                                     <th>File Title</th>
                                     <th>File Content</th>
                                     <th style={{ width: "30%" }}>File</th>
-                                    <th style={{ width: "10%" }} onClick={addRow}>
-                                        <Btn attrBtn={{ color: 'btn btn-light'}}>
-                                            <i className="fa fa-plus-circle"></i>
-                                        </Btn>
-                                    </th>
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) && 
+                                        <th style={{ width: "10%" }} onClick={addRow}>
+                                            <Btn attrBtn={{ color: 'btn btn-light'}}>
+                                                <i className="fa fa-plus-circle"></i>
+                                            </Btn>
+                                        </th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody>
@@ -459,6 +504,7 @@ const FilesCertificate = (props) => {
                                                 value={row.File_Title}
                                                 onChange={(e) => handleInputChange(e, row.id, "File_Title")}
                                                 className="form-control"
+                                                disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
 
                                             />
                                         </td>
@@ -468,10 +514,12 @@ const FilesCertificate = (props) => {
                                                 className="form-control"
                                                 value={row.File_Content}
                                                 onChange={(e) => handleInputChange(e, row.id, "File_Content")}
+                                                disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
 
                                             />
                                         </td>
                                         <td>
+                                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) && 
                                             <input
                                                 type="file"
                                                 onChange={(e) => {
@@ -493,6 +541,7 @@ const FilesCertificate = (props) => {
                                                 className="form-control"
 
                                             />
+                                            }
                                             {row.File_URL ? (
                                                 <button style={{
                                                     backgroundColor: 'transparent',
@@ -505,19 +554,23 @@ const FilesCertificate = (props) => {
                                                 <></>
                                             )}
                                         </td>
+                                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) && 
                                         <td style={{ width: "10%" }} onClick={() => deleteRow(row.id , row.idUpdate)}>
                                                     
                                             <button  className="btn btn-danger">
                                                 <i className="fa fa-trash"></i>
                                             </button>
                                         </td>
+                                        }
                                     </tr>
                                 ))}
                             </tbody>
                         </Table>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Btn attrBtn={{ color: 'primary', onClick: handleClick, disabled: loading }}>{loading ? 'Loading...' : 'Submit'}</Btn>
-                        </div>
+                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) && 
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <Btn attrBtn={{ color: 'primary', onClick: handleClick, disabled: loading }}>{loading ? 'Loading...' : 'Submit'}</Btn>
+                            </div>
+                        }
                     </CardBody>
                 </Collapse>
             </Card>

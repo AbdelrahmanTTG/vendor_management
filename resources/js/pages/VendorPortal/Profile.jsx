@@ -22,6 +22,11 @@ const Profile = () => {
   const [id, setId] = useState(user.id);
   const [personalData, setPersonalData] = useState([]);
   const [billingData, setBillingData] = useState([]);
+  const [priceList, setpriceList] = useState([]);
+  const [VendorExperience, setExperience] = useState([]);
+  const [EducationVendor, setEducationVendor] = useState([]);
+  const [VendorFiles, setVendorFiles] = useState([]);
+  const [InstantMessaging, setInstantMessaging] = useState([]);
   const handleDataSend = (data) => {
     setId(data);
   };
@@ -35,13 +40,23 @@ const Profile = () => {
           const user = JSON.parse(localStorage.getItem('USER'));
 
           const data = await axiosClient.post("EditVendor", {
-              id: user.id,
-              PersonalData: "Personal Data",
-              BillingData: "Billing Data",
-             InstantMessaging: "InstantMessaging",
+            id: user.id,
+            PersonalData: "Personal Data",
+            BillingData: "Billing Data",
+            InstantMessaging: "InstantMessaging",
+            priceList: "priceList",
+            Experience: "VendorExperience",
+            EducationVendor: "EducationVendor",
+            VendorFiles: "VendorFiles"
           });
           setPersonalData({ PersonalData: data.data.Data });
-          setBillingData({ BillingData: data.data.BillingData })
+          setBillingData({ BillingData: data.data.BillingData });
+          setpriceList({ priceList: data.data.priceList });
+          setExperience({ Experience: data.data.Experience });
+          setEducationVendor({ EducationVendor: data.data.EducationVendor });
+          setVendorFiles({ VendorFiles: data.data.VendorFiles });
+          setInstantMessaging({ InstantMessaging: data.data.InstantMessaging })
+
         } catch (error) {
           console.error('Error fetching vendor:', error);
         } finally {
@@ -50,7 +65,7 @@ const Profile = () => {
       fetchVendor();
     }
   }, [user]);
-
+  
   const [permissions, setPermissions] = useState({
     // type: 'hide',
     // name: 'disable',
@@ -98,7 +113,7 @@ const Profile = () => {
                           <Image attrImage={{ className: 'img-70 rounded-circle', alt: '', src: `${userImg}` }} />
                           <div className="media-body">
                             <Link to={``}>
-                              <H3 attrH3={{ className: 'mb-1 f-20 txt-primary' }}>{personalData.name}</H3>
+                              <H3 attrH3={{ className: 'mb-1 f-20 txt-primary' }}>{personalData.PersonalData?.name}</H3>
                             </Link>
                             <P></P>
                           </div>
@@ -108,7 +123,7 @@ const Profile = () => {
                     <FormGroup className="mb-3">
                       <Label className="form-label">{EmailAddress}</Label>
                       <Input type='hidden' name='id' defaultValue={user.id} />
-                      <Input className="form-control" disabled placeholder={personalData.email} />
+                      <Input className="form-control" disabled placeholder={personalData.PersonalData?.email} />
                     </FormGroup>
                     <FormGroup className="mb-3">
                       <Label className="form-label">{Password}</Label>
@@ -128,45 +143,45 @@ const Profile = () => {
             <Col xl="9">
               <Card>
                 <CardBody className='b-t-primary px-1'>
-                  <Nav tabs className="border-tab portal-profile ">
+                  <Nav tabs className="border-tab portal-profile" style={{overflow:'scroll'}}>
                     <NavItem id="myTab" role="tablist">
-                      <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('1')}>
+                      <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} style={{ padding: '10px', fontSize: '14px' }} onClick={() => setActiveTab('1')}>
                         <i className="icofont icofont-list me-1"></i>{'Personal Data'}
                       </NavLink>
                       <div className="material-border"></div>
                     </NavItem>
                     <NavItem id="myTab" role="tablist">
-                      <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('2')}>
+                      <NavLink href="#javascript" className={activeTab === '2' ? 'active' : ''} style={{ padding: '10px', fontSize: '14px' }} onClick={() => setActiveTab('2')}>
                         <i className="icofont icofont-bank-alt me-1"></i>{'Billing Information'}
                       </NavLink>
                       <div className="material-border"></div>
                     </NavItem>
                     <NavItem id="myTab" role="tablist">
-                      <NavLink href="#javascript" className={activeTab === '3' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('3')}>
+                      <NavLink href="#javascript" className={activeTab === '3' ? 'active' : ''} style={{ padding: '10px', fontSize: '14px' }} onClick={() => setActiveTab('3')}>
                         <i className="icofont icofont-list me-1"></i>{'Price List'}
                       </NavLink>
                       <div className="material-border"></div>
                     </NavItem>
                     <NavItem id="myTab" role="tablist">
-                      <NavLink href="#javascript" className={activeTab === '4' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('4')}>
+                      <NavLink href="#javascript" className={activeTab === '4' ? 'active' : ''} style={{ padding: '10px', fontSize: '14px' }} onClick={() => setActiveTab('4')}>
                         <i className="icofont icofont-ui-messaging me-1"></i>{'Messaging'}
                       </NavLink>
                       <div className="material-border"></div>
                     </NavItem>
                     <NavItem id="myTab" role="tablist">
-                      <NavLink href="#javascript" className={activeTab === '5' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('5')}>
+                      <NavLink href="#javascript" className={activeTab === '5' ? 'active' : ''} style={{ padding: '10px', fontSize: '14px' }} onClick={() => setActiveTab('5')}>
                         <i className="icofont icofont-certificate-alt-1 me-1"></i>{'Files & Certificate'}
                       </NavLink>
                       <div className="material-border"></div>
                     </NavItem>
                     <NavItem id="myTab" role="tablist">
-                      <NavLink href="#javascript" className={activeTab === '6' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('6')}>
+                      <NavLink href="#javascript" className={activeTab === '6' ? 'active' : ''} style={{ padding: '10px', fontSize: '14px' }} onClick={() => setActiveTab('6')}>
                         <i className="icofont icofont-book-alt me-1"></i>{'Education'}
                       </NavLink>
                       <div className="material-border"></div>
                     </NavItem>
                     <NavItem id="myTab" role="tablist">
-                      <NavLink href="#javascript" className={activeTab === '7' ? 'active' : ''} style={{padding:'10px',fontSize: '14px'}} onClick={() => setActiveTab('7')}>
+                      <NavLink href="#javascript" className={activeTab === '7' ? 'active' : ''} style={{ padding: '10px', fontSize: '14px' }} onClick={() => setActiveTab('7')}>
                         <i className="icofont icofont-listing-box me-1"></i>{'Experience'}
                       </NavLink>
                       <div className="material-border"></div>
@@ -176,26 +191,26 @@ const Profile = () => {
                   </Nav>
                   <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
-                      <EditMyProfile onSubmit="onUpdate" mode="edit"
+                      <EditMyProfile onSubmit="onUpdate" mode="edit" VendorSide="1"
                         permission={permissions} vendorPersonalData={personalData} backPermissions={{ edit: 1 }} />
                     </TabPane>
                     <TabPane tabId="2">
-                      <Billing backPermissions={{edit:1}}  permission={permissions} ID={id} />
+                      <Billing backPermissions={{ edit: 1 }} onSubmit="onUpdate" mode="edit" VendorSide="1" permission={permissions} id={id} BillingData={billingData} />
                     </TabPane>
-                    <TabPane tabId="3">                    
-                      {/* <Price_List backPermissions={{view:1}} id={id} /> */}
+                    <TabPane tabId="3">
+                      <Price_List Currency={billingData?.BillingData?.billingData?.billing_currency} mode="edit" backPermissions={{ view: 1 }} id={id} priceList={priceList} />
                     </TabPane>
-                    <TabPane tabId="4">                    
-                      {/* <Messaging backPermissions={{view:1}} id={id} /> */}
+                    <TabPane tabId="4">
+                      <Messaging backPermissions={{view:1}} id={id} mode="edit" InstantMessaging={InstantMessaging}  />
                     </TabPane>
-                    <TabPane tabId="5">                    
-                      {/* <FilesCertificate backPermissions={{view:1}} id={id} /> */}
+                    <TabPane tabId="5">
+                      <FilesCertificate backPermissions={{ view: 1 }} id={id} mode="edit" VendorFiles={VendorFiles} />
                     </TabPane>
-                    <TabPane tabId="6">                    
-                      {/* <Education backPermissions={{view:1}} id={id} /> */}
+                    <TabPane tabId="6">
+                      <Education backPermissions={{ view: 1 }} id={id} EducationVendor={EducationVendor} mode="edit" />
                     </TabPane>
-                    <TabPane tabId="7">                    
-                      {/* <Experience backPermissions={{view:1}} id={id} /> */}
+                    <TabPane tabId="7">
+                      <Experience backPermissions={{ view: 1 }} id={id} Experience={VendorExperience} mode="edit" />
                     </TabPane>
                   </TabContent>
                 </CardBody>

@@ -332,11 +332,13 @@ const Messaging = (props) => {
                                     <th scope="col">{'#'}</th>
                                     <th scope="col">{'Type'}</th>
                                     <th scope="col">Contact</th>
-                                    <th style={{ width: "10%" }} scope="col" onClick={addRow}>
-                                        <Btn attrBtn={{ color: 'btn btn-light', disabled: isSubmitting }} >
-                                            <i className="fa fa-plus-circle"></i>
-                                        </Btn>
-                                    </th>
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                        <th style={{ width: "10%" }} scope="col" onClick={addRow}>
+                                            <Btn attrBtn={{ color: 'btn btn-light', disabled: isSubmitting }} >
+                                                <i className="fa fa-plus-circle"></i>
+                                            </Btn>
+                                        </th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody>
@@ -351,7 +353,7 @@ const Messaging = (props) => {
                                                 render={({ field }) => (
                                                     <Select
                                                         {...field}
-                                                        isDisabled={isSubmitting}
+                                                        isDisabled={isSubmitting || (props.backPermissions?.add != 1&&props.backPermissions?.edit != 1)}
                                                         value={selectedOptions[row.id] || null}
                                                         options={optionsN}
                                                         onInputChange={(inputValue) =>
@@ -374,7 +376,7 @@ const Messaging = (props) => {
                                         <td>
 
                                             <input
-                                                disabled={isSubmitting}
+                                                disabled={isSubmitting || (props.backPermissions?.add != 1&&props.backPermissions?.edit != 1)}
 
                                                 type="text"
                                                 value={row.inputValue}
@@ -387,18 +389,22 @@ const Messaging = (props) => {
 
 
                                         </td>
-                                        <td onClick={() => deleteRow(row.id ,row.idUpdate)}>
-                                            <Btn attrBtn={{ color: 'btn btn-danger', disabled: isSubmitting }}>
-                                                <i className="fa fa-trash"></i>
-                                            </Btn>
-                                        </td>
+                                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                            <td onClick={() => deleteRow(row.id ,row.idUpdate)}>
+                                                <Btn attrBtn={{ color: 'btn btn-danger', disabled: isSubmitting }}>
+                                                    <i className="fa fa-trash"></i>
+                                                </Btn>
+                                            </td>
+                                        }
                                     </tr>
                                 ))}
                             </tbody>
                         </Table>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(Update) }}>Submit</Btn>
-                        </div>
+                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(Update) }}>Submit</Btn>
+                            </div>
+                        }
                     </CardBody>
                 </Collapse>
             </Card>

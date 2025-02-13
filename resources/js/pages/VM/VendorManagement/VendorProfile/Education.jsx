@@ -138,7 +138,7 @@ const Education = (props) => {
             if (props.EducationVendor.EducationVendor) {
                 const data = props.EducationVendor.EducationVendor
                 setValue("university_name", data?.university_name)
-                setValue("latest_degree", { value: data?.latest_degree, label: data?.latest_degree } )
+                setValue("latest_degree", { value: data?.latest_degree.id, label: data?.latest_degree.name } )
                 setValue("year_of_graduation", data?.year_of_graduation)
                 setValue("major", data?.major)
 
@@ -182,7 +182,11 @@ const Education = (props) => {
                         <Row className="g-3 mb-3">
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Institute Name</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                        <span style={{ color: 'red', fontSize: "18px" }}>*</span>
+                                    }
+                                         Institute Name</Label>
                                     <Col sm="9">
                                         {/* <Input className="form-control" type="text" placeholder="University name" /> */}
                                         <input
@@ -191,6 +195,7 @@ const Education = (props) => {
                                             type="text"
                                             name="university_name"
                                             {...register("university_name", { required: true })}
+                                            disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
                                         />
                                     </Col>
                                 </FormGroup>
@@ -198,7 +203,11 @@ const Education = (props) => {
 
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> last Degree</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                    <span style={{ color: 'red', fontSize: "18px" }}>*</span>
+                                    }
+                                    last Degree</Label>
                                     <Col sm="9">
                                         <Controller
                                             name="latest_degree"
@@ -222,6 +231,7 @@ const Education = (props) => {
                                                     onChange={(option) => {
                                                         field.onChange(option);
                                                     }}
+                                                    isDisabled={props.backPermissions?.add != 1&&props.backPermissions?.edit != 1}
 
                                                 />
                                             )}
@@ -231,7 +241,11 @@ const Education = (props) => {
                             </Col>
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Year of graduation</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                        <span style={{ color: 'red', fontSize: "18px" }}>*</span>
+                                    }
+                                    Year of graduation</Label>
                                     <Col sm="9">
                                         <input
                                             defaultValue=""
@@ -239,6 +253,7 @@ const Education = (props) => {
                                             type="text"
                                             name="year_of_graduation"
                                             {...register("year_of_graduation", { required: true })}
+                                            disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
                                         />
                                     </Col>
                                 </FormGroup>
@@ -246,7 +261,11 @@ const Education = (props) => {
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
 
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Major</Label>
+                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">
+                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                                        <span style={{ color: 'red', fontSize: "18px" }}>*</span>
+                                    }
+                                    Major</Label>
                                     <Col sm="9">
                                         <Col sm="9">
                                             <input
@@ -255,6 +274,7 @@ const Education = (props) => {
                                                 type="text"
                                                 name="major"
                                                 {...register("major", { required: true })}
+                                                disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
                                             />
                                         </Col>
                                         {/* <Controller
@@ -287,9 +307,11 @@ const Education = (props) => {
                                     </FormGroup>
                             </Col>
                         </Row>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: "2%" }}>
-                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit, onError)}}>Submit</Btn>
-                        </div>
+                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: "2%" }}>
+                                <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit, onError)}}>Submit</Btn>
+                            </div>
+                        }
                     </CardBody>
                 </Collapse>
             </Card>
