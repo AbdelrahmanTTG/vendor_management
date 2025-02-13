@@ -36,9 +36,11 @@ return [
             'app_id' => env('REVERB_APP_ID', '897670'),
             'options' => [
                 'host' => env('REVERB_HOST', "portal.lingotalents.com"),
-                'port' => 443,
-                'scheme' => 'https',
-                'useTLS' => true, 
+                'port' => env('REVERB_PORT', 6001),
+                'scheme' => env('REVERB_SCHEME', 'http'),
+                // 'useTLS' => env('REVERB_USE_TLS', true),
+                'useTLS' => false,
+
             ],
             'client_options' => [],
         ],
@@ -57,7 +59,6 @@ return [
         ],
 
     ],
-
 
 
 ];

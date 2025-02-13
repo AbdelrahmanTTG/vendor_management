@@ -223,10 +223,10 @@ const AppRouter = () => {
 
             ]
         },
-        // {
-        //     path: '*',
-        //     element: <NotFound />,
-        // }
+        {
+            path: '*',
+            element: <NotFound />,
+        }
     ])
 
     return <RouterProvider router={router} />;
