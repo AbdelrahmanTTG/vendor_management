@@ -123,7 +123,10 @@ return [
             'port' => env('REVERB_SERVER_PORT', 6001),
             'hostname' => env('REVERB_HOST', "portal.lingotalents.com"),
             'options' => [
-                'tls' => null, 
+                'tls' => [
+                    'cert' => '/etc/letsencrypt/live/portal.lingotalents.com/fullchain.pem',
+                    'key' => '/etc/letsencrypt/live/portal.lingotalents.com/privkey.pem',
+                ], 
             ],
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
             'scaling' => [
