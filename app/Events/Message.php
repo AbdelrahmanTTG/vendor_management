@@ -25,10 +25,10 @@ class Message implements ShouldBroadcastNow
     public function broadcastOn()
     {
         
-        // return new PrivateChannel('newMessage-private-channel.User.' . $this->userId);
-         return [
-                new Channel('test'),
-         ] ;
+        return new PrivateChannel('newMessage-private-channel.User.' . $this->userId);
+        //  return [
+        //         new Channel('test'),
+        //  ] ;
       
     }
     
