@@ -143,7 +143,7 @@ const Profile = () => {
             <Col xl="9">
               <Card>
                 <CardBody className='b-t-primary px-1'>
-                  <Nav tabs className="border-tab portal-profile" style={{overflow:'scroll'}}>
+                  <Nav tabs className="border-tab portal-profile" style={{flexWrap:'wrap'}}>
                     <NavItem id="myTab" role="tablist">
                       <NavLink href="#javascript" className={activeTab === '1' ? 'active' : ''} style={{ padding: '10px', fontSize: '14px' }} onClick={() => setActiveTab('1')}>
                         <i className="icofont icofont-list me-1"></i>{'Personal Data'}
