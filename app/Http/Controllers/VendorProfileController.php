@@ -860,20 +860,22 @@ class VendorProfileController extends Controller
                 [
                     'content' => $content,
                     'status' => $status,
+                    "is_read"=> 0
                 ]
             );
-            // if ($status == 1) {
-            //     $details = [
-            //         'subject' => 'New notifications ',
-            //         'title' => 'notifications',
-            //         'body' =>  $content,
-            //         'brand' => env('BRAND', "Nexus"),
-            //     ];
-            //     Mail::to($receiver_email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
-            // }
+            if ($status == 1) {
+                $details = [
+                    'subject' => 'New notifications ',
+                    'title' => 'notifications',
+                    'body' =>  $content,
+                    'brand' => env('BRAND', "Nexus"),
+                ];
+                Mail::to($receiver_email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
+                event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
 
-             event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
-            return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "created_at" => $data->created_at, "status" => $status]], 200);
+            }
+
+            return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "updated_at" => $data->updated_at, "status" => $status]], 200);
         } catch (\Exception $e) {
             return response()->json([
                 // 'error' => "Server error",

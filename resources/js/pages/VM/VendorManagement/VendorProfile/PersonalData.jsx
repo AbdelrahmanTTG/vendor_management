@@ -170,10 +170,10 @@ const PersonalData = React.memo((props) => {
           id: id
         }
       });
-      const formattedOptions =  [{ value: data.id, label: data.gmt }]
-      setSelectedOptionT(formattedOptions)
-      setOptionsT(formattedOptions);
-      setValue("timezone", data?.id)
+      const formattedOptions = [{ value: data.id || "", label: data.gmt || "" }]
+      setSelectedOptionT(formattedOptions )
+      setOptionsT(formattedOptions );
+      setValue("timezone", data?.id )
       if (!searchTerm) {
         setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
       }
@@ -735,7 +735,7 @@ const PersonalData = React.memo((props) => {
                             render={({ field }) => (
                               <Select
                                 {...field}
-                                value={selectedOptionC}
+                                value={selectedOptionC }
                                 options={optionsC}
                                 className="js-example-basic-single col-sm-12"
                                 isSearchable
@@ -749,9 +749,9 @@ const PersonalData = React.memo((props) => {
                                 ) : 'No options found'}
                                 onChange={(option) => {
                                   setSelectedOptionC(option);
-                                  handelingSelectTimeZone(option.value)
-                                  handelingRegions(option.regions)
-                                  field.onChange(option.value);
+                                  handelingSelectTimeZone(option?.value)
+                                  handelingRegions(option?.regions)
+                                  field.onChange(option?.value);
                                 }}
 
                               />
@@ -859,7 +859,7 @@ const PersonalData = React.memo((props) => {
                           render={({ field }) => (
                             <Select
                               {...field}
-                              value={selectedOptionT}
+                              value={selectedOptionT || { value: "", label :"" }}
                               options={optionsT}
                            
                               className="js-example-basic-single col-sm-12"

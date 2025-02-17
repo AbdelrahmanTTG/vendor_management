@@ -37,7 +37,7 @@ const EditProfile = (props) => {
     const [marginBottom, setMarginBottom] = useState('18vh');
     const [Currancydata, setCurrancy] = useState(null);
     const [Cur, setCUR] = useState(null);
-    const [data, setdata] = useState([]);
+    const [data, setData] = useState([]);
 
     const getCurrancy = (Currancystat, Cur) => {
         setBillingData({ BillingData:Currancystat })
@@ -45,7 +45,7 @@ const EditProfile = (props) => {
         setCUR(Cur)
     }
     const handleDataSend = (data) => {
-        // console.log(data)
+        setData({ country: data.country, nationality: data?.nationality })
         setPersonalData({ PersonalData:data });
     };
     const LazyWrapper = ({ children }) => (
@@ -94,6 +94,7 @@ const EditProfile = (props) => {
                     }
                     const data = await axiosClient.post("EditVendor", payload);
                     setPersonalData({ PersonalData: data.data.Data });
+                    setData({ country: data?.data?.Data?.country, nationality: data?.data?.Data?.nationality })
                     setlastMessage({ VMNotes: data.data.VMNotes, pm: data.data.pm })
                     setBillingData({ BillingData: data.data.BillingData })
                     setExperience({ Experience: data.data.Experience })
@@ -191,7 +192,7 @@ const EditProfile = (props) => {
                     <LazyWrapper>
 
                         <div id='Billing'>
-                            <Billing Bill={Currancydata} Currancy={getCurrancy} id={vendor?.id} BillingData={BillingData} onSubmit="onUpdate" backPermissions={props.permissions?.Billing} mode="edit" />
+                            <Billing countryAndNationality={data} Bill={Currancydata} Currancy={getCurrancy} id={vendor?.id} BillingData={BillingData} onSubmit="onUpdate" backPermissions={props.permissions?.Billing} mode="edit" />
                         </div>
                     </LazyWrapper>
                 )}

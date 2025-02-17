@@ -154,7 +154,7 @@ const AddProfile = (props) => {
 
                         <div id="Billing" className="row mb-3">
                             <div className="col-12">
-                                <Billing Bill={Currancydata} backPermissions={props.permissions?.Billing} id={data?.id} onSubmit="onSubmit" Currancy={getCurrancy} />
+                                <Billing countryAndNationality={{ country: data?.country, nationality: data?.nationality }} Bill={Currancydata} backPermissions={props.permissions?.Billing} id={data?.id} onSubmit="onSubmit" Currancy={getCurrancy} />
                             </div>
                         </div>
                     </LazyWrapper>

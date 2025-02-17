@@ -28,8 +28,8 @@ class Messages extends Model
             $query->where('sender_email', $sender_email)
                 ->where('receiver_email', $receiver_email);
         })
-            ->latest('created_at')
-            ->select('id', 'content', 'is_read',"status",  'created_at') 
+            ->latest('updated_at')
+            ->select('id', 'content', 'is_read',"status",  'updated_at') 
             ->first();
 
     }

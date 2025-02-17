@@ -290,6 +290,7 @@ const Billing = (props) => {
         }
         if (props.mode === "edit" || props.Bill) {
             setLoading(true);
+            console.log(props?.countryAndNationality)
             if (props.BillingData || props.Bill) {
                 if (props.BillingData?.BillingData || props.Bill) {
                     // if (!dataB) { setdataB(props.BillingData.BillingData) }
@@ -709,7 +710,32 @@ const Billing = (props) => {
                                                             </Col>
                                                         </FormGroup>
                                                     </Col>
+                                                    
                                                 }
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span>Country</Label>
+                                                        <Col sm="9">
+                                                            <Select
+                                                            isDisabled={true}
+                                                                value={props?.countryAndNationality?.country?.name ? { label: props.countryAndNationality.country.name } : null}
+                                                                className="js-example-basic-single col-sm-12" />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
+                                                <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
+                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span>Nationality</Label>
+                                                        <Col sm="9">
+                                                            <Select
+                                                                isDisabled={true}
+                                                              
+                                                                value={props?.countryAndNationality?.nationality?.name ? { label: props.countryAndNationality.nationality.name } : null}
+
+                                                                className="js-example-basic-single col-sm-12" />
+                                                        </Col>
+                                                    </FormGroup>
+                                                </Col>
                                             </Row>
 
                                         </div>

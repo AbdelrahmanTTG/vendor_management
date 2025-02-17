@@ -224,7 +224,7 @@ const VMnote = (props) => {
 
 
                                                                 <span style={styles.timestamp}>
-                                                                    {new Date(msg.created_at).toLocaleString()}
+                                                                    {new Date(msg.updated_at).toLocaleString()}
                                                                 </span>
 
                                                                 <span style={{
