@@ -290,7 +290,7 @@ const Billing = (props) => {
         }
         if (props.mode === "edit" || props.Bill) {
             setLoading(true);
-            console.log(props?.countryAndNationality)
+            // console.log(props?.countryAndNationality)
             if (props.BillingData || props.Bill) {
                 if (props.BillingData?.BillingData || props.Bill) {
                     // if (!dataB) { setdataB(props.BillingData.BillingData) }

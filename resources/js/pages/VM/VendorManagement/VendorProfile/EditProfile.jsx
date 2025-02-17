@@ -153,7 +153,7 @@ const EditProfile = (props) => {
                     <LazyWrapper>
 
                         <div id='VM-Notes'>
-                            <VMnote id={vendor?.id} email={vendor?.email || vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.VMnote} lastMessage={lastMessage} />
+                            <VMnote id={vendor?.id} email={vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.VMnote} lastMessage={lastMessage} />
                         </div>
                     </LazyWrapper>
                 )}
