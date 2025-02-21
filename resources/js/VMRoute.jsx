@@ -9,6 +9,7 @@ const ViewTicket = React.lazy(() => import('./pages/VM/Tickets/viewTicket'));
 const AllTasks = React.lazy(() => import('./pages/VM/Reports/AllTasks'));
 const VmActivity = React.lazy(() => import('./pages/VM/Reports/VmActivity'));
 const VPOs = React.lazy(() => import('./pages/VM/Reports/VPOS'));
+const AliasEmail = React.lazy(() => import('./pages/Admin/AliasEmail'));
 
 import axios from './pages/AxiosClint';
 import { Spinner } from './AbstractElements';
@@ -62,6 +63,14 @@ export const VM = (allowedPermissions) => [
         element: (
             <LazyWrapper>
                 <Tickets permissions={allowedPermissions['Tickets']} />
+            </LazyWrapper>
+        )
+    },
+    {
+        path: 'AliasEmail',
+        element: (
+            <LazyWrapper>
+                <AliasEmail  />
             </LazyWrapper>
         )
     },

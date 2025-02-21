@@ -75,7 +75,7 @@ const Notes = () => {
                                                                         <i className="icon-check font-primary" style={{ marginRight: '-8px' }}></i> <i className="icon-check me-2 font-primary"></i>
                                                                     </>
                                                                 }
-                                                                <span className='f-w-500'>  {new Date(item.created_at).toLocaleString()}</span>
+                                                                <span className='f-w-500'>  {new Date(item.updated_at).toLocaleString()}</span>
 
 
                                                             </td>

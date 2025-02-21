@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class BrandUsers extends Model
 {
     protected $table = 'users';
-
+    public function aliases()
+    {
+        return $this->belongsToMany(AliasMail::class, 'mailer', 'user_id', 'alias_id');
+        
+    }
     public static function SelectPMSalesData()
     {
         $role = ['2,3,12,16,20,29,42,43,45,47,49'];

@@ -106,7 +106,7 @@ const Report = (props) => {
         handelingSelect("vendors", setOptionsV, "vendor");
         handelingSelect("brand", setOptionsB, "brand");
         handelingSelectUsers();
-    }, []);
+    }, [1]);
 
     const options = [
         { value: 'brand', label: 'Brand' },

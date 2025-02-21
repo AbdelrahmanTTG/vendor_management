@@ -12,6 +12,7 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\VendorProfileController;
+use App\Http\Controllers\AdminController;
 
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -74,6 +75,16 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/MessagePM', [VendorProfileController::class, 'Message_VM_to_PM']);
     Route::post('/VPOS', [ReportsController::class, 'VPOs']);
     Route::post('/downloadVPO', [ReportsController::class, 'download']);
+    Route::get('/Departments', [AdminController::class, 'getDepartment']);
+    Route::post('/Employees', [AdminController::class, 'getEmployees']);
+    Route::post('/Alias', [AdminController::class, 'storeAlias']);
+    Route::get('/allAlias', [AdminController::class, 'AliasMails']);
+    Route::post('/updateEmailJoinAlias', [AdminController::class, 'updateEmailJoinAlias']);
+    Route::delete('/deleteAlias', [AdminController::class, 'destroy']);
+    Route::delete('/deleteAliasEmail', [AdminController::class, 'destroyEmail']);
+    Route::post('/ChangeStatus', [AdminController::class, 'activeEmail']);
+    Route::post('/updateAlias', [AdminController::class, 'updateAlias']);
+
 
 
 
