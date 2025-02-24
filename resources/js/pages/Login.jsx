@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
 import { Image } from '../AbstractElements';
-import Logo from '../assets/images/logo/1-400x141.png';
+import Logo from '../assets/images/logo/Lingotalents-logo.png';
 import { ToastContainer } from "react-toastify";
 import Toast from "./Toast";
 const FooterClass = () => {
@@ -15,20 +15,20 @@ const FooterClass = () => {
       <Footer
         attrFooter={{
           className: `footer ${location.pathname === '/viho/page-layout/footer-dark'
-              ? 'footer-dark'
-              : location.pathname === '/viho/page-layout/footer-fixed'
-                ? 'footer-fix'
-                : ''
+            ? 'footer-dark'
+            : location.pathname === '/viho/page-layout/footer-fixed'
+              ? 'footer-fix'
+              : ''
             }`,
           style: {
-            position: 'fixed', 
-            bottom: '0',       
+            position: 'fixed',
+            bottom: '0',
             left: '0',
             width: '100vw',
-            height:"7vh",
+            height: "7vh",
             backgroundColor: '#f1f1f1',
-            textAlign: 'center' ,
-            margin:"0"
+            textAlign: 'center',
+            margin: "0"
           }
         }}
       >
@@ -61,7 +61,7 @@ const Login = () => {
       return <Navigate to='/vm' />
     }
   }
- 
+
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [errorMessage, setErrorMessage] = useState(null);
@@ -71,7 +71,7 @@ const Login = () => {
   const [togglePassword, setTogglePassword] = useState(false);
   const [toasts, setToasts] = useState([]);
 
-  const error = (message,type = "error") => {
+  const error = (message, type = "error") => {
     const id = Date.now();
     setToasts([...toasts, { id, message, type }]);
     setTimeout(() => {
@@ -81,7 +81,7 @@ const Login = () => {
   const removeToast = (id) => {
     setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
   };
-  
+
   const Submit = (e) => {
     setLoading(true);
     e.preventDefault();
@@ -102,14 +102,14 @@ const Login = () => {
       error("Incorrect email or password")
       setLoading(false);
     });
-    
+
 
 
   }
   if (redirect) {
     return <Navigate to={redirect} />;
   }
-  
+
   return (
     <Fragment>
 
@@ -117,14 +117,14 @@ const Login = () => {
         <div id="boxed-wrapper">
           <div id="wrapper" className="fusion-wrapper">
             <main id="main" className="clearfix width-100" style={{ padding: "0", backgroundColor: "#0d1267" }}>
-              
+
               <div className="fusion-row" style={{ maxWidth: "100%", maxHeight: "100vh", overflow: "hidden" }}>
                 <section id="content" className="full-width">
-                  
+
                   <div id="post-1079" className="post-1079 page type-page status-publish hentry">
-                    
+
                     <div className="post-content">
-                     
+
                       <div
                         className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container fusion-parallax-none hundred-percent-fullwidth non-hundred-percent-height-scrolling lazyload"
                         style={{
@@ -142,50 +142,48 @@ const Login = () => {
                           "--awb-background-size": "cover",
                           "--awb-flex-wrap": "wrap",
                           backgroundImage: `url('https://lingotalents.com/wp-content/uploads/2024/08/home-bg-3.svg')`,
-                          backgroundSize: "cover",  
-                          backgroundPosition: "bottom",  
-                          backgroundAttachment: "fixed", 
+                          backgroundSize: "cover",
+                          backgroundPosition: "bottom",
+                          backgroundAttachment: "fixed",
                         }}
                       >
-                        
-                    
+
+
                         <div>
-                          
+
                         </div>
                         <Row>
                           <Col className="col-12">
-                            <div className="text-center " style={{ marginTop: '15vh' }}>
-                              <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
-                            </div>
-                            <div className="login-card" style={{ backgroundColor: "rgb(0,0,0,0%)", position:"relative" , top:"-28vh"}}>
-                              <div className="login-main login-tab">
-                                <Form className="theme-form" onSubmit={Submit} >
-                                  <H4>Sign</H4>
-                                  <P>{"Enter your email & password to login"}</P>
-                                  {/* {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} */}
-                                  <FormGroup>
-                                    <Label className="col-form-label">Email Address</Label>
-                                    <Input className="form-control" type="email" required onChange={(e) => setEmail(e.target.value)} />
-                                  </FormGroup>
-                                  <FormGroup className="position-relative">
-                                    <Label className="col-form-label">Password</Label>
-                                    <Input
-                                      className="form-control"
-                                      type={togglePassword ? "text" : "password"}
-                                      required
-                                      onChange={(e) => setPassword(e.target.value)}
-                                    />
-                                    <div className="show-hide" onClick={() => setTogglePassword(!togglePassword)}>
-                                      <span className={togglePassword ? "" : "show"}></span>
-                                    </div>
-                                  </FormGroup>
-                                  <div className="form-group mb-0">
-                                    <Btn attrBtn={{ color: "primary", className: "btn-block", disabled: loading ? loading : loading }}>
-                                      Login
-                                    </Btn>
+
+                            <div className="login-card" >
+                              <Form className="theme-form login-form" onSubmit={Submit} >
+                                <div className="text-center " >
+                                  <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
+                                </div>
+                                <h6>Welcome back! Log in to your account.</h6>
+                                {/* {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} */}
+                                <FormGroup>
+                                  <Label className="col-form-label">Email Address</Label>
+                                  <Input className="form-control" type="email" required onChange={(e) => setEmail(e.target.value)} />
+                                </FormGroup>
+                                <FormGroup className="position-relative">
+                                  <Label className="col-form-label">Password</Label>
+                                  <Input
+                                    className="form-control"
+                                    type={togglePassword ? "text" : "password"}
+                                    required
+                                    onChange={(e) => setPassword(e.target.value)}
+                                  />
+                                  <div className="show-hide" onClick={() => setTogglePassword(!togglePassword)}>
+                                    <span className={togglePassword ? "" : "show"}></span>
                                   </div>
-                                </Form>
-                              </div>
+                                </FormGroup>
+                                <div className="form-group mb-0">
+                                  <Btn attrBtn={{ color: "primary", className: "btn-block", disabled: loading ? loading : loading }}>
+                                    Login
+                                  </Btn>
+                                </div>
+                              </Form>
                             </div>
                           </Col>
                         </Row>
@@ -193,17 +191,17 @@ const Login = () => {
                     </div>
                   </div>
                 </section>
-             
-                  <FooterClass />
-               
+
+                <FooterClass />
+
               </div>
-              
+
             </main>
-            
+
           </div>
-          
+
         </div>
-       
+
         {/* <Row>
           <Col className="col-12">
             <div className="login-card">
@@ -240,17 +238,19 @@ const Login = () => {
             </div>
           </Col>
         </Row> */}
-      </div>
+      </div >
 
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
-    </Fragment>
+      {
+        toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))
+      }
+    </Fragment >
   );
 };
 
