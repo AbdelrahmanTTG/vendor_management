@@ -135,11 +135,6 @@ class AdminController extends Controller
         return response()->json($aliases, 200);
     }
 
-
-
-
-
-
     public function updateAlias(Request $request)
     {
         $request->validate([
@@ -294,5 +289,9 @@ class AdminController extends Controller
         } else {
             return response()->json(['message' => 'Item not found.'], 404);
         }
+    }
+
+    public function MailProvider (Request $request){
+        
     }
 }

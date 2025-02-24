@@ -39,6 +39,7 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
     item.active = !item.active;
     setMainMenu({ mainmenu: MENUITEMS });
   };
+  const [hoveredItem, setHoveredItem] = React.useState(null);
 
   return (
     <Fragment>
@@ -62,17 +63,22 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive }) => {
                 {menuItem.type === "sub" && (
                   <a
                     href="javascript"
-                    id="nav-link"
+                    id="nav-link" 
+                    style={{
+                      backgroundColor: hoveredItem === menuItem || activeMenu === menuItem ? "#00365B" : "", 
+                    }}
                     className={`nav-link menu-title ${activeMenu === menuItem ? "active" : ""
                       }`}
                     onClick={(event) => {
                       event.preventDefault();
                       handleMenuClick(menuItem);
                     }}
+                    onMouseEnter={() => setHoveredItem(menuItem)}
+                    onMouseLeave={() => setHoveredItem(null)}
                   >
                     {menuItem.icon !== undefined && <menuItem.icon />}
                     <span>{t(menuItem.title)}</span>
-                    <div className="according-menu">
+                    <div className="according-menu" >
                       {activeMenu === menuItem ? (
                         <i className="fa fa-angle-down"></i>
                       ) : (
