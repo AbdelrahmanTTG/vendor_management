@@ -157,23 +157,27 @@ const Login = () => {
 
                             <div className="login-card" >
                               <Form className="theme-form login-form" onSubmit={Submit} >
-                                <div className="text-center " >
+                                <div className="text-center m-b-10" >
                                   <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
                                 </div>
                                 <h6>Welcome back! Log in to your account.</h6>
                                 {/* {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} */}
                                 <FormGroup>
                                   <Label className="col-form-label">Email Address</Label>
-                                  <Input className="form-control" type="email" required onChange={(e) => setEmail(e.target.value)} />
+                                  <div className="input-group"><span className="input-group-text"><i className="icon-email"></i></span>
+                                    <Input className="form-control" type="email" required onChange={(e) => setEmail(e.target.value)} />
+                                  </div>
                                 </FormGroup>
                                 <FormGroup className="position-relative">
                                   <Label className="col-form-label">Password</Label>
+                                  <div className="input-group"><span className="input-group-text"><i className="icon-lock"></i></span>
                                   <Input
                                     className="form-control"
                                     type={togglePassword ? "text" : "password"}
                                     required
                                     onChange={(e) => setPassword(e.target.value)}
                                   />
+                                  </div>
                                   <div className="show-hide" onClick={() => setTogglePassword(!togglePassword)}>
                                     <span className={togglePassword ? "" : "show"}></span>
                                   </div>
