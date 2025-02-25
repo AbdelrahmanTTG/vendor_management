@@ -327,8 +327,26 @@ const TableAlias = (props) => {
             setCurrentPage(newPage);
         }
     };
+    const test = async ()  => {
+        const te = {
+            "sender_email": "johndoe@example.com",
+            "receiver_email": "ts10222@gmail.com",
+            "content": "ts1022@gmail.com",
+            "screen": "ts1022@gmail.com",
+            "screen_id": 1
+        }
+        try {
+            const { data } = await axiosClient.post("notice", te);
+           
+        } catch (err) {
+            const response = err.response;
+        
+        }
+    }
     return (
         <Fragment>
+            {/* <button onClick={() => test()}>tt</button> */}
+
             <Col sm="12">
                 <Card>
                     <CardHeader className="d-flex justify-content-between align-items-center">

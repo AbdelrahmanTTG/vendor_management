@@ -46,7 +46,7 @@ const Rightbar = () => {
                     </a></LI>
                     {/* <LanguageClass /> */}
                     {/* <Bookmarks /> */}
-                    {/* <Notifications /> */}
+                    <Notifications />
                     {/* <MoonLight /> */}
                     {/* <MessageDrop /> */}
                     {/* <LogoutClass /> */}

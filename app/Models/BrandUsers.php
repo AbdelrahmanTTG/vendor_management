@@ -9,8 +9,8 @@ class BrandUsers extends Model
     protected $table = 'users';
     public function aliases()
     {
-        return $this->belongsToMany(AliasMail::class, 'mailer', 'user_id', 'alias_id');
-        
+        return $this->belongsToMany(AliasMail::class, 'mailer', 'user_id', 'alias_id')
+         ->withPivot('status'); 
     }
     public static function SelectPMSalesData()
     {

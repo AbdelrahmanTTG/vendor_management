@@ -84,6 +84,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('/deleteAliasEmail', [AdminController::class, 'destroyEmail']);
     Route::post('/ChangeStatus', [AdminController::class, 'activeEmail']);
     Route::post('/updateAlias', [AdminController::class, 'updateAlias']);
+    Route::post('/MyAlias', [AdminController::class, 'findAlias']);
+    Route::post('/notice', [AdminController::class, 'MailProvider']);
 
 
 
