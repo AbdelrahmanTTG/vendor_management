@@ -3,7 +3,6 @@ import { Activity, Bell, CheckCircle, FileText, UserCheck } from 'react-feather'
 import { Link } from 'react-router-dom';
 import { LI, P, UL } from '../../../AbstractElements';
 import axiosClient from '../../../pages/AxiosClint';
-const { echo } = await import('../../../real-time');
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
@@ -19,21 +18,25 @@ const Notifications = () => {
 
     useEffect(() => {
         if (alias.length === 0) return;
-        alias?.forEach(email => {
-            echo.private(`notice-private-channel.User.${email}`)
-                .listen('.notice', (e) => {
-                    console.log(e)
-                    // const msg = e.data;
-                    // const newMsg = msg.replace(/(<([^>]+)>)/gi, "").substring(0, 70);
-                    // setNotifications(notifications => [...notifications, newMsg]);
-                });
-        });
+        const loadEcho = async () => {
+            const { echo } = await import('../../../real-time');
 
-        return () => {
-            alias.forEach(email => {
-                echo.leave(`notice-private-channel.User.${email}`);
+            alias?.forEach(email => {
+                echo.private(`notice-private-channel.User.${email}`)
+                    .listen('.notice', (e) => {
+                        console.log(e)
+
+                    });
             });
-        };
+
+            return () => {
+                alias.forEach(email => {
+                    echo.leave(`notice-private-channel.User.${email}`);
+                });
+            };
+        }
+        loadEcho();
+       
     }, [alias]);
     return (
         <Fragment>
