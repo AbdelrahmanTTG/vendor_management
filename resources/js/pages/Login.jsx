@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
 import { Image } from '../AbstractElements';
-import Logo from '../assets/images/logo/Lingotalents-logo.png';
+import Logo from '../assets/images/logo/Lingotalents.png';
 import { ToastContainer } from "react-toastify";
 import Toast from "./Toast";
 const FooterClass = () => {
@@ -157,10 +157,10 @@ const Login = () => {
 
                             <div className="login-card" >
                               <Form className="theme-form login-form" onSubmit={Submit} >
-                                <div className="text-center m-b-10" >
+                                <div className="m-b-10" >
                                   <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
                                 </div>
-                                <h6>Welcome back! Log in to your account.</h6>
+                                <h6>Welcome! Log in to your account.</h6>
                                 {/* {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} */}
                                 <FormGroup>
                                   <Label className="col-form-label">Email Address</Label>

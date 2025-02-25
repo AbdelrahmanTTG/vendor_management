@@ -70,7 +70,7 @@ const Dashboard = () => {
           show: false
         }
       },
-      colors: [primary, secondary, '#242934'],
+      colors: [primary, secondary, '#155FA0'],
       labels: ["Approved Invoices", "Pending Invoices", "Jobs Not Invoiced"],
       responsive: [{
         breakpoint: 480,

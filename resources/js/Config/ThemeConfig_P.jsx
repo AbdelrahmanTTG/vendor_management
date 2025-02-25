@@ -8,7 +8,7 @@ export class ConfigDB {
         sidebar_setting: "default-sidebar",
       },
       color: {
-        primary_color: "#155FA0",
+        primary_color: "#00365B",
         secondary_color: "#31C7A7",
         mix_background_layout: "light-only",
       },
