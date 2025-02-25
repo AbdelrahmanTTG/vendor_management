@@ -10,6 +10,9 @@ use App\Models\AliasMail;
 use App\Models\EmailJoinAlias;
 use App\Models\Mailer;
 use Illuminate\Support\Facades\DB;
+use App\Events\Message;
+use App\Events\Notice;
+use Illuminate\Support\Facades\Crypt;
 
 
 
@@ -292,6 +295,48 @@ class AdminController extends Controller
     }
 
     public function MailProvider (Request $request){
-        
+        $request->validate([
+            'sender_email' => 'required|string|max:255',
+            'receiver_email' => 'required|string|max:255',
+            'content' => 'nullable|string',
+            'screen' => 'required|string|max:255',
+            'screen_id' => 'required|integer',
+            'Permissions' => 'nullable|array',
+        ]);
+        $sender_email = app('decrypt')(base64_decode($request->input('sender_email')));
+        $receiver_email =$request->input('receiver_email') ;
+        $arrContent = [
+            "content" => $request->input('content') ,
+            "sender_email" => $sender_email,
+            "screen" => $request->input('screen'),
+            "screen_id" => $request->input('screen_id')
+        ];
+        event(new Notice($arrContent, base64_encode(app('encrypt')($receiver_email))));
+        return response()->json(["message"=> 'Send successfully '], 200);
+       }
+    public function findAlias(Request $request)
+    {
+        $accountId = $request->input('account_id');
+        if (!$accountId) {
+            return response()->json(['error' => 'Account ID is required'], 400);
+        }
+        try {
+            $accountId = Crypt::decrypt($accountId);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            $accountId = $accountId;
+        }
+        $aliases = AliasMail::whereHas('users', function ($query) use ($accountId) {
+            $query->where('mailer.user_id', $accountId)
+                ->where('mailer.status', 1)
+                ->where('aliasmails.status', 1); 
+
+        })->with('users:id,email')->pluck('email')
+        ->map(function ($email) {
+            return base64_encode(app('encrypt')($email));
+        });
+
+
+        return response()->json( $aliases, 200);
     }
+
 }

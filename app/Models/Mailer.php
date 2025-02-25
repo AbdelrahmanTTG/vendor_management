@@ -13,4 +13,5 @@ class Mailer extends Model
         'alias_id',
         'status'
     ];
+    
 }

@@ -1,27 +1,40 @@
 import React, { Fragment, useEffect, useState, Suspense } from 'react';
-import { Activity, Bell, CheckCircle, FileText, UserCheck  } from 'react-feather';
+import { Activity, Bell, CheckCircle, FileText, UserCheck } from 'react-feather';
 import { Link } from 'react-router-dom';
 import { LI, P, UL } from '../../../AbstractElements';
+import axiosClient from '../../../pages/AxiosClint';
+const { echo } = await import('../../../real-time');
+
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
-    // useEffect(() => {
-    //         const userId = JSON.parse(localStorage.getItem('USER'));
-    //     // console.log(userId.email)
-    //     const loadEcho = async () => {
-    //         const { echo } = await import('../../../real-time'); 
-    //         const userId = JSON.parse(localStorage.getItem('USER'));
-    //         if (userId) {
-    //             echo.private(`newMessage-private-channel.User.${userId.email}`)
-    //                 .listen('.newMessage', (e) => {
-    //                     console.log(e);
-    //                     // setNotifications((prev) => [...prev, e]);
-    //                 });
-    //         }
-    //         setLoading(false);
-    //     };
-    //     loadEcho();
-    // }, []);
+    const [alias, setAlias] = useState([]);
+    useEffect(() => {
+        const userId = JSON.parse(localStorage.getItem('USER'));
+        axiosClient.post("MyAlias", { account_id: userId.id })
+            .then(({ data }) => {
+                setAlias(data);
+            });
+    }, []);
+
+    useEffect(() => {
+        if (alias.length === 0) return;
+        alias?.forEach(email => {
+            echo.private(`notice-private-channel.User.${email}`)
+                .listen('.notice', (e) => {
+                    console.log(e)
+                    // const msg = e.data;
+                    // const newMsg = msg.replace(/(<([^>]+)>)/gi, "").substring(0, 70);
+                    // setNotifications(notifications => [...notifications, newMsg]);
+                });
+        });
+
+        return () => {
+            alias.forEach(email => {
+                echo.leave(`notice-private-channel.User.${email}`);
+            });
+        };
+    }, [alias]);
     return (
         <Fragment>
             <LI attrLI={{ className: 'onhover-dropdown' }} >

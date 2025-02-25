@@ -10,4 +10,6 @@ Broadcast::channel('newMessage-private-channel.User.{email}', function ($user, $
 Broadcast::channel('test', function () {
  
 });
-
+Broadcast::channel('notice-private-channel.User.{email}', function ($user, $email) {
+    return $email;
+}, ['guards' => ['api','vendor']]);
