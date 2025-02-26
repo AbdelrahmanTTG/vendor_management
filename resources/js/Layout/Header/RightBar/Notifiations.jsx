@@ -70,8 +70,8 @@ const Notifications = () => {
                 console.log(email)
                 echo.private(`notice-private-channel.User.${email}`)
                     .listen('.notice', (e) => {
-                        // if (alias.includes(e?.data?.brake)) return
-                        // setSound(true)
+                        if (e?.data?.brake === userId.email ) return
+                        setSound(true)
                         console.log(e.data)
                         setNotifications((prev) => [
                             ...(Array.isArray(e.data) ? e.data : [e.data]),
@@ -90,12 +90,12 @@ const Notifications = () => {
 
     }, [alias]);
 
-    // useEffect(() => {
-    //     if (sound) {
-    //         audio.currentTime = 0;
-    //         audio.play().catch(error => console.error('Failed to play sound:', error));
-    //     }
-    // }, [sound]);
+    useEffect(() => {
+        if (sound) {
+            audio.currentTime = 0;
+            audio.play().catch(error => console.error('Failed to play sound:', error));
+        }
+    }, [sound]);
     const Seen = async (notice_id) => {
         const payload = {
             user_id: userId.id,

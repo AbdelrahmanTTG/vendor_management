@@ -320,6 +320,7 @@ class AdminController extends Controller
             $sender_email = $request->input('sender_email');
         }
         $receiver_email = $request->input('receiver_email');
+        $userEmail = BrandUsers::where('id', $id)->value('email');
         $data = [
             'creator' => $id,
             "sender_email" => $sender_email,
@@ -331,7 +332,7 @@ class AdminController extends Controller
         ];
         $notification = Notifications::create($data);
         $arrContent = array_merge(Arr::except($notification->toArray(), ["creator"]), [
-            "brake" => base64_encode(app('encrypt')($sender_email)),
+            "brake" => base64_encode(app('encrypt')($userEmail)),
         ]);
 
         // $arrContent = [
