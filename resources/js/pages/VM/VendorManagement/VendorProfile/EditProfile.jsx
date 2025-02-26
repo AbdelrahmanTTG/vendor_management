@@ -23,7 +23,7 @@ import axiosClient from "../../../../pages/AxiosClint";
 const EditProfile = (props) => {
     const [id, setId] = useState('');
     const location = useLocation();
-    const { vendor } = location.state || {};
+    const vendor = Object.values(location.state || {})[0] || {};
     const [redirect, setRedirect] = useState(false);
     const [vendorPersonalData, setPersonalData] = useState([]);
     const [lastMessage, setlastMessage] = useState([]);

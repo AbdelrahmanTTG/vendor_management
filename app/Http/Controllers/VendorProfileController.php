@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
 
 class VendorProfileController extends Controller
 {
@@ -2112,29 +2113,26 @@ class VendorProfileController extends Controller
         }
         return response()->json($vendorData, 200);
     }
+
     public function getDashboardChart(Request $request)
     {
-        $Vendors =  $this->getVendorsChart();
-        $statusesCount = $this->countTaskStatus();
-        $service = $this->getServiceChart();
-        $taskType = $this->getTaskTypeChart();
-        $source = $this->getSourceChart();
-        $target = $this->getTargetChart();
-        $request_type = $this->countTicketsType();
+        $cacheKey = 'dashboard_chart_data';
+        $cacheTime = now()->addMinutes(60); 
+        $data = Cache::remember($cacheKey, $cacheTime, function () {
+            return [
+                "Vendors" => $this->getVendorsChart(),
+                "TaskStatus" => $this->countTaskStatus(),
+                "service" => $this->getServiceChart(),
+                "taskType" => $this->getTaskTypeChart(),
+                "source" => $this->getSourceChart(),
+                "target" => $this->getTargetChart(),
+                "requestType" => $this->countTicketsType(),
+            ];
+        });
 
-        return response()->json([
-            "Vendors" => $Vendors,
-            "TaskStatus" => $statusesCount,
-            "service" => $service,
-            "taskType" => $taskType,
-            "source" => $source,
-            "target" => $target,
-            "requestType" => $request_type,
-
-
-
-        ], 200);
+        return response()->json($data, 200);
     }
+
     public function getVendorsChart()
     {
         $startDate = Carbon::now()->subMonths(6)->startOfMonth();

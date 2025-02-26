@@ -86,6 +86,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/updateAlias', [AdminController::class, 'updateAlias']);
     Route::post('/MyAlias', [AdminController::class, 'findAlias']);
     Route::post('/notice', [AdminController::class, 'MailProvider']);
+    Route::get('/Notification', [AdminController::class, 'Notification']);
+    Route::post('/seen', [AdminController::class, 'seen']);
 
 
 

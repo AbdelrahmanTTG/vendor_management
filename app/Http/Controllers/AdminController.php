@@ -7,12 +7,13 @@ use App\Models\Department;
 use App\Models\Employees;
 use App\Models\BrandUsers;
 use App\Models\AliasMail;
-use App\Models\EmailJoinAlias;
+use App\Models\Notifications;
 use App\Models\Mailer;
 use Illuminate\Support\Facades\DB;
 use App\Events\Message;
 use App\Events\Notice;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Arr;
 
 
 
@@ -294,8 +295,10 @@ class AdminController extends Controller
         }
     }
 
-    public function MailProvider (Request $request){
+    public function MailProvider(Request $request)
+    {
         $request->validate([
+            'id' => 'required|string',
             'sender_email' => 'required|string|max:255',
             'receiver_email' => 'required|string|max:255',
             'content' => 'nullable|string',
@@ -303,18 +306,56 @@ class AdminController extends Controller
             'screen_id' => 'required|integer',
             'Permissions' => 'nullable|array',
         ]);
+        $id = $request->input('id');
+        if (!$id) {
+            return response()->json(['error' => 'Account ID is required'], 400);
+        }
+        try {
+            $id = Crypt::decrypt($id);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            $id = $id;
+        }
         $sender_email = app('decrypt')(base64_decode($request->input('sender_email')));
-        $receiver_email =$request->input('receiver_email') ;
-        $arrContent = [
-            "content" => $request->input('content') ,
+        if (!$sender_email) {
+            $sender_email = $request->input('sender_email');
+        }
+        $receiver_email = $request->input('receiver_email');
+        $data = [
+            'creator' => $id,
             "sender_email" => $sender_email,
+            "receiver_email" => $receiver_email,
+            "content" => $request->input('content'),
             "screen" => $request->input('screen'),
-            "screen_id" => $request->input('screen_id')
+            "screen_id" => $request->input('screen_id'),
+            'status' => 0
         ];
+        $notification = Notifications::create($data);
+        $arrContent = array_merge(Arr::except($notification->toArray(), ["creator"]), [
+            "brake" => base64_encode(app('encrypt')($sender_email)),
+        ]);
+
+        // $arrContent = [
+        //     "content" => $request->input('content') ,
+        //     "sender_email" => $sender_email,
+        //     "brake"=> base64_encode(app('encrypt')($sender_email)),
+        //     "screen" => $request->input('screen'),
+        //     "screen_id" => $request->input('screen_id')
+        // ];
+
+
         event(new Notice($arrContent, base64_encode(app('encrypt')($receiver_email))));
-        return response()->json(["message"=> 'Send successfully '], 200);
-       }
+        return response()->json(["message" => 'Send successfully '], 200);
+    }
     public function findAlias(Request $request)
+    {
+        $aliases = $this->handelEmails($request);
+        $userEmail = BrandUsers::where('id', $aliases['accountId'])->value('email');
+        $allEmails = collect($aliases['aliases'])->merge([$userEmail]);
+        $encryptedEmails = $allEmails->map(fn($email) => base64_encode(app('encrypt')($email)));
+        return response()->json($encryptedEmails, 200);
+    }
+
+    public function handelEmails(Request $request)
     {
         $accountId = $request->input('account_id');
         if (!$accountId) {
@@ -323,20 +364,72 @@ class AdminController extends Controller
         try {
             $accountId = Crypt::decrypt($accountId);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            $accountId = $accountId;
+
         }
-        $aliases = AliasMail::whereHas('users', function ($query) use ($accountId) {
-            $query->where('mailer.user_id', $accountId)
-                ->where('mailer.status', 1)
-                ->where('aliasmails.status', 1); 
 
-        })->with('users:id,email')->pluck('email')
-        ->map(function ($email) {
-            return base64_encode(app('encrypt')($email));
-        });
+        $aliases = AliasMail::join('mailer', 'aliasmails.id', '=', 'mailer.alias_id')
+            ->where('mailer.user_id', $accountId)
+            ->where('mailer.status', 1)
+            ->where('aliasmails.status', 1)
+            ->pluck('aliasmails.email')
+            ->toArray();
+        return ["aliases" => $aliases, "accountId" => $accountId];
+    }
+    public function Notification(Request $request)
+    {
+        $aliases = $this->handelEmails($request);
+        $userEmail = BrandUsers::where('id', $aliases['accountId'])->value('email');
+
+        if ($userEmail) {
+            $aliases['aliases'][] = $userEmail;
+        }
+        $notifications = Notifications::join('aliasmails', 'notifications.receiver_email', '=', 'aliasmails.email')
+            ->leftJoin('notification_reads', function ($join) use ($aliases) {
+                $join->on('notifications.id', '=', 'notification_reads.notification_id')
+                    ->where('notification_reads.user_id', '=', $aliases['accountId']);
+            })
+            ->whereIn('aliasmails.email', $aliases['aliases'])
+            ->where('notifications.creator', '!=', $aliases['accountId'])
+            ->whereNull('notification_reads.notification_id')
+            ->orderBy('notifications.created_at', 'DESC')
+            ->select('notifications.*')
+            ->paginate(5);
 
 
-        return response()->json( $aliases, 200);
+        return response()->json($notifications, 200);
+    }
+
+    public function seen(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|string',
+            'notification_id' => 'required|integer',
+        ]);
+
+        $accountId = $request->input('user_id');
+
+        if (!$accountId) {
+            return response()->json(['error' => 'Account ID is required'], 400);
+        }
+
+        try {
+            $accountId = Crypt::decrypt($accountId);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            return response()->json(['error' => 'Invalid Account ID'], 400);
+        }
+        $exists = DB::table('notification_reads')
+            ->where('user_id', $accountId)
+            ->where('notification_id', $request->input('notification_id'))
+            ->exists();
+
+        if (!$exists) {
+            DB::table('notification_reads')->insert([
+                'user_id' => $accountId,
+                'notification_id' => $request->input('notification_id'),
+            ]);
+        }
+
+        return response()->json(['message' => 'Notification marked as seen'], 200);
     }
 
 }

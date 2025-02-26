@@ -327,12 +327,15 @@ const TableAlias = (props) => {
             setCurrentPage(newPage);
         }
     };
-    const test = async ()  => {
+    const test = async () => {
+        const userId = JSON.parse(localStorage.getItem('USER'));
+
         const te = {
-            "sender_email": "johndoe@example.com",
-            "receiver_email": "ts10222@gmail.com",
-            "content": "ts1022@gmail.com",
-            "screen": "ts1022@gmail.com",
+            "id": userId.id,
+            "sender_email": "dev.support@lingotalents.com",
+            "receiver_email": "dev.support@lingotalents.com",
+            "content": "Vendor file modification test",
+            "screen": "/vm/vendors/editprofiletest",
             "screen_id": 1
         }
         try {
@@ -345,7 +348,7 @@ const TableAlias = (props) => {
     }
     return (
         <Fragment>
-            {/* <button onClick={() => test()}>tt</button> */}
+            <button onClick={() => test()}>tt</button>
 
             <Col sm="12">
                 <Card>

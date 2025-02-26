@@ -1,34 +1,83 @@
 import React, { Fragment, useEffect, useState, Suspense } from 'react';
 import { Activity, Bell, CheckCircle, FileText, UserCheck } from 'react-feather';
 import { Link } from 'react-router-dom';
-import { LI, P, UL } from '../../../AbstractElements';
+import { LI, P, UL, Badges, Spinner } from '../../../AbstractElements';
 import axiosClient from '../../../pages/AxiosClint';
+import { useNavigate } from 'react-router-dom';
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [alias, setAlias] = useState([]);
+    const userId = JSON.parse(localStorage.getItem('USER'));
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [sound, setSound] = useState(true);
+
     useEffect(() => {
-        const userId = JSON.parse(localStorage.getItem('USER'));
+        fetchNotifications(page);
+    }, []);
+
+    const fetchNotifications = async (pageNumber) => {
+        if (loading || !hasMore) return;
+
+        setLoading(true);
+        try {
+            const { data } = await axiosClient.get("Notification", {
+                params: { account_id: userId.id, page: pageNumber },
+            });
+            if (pageNumber !== 1) {
+                setSound(false) 
+            }
+            setNotifications((prev) => [...prev, ...data.data]);
+            setHasMore(data.next_page_url !== null);
+            setPage(pageNumber + 1);
+        } catch (error) {
+            console.error("Error fetching notifications", error);
+        }
+        setLoading(false);
+    };
+
+    const handleScroll = (event) => {
+        const { scrollTop, scrollHeight, clientHeight } = event.target;
+        if (scrollTop + clientHeight >= scrollHeight - 10) {
+            fetchNotifications(page);
+        }
+    };
+
+    const [audio] = useState(new Audio('/audio/Whatsapp Message Ringtone Download - MobCup.Com.Co.mp3'));
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, [page, hasMore, loading]);
+    useEffect(() => {
         axiosClient.post("MyAlias", { account_id: userId.id })
             .then(({ data }) => {
                 setAlias(data);
-            });
-    }, []);
 
+            });
+
+    }, []);
     useEffect(() => {
-        if (alias.length === 0) return;
         const loadEcho = async () => {
             const { echo } = await import('../../../real-time');
-
+            echo.private(`newMessage-private-channel.User.${userId.email}`)
+                .listen('.newMessage', (e) => {
+                });
+            if (alias.length === 0) return;
             alias?.forEach(email => {
                 echo.private(`notice-private-channel.User.${email}`)
                     .listen('.notice', (e) => {
-                        console.log(e)
+                        if (alias.includes(e?.data?.brake)) return
+                        setSound(true)
+                        setNotifications((prev) => [
+                            ...(Array.isArray(e.data) ? e.data : [e.data]),
+                            ...prev
+                        ]);
 
                     });
             });
-
             return () => {
                 alias.forEach(email => {
                     echo.leave(`notice-private-channel.User.${email}`);
@@ -36,64 +85,105 @@ const Notifications = () => {
             };
         }
         loadEcho();
-       
+
     }, [alias]);
+
+    useEffect(() => {
+        if (sound) {
+            audio.currentTime = 0;
+            audio.play().catch(error => console.error('Failed to play sound:', error));
+        }
+    }, [sound]);
+    const Seen = async (notice_id) => {
+        const payload = {
+            user_id: userId.id,
+            notification_id:notice_id
+        }
+        try {
+            const { data } = await axiosClient.post("seen", payload);
+            setNotifications((prevNotifications) =>
+                prevNotifications.filter((notification) => notification.id !== notice_id)
+            );
+        } catch (error) {
+            console.error("Error fetching notifications", error);
+        }
+    };
+  
+    const navigate = useNavigate();
+    const handleNavigation = (event, route, id) => {
+        event.preventDefault();
+        const data = { id: id, }
+        navigate(route, { state: { data } });
+    };
+
     return (
         <Fragment>
-            <LI attrLI={{ className: 'onhover-dropdown' }} >
+                      <LI attrLI={{ className: 'onhover-dropdown' }} >
                 <div className="notification-box">
-                    <Bell />
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <Bell />
+                        {notifications.length > 0 && (
+
+                            <span
+                                style={{
+                                    position: 'absolute',
+                                    top: '-15px',
+                                    right: '-15px',
+                                    minWidth: '18px',
+                                    height: '18px',
+                                    padding: '0 5px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    whiteSpace: 'nowrap'
+                                }}
+                            >
+                                <Badges attrBadge={{ className: 'badge rounded-pill', color: 'danger', pill: true }} >
+                                    {notifications.filter(notification => notification.status === 0).length >= 5 ? "5+" : notifications.filter(notification => notification.status === 0).length}
+                                </Badges>
+                            </span>
+                        )}
+                    </div>
+
                     {/* <span className="dot-animated"></span> */}
                 </div>
-                <UL attrUL={{ className: 'notification-dropdown onhover-show-div' }} >
-                    <LI>
-                        <P attrPara={{ className: 'f-w-700 m-0' }} >You have 3 Notifications<span className="pull-right badge badge-primary badge-pill">4</span></P>
-                    </LI>
-                    <LI attrLI={{ className: 'noti-primary' }} >
-                        <Link to={`http://127.0.0.1:8000/app/email/mailbox`}>
-                            <div className="media"><span className="notification-bg bg-light-primary">
-                                <Activity />
-                            </span>
-                                <div className="media-body">
-                                    <P>Delivery processing </P><span>10 minutes ago</span>
+
+
+                <ul
+                    className="notification-dropdown onhover-show-div"
+                    style={{
+                        maxHeight: "50vh",
+                        overflowY: "auto",
+                        padding: "10px",
+                        border: "1px solid #ddd",
+                        borderRadius: "5px"
+                    }}
+                    onScroll={handleScroll}
+                >
+                    {notifications.map((item) => (
+                        <li key={item.id} className="noti-primary">
+                            <a onClick={(event) => {
+                                handleNavigation(event, item.screen, item.screen_id);
+                                Seen(item.id); 
+                            }}>
+                                <div className="media">
+                                    <span className={`notification-bg ${item.status === 0 ? "bg-light-primary" : "bg-light-secondary"}`}>
+                                        {item.status === 0 ? <Activity /> : <CheckCircle />}
+                                    </span>
+                                    <div className="media-body">
+                                        <p>{item.content}</p>
+                                        <span>{new Date(item.created_at).toLocaleString()}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </Link>
-                    </LI>
-                    {/* <LI attrLI={{ className: 'noti-secondary' }} >
-                        <Link to={`http://127.0.0.1:8000/app/email/mailbox`}>
-                            <div className="media"><span className="notification-bg bg-light-secondary">
-                                <CheckCircle />
-                            </span>
-                                <div className="media-body">
-                                    <P>Order Complete</P><span>1 hour ago</span>
-                                </div>
-                            </div>
-                        </Link>
-                    </LI>
-                    <LI attrLI={{ className: 'noti-success' }} >
-                        <Link to={`http://127.0.0.1:8000/app/email/mailbox`}>
-                            <div className="media"><span className="notification-bg bg-light-success">
-                                <FileText />
-                            </span>
-                                <div className="media-body">
-                                    <P>Tickets Generated</P><span>3 hour ago</span>
-                                </div>
-                            </div>
-                        </Link>
-                    </LI>
-                    <LI attrLI={{ className: 'noti-danger' }} >
-                        <Link to={`http://127.0.0.1:8000/app/email/mailbox`}>
-                            <div className="media"><span className="notification-bg bg-light-danger">
-                                <UserCheck />
-                            </span>
-                                <div className="media-body">
-                                    <P>Delivery Complete</P><span>6 hour ago</span>
-                                </div>
-                            </div>
-                        </Link>
-                    </LI> */}
-                </UL>
+                            </a>
+                        </li>
+                    ))}
+                    {loading && <div className="loader-box">
+                        <Spinner attrSpinner={{ className: 'loader-9' }} />
+                    </div>}
+                </ul>
+
+
             </LI>
         </Fragment>
     );
