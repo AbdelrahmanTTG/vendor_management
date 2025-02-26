@@ -62,9 +62,9 @@ const Notifications = () => {
     useEffect(() => {
         const loadEcho = async () => {
             const { echo } = await import('../../../real-time');
-            echo.private(`newMessage-private-channel.User.${userId.email}`)
-                .listen('.newMessage', (e) => {
-                });
+            // echo.private(`newMessage-private-channel.User.${userId.email}`)
+            //     .listen('.newMessage', (e) => {
+            //     });
             if (alias.length === 0) return;
             alias?.forEach(email => {
                 echo.private(`notice-private-channel.User.${email}`)
@@ -88,12 +88,12 @@ const Notifications = () => {
 
     }, [alias]);
 
-    useEffect(() => {
-        if (sound) {
-            audio.currentTime = 0;
-            audio.play().catch(error => console.error('Failed to play sound:', error));
-        }
-    }, [sound]);
+    // useEffect(() => {
+    //     if (sound) {
+    //         audio.currentTime = 0;
+    //         audio.play().catch(error => console.error('Failed to play sound:', error));
+    //     }
+    // }, [sound]);
     const Seen = async (notice_id) => {
         const payload = {
             user_id: userId.id,
