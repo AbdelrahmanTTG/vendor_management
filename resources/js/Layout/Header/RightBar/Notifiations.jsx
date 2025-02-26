@@ -67,10 +67,12 @@ const Notifications = () => {
             //     });
             if (alias.length === 0) return;
             alias?.forEach(email => {
+                console.log(email)
                 echo.private(`notice-private-channel.User.${email}`)
                     .listen('.notice', (e) => {
-                        if (alias.includes(e?.data?.brake)) return
-                        setSound(true)
+                        // if (alias.includes(e?.data?.brake)) return
+                        // setSound(true)
+                        console.log(e.data)
                         setNotifications((prev) => [
                             ...(Array.isArray(e.data) ? e.data : [e.data]),
                             ...prev
