@@ -12,7 +12,7 @@ const Notifications = () => {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
-    const [sound, setSound] = useState(true);
+    const [sound, setSound] = useState(0);
 
     useEffect(() => {
         fetchNotifications(page);
@@ -26,9 +26,7 @@ const Notifications = () => {
             const { data } = await axiosClient.get("Notification", {
                 params: { account_id: userId.id, page: pageNumber },
             });
-            if (pageNumber !== 1) {
-                setSound(false) 
-            }
+          
             setNotifications((prev) => [...prev, ...data.data]);
             setHasMore(data.next_page_url !== null);
             setPage(pageNumber + 1);
@@ -67,17 +65,16 @@ const Notifications = () => {
             //     });
             if (alias.length === 0) return;
             alias?.forEach(email => {
-                console.log(email)
                 echo.private(`notice-private-channel.User.${email}`)
                     .listen('.notice', (e) => {
-                        if (e?.data?.brake === userId.email ) return
-                        setSound(true)
-                        console.log(e.data)
+                        if (e?.data?.brake === userId.email) return
+                        // setSound(sound + 1)
                         setNotifications((prev) => [
                             ...(Array.isArray(e.data) ? e.data : [e.data]),
                             ...prev
                         ]);
-
+                        audio.currentTime = 0;
+                        audio.play().catch(error => console.error('Failed to play sound:', error));
                     });
             });
             return () => {
@@ -90,12 +87,12 @@ const Notifications = () => {
 
     }, [alias]);
 
-    useEffect(() => {
-        if (sound) {
-            audio.currentTime = 0;
-            audio.play().catch(error => console.error('Failed to play sound:', error));
-        }
-    }, [sound]);
+    // useEffect(() => {
+    //     if (sound > 0) {
+    //         audio.currentTime = 0;
+    //         audio.play().catch(error => console.error('Failed to play sound:', error));
+    //     }
+    // }, [sound]);
     const Seen = async (notice_id) => {
         const payload = {
             user_id: userId.id,
