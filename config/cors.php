@@ -17,7 +17,7 @@ return [
 
     'paths' => ['api/MyAlias', 'api/Notification', "api/seen", 'broadcasting/auth'], 
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['https://stage.aixnexus.com/erp'], 
+    'allowed_origins' => ['https://stage.aixnexus.com'], 
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
