@@ -334,8 +334,8 @@ const TableAlias = (props) => {
             "id": userId.id,
             "sender_email": "dev.support@lingotalents.com",
             "receiver_email": "dev.support@lingotalents.com",
-            "content": "Vendor file modification test",
-            "screen": "/vm/vendors/editprofiletest",
+            "content": "Vendor file  ",
+            "screen": "admin/masterUsers",
             "screen_id": 1
         }
         try {

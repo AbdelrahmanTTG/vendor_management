@@ -17,6 +17,13 @@ use App\Http\Controllers\AdminController;
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
 });
+
+Route::middleware([App\Http\Middleware\ApiKeyMiddleware::class])->group(function () {
+    Route::post('/MyAlias', [AdminController::class, 'findAlias']);
+    Route::get('/Notification', [AdminController::class, 'Notification']);
+    Route::post('/seen', [AdminController::class, 'seen']);
+});
+
 Route::middleware(['auth:api'])->group(function () {
     Route::post('permission', [AuthController::class, 'userpermission']);
     Route::get('logout', [AuthController::class, 'logout']);
@@ -31,12 +38,12 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/Vendors', [VendorProfileController::class, 'Vendors']);
     Route::delete('/deleteWallet', [VendorProfileController::class, 'deleteWalletsPayment']);
     Route::delete('/deleteSkill', [VendorProfileController::class, 'deleteSkill']);
-   
+
     Route::post('/GeneratePassword', [VendorProfileController::class, 'setPassword']);
     Route::post('/AddExperience', [VendorProfileController::class, 'AddExperience']);
     Route::post('/UpdateExperience', [VendorProfileController::class, 'UpdateExperience']);
     Route::post('/uploadFiles', [VendorProfileController::class, 'uploadFiles']);
-   
+
     Route::delete('/delete', [VendorProfileController::class, 'deleteFile']);
     Route::post('/updateFiles', [VendorProfileController::class, 'updateFiles']);
     // Route::post('/instantMessaging', [VendorProfileController::class, 'AddinstantMessaging']);
@@ -84,18 +91,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('/deleteAliasEmail', [AdminController::class, 'destroyEmail']);
     Route::post('/ChangeStatus', [AdminController::class, 'activeEmail']);
     Route::post('/updateAlias', [AdminController::class, 'updateAlias']);
-    Route::post('/MyAlias', [AdminController::class, 'findAlias']);
     Route::post('/notice', [AdminController::class, 'MailProvider']);
-    Route::get('/Notification', [AdminController::class, 'Notification']);
-    Route::post('/seen', [AdminController::class, 'seen']);
-
-
-
-
-
 });
 Route::middleware([App\Http\Middleware\AdminAuth::class])->prefix('Portal')->group(function () {
-        Route::group(['prefix' => 'Vendor'], function () {
+    Route::group(['prefix' => 'Vendor'], function () {
         Route::post('allJobs', [TaskController::class, 'allJobs'])->name('Portal.allJobs');
         Route::post('allJobOffers', [TaskController::class, 'allJobOffers'])->name('Portal.allJobOffers');
         Route::post('allClosedJobs', [TaskController::class, 'allClosedJobs'])->name('Portal.allClosedJobs');
@@ -143,8 +142,7 @@ Route::middleware([App\Http\Middleware\VendorOrUser::class])->group(function () 
     Route::get('/GetTimeZone', [VendorProfileController::class, 'findTimeZone']);
     Route::post('/refreshToken ', [AuthController::class, 'RegenrateToken']);
     Route::post('/SendMessage ', [VendorProfileController::class, 'Message_VM_to_Vendor']);
-    Route::post('/download', [VendorProfileController::class, 'download']);    
+    Route::post('/download', [VendorProfileController::class, 'download']);
     Route::post('/updatePersonalInformation', [VendorProfileController::class, 'updatePersonalInfo']);
     Route::post('/UpdateBillingData', [VendorProfileController::class, 'updateBillingData']);
 });
-  

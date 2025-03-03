@@ -14,6 +14,8 @@ use App\Events\Message;
 use App\Events\Notice;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Arr;
+use App\Models\ApiUser;
+use Illuminate\Support\Str;
 
 
 
@@ -135,7 +137,11 @@ class AdminController extends Controller
             });
             return $alias;
         });
-
+        // $user = ApiUser::create([
+        //     'name' => 'External User',
+        //     'api_key' => Str::random(32),
+        //     'expires_at' => now()->addMonths(12), // انتهاء الصلاحية بعد 3 أشهر
+        // ]);
         return response()->json($aliases, 200);
     }
 
@@ -416,7 +422,7 @@ class AdminController extends Controller
         try {
             $accountId = Crypt::decrypt($accountId);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            return response()->json(['error' => 'Invalid Account ID'], 400);
+            // return response()->json(['error' => 'Invalid Account ID'], 400);
         }
         $exists = DB::table('notification_reads')
             ->where('user_id', $accountId)

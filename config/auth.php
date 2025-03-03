@@ -48,6 +48,11 @@ return [
             'driver' => 'jwt',
             'provider' => 'vendor',
         ],
+        'api_key' => [
+            'driver' => 'api_key',
+            'provider' => 'api_keys',
+        ],
+      
     ],
 
   
@@ -77,6 +82,10 @@ return [
         'vendor' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\Vendor::class),
+        ],
+        'api_keys' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\ApiUser::class,
         ],
         // 'users' => [
         //     'driver' => 'database',

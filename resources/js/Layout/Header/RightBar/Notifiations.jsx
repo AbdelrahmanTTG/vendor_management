@@ -42,13 +42,13 @@ const Notifications = () => {
             fetchNotifications(page);
         }
     };
-
-    const [audio] = useState(new Audio('/audio/Whatsapp Message Ringtone Download - MobCup.Com.Co.mp3'));
-
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, [page, hasMore, loading]);
+    const [audio] = useState(new Audio('/audio/Whatsapp Message Ringtone Download - MobCup.Com.Co.mp3'));
+
+  
     useEffect(() => {
         axiosClient.post("MyAlias", { account_id: userId.id })
             .then(({ data }) => {
@@ -60,15 +60,12 @@ const Notifications = () => {
     useEffect(() => {
         const loadEcho = async () => {
             const { echo } = await import('../../../real-time');
-            // echo.private(`newMessage-private-channel.User.${userId.email}`)
-            //     .listen('.newMessage', (e) => {
-            //     });
             if (alias.length === 0) return;
             alias?.forEach(email => {
                 echo.private(`notice-private-channel.User.${email}`)
                     .listen('.notice', (e) => {
                         if (e?.data?.brake === userId.email) return
-                        // setSound(sound + 1)
+                        setSound(sound + 1)
                         setNotifications((prev) => [
                             ...(Array.isArray(e.data) ? e.data : [e.data]),
                             ...prev

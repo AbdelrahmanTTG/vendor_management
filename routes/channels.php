@@ -9,7 +9,7 @@ Broadcast::channel('newMessage-private-channel.User.{email}', function ($user, $
 }, ['guards' => ['api', 'vendor']]);
 Broadcast::channel('test', function () {
  
-});
+},);
 Broadcast::channel('notice-private-channel.User.{email}', function ($user, $email) {
     return $email;
-}, ['guards' => ['api','vendor']]);
+}, ['guards' => ['api','vendor','api_key']]);
