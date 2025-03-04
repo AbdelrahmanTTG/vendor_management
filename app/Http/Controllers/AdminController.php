@@ -386,7 +386,7 @@ class AdminController extends Controller
     {
         $aliases = $this->handelEmails($request);
         $userEmail = BrandUsers::where('id', $aliases['accountId'])->value('email');
-
+        $perPage = $request->input('per_page', 10);
         if ($userEmail) {
             $aliases['aliases'][] = $userEmail;
         }
@@ -396,11 +396,11 @@ class AdminController extends Controller
                     ->where('notification_reads.user_id', '=', $aliases['accountId']);
             })
             ->whereIn('aliasmails.email', $aliases['aliases'])
-            ->where('notifications.creator', '!=', $aliases['accountId'])
+            // ->where('notifications.creator', '!=', $aliases['accountId'])
             ->whereNull('notification_reads.notification_id')
             ->orderBy('notifications.created_at', 'DESC')
             ->select('notifications.*')
-            ->paginate(5);
+            ->paginate($perPage);
 
 
         return response()->json($notifications, 200);
