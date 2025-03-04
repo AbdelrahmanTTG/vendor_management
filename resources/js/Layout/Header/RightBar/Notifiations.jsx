@@ -13,6 +13,7 @@ const Notifications = () => {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const [sound, setSound] = useState(0);
+    const [total, setTotal] = useState(0);
 
     useEffect(() => {
         fetchNotifications(page);
@@ -26,7 +27,7 @@ const Notifications = () => {
             const { data } = await axiosClient.get("Notification", {
                 params: { account_id: userId.id, page: pageNumber },
             });
-          
+            setTotal(data.total)
             setNotifications((prev) => [...prev, ...data.data]);
             setHasMore(data.next_page_url !== null);
             setPage(pageNumber + 1);
@@ -135,7 +136,7 @@ const Notifications = () => {
                                 }}
                             >
                                 <Badges attrBadge={{ className: 'badge rounded-pill', color: 'danger', pill: true }} >
-                                    {notifications.filter(notification => notification.status === 0).length >= 5 ? "5+" : notifications.filter(notification => notification.status === 0).length}
+                                    {total > 9 ? "9+" : total > 0 ? total : ""}
                                 </Badges>
                             </span>
                         )}
