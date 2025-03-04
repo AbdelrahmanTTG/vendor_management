@@ -67,6 +67,7 @@ const Notifications = () => {
                     .listen('.notice', (e) => {
                         if (e?.data?.brake === userId.email) return
                         setSound(sound + 1)
+                        setTotal(total + 1)
                         setNotifications((prev) => [
                             ...(Array.isArray(e.data) ? e.data : [e.data]),
                             ...prev
@@ -136,7 +137,7 @@ const Notifications = () => {
                                 }}
                             >
                                 <Badges attrBadge={{ className: 'badge rounded-pill', color: 'danger', pill: true }} >
-                                    {total > 9 ? "9+" : total > 0 ? total : ""}
+                                    {total > 99 ? "99+" : total > 0 ? total : ""}
                                 </Badges>
                             </span>
                         )}

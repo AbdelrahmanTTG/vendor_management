@@ -140,7 +140,7 @@ class AdminController extends Controller
         // $user = ApiUser::create([
         //     'name' => 'External User',
         //     'api_key' => Str::random(32),
-        //     'expires_at' => now()->addMonths(12), // انتهاء الصلاحية بعد 3 أشهر
+        //     'expires_at' => now()->addMonths(12), 
         // ]);
         return response()->json($aliases, 200);
     }
@@ -396,7 +396,7 @@ class AdminController extends Controller
                     ->where('notification_reads.user_id', '=', $aliases['accountId']);
             })
             ->whereIn('aliasmails.email', $aliases['aliases'])
-            // ->where('notifications.creator', '!=', $aliases['accountId'])
+            ->where('notifications.creator', '!=', $aliases['accountId'])
             ->whereNull('notification_reads.notification_id')
             ->orderBy('notifications.created_at', 'DESC')
             ->select('notifications.*')
