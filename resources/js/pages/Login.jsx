@@ -7,6 +7,7 @@ import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
 import { Image } from '../AbstractElements';
 import Logo from '../assets/images/logo/Lingotalents.png';
+import login_interface from '../assets/images/login/login-770-interface.png';
 import { ToastContainer } from "react-toastify";
 import Toast from "./Toast";
 const FooterClass = () => {
@@ -112,148 +113,61 @@ const Login = () => {
 
   return (
     <Fragment>
-
-      <div className="p-0 container-fluid">
-        <div id="boxed-wrapper">
-          <div id="wrapper" className="fusion-wrapper">
-            <main id="main" className="clearfix width-100" style={{ padding: "0", backgroundColor: "#0d1267" }}>
-
-              <div className="fusion-row" style={{ maxWidth: "100%", maxHeight: "100vh", overflow: "hidden" }}>
-                <section id="content" className="full-width">
-
-                  <div id="post-1079" className="post-1079 page type-page status-publish hentry">
-
-                    <div className="post-content">
-
-                      <div
-                        className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container fusion-parallax-none hundred-percent-fullwidth non-hundred-percent-height-scrolling lazyload"
-                        style={{
-                          "--awb-border-radius-top-left": "0px",
-                          "--awb-border-radius-top-right": "0px",
-                          "--awb-border-radius-bottom-right": "0px",
-                          "--awb-border-radius-bottom-left": "0px",
-                          "--awb-padding-right": "11vw",
-                          "--awb-padding-left": "11vw",
-                          "--awb-padding-right-medium": "5vw",
-                          "--awb-padding-left-medium": "5vw",
-                          "--awb-padding-top-small": "3vh",
-                          "--awb-margin-bottom": "0px",
-                          "--awb-background-color": "#0d1267",
-                          "--awb-background-size": "cover",
-                          "--awb-flex-wrap": "wrap",
-                          backgroundImage: `url('https://lingotalents.com/wp-content/uploads/2024/08/home-bg-3.svg')`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "bottom",
-                          backgroundAttachment: "fixed",
-                        }}
-                      >
-
-
-                        <div>
-
-                        </div>
-                        <Row>
-                          <Col className="col-12">
-
-                            <div className="login-card" >
-                              <Form className="theme-form login-form" onSubmit={Submit} >
-                                <div className="m-b-10" >
-                                  <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
-                                </div>
-                                <h6>Welcome! Log in to your account.</h6>
-                                {/* {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} */}
-                                <FormGroup>
-                                  <Label className="col-form-label">Email Address</Label>
-                                  <div className="input-group"><span className="input-group-text"><i className="icon-email"></i></span>
-                                    <Input className="form-control" type="email" required onChange={(e) => setEmail(e.target.value)} />
-                                  </div>
-                                </FormGroup>
-                                <FormGroup className="position-relative">
-                                  <Label className="col-form-label">Password</Label>
-                                  <div className="input-group"><span className="input-group-text"><i className="icon-lock"></i></span>
-                                  <Input
-                                    className="form-control"
-                                    type={togglePassword ? "text" : "password"}
-                                    required
-                                    onChange={(e) => setPassword(e.target.value)}
-                                  />
-                                  </div>
-                                  <div className="show-hide" onClick={() => setTogglePassword(!togglePassword)}>
-                                    <span className={togglePassword ? "" : "show"}></span>
-                                  </div>
-                                </FormGroup>
-                                <div className="form-group mb-0">
-                                  <Btn attrBtn={{ color: "primary", className: "btn-block", disabled: loading ? loading : loading }}>
-                                    Login
-                                  </Btn>
-                                </div>
-                              </Form>
-                            </div>
-                          </Col>
-                        </Row>
-                      </div>
-                    </div>
+      <section>
+        <Container fluid={true}>
+          <Row>
+            <Col xl="5">
+              <Image attrImage={{ className: "bg-img-cover bg-center", src: `${login_interface}`, alt: "looginpage" }} />
+            </Col>
+            <Col xl="7 p-0" >
+              <div className="login-card" >
+                <Form className="theme-form login-form" onSubmit={Submit} >
+                  <div className="m-b-10" >
+                    <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
                   </div>
-                </section>
-
-                <FooterClass />
-
-              </div>
-
-            </main>
-
-          </div>
-
-        </div>
-
-        {/* <Row>
-          <Col className="col-12">
-            <div className="login-card">
-              <div className="login-main login-tab">
-                <Form className="theme-form" onSubmit={Submit}>
-                  <H4>Sign </H4>
-                  <P>{"Enter your email & password to login"}</P>
-                  {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+                  <h6>Welcome! Log in to your account.</h6>
+                  {/* {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} */}
                   <FormGroup>
                     <Label className="col-form-label">Email Address</Label>
-                    <Input className="form-control" type="email" required onChange={(e) => setEmail(e.target.value)} />
+                    <div className="input-group"><span className="input-group-text"><i className="icon-email"></i></span>
+                      <Input className="form-control" type="email" required onChange={(e) => setEmail(e.target.value)} />
+                    </div>
                   </FormGroup>
                   <FormGroup className="position-relative">
                     <Label className="col-form-label">Password</Label>
-                    <Input className="form-control" type={togglePassword ? "text" : "password"} required onChange={(e) => setPassword(e.target.value)} />
+                    <div className="input-group"><span className="input-group-text"><i className="icon-lock"></i></span>
+                      <Input
+                        className="form-control"
+                        type={togglePassword ? "text" : "password"}
+                        required
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
                     <div className="show-hide" onClick={() => setTogglePassword(!togglePassword)}>
                       <span className={togglePassword ? "" : "show"}></span>
                     </div>
-                  </FormGroup>
-                  <div className="form-group mb-0">
-                    <div className="checkbox ms-3">
-                      <Input id="checkbox1" type="checkbox" />
-                      <Label className="text-muted" htmlFor="checkbox1">
-                        Remember Password
-                      </Label>
-                    </div>
-                    <a className="link" href="#javascript">
-                      Forgot Password
-                    </a>
-                    <Btn attrBtn={{ color: "primary", className: "btn-block", disabled: loading ? loading : loading }}>Login</Btn>
-                  </div>
+                  </FormGroup>                
+                  <FormGroup className="pt-2">
+                    <Btn attrBtn={{ color: "primary", className: "btn-block w-100", disabled: loading ? loading : loading }}>
+                    Sign in
+                    </Btn>
+                    </FormGroup>
                 </Form>
               </div>
-            </div>
-          </Col>
-        </Row> */}
-      </div >
-
-      {
-        toasts.map((toast) => (
-          <Toast
-            key={toast.id}
-            message={toast.message}
-            type={toast.type}
-            onClose={() => removeToast(toast.id)}
-          />
-        ))
-      }
+            </Col>
+          </Row>
+        </Container>
+      </section >
+{
+    toasts.map((toast) => (
+      <Toast
+        key={toast.id}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => removeToast(toast.id)}
+      />
+    ))
+  }
     </Fragment >
   );
 };
