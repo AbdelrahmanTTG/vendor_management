@@ -10,44 +10,7 @@ import Logo from '../assets/images/logo/Lingotalents.png';
 import login_interface from '../assets/images/login/login-770-interface.png';
 import { ToastContainer } from "react-toastify";
 import Toast from "./Toast";
-const FooterClass = () => {
-  return (
-    <Fragment>
-      <Footer
-        attrFooter={{
-          className: `footer ${location.pathname === '/viho/page-layout/footer-dark'
-            ? 'footer-dark'
-            : location.pathname === '/viho/page-layout/footer-fixed'
-              ? 'footer-fix'
-              : ''
-            }`,
-          style: {
-            position: 'fixed',
-            bottom: '0',
-            left: '0',
-            width: '100vw',
-            height: "7vh",
-            backgroundColor: '#f1f1f1',
-            textAlign: 'center',
-            margin: "0"
-          }
-        }}
-      >
-        <Container fluid={true}>
-          <Row>
-            <Col md="6" className="footer-copyright">
-              <P attrPara={{ className: 'mb-0' }}>
-                {'Copyright 2024 © Lingo Talents All rights reserved.'}
-              </P>
-            </Col>
-            <Col md="6">
-            </Col>
-          </Row>
-        </Container>
-      </Footer>
-    </Fragment>
-  );
-};
+
 const Login = () => {
   const basictoaster = () => {
     toast.error("status", {
@@ -116,11 +79,11 @@ const Login = () => {
       <section>
         <Container fluid={true}>
           <Row>
-            <Col xl="5">
+            <Col sm="3" lg="5" className="d-none d-sm-block">
               <Image attrImage={{ className: "bg-img-cover bg-center", src: `${login_interface}`, alt: "looginpage" }} />
             </Col>
-            <Col xl="7 p-0" >
-              <div className="login-card" >
+            <Col sm="9 p-0" lg="7 p-0" >
+              <div className="login-card d-block d-md-flex" >
                 <Form className="theme-form login-form" onSubmit={Submit} >
                   <div className="m-b-10" >
                     <Image attrImage={{ className: 'img-fluid d-inline', src: `${Logo}`, alt: '' }} />
