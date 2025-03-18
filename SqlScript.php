@@ -1,20 +1,13 @@
 <?php
-// Database connection settings
-$host = 'localhost'; // Host name (usually localhost)
-$dbname = 'your_database_name'; // Database name
-$username = 'your_username'; // Username
-$password = 'your_password'; // Password
+$host = '';
+$dbname = '';
+$username = '';
+$password = '';
 
 try {
-    // Create PDO connection
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-
-    // Set error mode to exceptions
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    echo "Database connection successful!\n";
-
-    // SQL queries
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    ]);
     $queries = [
         // Create job_task table if not exists
         "CREATE TABLE IF NOT EXISTS job_task (
@@ -25,8 +18,7 @@ try {
         );",
 
         // Add invoice_id column to job_task table if not exists
-        "ALTER TABLE job_task
-        ADD COLUMN IF NOT EXISTS invoice_id INT UNSIGNED NULL;",
+        "ALTER TABLE job_task ADD COLUMN invoice_id INT UNSIGNED NULL;",
 
         // Create job_task_conversation table if not exists
         "CREATE TABLE IF NOT EXISTS job_task_conversation (
@@ -54,47 +46,52 @@ try {
 
         // Adding Active column to regions table
         "ALTER TABLE regions
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        ADD COLUMN Active BOOLEAN DEFAULT FALSE;",
 
-        // Adding Active column to time_zone table
-        "ALTER TABLE time_zone
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        // Adding Active column to vendorTimeZone table
 
+        "CREATE TABLE IF NOT EXISTS vendortimezone (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            zone TEXT NULL,
+            gmt TEXT NULL,
+            parent INT NULL,
+            Active TINYINT NULL
+        );",
         // Adding Active column to countries table
         "ALTER TABLE countries
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        ADD COLUMN Active BOOLEAN DEFAULT FALSE;",
 
         // Adding Active column to fields table
         "ALTER TABLE fields
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        ADD COLUMN Active BOOLEAN DEFAULT FALSE;",
 
         // Adding Active column to services table
         "ALTER TABLE services
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        ADD COLUMN Active BOOLEAN DEFAULT FALSE;",
 
         // Adding Active column to task_type table
         "ALTER TABLE task_type
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        ADD COLUMN Active BOOLEAN DEFAULT FALSE;",
 
         // Adding Active column to currency table
         "ALTER TABLE currency
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        ADD COLUMN Active BOOLEAN DEFAULT FALSE;",
 
         // Adding Active column to tools table
         "ALTER TABLE tools
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        ADD COLUMN Active BOOLEAN DEFAULT FALSE;",
 
         // Adding Active column to languages table
         "ALTER TABLE languages
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        ADD COLUMN Active BOOLEAN DEFAULT FALSE;",
 
         // Adding Active column to unit table
         "ALTER TABLE unit
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        ADD COLUMN Active BOOLEAN DEFAULT FALSE;",
 
         // Adding Active column to languages_dialect table
         "ALTER TABLE languages_dialect
-        ADD COLUMN IF NOT EXISTS Active BOOLEAN DEFAULT FALSE;",
+        ADD COLUMN Active BOOLEAN DEFAULT FALSE;",
         "ALTER TABLE payment_method
         ADD COLUMN Active BOOLEAN DEFAULT false;",
 
@@ -132,16 +129,8 @@ try {
             updated_at TIMESTAMP NULL DEFAULT NULL
         );",
         "ALTER TABLE fields 
-ADD COLUMN parent INT(11) DEFAULT NULL;
-",
-        // Create Major table if not exists
-        "CREATE TABLE IF NOT EXISTS Major (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            Active BOOLEAN DEFAULT TRUE,
-            created_at TIMESTAMP NULL DEFAULT NULL,
-            updated_at TIMESTAMP NULL DEFAULT NULL
-        );",
+        ADD COLUMN parent INT(11) DEFAULT NULL;
+        ",
         "CREATE TABLE IF NOT EXISTS vendor_invoices (
             id INT AUTO_INCREMENT PRIMARY KEY,
             vendor_id INT,
@@ -176,7 +165,7 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
             ADD COLUMN contact_name VARCHAR(255) NULL,
             ADD COLUMN legal_Name VARCHAR(255) NULL,
             ADD COLUMN region INT NULL,
-            ADD COLUMN note TEXT NULL;",
+            ADD COLUMN vendor_source VARCHAR(255) NULL;",
         // Create the 'billing_data' table if it doesn't exist
         "CREATE TABLE IF NOT EXISTS billing_data (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -186,7 +175,7 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
             street VARCHAR(255),
             billing_address TEXT,
             billing_currency VARCHAR(255) NOT NULL,
-            billing_status CHAR(1) NULL
+            billing_status CHAR(1) NULL,
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL
         );",
@@ -209,16 +198,32 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
             billing_data_id INT,
             method VARCHAR(255),
             account VARCHAR(255),
+            defaults TINYINT NULL,
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL
         );",
-        "ALTER TABLE vm_setup
-            ADD COLUMN IF NOT EXISTS pe_invoice_subject TEXT NULL,
-            ADD COLUMN IF NOT EXISTS pe_invoice_body TEXT NULL,
-            ADD COLUMN IF NOT EXISTS pe_message_subject TEXT NULL,
-            ADD COLUMN IF NOT EXISTS pe_message_body TEXT NULL,
-            ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NULL DEFAULT NULL,
-            ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NULL DEFAULT NULL;",
+        "CREATE TABLE IF NOT EXISTS `vm_setup` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `acceptance_offers_hours` DOUBLE DEFAULT NULL,
+  `unaccepted_offers_email` VARCHAR(200) DEFAULT NULL,
+  `enable_evaluation` TINYINT NOT NULL DEFAULT '0',
+  `v_ev_name1` VARCHAR(255) NULL,
+  `v_ev_per1` INT(3) NULL,
+  `v_ev_name2` VARCHAR(255) NULL,
+  `v_ev_per2` INT(3) NULL,
+  `v_ev_name3` VARCHAR(255) NULL,
+  `v_ev_per3` INT(3) NULL,
+  `v_ev_name4` VARCHAR(255) NULL,
+  `v_ev_per4` INT(3) NULL,
+  `v_ev_name5` VARCHAR(255) NULL,
+  `v_ev_per5` INT(3) NULL,
+  `v_ev_name6` VARCHAR(255) NULL,
+  `v_ev_per6` INT(3) NULL,
+  `pm_email` VARCHAR(255) NULL,
+  `vm_email` VARCHAR(255) NULL,
+  `accounting_email` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;",
 
 
         // Alter the 'vendor' table to change column types
@@ -250,12 +255,15 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
             MODIFY COLUMN favourite TINYINT NULL,
             MODIFY COLUMN external_id INT NULL,
             MODIFY COLUMN quality VARCHAR(255) NULL,
-            ADD COLUMN IF NOT EXISTS contact_linked_in VARCHAR(255) NOT NULL,
-            ADD COLUMN IF NOT EXISTS contact_ProZ VARCHAR(255) NOT NULL,
-            ADD COLUMN IF NOT EXISTS contact_other1 VARCHAR(255) NULL,
-            ADD COLUMN IF NOT EXISTS contact_other2 VARCHAR(255) NULL,
-            ADD COLUMN IF NOT EXISTS contact_other3 VARCHAR(255) NULL,
-            ADD COLUMN IF NOT EXISTS Anothernumber VARCHAR(255) NULL;",
+            ADD COLUMN contact_linked_in VARCHAR(255) NOT NULL,
+            ADD COLUMN contact_ProZ VARCHAR(255) NOT NULL,
+            ADD COLUMN contact_other1 VARCHAR(255) NULL,
+            ADD COLUMN contact_other2 VARCHAR(255) NULL,
+            ADD COLUMN contact_other3 VARCHAR(255) NULL,
+            ADD COLUMN Anothernumber VARCHAR(255) NULL,
+            ADD COLUMN PM VARCHAR(255) NULL,
+            ;",
+
 
         // Create the 'messages' table if it doesn't exist
         "CREATE TABLE IF NOT EXISTS messages (
@@ -264,6 +272,7 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
             receiver_email VARCHAR(255) NOT NULL,
             content TEXT NOT NULL,
             is_read BOOLEAN DEFAULT FALSE,
+            status BOOLEAN DEFAULT FALSE,
             created_at TIMESTAMP NULL DEFAULT NULL,
             updated_at TIMESTAMP NULL DEFAULT NULL
         );",
@@ -363,23 +372,23 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
 
         "ALTER TABLE `vm_ticket` ADD `brand_id` INT(11) NULL AFTER `created_at`",
 
-        "ALTER TABLE `master_user` ADD COLUMN IF NOT EXISTS `use_system` VARCHAR(10) NULL AFTER `employees_id`",
-        "ALTER TABLE `master_user` ADD COLUMN IF NOT EXISTS `use_type` int(1) NULL AFTER `use_system`;",
+        "ALTER TABLE `master_user` ADD COLUMN `use_system` VARCHAR(10) NULL AFTER `employees_id`",
+        "ALTER TABLE `master_user` ADD COLUMN `use_type` int(1) NULL AFTER `use_system`;",
         "update `master_user` set `use_system` = 'ERP';",
         "update `master_user` set `use_type` = '1';",
-        "ALTER TABLE `master_user` ADD COLUMN IF NOT EXISTS  `reset_token` text NULL ;",
-        "ALTER TABLE `master_user` ADD COLUMN IF NOT EXISTS `token_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
-        "ALTER TABLE `master_user` ADD COLUMN IF NOT EXISTS `token_expiry` datetime NULL ;",
-        "ALTER TABLE `job` ADD COLUMN IF NOT EXISTS `rate` DOUBLE NULL;
-        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`currency` int(11) NULL;
-        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`revenue` DOUBLE NULL;
-        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`revenue_local` DOUBLE NULL;
-        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`lead` int(11) NULL;
-        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`attach_type` int(1) NULL;
-        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`job_file1` text NULL;
-        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`job_file2` text NULL;
-        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`job_file1_name` text NULL;
-        ALTER TABLE `job` ADD COLUMN IF NOT EXISTS`job_file2_name` text NULL;
+        "ALTER TABLE `master_user` ADD COLUMN  `reset_token` text NULL ;",
+        "ALTER TABLE `master_user` ADD COLUMN `token_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+        "ALTER TABLE `master_user` ADD COLUMN `token_expiry` datetime NULL ;",
+        "ALTER TABLE `job` ADD COLUMN `rate` DOUBLE NULL;
+        ALTER TABLE `job` ADD COLUMN`currency` int(11) NULL;
+        ALTER TABLE `job` ADD COLUMN`revenue` DOUBLE NULL;
+        ALTER TABLE `job` ADD COLUMN`revenue_local` DOUBLE NULL;
+        ALTER TABLE `job` ADD COLUMN`lead` int(11) NULL;
+        ALTER TABLE `job` ADD COLUMN`attach_type` int(1) NULL;
+        ALTER TABLE `job` ADD COLUMN`job_file1` text NULL;
+        ALTER TABLE `job` ADD COLUMN`job_file2` text NULL;
+        ALTER TABLE `job` ADD COLUMN`job_file1_name` text NULL;
+        ALTER TABLE `job` ADD COLUMN`job_file2_name` text NULL;
         ALTER TABLE `job` ADD `job_link` text NULL; ",
         "CREATE TABLE IF NOT EXISTS `pm_setup` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -420,15 +429,15 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
         "ALTER TABLE `vm_setup`
         MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
         ALTER TABLE `vm_setup` CHANGE `id` `id` INT(11) NOT NULL AUTO_INCREMENT; 
-        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS `enable_evaluation` TINYINT NOT NULL DEFAULT '0' AFTER `unaccepted_offers_email`;
-        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name1` VARCHAR(255) NULL , ADD `v_ev_per1` INT(3) NULL ;  
-        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name2` VARCHAR(255) NULL , ADD `v_ev_per2` INT(3) NULL ;  
-        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name3` VARCHAR(255) NULL , ADD `v_ev_per3` INT(3) NULL ;  
-        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name4` VARCHAR(255) NULL , ADD `v_ev_per4` INT(3) NULL ;  
-        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name5` VARCHAR(255) NULL , ADD `v_ev_per5` INT(3) NULL ;  
-        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`v_ev_name6` VARCHAR(255) NULL , ADD `v_ev_per6` INT(3) NULL ;
+        ALTER TABLE `vm_setup` ADD COLUMN `enable_evaluation` TINYINT NOT NULL DEFAULT '0' AFTER `unaccepted_offers_email`;
+        ALTER TABLE `vm_setup` ADD COLUMN`v_ev_name1` VARCHAR(255) NULL , ADD `v_ev_per1` INT(3) NULL ;  
+        ALTER TABLE `vm_setup` ADD COLUMN`v_ev_name2` VARCHAR(255) NULL , ADD `v_ev_per2` INT(3) NULL ;  
+        ALTER TABLE `vm_setup` ADD COLUMN`v_ev_name3` VARCHAR(255) NULL , ADD `v_ev_per3` INT(3) NULL ;  
+        ALTER TABLE `vm_setup` ADD COLUMN`v_ev_name4` VARCHAR(255) NULL , ADD `v_ev_per4` INT(3) NULL ;  
+        ALTER TABLE `vm_setup` ADD COLUMN`v_ev_name5` VARCHAR(255) NULL , ADD `v_ev_per5` INT(3) NULL ;  
+        ALTER TABLE `vm_setup` ADD COLUMN`v_ev_name6` VARCHAR(255) NULL , ADD `v_ev_per6` INT(3) NULL ;
         ALTER TABLE `vm_setup` ADD `vm_setup` TEXT NULL , ADD `erp_uploads_folder_path` TEXT NULL ;
-        ALTER TABLE `vm_setup` ADD COLUMN IF NOT EXISTS`pm_email` VARCHAR(255) NULL,ADD `vm_email` VARCHAR(255) NULL,  
+        ALTER TABLE `vm_setup` ADD COLUMN`pm_email` VARCHAR(255) NULL,ADD `vm_email` VARCHAR(255) NULL,  
         ADD `accounting_email` VARCHAR(255) NULL; ",
         "ALTER TABLE `job_task` ADD `brand` INT(11) NULL ;
          ALTER TABLE `job_offer_list` ADD `brand` INT(11) NULL ;",
@@ -492,7 +501,7 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
             
             FOREIGN KEY (tot_id) REFERENCES vendor_aval_tot(id)
     );",
-        "ALTER TABLE `vendor_aval_det` ADD COLUMN IF NOT EXISTS`email_status` int NULL ;",
+        "ALTER TABLE `vendor_aval_det` ADD COLUMN`email_status` int NULL ;",
         "CREATE TABLE IF NOT EXISTS holidays (
             `id` INT AUTO_INCREMENT PRIMARY KEY,
             `start_date` datetime  NULL,
@@ -551,8 +560,67 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
             ( 5, 'Add vendor profile', 'vendors/Profiletest', 0, 'VM'),
             ( 5, 'edit vendor profile', 'vendors/editprofiletest', 0, 'VM');",
         "ALTER TABLE logger
-            ADD COLUMN master_id UNSIGNED BIGINT NULL;"
-            
+            ADD COLUMN master_id UNSIGNED BIGINT NULL;",
+        "CREATE TABLE apiuser (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    api_key VARCHAR(255) NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);",
+        "INSERT INTO apiuser (name, api_key, expires_at) 
+VALUES ('External User', 'G0l8NGEDgidMD0A4EybukR0ZILQTXqmw', '2026-03-02 13:19:04');",
+        "CREATE TABLE notifications (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    sender_email VARCHAR(255) NOT NULL,
+    receiver_email VARCHAR(255) NOT NULL,
+    content VARCHAR(255) NOT NULL,
+    screen VARCHAR(255) NOT NULL,
+    screen_id VARCHAR(255) NOT NULL,
+    status TINYINT(1) NOT NULL DEFAULT 0,
+    creator VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);",
+        "CREATE TABLE notification_reads (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    notification_id INT NOT NULL,
+    user_id INT NOT NULL,
+    read_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (notification_id) REFERENCES notifications(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE (notification_id, user_id) 
+);",
+        "CREATE TABLE aliasmails (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) COLLATE  NOT NULL,
+    email VARCHAR(255) COLLATE  NOT NULL,
+    brand_id INT(11) NOT NULL,
+    status TINYINT(1) NOT NULL DEFAULT 1
+);
+",
+        "CREATE TABLE mailer (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    user_id INT(11) NOT NULL,
+    alias_id INT(11) NOT NULL,
+    status TINYINT(1) NOT NULL DEFAULT 1,
+    CONSTRAINT mailer_ibfk_1 FOREIGN KEY (alias_id) REFERENCES aliasmails(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+);
+",
+        "ALTER TABLE it_tickets
+ADD COLUMN file VARCHAR(255) COLLATE utf8_general_ci NULL,
+ADD COLUMN priority INT(11) NULL,
+ADD COLUMN classification INT(11) NULL,
+ADD COLUMN status INT(11) NOT NULL DEFAULT 1,
+ADD COLUMN type VARCHAR(255) COLLATE utf8_general_ci NULL;",
+        "ALTER TABLE automation_service_types
+ADD COLUMN using_system INT(11) NULL;
+",
+        "UPDATE automation_service_types
+SET using_system = 1;"
+
     ];
 
     // Execute the queries
@@ -561,6 +629,5 @@ ADD COLUMN parent INT(11) DEFAULT NULL;
         echo "Query executed successfully!\n";
     }
 } catch (PDOException $e) {
-    // Print error message if connection fails
-    echo "Database connection failed: " . $e->getMessage();
+    echo " Database connection failed: " . $e->getMessage();
 }
