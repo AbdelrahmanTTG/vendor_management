@@ -29,7 +29,7 @@ const JobsTable = (props) => {
                     <thead className="bg-primary">
                         <tr>
                             <th scope="col">{'#'}</th>
-                            <th scope="col">{'Brand'}</th>
+                            <th scope="col">{'Company'}</th>
                             {viewVendor == true && (
                                 <th scope="col">{'Vendor'}</th>
                             )}

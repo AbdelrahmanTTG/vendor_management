@@ -62,7 +62,7 @@ const AllData = () => {
                                                     <th scope="col">{'Email From'}</th>
                                                     <th scope="col">{'Email Subject'}</th>
                                                     <th scope="col">{'Attached File'}</th>
-                                                    <th scope="col">{'Brand'}</th>
+                                                    <th scope="col">{'Company'}</th>
                                                     <th scope="col">{'Actions'}</th>
                                                 </tr>
                                             </thead>

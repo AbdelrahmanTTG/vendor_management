@@ -207,10 +207,10 @@ const AddInvoice = () => {
                                     <Row>
                                         <Col>
                                             <FormGroup className="row">
-                                                <Label className="col-sm-3 col-form-label">{'Select Brand '}</Label>
+                                                <Label className="col-sm-3 col-form-label">{'Select Company '}</Label>
                                                 <Col sm="6">
                                                     <Input type="select" name='brand' className="custom-select form-control" defaultValue={brandInput} onChange={e => getCompletedJobs(e)}>
-                                                        <option value='0' disabled>{'Select Brand'}</option>
+                                                        <option value='0' disabled>{'Select Company'}</option>
                                                         {pendingTasks.map((item) => (
                                                             <option key={item.brand_id} value={item.brand_id}>{item.brand_name}</option>
                                                         ))}

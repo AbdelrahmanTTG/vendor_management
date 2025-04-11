@@ -22,7 +22,7 @@ const InvoicesTable = (props) => {
                     <thead className="bg-primary">
                         <tr>
                             <th scope="col">{'ID'}</th>
-                            <th scope="col">{'Brand'}</th>
+                            <th scope="col">{'Company'}</th>
                             {viewVendor == true && (
                                 <th scope="col">{'Vendor Name'}</th>
                             )}
