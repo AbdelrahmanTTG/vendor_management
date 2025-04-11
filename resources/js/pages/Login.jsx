@@ -7,7 +7,7 @@ import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
 import { Image } from '../AbstractElements';
 import Logo from '../assets/images/logo/Lingotalents.png';
-import login_interface from '../assets/images/login/login-770-interface.png';
+import login_interface from '../assets/images/login/ok1.jpg';
 import { ToastContainer } from "react-toastify";
 import Toast from "./Toast";
 
@@ -79,10 +79,10 @@ const Login = () => {
       <section>
         <Container fluid={true}>
           <Row>
-            <Col sm="3" lg="5" className="d-none d-sm-block">
-              <Image attrImage={{ className: "bg-img-cover bg-center", src: `${login_interface}`, alt: "looginpage" }} />
+            <Col md="6" className="d-none d-md-block p-0" style={{backgroundImage:`url(${login_interface})`,backgroundSize:"cover",backgroundPositionY: "center"}}>
+              {/* <Image attrImage={{ className: "bg-img-cover bg-center w-100 h-auto", src: `${login_interface}`, alt: "looginpage" }} /> */}
             </Col>
-            <Col sm="9 p-0" lg="7 p-0" >
+            <Col sm="12 p-0" md="6 p-0" >
               <div className="login-card d-block d-md-flex" >
                 <Form className="theme-form login-form" onSubmit={Submit} >
                   <div className="m-b-10" >
