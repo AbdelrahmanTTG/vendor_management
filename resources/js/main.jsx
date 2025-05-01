@@ -26,7 +26,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                         <FilterProvider>
                             <CartProvider>
                             <AnimationThemeProvider>
-                                <Router />
+                                <Router /> 
                                 </AnimationThemeProvider>
                             </CartProvider>
                         </FilterProvider>
