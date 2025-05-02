@@ -251,17 +251,30 @@ const table = (props) => {
                                                 <td key="id">
                                                     {item.id}
                                                 </td>
-                                                {Object.entries(item).map(([key, value]) =>
-                                                    key !== 'id' && key !== 'Active' && (
-                                                        <td key={key}>  {typeof value === 'object' && value !== null
-                                                            ? value.name 
-                                                            : value
-                                                        }</td>
-                                                    )
-                                                )}
-                                                <td key="Active">
+                                             {Object.entries(item).map(([key, value]) => {
+                                                if (key === 'id') return null;
+                                                const fieldInfo = props.fields.find(f => f.name === key);
+                                                if (fieldInfo?.static) {
+                                                    const match = fieldInfo.static.find(opt => opt.value === value);
+                                                    return (
+                                                        <td key={key}>
+                                                            {match ? match.label : value}
+                                                        </td>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <td key={key}>
+                                                        {typeof value === 'object' && value !== null
+                                                            ? value.name
+                                                            : value}
+                                                    </td>
+                                                );
+                                            })}
+
+                                                {/* <td key="Active">
                                                     {item.Active == 0 ? <i className="fa fa-circle font-danger f-12" /> : <i className="fa fa-circle font-success f-12" />}
-                                                </td>
+                                                </td> */}
                                                 {props.permissions?.edit == 1 && (
                                                     <td>
                                                         <button onClick={() => handleEditClick(item.id)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
