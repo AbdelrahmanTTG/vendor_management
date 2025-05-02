@@ -64,6 +64,7 @@ jobs:
           git pull origin main
 
           # Install Composer dependencies (make sure vendor directory is populated)
+          export COMPOSER_ALLOW_SUPERUSER=1
           composer install --no-dev --optimize-autoloader
 
           # Run Laravel commands
