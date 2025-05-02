@@ -53,6 +53,7 @@ jobs:
         run: |
           sshpass -p "$SSH_PASSWORD" ssh -p "$SSH_PORT" -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS << 'EOF'
           cd /var/www/html/lingotalents.com
+          git config --global --add safe.directory /var/www/html
 
           # Stash any local changes
           git stash --include-untracked
