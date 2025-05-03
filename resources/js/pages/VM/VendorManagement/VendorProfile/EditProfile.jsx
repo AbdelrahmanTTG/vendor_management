@@ -19,6 +19,7 @@ const Portal_User = React.lazy(() => import('./Portal_User'));
 import NavBar from './NavBar';
 import { Navigate } from 'react-router-dom';
 import axiosClient from "../../../../pages/AxiosClint";
+import ErrorBoundary from "../../../../ErrorBoundary";
 
 const EditProfile = (props) => {
     const [id, setId] = useState('');
@@ -49,13 +50,16 @@ const EditProfile = (props) => {
         setPersonalData({ PersonalData:data });
     };
     const LazyWrapper = ({ children }) => (
+        <ErrorBoundary>
         <Suspense fallback={
             <div className="loader-box"  >
                 <Spinner attrSpinner={{ className: 'loader-6' }} />
             </div>
         }>
             {children}
-        </Suspense>
+            </Suspense>
+            </ErrorBoundary>
+       
     );
     useEffect(() => {
         const updateMargin = () => {

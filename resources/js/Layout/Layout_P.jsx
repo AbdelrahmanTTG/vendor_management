@@ -12,6 +12,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import AnimationThemeContext from "../_helper/AnimationTheme";
 import ConfigDB from "../Config/ThemeConfig_P";
+import Offline from "../offLine";
 
 const AppLayout = ({ children, classNames, ...rest }) => {
   const location = useLocation();
@@ -45,6 +46,7 @@ const AppLayout = ({ children, classNames, ...rest }) => {
             <CSSTransition key={location.key} timeout={100} classNames={animationTheme} nodeRef={nodeRef} unmountOnExit>
               <div className='page-body' ref={nodeRef}>
                 <Outlet />
+                <Offline />
               </div>
             </CSSTransition>
           </TransitionGroup>

@@ -10,11 +10,14 @@ const AllTasks = React.lazy(() => import('./pages/VM/Reports/AllTasks'));
 const VmActivity = React.lazy(() => import('./pages/VM/Reports/VmActivity'));
 const VPOs = React.lazy(() => import('./pages/VM/Reports/VPOS'));
 const AliasEmail = React.lazy(() => import('./pages/Admin/AliasEmail'));
+import ErrorBoundary from "./ErrorBoundary";
 
 import axios from './pages/AxiosClint';
 import { Spinner } from './AbstractElements';
 
 const LazyWrapper = ({ children }) => (
+    <ErrorBoundary>
+
     <Suspense fallback={
         <div
             className="loader-box"
@@ -35,7 +38,9 @@ const LazyWrapper = ({ children }) => (
 
     }>
         {children}
-    </Suspense>
+        </Suspense>
+    </ErrorBoundary>
+        
 );
 const checkIfRouteAllowed = (path, routes) => {
     return routes.includes(path);

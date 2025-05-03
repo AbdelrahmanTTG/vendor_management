@@ -81,15 +81,29 @@ class TicketsController extends Controller
                 'subject',
                 'software',
                 'status',
+                'region',
+                'division',
                 'created_by',
                 'requester_function',
                 'created_at',
                 
             ];
         }
-        // start get data    
         $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
-            ->select('vm_ticket.*', 'users.brand AS brand');
+            ->leftJoin('employees', 'employees.id', '=', 'users.employees_id')
+            ->leftJoin('regions', 'regions.id', '=', 'employees.region_id')
+            ->leftJoin('division', 'division.id', '=', 'employees.division')
+            ->select(
+                'vm_ticket.*',
+                'users.brand as brand',
+                'regions.name as region',
+                'regions.id as region_id',
+                'division.name as division'
+            );
+
+        // start get data    
+        // $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
+        //     ->select('vm_ticket.*', 'users.brand AS brand');
         // ->orderBy('vm_ticket.id', 'desc');
         // if ($user->use_type != 2 && $view != 3) {
         //     $tickets->whereIn('created_by', $piv);

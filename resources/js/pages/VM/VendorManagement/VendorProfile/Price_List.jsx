@@ -8,12 +8,15 @@ import axiosClient from "../../../AxiosClint";
 const Model = React.lazy(() => import('./models/modelAddPriceList'));
 const ModelEdit = React.lazy(() => import('./models/modelEditPriceList'));
 import { useForm, Controller } from 'react-hook-form';
+import ErrorBoundary from "../../../../ErrorBoundary";
 
 const PriceList = (props) => {
     const LazyWrapper = ({ children }) => (
+          <ErrorBoundary>
         <Suspense fallback={<div>Loading...</div>}>
             {children}
-        </Suspense>
+            </Suspense>
+            </ErrorBoundary>
     );
     const [isOpen, setIsOpen] = useState(true);
     const toggleCollapse = () => {

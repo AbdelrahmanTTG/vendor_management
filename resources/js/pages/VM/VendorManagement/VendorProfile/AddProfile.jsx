@@ -15,7 +15,7 @@ const Billing = React.lazy(() => import('./Billing'));
 const History = React.lazy(() => import('./History'));
 const Portal_User = React.lazy(() => import('./Portal_User'));
 import NavBar from './NavBar';
-
+import ErrorBoundary from "../../../../ErrorBoundary";
 import { Spinner } from '../../../../AbstractElements';
 
 const AddProfile = (props) => {
@@ -25,15 +25,18 @@ const AddProfile = (props) => {
 
     const [progressValue, setProgressValue] = useState(20);
     const [marginBottom, setMarginBottom] = useState('18vh');
-    const LazyWrapper = ({ children }) => (
-        <Suspense fallback={
-            <div className="loader-box"  >
-                <Spinner attrSpinner={{ className: 'loader-6' }} />
-            </div>
-        }>
-            {children}
-        </Suspense>
-    );
+      const LazyWrapper = ({ children }) => (
+            <ErrorBoundary>
+            <Suspense fallback={
+                <div className="loader-box"  >
+                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                </div>
+            }>
+                {children}
+                </Suspense>
+                </ErrorBoundary>
+           
+        );
     const handleProgressValue = (data) => {
         setProgressValue(progressValue + data)
     }

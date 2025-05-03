@@ -9,12 +9,14 @@ import ExcelJS from 'exceljs';
 import FormatTable from "../../Format";
 import SweetAlert from 'sweetalert2'
 const ModelEdit = React.lazy(() => import('./models/modelEditPriceList'));
-
+import ErrorBoundary from "../../../../ErrorBoundary";
 const Vendor = (props) => {
-    const LazyWrapper = ({ children }) => (
+   const LazyWrapper = ({ children }) => (
+          <ErrorBoundary>
         <Suspense fallback={<div>Loading...</div>}>
             {children}
-        </Suspense>
+            </Suspense>
+            </ErrorBoundary>
     );
     const getData = (newData) => {
         setVendors((prevData) => {

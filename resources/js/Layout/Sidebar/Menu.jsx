@@ -1,37 +1,42 @@
 // import { Airplay, BarChart, Box, Calendar, CheckSquare, Clock, Cloud, Command, Database, Edit, File, FolderPlus, GitPullRequest, Heart, HelpCircle, Home, Image, Layers, Layout, List, Mail, Map, MessageCircle, Package, Radio, Search, Server, ShoppingBag, Sliders, Sunrise, UserCheck, Users, Zap } from "react-feather";
-import axiosClient from "../../pages/AxiosClint";
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useStateContext } from '../../pages/context/contextAuth'
+import axiosClient from "../../pages/AxiosClint";
+import { useStateContext } from '../../pages/context/contextAuth';
+import { getMenuCache, setMenuCache } from './cache'; 
 
 export const Menu = () => {
   const [menuItems, setMenuItems] = useState([]);
   const { user } = useStateContext();
 
   useEffect(() => {
-    if (user) {
-      const payload = {
-        'role': user.role
-      };
+    if (!user) return;
 
-      axiosClient.post("permission", payload)
-        .then(({ data }) => {
-          const Items = Object.values(data.Items);
-          setMenuItems([{ Items }])
-        })
-        .catch(err => {
-          const response = err.response;
-          if (response && response.status === 422) {
-            setErrorMessage(response.data.errors);
-          } else if (response && response.status === 401) {
-            setErrorMessage(response.data.message);
-          } else {
-            setErrorMessage("An unexpected error occurred.");
-          }
-          console.log(response);
-        });
+    if (!navigator.onLine) {
+      const cached = getMenuCache();
+      if (cached) {
+        setMenuItems(cached);
+      }
+      return;
     }
+
+    const payload = { role: user.role };
+
+    axiosClient.post("permission", payload)
+      .then(({ data }) => {
+        const Items = Object.values(data.Items);
+        const newMenu = [{ Items }];
+        setMenuItems(newMenu);
+        setMenuCache(newMenu);
+      })
+      .catch(err => {
+        console.error( err);
+        const cached = getMenuCache();
+        if (cached) {
+          setMenuItems(cached);
+        }
+      });
   }, [user]);
+
   return menuItems;
 };
 

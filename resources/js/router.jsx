@@ -36,11 +36,15 @@ const Portal_Availability_Details = React.lazy(() => import('./pages/VendorPorta
 import NotFound from "./NotFound";
 import { getAllowedRoutes } from './VMRoute'
 import { useStateContext } from "./pages/context/contextAuth";
+import ErrorBoundary from "./ErrorBoundary";
 
 const LazyWrapper = ({ children }) => (
+    <ErrorBoundary>
     <Suspense fallback={<div>Loading...</div>}>
         {children}
-    </Suspense>
+        </Suspense>
+    </ErrorBoundary>
+        
 );
 const AppRouter = () => {
     const [routes, setRoutes] = useState([]);
