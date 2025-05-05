@@ -252,6 +252,8 @@ const TicketsList = (props) => {
             'status': 'Status',
             'created_by': 'Created By',
             'requester_function': 'Requester Function',
+            'region': 'Region',
+            'division': 'Division',
             'created_at': 'Created At',
 
         };
@@ -699,6 +701,8 @@ const TicketsList = (props) => {
                                         { value: 'status', label: 'Status' },
                                         { value: 'created_by', label: 'Created By' },
                                         { value: 'requester_function', label: 'Requester Function' },
+                                        { value: 'division', label: 'Division' },
+                                        { value: 'region', label: 'Region' },
                                         { value: 'created_at', label: 'Created At' },
 
                                     ]} table="vm_tickets"

@@ -9,7 +9,7 @@ const ViewTicket = React.lazy(() => import('./pages/VM/Tickets/viewTicket'));
 const AllTasks = React.lazy(() => import('./pages/VM/Reports/AllTasks'));
 const VmActivity = React.lazy(() => import('./pages/VM/Reports/VmActivity'));
 const VPOs = React.lazy(() => import('./pages/VM/Reports/VPOS'));
-const AliasEmail = React.lazy(() => import('./pages/Admin/AliasEmail'));
+const AliasEmail = React.lazy(() => import('./pages/Admin/AliasEmail/bac'));
 import ErrorBoundary from "./ErrorBoundary";
 
 import axios from './pages/AxiosClint';
