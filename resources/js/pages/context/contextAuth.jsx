@@ -47,19 +47,16 @@ export const ContextProvider = ({ children }) => {
     const refreshToken = async () => {
         try {
             const response = await axiosClient.post('refreshToken', {}, {
-              
             });
             const newToken = response.data.token;
             const newExpiresIn = response.data.expires_in;
 
             setToken(newToken, newExpiresIn);
-            // setShowWarning(false);
-            // setRemainingTime(newExpiresIn);
+         
         } catch (error) {
             setToken(null);
             setUser(null);
-            // setShowWarning(false);  
-            // setRemainingTime(0);
+         
             localStorage.removeItem('USER');
             localStorage.removeItem('ACCESS_TOKEN');
             localStorage.removeItem('EXPIRES_IN');
@@ -90,18 +87,11 @@ export const ContextProvider = ({ children }) => {
                     localStorage.removeItem('ACCESS_TOKEN');
                     localStorage.removeItem('EXPIRES_IN');
                 } else if (timeLeft <= 300000) {
-                    // setShowWarning(true);
-                    // setRemainingTime(Math.ceil(timeLeft / 1000));
+                    
                     refreshToken()
+                    console.log("refresh token")
                 }
-                // else {
-                //     setShowWarning(false);
-                // }
-                // if (showWarning && timeLeft > 0) {
-                //     // setRemainingTime(Math.ceil(timeLeft / 1000));
-                // }
             }, 10000);
-
             return () => clearInterval(interval);
         }
     }, [token, expiresIn]);

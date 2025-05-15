@@ -111,14 +111,23 @@ class InvoiceController extends Controller
                 $message .= $err;
             }
         } else {
-            if ($request->payment_method == 0 && (empty($request->bank_name) || empty($request->bank_account_holder)
-                || empty($request->bank_swift) || empty($request->bank_IBAN) || empty($request->bank_address)
-            )) {
+            $vendorId = Crypt::decrypt($request->vendor);
+            $billingData = BillingData::where('vendor_id', $vendorId)->first();
+            $bankIsEmpty = false;
+            $walletIsEmpty = false;
+            if($billingData->bank_required ==1){
+                $bankIsEmpty = empty($request->bank_name) || empty($request->bank_account_holder)
+                    || empty($request->bank_swift) || empty($request->bank_IBAN) || empty($request->bank_address);
+            }
+            if($billingData->wallet_required ==1){
+                $walletIsEmpty = empty($request->wallet_method) || empty($request->wallet_account);
+            }
+
+            $walletIsEmpty = empty($request->wallet_method) || empty($request->wallet_account);
+
+            if ($bankIsEmpty && $walletIsEmpty) {
                 $msg['type'] = "error";
-                $message = "Please Enter Bank Account Details!";
-            } elseif ($request->payment_method == 1 && (empty($request->wallet_method) || empty($request->wallet_account))) {
-                $msg['type'] = "error";
-                $message = "Please Enter Wallet Details!";
+                $message = "Please enter either full Bank Account details or full Wallet details!";
             } else {
                 $data['invoice_created_at'] = date("Y-m-d H:i:s");
                 $data['invoice_date'] = date("Y-m-d H:i:s");
@@ -228,12 +237,13 @@ class InvoiceController extends Controller
             $bankData = '';
             $walletData = '';
         }
-
+        $vmConfig = VmSetup::first();
         return [
             "billingData" => $billingData ?? '',
             "bankData" => $bankData,
             "walletData" => $walletData,
             "vendor_payment_methods" => $vendor_payment_methods,
+             "amount" =>  $vmConfig ? $vmConfig->amount : ''
         ];
     }
 

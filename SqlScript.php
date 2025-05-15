@@ -609,6 +609,8 @@ VALUES ('External User', 'G0l8NGEDgidMD0A4EybukR0ZILQTXqmw', '2026-03-02 13:19:0
         ON UPDATE CASCADE
 );
 ",
+        "ALTER TABLE `vendor` ADD `Approval_nda_date` DATE NULL AFTER `PM`;
+",
         "ALTER TABLE it_tickets
 ADD COLUMN file VARCHAR(255) COLLATE utf8_general_ci NULL,
 ADD COLUMN priority INT(11) NULL,
@@ -619,7 +621,15 @@ ADD COLUMN type VARCHAR(255) COLLATE utf8_general_ci NULL;",
 ADD COLUMN using_system INT(11) NULL;
 ",
         "UPDATE automation_service_types
-SET using_system = 1;"
+SET using_system = 1;",
+        "UPDATE vendor
+SET first_login = 0;",
+        "ALTER TABLE `vm_setup` ADD `amount` DECIMAL(11,2) NULL AFTER `erp_uploads_folder_path`;"
+,
+        "ALTER TABLE `billing_data` ADD `bank_required` TINYINT NULL DEFAULT '1' AFTER `billing_currency`;
+",
+        "ALTER TABLE `billing_data` ADD `wallet_required` TINYINT NULL DEFAULT '1' AFTER `bank_required`;
+"
 
     ];
 

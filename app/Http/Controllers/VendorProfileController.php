@@ -606,6 +606,13 @@ class VendorProfileController extends Controller
 
     public function storeBilling(Request $request)
     {
+        if ($request['wallet_required'] == 0 && $request['bank_required']) {
+            return response()->json([
+                'message' => 'You must provide either bank details or wallet payment methods.',
+                'error' => true,
+                'code' => 422
+            ]);
+        }
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required|integer',
             'billing_currency' => 'required|integer',
@@ -665,7 +672,11 @@ class VendorProfileController extends Controller
             'city' => $request['city'],
             'street' => $request['street'],
             'billing_address' => $request['billing_address'],
-            'billing_status' => "2"
+            'billing_status' => "2" ,
+            'bank_required' => $request['bank_required'],
+            'wallet_required' => $request['wallet_required'],
+
+
         ]);
 
         if (
@@ -929,6 +940,13 @@ class VendorProfileController extends Controller
     {
         $hasBankDetails = $request->filled('bank_name') && $request->filled('account_holder') && $request->filled('swift_bic') && $request->filled('iban');
         $hasWalletMethods = $request->has('Wallets Payment methods') && is_array($request->input('Wallets Payment methods')) && count($request->input('Wallets Payment methods')) > 0;
+        if($request['wallet_required'] == 0 && $request['bank_required']){
+            return response()->json([
+                'message' => 'You must provide either bank details or wallet payment methods.',
+                'error' => true,
+                'code' => 422
+            ]);
+        }
         try {
             $request['vendor_id'] = Crypt::decrypt($request->vendor_id);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
@@ -974,7 +992,9 @@ class VendorProfileController extends Controller
                     'city',
                     'street',
                     'billing_address',
-                    'billing_status'
+                    'billing_status',
+                    "wallet_required",
+                    "bank_required"
                 ]);
                 if (empty($requestData['billing_status'])) {
                     $requestData['billing_status'] = '2';
@@ -988,7 +1008,9 @@ class VendorProfileController extends Controller
                     'city' => $request->input('city'),
                     'street' => $request->input('street'),
                     'billing_address' => $request->input('billing_address'),
-                    'billing_status' => "2"
+                    'billing_status' => "2",
+                    "wallet_required" => $request->input('wallet_required'),
+                    "bank_required" => $request->input('bank_required')
                 ]);
             }
         } else {
@@ -999,7 +1021,9 @@ class VendorProfileController extends Controller
                 'city' => $request->input('city'),
                 'street' => $request->input('street'),
                 'billing_address' => $request->input('billing_address'),
-                'billing_status' => "2"
+                'billing_status' => "2",
+                "wallet_required" => $request->input('wallet_required'),
+                "bank_required" => $request->input('bank_required')
             ]);
         }
 
@@ -1298,7 +1322,7 @@ class VendorProfileController extends Controller
             $vendorId = $request->input('vendor_id');
             $vendor = Vendor::find($vendorId);
             if (!$vendor) {
-                Storage::delete([$cvFilePath, $ndaFilePath]);
+                Storage::disk('external')->delete([$cvFilePath, $ndaFilePath]);
                 return response()->json(['error' => 'Vendor not found.'], 404);
             }
             $vendor->cv = $cvFilePath;
@@ -1346,9 +1370,9 @@ class VendorProfileController extends Controller
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Storage::delete([$cvFilePath, $ndaFilePath]);
+            Storage::disk('external')->delete([$cvFilePath, $ndaFilePath]);
             foreach ($additionalFiles as $file) {
-                Storage::delete($file['file_path']);
+                Storage::disk('external')->delete($file['file_path']);
             }
 
             return response()->json([
@@ -1356,6 +1380,44 @@ class VendorProfileController extends Controller
 
             ], 500);
         }
+    }
+    public function NDA_vendor(Request $request){
+        if ( !$request->hasFile('nda_file')) {
+            return response()->json(['error' => ' NDA files are required.'], 400);
+        }
+        $ndaFile = $request->file('nda_file');
+        DB::beginTransaction();
+        try {
+            $vendorId = Crypt::decrypt($request->input('vendor_id'));
+            $vendor = Vendor::find($vendorId);
+            if (!$vendor) {
+                return response()->json(['error' => 'Vendor not found.'], 404);
+            }
+            $path = storage_path('app/external/nda_files');
+            if (!file_exists($path)) {
+                mkdir(
+                    $path,
+                    0777,
+                    true
+                );
+            }
+            $originalFileNameN = $ndaFile->getClientOriginalName();
+            $encryptedFileName = Crypt::encryptString($originalFileNameN);
+            $ndaFilePath = $ndaFile->storeAs('nda_files', $encryptedFileName . '.' . $ndaFile->getClientOriginalExtension(), 'external');
+            $vendor->NDA = $ndaFilePath;
+            $vendor->first_login = 1;
+            $vendor->Approval_nda_date = $request->input('date');
+            $vendor->save();
+            DB::commit();
+            return response()->json([
+                'message' => 'Files uploaded and vendor updated successfully.'
+            ], 200);
+        }catch (\Exception $e) {
+            DB::rollBack();
+            Storage::disk('external')->delete([$ndaFilePath]);
+            return response()->json([
+                'error' => 'An error occurred while processing the request.',
+            ], 500);}
     }
 
 
@@ -1911,10 +1973,6 @@ class VendorProfileController extends Controller
             return $vendorTest;
         }
     }
-
-
-
-
     public function saveOrUpdateMessages(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -2217,5 +2275,71 @@ class VendorProfileController extends Controller
             ->limit(10)
             ->get();
         return $data;
+    }
+    public function storeBankData(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'account_holder' => 'required|string',
+            'bank_address'   => 'required|string',
+            'bank_name'      => 'required|string',
+            'billing_data_id' => 'required|integer|unique:bank_details,billing_data_id',
+            'iban'           => 'required|string',
+            'payment_terms'  => 'required|string',
+            'swift_bic'      => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $bankData = BankDetails::create([
+            'account_holder'  => $request->account_holder,
+            'bank_address'    => $request->bank_address,
+            'bank_name'       => $request->bank_name,
+            'billing_data_id' => $request->billing_data_id,
+            'iban'            => $request->iban,
+            'payment_terms'   => $request->payment_terms,
+            'swift_bic'       => $request->swift_bic,
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Bank data saved successfully.',
+            'data' => $bankData
+        ]);
+    }
+    public function storeWalletData(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'method' => 'required|integer',
+            'account'   => 'required|string',
+            'billing_data_id' => 'required|integer',
+
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $walletData = WalletsPaymentMethods::create([
+            'method'  => $request->method,
+            'account'    => $request->account,
+            'defaults'       => 1,
+            'billing_data_id' => $request->billing_data_id,
+          
+        ]);
+        $walletData->load('method');
+
+        return response()->json([
+            'status' => true,
+            'message' => 'wallet data saved successfully.',
+            'data' => [$walletData]
+        ]);
     }
 }

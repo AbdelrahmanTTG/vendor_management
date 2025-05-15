@@ -18,7 +18,9 @@ class BillingData extends Model
         'city',
         'street',
         'billing_address',
-        'billing_status'
+        'billing_status',
+        "wallet_required",
+        "bank_required"
     ];
     public function bankDetail()
     {

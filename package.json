@@ -30,7 +30,7 @@
         "@fullcalendar/react": "^6.1.5",
         "@fullcalendar/timegrid": "^6.1.5",
         "@react-google-maps/api": "^2.18.1",
-        "apexcharts": "^3.54.1",
+        "apexcharts": "^4.0.0",
         "babel-eslint": "^10.1.0",
         "body-scroll-lock": "^4.0.0-beta.0",
         "bootstrap-scss": "^5.2.3",
@@ -99,6 +99,7 @@
         "sweetalert2": "^11.7.3",
         "web-vitals": "^3.3.0",
         "world-map-geojson": "^1.0.2",
-        "react-dom": "^18.2.0"
+        "react-dom": "^18.2.0",
+        "pdfjs-dist": "^3.8.1"
     }
 }

@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect, useCallback, useImperativeHandle } from 'react';
-import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table, FormGroup, Form } from 'reactstrap';
+import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table, FormGroup, Form  } from 'reactstrap';
 import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
@@ -281,7 +281,7 @@ const Billing = (props) => {
     }, []);
     useEffect(() => {
         if (props?.Cru) {
-            console.log(props?.Cru)
+            // console.log(props?.Cru)
         }
     }, [props?.Cru]);
     useEffect(() => {
@@ -309,9 +309,14 @@ const Billing = (props) => {
                         } : null;
                         setSelectedOptionC(billing_currency);
                         // props.Currancy(billing_currency)
-                        setValue("billing_currency", billing_currency.value);
+                        setValue("billing_currency", billing_currency?.value);
                         setValue("street", data.billingData.street)
-                        setValue("billing_address", data.billingData.billing_address)
+                        setValue("billing_address", data.billingData?.billing_address)
+                        setValue(
+                            "bank_required",
+                            data.billingData?.bank_required
+                        );
+                        setValue("wallet_required", data.billingData?.wallet_required);
                         if (data.billingData?.billing_status !== null && data.billingData?.billing_status !== undefined) {
                             const vendorTypeOption = {
                                 value: "",
@@ -399,7 +404,12 @@ const Billing = (props) => {
             delete newFormData.method;
             delete newFormData.account;
             delete newFormData.defaults;
-
+            newFormData.bank_required
+                ? (newFormData.bank_required = 1)
+                : (newFormData.bank_required = 0);
+            newFormData.wallet_required
+                ? (newFormData.wallet_required = 1)
+                : (newFormData.wallet_required = 0);
             try {
                 const response = await axiosClient.post("storeBilling", newFormData);
                 // setdataB(response.data)
@@ -461,6 +471,11 @@ const Billing = (props) => {
         delete newFormData.method;
         delete newFormData.account;
         delete newFormData.defaults;
+        newFormData.bank_required ? newFormData.bank_required = 1 : newFormData.bank_required = 0;
+        newFormData.wallet_required
+            ? (newFormData.wallet_required = 1)
+            : (newFormData.wallet_required = 0);
+
         try {
             const response = await axiosClient.post("UpdateBillingData", newFormData);
             setIsSubmitting(true)
@@ -736,6 +751,60 @@ const Billing = (props) => {
                                                         </Col>
                                                     </FormGroup>
                                                 </Col>
+                                                {(props.backPermissions.edit == 1 && props?.permission?.bank_required != "hide") &&
+
+                                                 <Col md="6" className="mb-3">
+                                                    <FormGroup className="row">
+
+                                                        <Label className="col-sm-6 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span>Bank required in invoice</Label>
+                                                        <Col sm="6">
+                                                           
+                                                    <Controller
+                                                    name="bank_required"
+                                                    control={control}
+                                                     defaultValue={true}
+                                                    rules={{ required: false }}
+                                                    render={({ field }) => (
+                                                        <Input
+                                                        type="checkbox"
+                                                        id=""
+                                                        className="checkbox_animated mt-3"
+                                                        checked={field.value}
+                                                        onChange={(e) => field.onChange(e.target.checked)}
+                                                        />
+                                                    )}
+                                                    />
+                                                        </Col>
+                                                    </FormGroup>
+                                                    </Col>}
+                                                {(props.backPermissions.edit == 1 && props?.permission?.wallet_required != "hide") &&
+                                                
+                                                    <Col md="6" className="mb-3">
+                                                        <FormGroup className="row">
+
+                                                            <Label className="col-sm-6 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span>Wallet required in invoice</Label>
+                                                            <Col sm="6">
+                                                           
+                                                                <Controller
+                                                                    name="wallet_required"
+                                                                    control={control}
+                                                                    defaultValue={true}
+                                                                    rules={{ required: false }}
+                                                                    render={({ field }) => (
+                                                                        <Input
+                                                                            type="checkbox"
+                                                                            id=""
+                                                                            className="checkbox_animated mt-3"
+                                                                            checked={field.value}
+                                                                            onChange={(e) => field.onChange(e.target.checked)}
+                                                                        />
+                                                                    )}
+                                                                />
+                                                            </Col>
+                                                        </FormGroup>
+                                                    </Col>
+                                                }
+
                                             </Row>
 
                                         </div>
@@ -918,7 +987,7 @@ const Billing = (props) => {
                                                                                 </div>
                                                                             ) : 'No options found'}
                                                                             onChange={(option) => {
-                                                                                setSelectedOptionM(prev => ({ ...prev, [row.id]: option })); // تحديث القيمة لهذا الصف فقط
+                                                                                setSelectedOptionM(prev => ({ ...prev, [row.id]: option })); 
                                                                                 field.onChange(option.value);
                                                                             }}
                                                                         />

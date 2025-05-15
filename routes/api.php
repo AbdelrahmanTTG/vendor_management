@@ -119,6 +119,9 @@ Route::middleware([App\Http\Middleware\AdminAuth::class])->prefix('Portal')->gro
         Route::post('viewAvailabilityCheck', [AvailabilityController::class, 'viewAvailabilityCheck'])->name('Portal.viewAvailabilityCheck');
         Route::post('acceptAvailability', [AvailabilityController::class, 'acceptAvailability'])->name('Portal.acceptAvailability');
         Route::post('rejectAvailability', [AvailabilityController::class, 'rejectAvailability'])->name('Portal.rejectAvailability');
+        Route::post('NDA_vendor', [VendorProfileController::class, 'NDA_vendor'])->name('Portal.NDA_vendor');
+        Route::post('storeBankData', [VendorProfileController::class, 'storeBankData'])->name('Portal.storeBankData');
+        Route::post('storeWalletData', [VendorProfileController::class, 'storeWalletData'])->name('Portal.storeWalletData');
     });
     Route::group(['prefix' => 'Admin'], function () {
         Route::post('settingsData', [PortalAdminController::class, 'getSettingsData'])->name('Portal.getSettingsData');
