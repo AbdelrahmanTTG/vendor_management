@@ -32,6 +32,9 @@ jobs:
       - name: Install NPM dependencies
         run: npm install --legacy-peer-deps  # Optional
 
+      - name: Install dependencies
+        run: npm ci
+      
       - name: Build React App with Vite
         run: npm run build  # Adjust if your build command is different
 
