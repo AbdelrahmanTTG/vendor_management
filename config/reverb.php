@@ -126,7 +126,7 @@ return [
                 'tls' => [
                     'local_cert' => '/etc/letsencrypt/live/portal.lingotalents.com/fullchain.pem',
                     'local_pk'   => '/etc/letsencrypt/live/portal.lingotalents.com/privkey.pem',
-                    'verify_peer' => false,
+                    'verify_peer' => true,
                 ],
             ],
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),

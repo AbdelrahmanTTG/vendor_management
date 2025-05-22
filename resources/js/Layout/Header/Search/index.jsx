@@ -58,7 +58,7 @@ const Searchbar = () => {
         const items = [];
         setSearchValue(keyword);
         mainmenu.map(menuItems => {
-            menuItems.Items.filter(mItems => {
+            menuItems?.Items?.filter(mItems => {
                 if (mItems.title.toLowerCase().includes(keyword) && mItems.type === 'link') {
                     items.push(mItems);
                 }

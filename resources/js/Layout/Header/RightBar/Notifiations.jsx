@@ -14,6 +14,7 @@ const Notifications = () => {
     const [loading, setLoading] = useState(false);
     const [sound, setSound] = useState(0);
     const [total, setTotal] = useState(0);
+    const [audio] = useState(new Audio("/audio/smile-ringtone.mp3"));
 
     useEffect(() => {
         fetchNotifications(page);
@@ -31,6 +32,19 @@ const Notifications = () => {
             setNotifications((prev) => [...prev, ...data.data]);
             setHasMore(data.next_page_url !== null);
             setPage(pageNumber + 1);
+            if (audio.muted === false && audio.currentTime === 0) {
+                audio.muted = true;
+                audio
+                    .play()
+                    .then(() => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                        audio.muted = false;
+                    })
+                    .catch((err) => {
+                        console.error("Silent pre-play failed:", err);
+                    });
+            }
         } catch (error) {
             console.error("Error fetching notifications", error);
         }
@@ -47,7 +61,6 @@ const Notifications = () => {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, [page, hasMore, loading]);
-    const [audio] = useState(new Audio('/audio/Whatsapp Message Ringtone Download - MobCup.Com.Co.mp3'));
 
   
     useEffect(() => {
@@ -62,20 +75,31 @@ const Notifications = () => {
         const loadEcho = async () => {
             const { echo } = await import('../../../real-time');
             if (alias.length === 0) return;
-            alias?.forEach(email => {
-                echo.private(`notice-private-channel.User.${email}`)
-                    .listen('.notice', (e) => {
-                        if (e?.data?.brake === userId.email) return
-                        setSound(sound + 1)
-                        setTotal(total + 1)
+            alias?.forEach((email) => {
+                echo.private(`notice-private-channel.User.${email}`).listen(
+                    ".notice",
+                    (e) => {
+                        if (!e?.data) return;
+                        if (e.data.brake === userId?.email) return;
+
+                        
                         setNotifications((prev) => [
                             ...(Array.isArray(e.data) ? e.data : [e.data]),
-                            ...prev
+                            ...prev,
                         ]);
-                        audio.currentTime = 0;
-                        audio.play().catch(error => console.error('Failed to play sound:', error));
-                    });
+                        setTotal((prev) => prev + 1);
+                        try {
+                            audio.currentTime = 0;
+                            audio.play().catch((error) => {
+                                console.error("Failed to play sound:", error);
+                            });
+                        } catch (error) {
+                            console.error("Sound error:", error);
+                        }
+                    }
+                );
             });
+            
             return () => {
                 alias.forEach(email => {
                     echo.leave(`notice-private-channel.User.${email}`);
