@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import axiosClient from "./AxiosClint";
 import { useStateContext } from "./context/contextAuth";
 import { Image } from '../AbstractElements';
-import Logo from '../assets/images/logo/Lingotalents.png';
+import Logo from '../assets/images/logo/Lingotalents-logo.png';
 import login_interface from '../assets/images/login/ok1.jpg';
 import { ToastContainer } from "react-toastify";
 import Toast from "./Toast";
