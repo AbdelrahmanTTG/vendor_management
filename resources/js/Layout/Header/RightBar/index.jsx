@@ -12,6 +12,7 @@ import MoonLight from './MoonLight';
 import Notifications from './Notifiations';
 import Profile from './Profile';
 import LeftBar from "../LeftBar";
+import ToDo from "./ToDo";
 
 const Rightbar = () => {
     const { sidebarResponsive } = useContext(CustomizerContext);
@@ -40,21 +41,32 @@ const Rightbar = () => {
     return (
         <Fragment>
             <div className="nav-right col pull-right right-menu p-0">
-                <UL attrUL={{ className: `simple-list d-flex flex-row nav-menus ${sidebarResponsive ? 'open' : ''}` }} >
-                    <LI><a className="text-dark" href="#javascript" onClick={goFull}>
-                        <Maximize />
-                    </a></LI>
+                <UL
+                    attrUL={{
+                        className: `simple-list d-flex flex-row nav-menus ${
+                            sidebarResponsive ? "open" : ""
+                        }`,
+                    }}
+                >
+                    <LI>
+                        <a
+                            className="text-dark"
+                            href="#javascript"
+                            onClick={goFull}
+                        >
+                            <Maximize />
+                        </a>
+                    </LI>
                     {/* <LanguageClass /> */}
                     {/* <Bookmarks /> */}
                     <Notifications />
-                    {/* <MoonLight /> */}
+                    <ToDo />
                     {/* <MessageDrop /> */}
                     {/* <LogoutClass /> */}
                     <Profile />
-
                 </UL>
             </div>
-        </Fragment >
+        </Fragment>
     );
 };
 

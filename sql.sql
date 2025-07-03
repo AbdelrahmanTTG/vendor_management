@@ -661,3 +661,5 @@ UPDATE `screen` SET `use_system` = 'ERP,VM' WHERE `screen`.`id` = 123;
 UPDATE `screen` SET `use_system` = 'ERP,VM' WHERE `screen`.`id` = 124;
 UPDATE `screen` SET `use_system` = 'ERP,VM' WHERE `screen`.`id` = 120;
 ALTER TABLE withdrawals ADD manual_rate TINYINT(1) NULL ;
+ALTER TABLE `payment_requests` ADD `entry_exit` TINYINT NULL AFTER `user_id`;
+INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`,`use_system`) VALUES ('296', '1', 'Dashboard', 'admin/Excel', '0','ERP');

@@ -10,6 +10,8 @@ const AllTasks = React.lazy(() => import('./pages/VM/Reports/AllTasks'));
 const VmActivity = React.lazy(() => import('./pages/VM/Reports/VmActivity'));
 const VPOs = React.lazy(() => import('./pages/VM/Reports/VPOS'));
 const AliasEmail = React.lazy(() => import('./pages/Admin/AliasEmail/bac'));
+const Tasks = React.lazy(() => import("./pages/Admin/tasks/bac"));
+
 import ErrorBoundary from "./ErrorBoundary";
 
 import axios from './pages/AxiosClint';
@@ -60,549 +62,803 @@ const fetchAllowedRoutes = async () => {
 };
 export const VM = (allowedPermissions) => [
     {
-        path: '',
-        element: <Home />
+        path: "",
+        element: <Home />,
     },
     {
-        path: 'Tickets',
+        path: "Tickets",
         element: (
             <LazyWrapper>
-                <Tickets permissions={allowedPermissions['Tickets']} />
+                <Tickets permissions={allowedPermissions["Tickets"]} />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'AliasEmail',
+        path: "AliasEmail",
         element: (
             <LazyWrapper>
-                <AliasEmail  />
+                <AliasEmail />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'accounting/vpoStatus',
+        path: "accounting/vpoStatus",
         element: (
             <LazyWrapper>
-                <VPOs permissions={allowedPermissions['accounting/vpoStatus']} />
+                <VPOs
+                    permissions={allowedPermissions["accounting/vpoStatus"]}
+                />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'ViewTicket',
+        path: "ViewTicket",
         element: (
             <LazyWrapper>
-                <ViewTicket permissions={allowedPermissions['ViewTicket']}/>
+                <ViewTicket permissions={allowedPermissions["ViewTicket"]} />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'reports/vmActivity',
+        path: "reports/vmActivity",
         element: (
             <LazyWrapper>
-                <VmActivity permissions={allowedPermissions['reports/vmActivity']} />
+                <VmActivity
+                    permissions={allowedPermissions["reports/vmActivity"]}
+                />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'reports/allTasks',
+        path: "reports/allTasks",
         element: (
             <LazyWrapper>
-                <AllTasks permissions={allowedPermissions['reports/allTasks']} />
+                <AllTasks
+                    permissions={allowedPermissions["reports/allTasks"]}
+                />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'vendors/Profile',
+        path: "vendors/Profile",
         element: (
             <LazyWrapper>
-                <ProfileIndex permissions={allowedPermissions['vendors/Profile']} />
+                <ProfileIndex
+                    permissions={allowedPermissions["vendors/Profile"]}
+                />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'vendors/profiletest',
+        path: "vendors/profiletest",
         element: (
             <LazyWrapper>
                 <VendorProfile
                     permissions={{
-                        Profile: allowedPermissions['vendors/Profiletest'],
-                        PersonalData: allowedPermissions['PersonalData'],
-                        Messaging: allowedPermissions['Messaging type'],
-                        VMnote: allowedPermissions['VMnote'],
-                        FilesCertificate: allowedPermissions['FilesCertificate'],
-                        Education: allowedPermissions['Education'],
-                        Experience: allowedPermissions['Experience'],
-                        Test: allowedPermissions['Test'],
-                        Billing: allowedPermissions['Billing'],
-                        Portal_User: allowedPermissions['Portal_User'],
-                        Price_List: allowedPermissions['Price_List'],
-                        Evaluation: allowedPermissions['Test'],
-                        Feedback: allowedPermissions['Feedback'],
-                        Vacation: allowedPermissions['Vacation'],
-                        History: allowedPermissions['History'],
+                        Profile: allowedPermissions["vendors/Profiletest"],
+                        PersonalData: allowedPermissions["PersonalData"],
+                        Messaging: allowedPermissions["Messaging type"],
+                        VMnote: allowedPermissions["VMnote"],
+                        FilesCertificate:
+                            allowedPermissions["FilesCertificate"],
+                        Education: allowedPermissions["Education"],
+                        Experience: allowedPermissions["Experience"],
+                        Test: allowedPermissions["Test"],
+                        Billing: allowedPermissions["Billing"],
+                        Portal_User: allowedPermissions["Portal_User"],
+                        Price_List: allowedPermissions["Price_List"],
+                        Evaluation: allowedPermissions["Test"],
+                        Feedback: allowedPermissions["Feedback"],
+                        Vacation: allowedPermissions["Vacation"],
+                        History: allowedPermissions["History"],
                     }}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'vendors/editprofiletest',
+        path: "vendors/editprofiletest",
         element: (
             <LazyWrapper>
-                <EditVendorProfile permissions={
-                    {
-                        Profile: allowedPermissions['vendors/editprofiletest'],
-                        PersonalData: allowedPermissions['PersonalData'],
-                        Messaging: allowedPermissions['Messaging type'],
-                        VMnote: allowedPermissions['VMnote'],
-                        FilesCertificate: allowedPermissions['FilesCertificate'],
-                        Education: allowedPermissions['Education'],
-                        Experience: allowedPermissions['Experience'],
-                        Test: allowedPermissions['Test'],
-                        Billing: allowedPermissions['Billing'],
-                        Portal_User: allowedPermissions['Portal_User'],
-                        Price_List: allowedPermissions['Price_List'],
-                        Evaluation: allowedPermissions['Test'],
-                        Feedback: allowedPermissions['Feedback'],
-                        Vacation: allowedPermissions['Vacation'],
-                        History: allowedPermissions['History'],
-                    }
-                } />
+                <EditVendorProfile
+                    permissions={{
+                        Profile: allowedPermissions["vendors/editprofiletest"],
+                        PersonalData: allowedPermissions["PersonalData"],
+                        Messaging: allowedPermissions["Messaging type"],
+                        VMnote: allowedPermissions["VMnote"],
+                        FilesCertificate:
+                            allowedPermissions["FilesCertificate"],
+                        Education: allowedPermissions["Education"],
+                        Experience: allowedPermissions["Experience"],
+                        Test: allowedPermissions["Test"],
+                        Billing: allowedPermissions["Billing"],
+                        Portal_User: allowedPermissions["Portal_User"],
+                        Price_List: allowedPermissions["Price_List"],
+                        Evaluation: allowedPermissions["Test"],
+                        Feedback: allowedPermissions["Feedback"],
+                        Vacation: allowedPermissions["Vacation"],
+                        History: allowedPermissions["History"],
+                    }}
+                />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Time zone',
+        path: "Time zone",
         element: (
             <LazyWrapper>
                 <CodeTable
-                    permissions={allowedPermissions['Time zone']}
+                    permissions={allowedPermissions["Time zone"]}
                     key="Time zone"
-                    table="Time zone" dataTable="vendortimezone" header={["id", "zone", "gmt","Country", 'Active', "Edit", "Delete"]}
+                    table="Time zone"
+                    dataTable="vendortimezone"
+                    header={[
+                        "id",
+                        "zone",
+                        "gmt",
+                        "Country",
+                        "Active",
+                        "Edit",
+                        "Delete",
+                    ]}
                     fields={[
-                        { name: 'zone', type: 'text', field: "input", label: "zone" },
-                        { name: 'gmt', type: 'text', field: "input", label: "gmt" },
-                        { name: 'parent', type: 'text', field: "selec", tableData: "countries", label: "Country" },
                         {
-                            name: 'Active', type: 'number', field: "selec", label: "Active", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
-
+                            name: "zone",
+                            type: "text",
+                            field: "input",
+                            label: "zone",
+                        },
+                        {
+                            name: "gmt",
+                            type: "text",
+                            field: "input",
+                            label: "gmt",
+                        },
+                        {
+                            name: "parent",
+                            type: "text",
+                            field: "selec",
+                            tableData: "countries",
+                            label: "Country",
+                        },
+                        {
+                            name: "Active",
+                            type: "number",
+                            field: "selec",
+                            label: "Active",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                     columns={["id", "zone", "gmt", "Active"]}
                     related={{
-                        'table': 'countries',
-                        'foreign_key': 'parent',
-                        'primary_key': 'id',
-                        'columns': ['id', 'name']
+                        table: "countries",
+                        foreign_key: "parent",
+                        primary_key: "id",
+                        columns: ["id", "name"],
                     }}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Region',
+        path: "Region",
         element: (
             <LazyWrapper>
                 <CodeTable
-                    permissions={allowedPermissions['Region']}
-
+                    permissions={allowedPermissions["Region"]}
                     key="Region"
                     table="Region"
                     dataTable="regions"
                     columns={["id", "name", "abbreviations", "Active"]}
-                    header={['ID', 'name', 'abbreviations', "Active", "Edit", "Delete"]}
+                    header={[
+                        "ID",
+                        "name",
+                        "abbreviations",
+                        "Active",
+                        "Edit",
+                        "Delete",
+                    ]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "name" },
-                        { name: 'abbreviations', type: 'text', field: "input", label: "abbreviations" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
-
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "name",
+                        },
+                        {
+                            name: "abbreviations",
+                            type: "text",
+                            field: "input",
+                            label: "abbreviations",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Country',
+        path: "Country",
         element: (
             <LazyWrapper>
-
                 <CodeTable
                     key="Country"
-                    permissions={allowedPermissions['Country']}
-
-                    table="Country" dataTable="countries" header={["id", " Name", "Region", "Active", "Edit", "Delete"]}
+                    permissions={allowedPermissions["Country"]}
+                    table="Country"
+                    dataTable="countries"
+                    header={[
+                        "id",
+                        " Name",
+                        "Region",
+                        "Active",
+                        "Edit",
+                        "Delete",
+                    ]}
                     related={{
-                        'table': 'regions',
-                        'foreign_key': 'region',
-                        'primary_key': 'id',
-                        'columns': ['id', 'name']
+                        table: "regions",
+                        foreign_key: "region",
+                        primary_key: "id",
+                        columns: ["id", "name"],
                     }}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
-                        { name: 'region', type: 'text', field: "selec", tableData: "regions", label: "Region" },
-                        
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "region",
+                            type: "text",
+                            field: "selec",
+                            tableData: "regions",
+                            label: "Region",
+                        },
 
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                     columns={["id", "name", "region", "Active"]}
-
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Messaging type',
+        path: "Messaging type",
         element: (
             <LazyWrapper>
                 <CodeTable
                     key="Messaging type"
-                    permissions={allowedPermissions['Messaging type']}
-                    table="Messaging type" dataTable="messaging_types"
-                    header={['ID', 'name', "Active", "Edit", "Delete"]}
+                    permissions={allowedPermissions["Messaging type"]}
+                    table="Messaging type"
+                    dataTable="messaging_types"
+                    header={["ID", "name", "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "name" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
-
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "name",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Main-Subject Matter',
+        path: "Main-Subject Matter",
         element: (
             <LazyWrapper>
-
                 <CodeTable
-                    permissions={allowedPermissions['Main-Subject Matter']}
+                    permissions={allowedPermissions["Main-Subject Matter"]}
                     key="Main-Subject Matter"
-                    table="Main Subject Matter" dataTable="mainsubject" columns={["id", "name", "Active"]} header={["id", " name", "Active", "Edit", "Delete"]}
+                    table="Main Subject Matter"
+                    dataTable="mainsubject"
+                    columns={["id", "name", "Active"]}
+                    header={["id", " name", "Active", "Edit", "Delete"]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "name" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
-
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "name",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Sub-Subject Matter',
+        path: "Sub-Subject Matter",
         element: (
             <LazyWrapper>
                 <CodeTable
-                    permissions={allowedPermissions['Sub-Subject Matter']}
+                    permissions={allowedPermissions["Sub-Subject Matter"]}
                     key="Sub-Subject Matter"
                     table="Sub-Subject Matter"
                     dataTable="fields"
-                    columns={["id", "name","parent", "Active"]}
-                    header={["id", " name", "Main Subject Matter", "Active", "Edit", "Delete"]}
+                    columns={["id", "name", "parent", "Active"]}
+                    header={[
+                        "id",
+                        " name",
+                        "Main Subject Matter",
+                        "Active",
+                        "Edit",
+                        "Delete",
+                    ]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
-                        { name: 'parent', type: 'text', field: "selec", tableData: "MainSubjectMatter", label: "Main Subject Matter" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "parent",
+                            type: "text",
+                            field: "selec",
+                            tableData: "MainSubjectMatter",
+                            label: "Main Subject Matter",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active ",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                     related={{
-                        'table': 'mainsubject',
-                        'foreign_key': 'parent',
-                        'primary_key': 'id',
-                        'columns': ['id', 'name']
+                        table: "mainsubject",
+                        foreign_key: "parent",
+                        primary_key: "id",
+                        columns: ["id", "name"],
                     }}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'services',
+        path: "services",
         element: (
             <LazyWrapper>
                 <CodeTable
-                    permissions={allowedPermissions['services']}
+                    permissions={allowedPermissions["services"]}
                     key="Service"
                     table="Service"
                     dataTable="services"
                     columns={["id", "name", "abbreviations", "Active"]}
-                    header={["id", " name", "abbreviations", "Active", "Edit", "Delete"]}
+                    header={[
+                        "id",
+                        " name",
+                        "abbreviations",
+                        "Active",
+                        "Edit",
+                        "Delete",
+                    ]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
-                        { name: 'abbreviations', type: 'text', field: "input", label: "Abbreviations" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "abbreviations",
+                            type: "text",
+                            field: "input",
+                            label: "Abbreviations",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active ",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'task_type',
+        path: "task_type",
         element: (
             <LazyWrapper>
                 <CodeTable
                     key="Task Type"
-                    permissions={allowedPermissions['task_type']}
+                    permissions={allowedPermissions["task_type"]}
                     table="Task Type"
                     dataTable="task_type"
-                    header={["id", " name", "Service", "Active", "Edit", "Delete"]}
+                    header={[
+                        "id",
+                        " name",
+                        "Service",
+                        "Active",
+                        "Edit",
+                        "Delete",
+                    ]}
                     related={{
-                        'table': 'services',
-                        'foreign_key': 'parent',
-                        'primary_key': 'id',
-                        'columns': ['id', 'name']
+                        table: "services",
+                        foreign_key: "parent",
+                        primary_key: "id",
+                        columns: ["id", "name"],
                     }}
                     columns={["id", "name", "parent", "Active"]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
-                        { name: 'parent', type: 'text', field: "selec", tableData: "services", label: "Service" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "parent",
+                            type: "text",
+                            field: "selec",
+                            tableData: "services",
+                            label: "Service",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Currency',
+        path: "Currency",
         element: (
             <LazyWrapper>
                 <CodeTable
                     key="Currency"
-                    permissions={allowedPermissions['Currency']}
+                    permissions={allowedPermissions["Currency"]}
                     table="Currency"
                     dataTable="currency"
                     header={["id", " name", "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active ",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Wallets Payment methods',
+        path: "Wallets Payment methods",
         element: (
             <LazyWrapper>
                 <CodeTable
-                    permissions={allowedPermissions['Wallets Payment methods']}
+                    permissions={allowedPermissions["Wallets Payment methods"]}
                     key="Wallets Payment methods"
                     table="Wallets Payment methods"
                     dataTable="vendor_payment_methods"
                     header={["id", " name", "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active ",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
-
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Tools',
+        path: "Tools",
         element: (
             <LazyWrapper>
                 <CodeTable
-                    permissions={allowedPermissions['Tools']}
-
+                    permissions={allowedPermissions["Tools"]}
                     key="Tools"
                     table="Tools"
                     dataTable="tools"
                     columns={["id", "name", "Active"]}
                     header={["id", " name", "Active", "Edit", "Delete"]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active ",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'languages',
+        path: "languages",
         element: (
             <LazyWrapper>
                 <CodeTable
                     key="Languages"
-                    permissions={allowedPermissions['languages']}
+                    permissions={allowedPermissions["languages"]}
                     table="Languages"
                     dataTable="languages"
-                    header={['ID', 'name', "Active", "Edit", "Delete"]}
+                    header={["ID", "name", "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active ",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Dialect',
+        path: "Dialect",
         element: (
             <LazyWrapper>
                 <CodeTable
                     key="Dialect"
-                    permissions={allowedPermissions['Dialect']}
+                    permissions={allowedPermissions["Dialect"]}
                     table="Dialect"
                     dataTable="languages_dialect"
-                    header={["id", "dialect", "language", "Active", "Edit", "Delete"]}
+                    header={[
+                        "id",
+                        "dialect",
+                        "language",
+                        "Active",
+                        "Edit",
+                        "Delete",
+                    ]}
                     columns={["id", "dialect", "language", "Active"]}
                     related={{
-                        'table': 'languages',
-                        'foreign_key': 'language',
-                        'primary_key': 'id',
-                        'columns': ["id", 'name']
+                        table: "languages",
+                        foreign_key: "language",
+                        primary_key: "id",
+                        columns: ["id", "name"],
                     }}
                     fields={[
-                        { name: 'dialect', type: 'text', field: "input", label: "Dialect" },
-                        { name: 'language', type: 'text', field: "selec", tableData: "languages", label: "language" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "dialect",
+                            type: "text",
+                            field: "input",
+                            label: "Dialect",
+                        },
+                        {
+                            name: "language",
+                            type: "text",
+                            field: "selec",
+                            tableData: "languages",
+                            label: "language",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active ",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'Unit',
+        path: "Unit",
         element: (
             <LazyWrapper>
                 <CodeTable
                     key="unit"
                     table="Unit"
-                    permissions={allowedPermissions['Unit']}
+                    permissions={allowedPermissions["Unit"]}
                     dataTable="unit"
-                    header={['ID', 'name', "Active", "Edit", "Delete"]}
+                    header={["ID", "name", "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active ",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
     {
-        path: 'University Degree',
+        path: "University Degree",
         element: (
             <LazyWrapper>
                 <CodeTable
                     key="University_Degree"
                     table="University Degree"
-                    permissions={allowedPermissions['University Degree']}
+                    permissions={allowedPermissions["University Degree"]}
                     dataTable="University_Degree"
-                    header={['ID', 'name', "Active", "Edit", "Delete"]}
+                    header={["ID", "name", "Active", "Edit", "Delete"]}
                     columns={["id", "name", "Active"]}
                     fields={[
-                        { name: 'name', type: 'text', field: "input", label: "Name" },
                         {
-                            name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-                                { value: 1, label: 'Active' },
-                                { value: 0, label: 'Inactive' },
-                            ]
-                        }
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active ",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
                     ]}
                 />
             </LazyWrapper>
-        )
+        ),
     },
-    // {
-    //     path: 'Major',
-    //     element: (
-    //         <LazyWrapper>
-    //             <CodeTable
-    //                 key="Major"
-    //                 table="Major"
-    //                 permissions={allowedPermissions['Major']}
-    //                 dataTable="major"
-    //                 header={['ID', 'name', "Active", "Edit", "Delete"]}
-    //                 columns={["id", "name", "Active"]}
-    //                 fields={[
-    //                     { name: 'name', type: 'text', field: "input", label: "Name" },
-    //                     {
-    //                         name: 'Active', type: 'text', field: "selec", label: "Active ", static: [
-    //                             { value: 1, label: 'Active' },
-    //                             { value: 0, label: 'Inactive' },
-    //                         ]
-    //                     }
-    //                 ]}
-    //             />
-    //         </LazyWrapper>
-    //     )
-    // }
-
-]
+    {
+        path: "University Degree",
+        element: (
+            <LazyWrapper>
+                <CodeTable
+                    key="University_Degree"
+                    table="University Degree"
+                    permissions={allowedPermissions["University Degree"]}
+                    dataTable="University_Degree"
+                    header={["ID", "name", "Active", "Edit", "Delete"]}
+                    columns={["id", "name", "Active"]}
+                    fields={[
+                        {
+                            name: "name",
+                            type: "text",
+                            field: "input",
+                            label: "Name",
+                        },
+                        {
+                            name: "Active",
+                            type: "text",
+                            field: "selec",
+                            label: "Active ",
+                            static: [
+                                { value: 1, label: "Active" },
+                                { value: 0, label: "Inactive" },
+                            ],
+                        },
+                    ]}
+                />
+            </LazyWrapper>
+        ),
+    },
+    {
+        path: "tasks",
+        element: (
+            <LazyWrapper>
+                <Tasks />
+            </LazyWrapper>
+        ),
+    },
+];
 export const getAllowedRoutes = async () => {
     const allowedRoutes = await fetchAllowedRoutes();
+
     const allowedUrls = allowedRoutes.map(route => route.url.toLowerCase());
+
     const permissions = allowedRoutes.reduce((acc, route) => {
         const urlKey = route?.url;
         acc[urlKey] = {
@@ -614,10 +870,18 @@ export const getAllowedRoutes = async () => {
         };
         return acc;
     }, {});
-    return VM(permissions).filter(route =>
-        checkIfRouteAllowed(route.path.toLowerCase(), allowedUrls)
-    );
+
+    const alwaysIncludedRoutes = ["tasks"];
+
+    return VM(permissions).filter(route => {
+        const path = route.path.toLowerCase();
+        return (
+            checkIfRouteAllowed(path, allowedUrls) ||
+            alwaysIncludedRoutes.includes(path)
+        );
+    });
 };
+
 
 // export const VM =  [
 //     {

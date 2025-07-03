@@ -63,6 +63,13 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/updateFormat', [VendorProfileController::class, 'updateFormat']);
     Route::delete('/deleteFormat', [VendorProfileController::class, 'deleteFormat']);
     Route::post('/getPriceList', [VendorProfileController::class, 'getPriceListById']);
+    Route::post('/userTask', [VendorProfileController::class, 'storeUserTask']);
+    Route::get('/allTask', [VendorProfileController::class, 'getUserTasks']);
+    Route::post('/updateTaskStatus', [VendorProfileController::class, 'updateTaskStatus']);
+    Route::post('/updateTask', [VendorProfileController::class, 'updateTask']);
+    Route::delete('deleteTask/{id}', [VendorProfileController::class, 'deleteTask']);
+    Route::get('/getAllTask', [VendorProfileController::class, 'getAllUserTasks']);
+
 
     Route::post('/getTickets', [TicketsController::class, 'index']);
     Route::post('/getTicketsTotal', [TicketsController::class, 'getTicketsTotal']);

@@ -40,6 +40,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class VendorProfileController extends Controller
 {
@@ -2341,5 +2342,182 @@ class VendorProfileController extends Controller
             'message' => 'wallet data saved successfully.',
             'data' => [$walletData]
         ]);
+    }
+    public function storeUserTask(Request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Token invalid or expired'], 401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'title'       => 'required|string|max:255',
+            'due_date'    => 'required|date',
+            'status'      => 'nullable|integer',
+            'description' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $id = DB::table('user_tasks')->insertGetId([
+            'user_id'     => $user->id,
+            'title'       => $request->title,
+            'due_date'    => $request->due_date,
+            'status'      => $request->status,
+            'description' => $request->description,
+            'created_at'  => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Task created successfully',
+            'task' => [
+                'id' => $id,
+                'title' => $request->title,
+                'due_date' => $request->due_date,
+                'status' => $request->status,
+                'description' => $request->description,
+                'created_at' => now(),
+            ]
+        ], 201);
+    }
+   
+    public function getUserTasks(Request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Token invalid or expired'], 401);
+        }
+
+        $limit = $request->input('limit', 5); 
+        $offset = $request->input('offset', 0); 
+
+        $query = DB::table('user_tasks')->where('user_id', $user->id);
+
+        $total = $query->count();
+        $tasks = $query->orderByDesc('due_date')->offset($offset)->limit($limit)->get();
+
+        return response()->json([
+            'tasks' => $tasks,
+            'total' => $total,
+        ], 200);
+    }
+    public function updateTaskStatus(Request $request)
+    {
+        $request->validate([
+            'task_id' => 'required|integer|exists:user_tasks,id',
+            'status' => 'required|integer',
+        ]);
+
+        $updated = DB::table('user_tasks')
+            ->where('id', $request->task_id)
+            ->update(['status' => $request->status]);
+
+        if ($updated) {
+            return response()->json(['message' => 'Task status updated successfully.'], 200);
+        } else {
+            return response()->json(['error' => 'Task not found or not updated.'], 404);
+        }
+    }
+    public function updateTask(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer|exists:user_tasks,id',
+            'title' => 'required|string|max:255',
+            'due_date' => 'required|date',
+            'status' => 'required|integer',
+            'description' => 'required|string',
+        ]);
+
+        $updated = DB::table('user_tasks')
+            ->where('id', $request->id)
+            ->update([
+                'title' => $request->title,
+                'due_date' => $request->due_date,
+                'status' => $request->status,
+                'description' => $request->description,
+                'updated_at' => now(),
+            ]);
+
+        if ($updated) {
+            return response()->json(['message' => 'Task updated successfully.']);
+        }
+
+        return response()->json(['error' => 'Task not found or not updated.'], 404);
+    }
+    public function deleteTask($id)
+    {
+        $deleted = DB::table('user_tasks')->where('id', $id)->delete();
+
+        if ($deleted) {
+            return response()->json(['message' => 'Task deleted successfully.']);
+        }
+
+        return response()->json(['error' => 'Task not found or could not be deleted.'], 404);
+    }
+    public function getAllUserTasks(Request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Token invalid or expired'], 401);
+        }
+
+        $perPage = $request->input('per_page', 5);
+        $sortBy = $request->input('sort_by', 'due_date');
+        $sortOrder = $request->input('sort_order', 'desc');
+        $queryParams = $request->input('queryParams', []);
+
+        $allowedSorts = ['id', 'created_at', 'due_date', 'title'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'due_date';
+        }
+
+        $query = DB::table('user_tasks')->where('user_id', $user->id);
+
+        foreach ($queryParams as $key => $val) {
+            if (empty($val)) continue;
+
+            if (Str::startsWith($key, 'start_date_')) {
+                $column = Str::after($key, 'start_date_');
+                $query->whereDate($column, '>=', $val);
+            } elseif (Str::startsWith($key, 'end_date_')) {
+                $column = Str::after($key, 'end_date_');
+                $query->whereDate($column, '<=', $val);
+            } elseif (is_array($val)) {
+                $query->where(function ($q) use ($key, $val) {
+                    foreach ($val as $index => $v) {
+                        $index === 0
+                            ? $q->where($key, 'like', '%' . $v . '%')
+                            : $q->orWhere($key, 'like', '%' . $v . '%');
+                    }
+                });
+            } else {
+                $query->where($key, 'like', '%' . $val . '%');
+            }
+        }
+
+
+        $tasks = $query->orderBy($sortBy, $sortOrder)->paginate($perPage);
+
+        return response()->json([
+            'tasks' => $tasks->items(),
+            'total' => $tasks->total(),
+            'current_page' => $tasks->currentPage(),
+            'last_page' => $tasks->lastPage(),
+            'per_page' => $tasks->perPage(),
+        ], 200);
     }
 }
