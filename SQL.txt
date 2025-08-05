@@ -328,3 +328,11 @@ INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `ed
 
 ALTER TABLE `vendor_invoices` CHANGE `wallet_method` `wallet_method` INT(11) NULL DEFAULT NULL;
 ALTER TABLE `vm_ticket` ADD `requester_function` TINYINT(1) NULL COMMENT '1:sales/2:pm' ;
+
+ALTER TABLE `vendor` ADD COLUMN `vendor_brands` VARCHAR(255) NULL AFTER `brand`;
+UPDATE `vendor` SET `vendor_brands` = `brand`;
+
+ALTER TABLE `vendor_sheet` ADD COLUMN `sheet_brand` INT NULL ;
+UPDATE `vendor_sheet` vs
+JOIN `vendor` v ON vs.vendor = v.id
+SET vs.sheet_brand = v.brand;

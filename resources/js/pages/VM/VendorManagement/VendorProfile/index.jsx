@@ -11,12 +11,12 @@ import SweetAlert from 'sweetalert2'
 const ModelEdit = React.lazy(() => import('./models/modelEditPriceList'));
 import ErrorBoundary from "../../../../ErrorBoundary";
 const Vendor = (props) => {
-   const LazyWrapper = ({ children }) => (
-          <ErrorBoundary>
-        <Suspense fallback={<div>Loading...</div>}>
-            {children}
+    const LazyWrapper = ({ children }) => (
+        <ErrorBoundary>
+            <Suspense fallback={<div>Loading...</div>}>
+                {children}
             </Suspense>
-            </ErrorBoundary>
+        </ErrorBoundary>
     );
     const getData = (newData) => {
         setVendors((prevData) => {
@@ -68,6 +68,7 @@ const Vendor = (props) => {
     const [totalVendors, setTotalVendors] = useState(null);
     const [price, setPrice] = useState(null);
     const [progress, setProgress] = useState(0);
+    const [optionsVB, setOptionsVB] = useState([]);
 
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
@@ -185,6 +186,7 @@ const Vendor = (props) => {
                 { value: 'contact_other1', label: 'Other Contact 1' },
                 { value: 'contact_other2', label: 'Other Contact 2' },
                 { value: 'contact_other3', label: 'Other Contact 3' },
+                { value: 'vendor_brands', label: 'Brands' },
             ],
         },
         {
@@ -200,6 +202,7 @@ const Vendor = (props) => {
                 { value: 'task_type', label: ' Task type' },
                 { value: 'unit', label: 'Unit' },
                 { value: 'service', label: 'Service' },
+                { value: 'sheet_brand', label: 'Sheet Brand' },
             ],
         },
         {
@@ -262,7 +265,7 @@ const Vendor = (props) => {
     }
 
     const searchVendors = (event) => {
-        const priceListArr = ["source_lang", "target_lang", "service", "task_type", 'unit', 'rate', 'special_rate', 'currency', 'subject', 'sub_subject'];
+        const priceListArr = ["source_lang", "target_lang", "service", "task_type", 'unit', 'rate', 'special_rate', 'currency', 'subject', 'sub_subject', 'sheet_brand'];
         const EducationArr = ["university_name", 'latest_degree', 'major', 'year_of_graduation']
         const TestArr = ['source_lang2', "target_lang2", "main_subject", "sub_subject2", "test_type", 'test_result'];
         const ExpArr = ["experience_year"]
@@ -412,25 +415,25 @@ const Vendor = (props) => {
         try {
             setLoading2(true)
             const { data } = await axiosClient.post("Vendors", payload);
-            
+
             setVendors(data.vendors.data);
             setFields(data.fields)
             setFormats(data.formats)
             setTotalPages(data.vendors.last_page);
             setTotalVendors(data.totalVendors)
-            
+
             if (data.AllVendors) {
                 exportToExcel(data.AllVendors)
                 setProgress(50);
             }
-            
+
         } catch (err) {
             console.error(err);
         } finally {
             setLoading2(false)
         }
     });
-   
+
     useEffect(() => {
         fetchData();
     }, [currentPage, queryParams, sortConfig, formatsChanged]);
@@ -455,9 +458,9 @@ const Vendor = (props) => {
                 if (result.isConfirmed) {
                     fetchData(true)
                 }
-            }); 
+            });
         }
-   
+
 
 
     };
@@ -582,7 +585,9 @@ const Vendor = (props) => {
             'experiences.experience_year': 'Experience year',
             'bank_details.bank_name': 'Bank name',
             'billing_data.billing_status': 'Billing status',
-            "wallets_payment_methods.method":'Wallet payment method'
+            "wallets_payment_methods.method": 'Wallet payment method',
+            'brands': 'Brands',
+            'sheet_brand': 'Sheet Brand'
         };
         format?.flatMap(element =>
             element.format = element.format.split(',').map(value => {
@@ -598,14 +603,22 @@ const Vendor = (props) => {
     }
 
     const exportToExcel = async (exportEx) => {
-        setProgress(5); 
+        setProgress(5);
         let data = [];
         if (exportEx) {
             data = exportEx[1].map(item => {
+
                 if (typeof item === 'object' && item !== null) {
                     const processedItem = { ...item };
                     for (const key in processedItem) {
-                        if (typeof processedItem[key] === 'object' && processedItem[key] !== null) {
+                        if (Array.isArray(processedItem[key])) {                          
+                            processedItem[key] = processedItem[key].map(el => {
+                                if (typeof el === 'object' && el !== null) {
+                                    return el.name || '';
+                                }
+                                return el;
+                            }).join(', ');
+                        } else if (typeof processedItem[key] === 'object' && processedItem[key] !== null) {
                             processedItem[key] = String(processedItem[key]?.name || processedItem[key]?.gmt || processedItem[key]?.dialect || '');
                         } else if (processedItem[key] === null || processedItem[key] === undefined) {
                             processedItem[key] = '';
@@ -703,7 +716,7 @@ const Vendor = (props) => {
                     right: { style: 'thin' }
                 };
             });
-            setProgress(30 + Math.round(((index + 1) / data.length) * 60));   
+            setProgress(30 + Math.round(((index + 1) / data.length) * 60));
         });
 
         workbook.xlsx.writeBuffer().then(buffer => {
@@ -714,12 +727,12 @@ const Vendor = (props) => {
             a.download = 'Vendor-List.xlsx';
             a.click();
             window.URL.revokeObjectURL(url);
-            setProgress(100); 
-            setTimeout(() => setProgress(0), 2000); 
+            setProgress(100);
+            setTimeout(() => setProgress(0), 2000);
         });
     };
 
-   
+
 
 
     function removeLastIfNumber(str) {
@@ -786,11 +799,9 @@ const Vendor = (props) => {
             'vendorTest.target_lang': 'Target language',
             'vendorTest.main_subject': 'Main-Subject Matter',
             'vendorTest.sub_subject': 'Sub–Subject Matter',
-       
+            'sheet_brand': 'Sheet Brand'
 
-            
 
-            
         };
 
         return mapping[input] || input;
@@ -835,6 +846,14 @@ const Vendor = (props) => {
         setVisibleItems(prev => ({ ...prev, [id]: prev[id] + 5 }));
     };
     function renderValue(value) {
+        if (Array.isArray(value)) {
+            return value.map(item => {
+                if (typeof item === 'object' && item !== null) {
+                    return item.name || '';
+                }
+                return item;
+            }).join(', ');
+        }
         if (value && typeof value === 'object' && value !== null) {
             return value.name || value.gmt;
         }
@@ -921,7 +940,7 @@ const Vendor = (props) => {
 
     return (
         <Fragment >
-           
+
             <Col>
                 <Card>
 
@@ -1156,6 +1175,20 @@ const Vendor = (props) => {
                                                         <Input className='form-control form-control-sm contactOther3Input mb-1' type='text' name='contact_other3' required />
                                                     </FormGroup>
                                                 </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("vendor_brands") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Brands'}</Label>
+                                                        <Select name='vendor_brands' id='vendor_brands' required
+                                                            data-table="brands"
+                                                            options={optionsVB} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "brand", "vendor_brands", setOptionsVB, optionsVB)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
                                             }
                                         </Row>
                                         <Row>
@@ -1285,6 +1318,20 @@ const Vendor = (props) => {
                                                             isMulti />
                                                     </FormGroup>
                                                 </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("sheet_brand") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Sheet Brand'}</Label>
+                                                        <Select name='sheet_brand' id='sheet_brand' required
+                                                            data-table="brands"
+                                                            options={optionsVB} className="js-example-basic-single"
+                                                            onInputChange={(inputValue) =>
+                                                                handleInputChange(inputValue, "brand", "sheet_brand", setOptionsVB, optionsVB)
+                                                            }
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
                                             }
 
                                         </Row>
@@ -1315,10 +1362,10 @@ const Vendor = (props) => {
                                             }  {
                                                 selectedSearchCol.indexOf("major") > -1 &&
                                                 <Col md='3'>
-                                                        <FormGroup id='majorInput'>
-                                                            <Label className="col-form-label-sm f-12" htmlFor='major'>{'Major'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'majorInput') }}><i className="fa fa-plus-circle"></i></Btn>
-                                                                <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'majorInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
-                                                            <Input className='form-control form-control-sm majorInput mb-1' type='text' name='major' required />
+                                                    <FormGroup id='majorInput'>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='major'>{'Major'}<Btn attrBtn={{ datatoggle: "tooltip", title: "Add More Fields", color: 'btn px-2 py-0', onClick: (e) => addBtn(e, 'majorInput') }}><i className="fa fa-plus-circle"></i></Btn>
+                                                            <Btn attrBtn={{ datatoggle: "tooltip", title: "Delete Last Row", color: 'btn px-2 py-0', onClick: (e) => delBtn(e, 'majorInput') }}><i className="fa fa-minus-circle"></i></Btn></Label>
+                                                        <Input className='form-control form-control-sm majorInput mb-1' type='text' name='major' required />
                                                     </FormGroup>
                                                 </Col>
                                                 // <Col md='3'>
@@ -1497,15 +1544,15 @@ const Vendor = (props) => {
                                                 selectedSearchCol.indexOf("billing_status") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
-                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Billing status'}</Label>
-                                                            <Select id='billing_status' required
-                                                                name='billing_status'
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Billing status'}</Label>
+                                                        <Select id='billing_status' required
+                                                            name='billing_status'
                                                             options={
                                                                 [
                                                                     { value: 1, label: 'Active' },
                                                                     { value: 0, label: 'Inactive' },
                                                                     { value: 2, label: 'Pending' },
-                                                                
+
                                                                 ]} className="js-example-basic-multiple prefixInput mb-1" isMulti
                                                         />
                                                     </FormGroup>
@@ -1515,9 +1562,9 @@ const Vendor = (props) => {
                                                 selectedSearchCol.indexOf("method") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
-                                                            <Label className="col-form-label-sm f-12" htmlFor='name'>{'Wallet payment method'}</Label>
-                                                            <Select id='method' required
-                                                                name='method'
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Wallet payment method'}</Label>
+                                                        <Select id='method' required
+                                                            name='method'
                                                             options={
                                                                 [
                                                                     { value: 4, label: 'Other' },
@@ -1551,7 +1598,7 @@ const Vendor = (props) => {
                         )}
                     </div>
                     <CardHeader className="px-3 d-flex justify-content-between align-items-center">
-                       
+
                         <H5>Vendors | {totalVendors}</H5>
                         <div className="ml-auto">
                             <ButtonGroup>
@@ -1589,6 +1636,7 @@ const Vendor = (props) => {
                                                 { value: 'street', label: 'Street' },
                                                 { value: 'address', label: 'Address' },
                                                 { value: 'note', label: 'Note' },
+                                                { value: 'brands', label: 'Brands' },
                                             ]
                                         },
                                         {
@@ -1607,6 +1655,7 @@ const Vendor = (props) => {
                                                 { value: 'sub_subject', label: 'Sub–Subject Matter' },
                                                 { value: 'rate', label: 'Rate' },
                                                 { value: 'special_rate', label: 'Special rate' },
+                                                { value: 'sheet_brand', label: 'Sheet Brand' },
                                             ]
                                         },
                                         {
@@ -1776,7 +1825,7 @@ const Vendor = (props) => {
                                                                             {fields[index] === 'method' && (
                                                                                 <div>
                                                                                     {value == 4 && <span style={{ color: 'black' }}> Other</span>}
-                                                                                 
+
                                                                                     {(value < 0 || value > 3 || value == null) && <span></span>}
                                                                                 </div>
                                                                             )}
@@ -1844,7 +1893,7 @@ const Vendor = (props) => {
                                                                                                     <ModelEdit id={detail.id} getData={getData} />
                                                                                                 </LazyWrapper>
                                                                                             )}
-                                                                                            
+
                                                                                         </td>
                                                                                         <td>
                                                                                             {props.permissions?.delete == 1 && (
@@ -1855,7 +1904,7 @@ const Vendor = (props) => {
                                                                                                     <i className="icofont icofont-ui-delete"></i>
                                                                                                 </Btn>
                                                                                             )}
-                                                                                           
+
                                                                                         </td>
                                                                                     </tr>
                                                                                 ))}

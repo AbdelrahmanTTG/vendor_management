@@ -83,7 +83,7 @@ class VendorProfileController extends Controller
         });
 
         if ($filteredFormats->isEmpty()) {
-            $formatArray = ['name', 'email', 'status', "priceList", 'type', 'country', "source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target"];
+            $formatArray = ['name', 'email', 'status', "priceList", 'type', 'country', "source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target", "brands"];
         } else {
             $formatArray = $filteredFormats->pluck('format')->toArray();
             $formatArray = array_merge(...array_map(function ($item) {
@@ -94,13 +94,15 @@ class VendorProfileController extends Controller
         $relationships = [
             'country' => ['id', 'name'],
             'nationality' => ['id', 'name'],
-            'region' => ['id', 'name'],
-            "timezone" => ['id', 'gmt'],
+            'region' => ['id', 'name'],            
+            "timezone" => ['id', 'gmt'],            
             // "major" => ['id', 'name'],
-            "source_lang" => ['id', 'name'],
-            "target_lang" => ['id', 'name'],
-            "main_subject" => ['id', 'name'],
-            "sub_subject" => ['id', 'name'],
+            // "source_lang" => ['id', 'name'],
+            // "target_lang" => ['id', 'name'],
+            // "main_subject" => ['id', 'name'],
+            // "sub_subject" => ['id', 'name'],
+            
+
         ];
 
         $vendorColumns = Schema::getColumnListing('vendor');
@@ -116,7 +118,7 @@ class VendorProfileController extends Controller
         $intersectColumnsVendorSheet = array_intersect($formatArray, $vendorSheet);
 
         if (!empty($intersectColumns)) {
-            $vendorsQuery = Vendor::select('vendor.id')
+            $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands')
                 ->addSelect(DB::raw(implode(',', $intersectColumns)));
             // if ($user->use_type != 2 && $view != 3 ) {
             //     $vendorsQuery->whereIn('created_by', $piv);
@@ -125,7 +127,7 @@ class VendorProfileController extends Controller
             //     }
             // }
         } else {
-            $vendorsQuery = Vendor::select('vendor.id');
+            $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands');
             // if ($user->use_type !=2 && $view != 3) {
             //     $vendorsQuery->whereIn('created_by', $piv);
             //     if (count($piv) > 1) {
@@ -147,7 +149,7 @@ class VendorProfileController extends Controller
                     'vendor_sheet' => function ($query) use ($formatArray, $vendorSheet) {
                         $selectedColumns = array_intersect($formatArray, $vendorSheet);
                         if (empty($selectedColumns)) {
-                            $selectedColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target"];
+                            $selectedColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target","sheet_brand"];
                         }
                         $query->select(array_merge(['id', "vendor"], $selectedColumns));
                         foreach ($selectedColumns as $relation) {
@@ -188,9 +190,16 @@ class VendorProfileController extends Controller
 
             foreach ($queryParams as $key => $val) {
                 if ($key !== 'filters' && !empty($val)) {
-                    if (!in_array($key, $formatArray)) {
-                        $vendorsQuery->addSelect($key);
-                        $formatArray[] = $key;
+                    // check vendor brands
+                    if ($key === 'vendor_brands') {
+                        if (!in_array('brands', $formatArray)) {
+                            $formatArray[] = 'brands';
+                        }
+                    } else {
+                        if (!in_array($key, $formatArray)) {
+                            $vendorsQuery->addSelect($key);
+                            $formatArray[] = $key;
+                        }
                     }
 
                     if (is_array($val)) {
@@ -241,7 +250,7 @@ class VendorProfileController extends Controller
                             });
                             $selectedColumnsRow = array_intersect($diffFormatArray, $vendorSheet);
                             if (empty($selectedColumnsRow)) {
-                                $selectedColumnsRow = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target"];
+                                $selectedColumnsRow = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target","sheet_brand"];
                             }
                             if (!in_array('priceList', $formatArray)) {
                                 $formatArray[] = 'priceList';
@@ -363,7 +372,7 @@ class VendorProfileController extends Controller
             $diffFormatArrayEx = [];
             $diffFormatArrayEx = array_merge($diffFormatArrayEx, $diffFormatArray);
             if (empty(array_intersect($diffFormatArray, $vendorSheet)) && in_array('priceList', $diffFormatArray)) {
-                $diffFormatArrayEx = array_merge($diffFormatArrayEx, ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target"]);
+                $diffFormatArrayEx = array_merge($diffFormatArrayEx, ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target","sheet_brand"]);
             }
             $diffFormatArrayEx = array_map(function ($column) use ($diffFormatArrayEx) {
                 if (strpos($column, '.') !== false) {
@@ -522,6 +531,7 @@ class VendorProfileController extends Controller
             'city' => 'nullable|string',
             'address' => 'nullable|string',
             'reject_reason' => 'nullable|string',
+            'vendor_brands' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -565,8 +575,8 @@ class VendorProfileController extends Controller
                 'sometimes',
                 'required',
                 'email',
-                Rule::unique('vendor', 'email')->ignore($vendor->id) 
-            ],            
+                Rule::unique('vendor', 'email')->ignore($vendor->id)
+            ],
             'contact_linked_in' => 'sometimes|nullable|string',
             'contact_ProZ' => 'sometimes|nullable|string',
             'contact_other1' => 'sometimes|nullable|string',
@@ -582,6 +592,7 @@ class VendorProfileController extends Controller
             'city' => 'sometimes|nullable|string',
             'address' => 'sometimes|nullable|string',
             'reject_reason' => 'sometimes|nullable|string',
+            'vendor_brands' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -589,19 +600,19 @@ class VendorProfileController extends Controller
         }
 
         $vendor->update($validator->validated());
-        if($request->VendorSide == true){
+        if ($request->VendorSide == true) {
             $vmConfig = VmSetup::first();
             $mailData = [
                 'subject' => 'Portal - Vendor Profile Updates',
-                'title' => 'The vendor has made changes to their data',               
-                'personalData' => $this->PersonalData($vendor->id),                
+                'title' => 'The vendor has made changes to their data',
+                'personalData' => $this->PersonalData($vendor->id),
 
-            ];           
+            ];
             Mail::to($vmConfig->vm_email)->send(new UpdateDataMail($mailData));
         }
         return response()->json([
             'message' => 'Vendor updated successfully!',
-            'vendor' => ['id' => $vendor->id , "vendor" => $this->PersonalData($vendor->id)]
+            'vendor' => ['id' => $vendor->id, "vendor" => $this->PersonalData($vendor->id)]
         ], 200);
     }
 
@@ -673,7 +684,7 @@ class VendorProfileController extends Controller
             'city' => $request['city'],
             'street' => $request['street'],
             'billing_address' => $request['billing_address'],
-            'billing_status' => "2" ,
+            'billing_status' => "2",
             'bank_required' => $request['bank_required'],
             'wallet_required' => $request['wallet_required'],
 
@@ -873,7 +884,7 @@ class VendorProfileController extends Controller
                 [
                     'content' => $content,
                     'status' => $status,
-                    "is_read"=> 0
+                    "is_read" => 0
                 ]
             );
             if ($status == 1) {
@@ -885,7 +896,6 @@ class VendorProfileController extends Controller
                 ];
                 Mail::to($receiver_email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
                 event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
-
             }
 
             return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "updated_at" => $data->updated_at, "status" => $status]], 200);
@@ -941,7 +951,7 @@ class VendorProfileController extends Controller
     {
         $hasBankDetails = $request->filled('bank_name') && $request->filled('account_holder') && $request->filled('swift_bic') && $request->filled('iban');
         $hasWalletMethods = $request->has('Wallets Payment methods') && is_array($request->input('Wallets Payment methods')) && count($request->input('Wallets Payment methods')) > 0;
-        if($request['wallet_required'] == 0 && $request['bank_required']){
+        if ($request['wallet_required'] == 0 && $request['bank_required']) {
             return response()->json([
                 'message' => 'You must provide either bank details or wallet payment methods.',
                 'error' => true,
@@ -953,7 +963,7 @@ class VendorProfileController extends Controller
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             $request['vendor_id'] = $request->vendor_id;
         }
-       
+
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required|integer',
             'BillingData_id' => 'nullable|integer',
@@ -1090,19 +1100,18 @@ class VendorProfileController extends Controller
 
         $InvoiceController = new InvoiceController();
         $decID = Crypt::encrypt($request->input('vendor_id'));
-        $BillingData = $InvoiceController->getVendorBillingData($decID);       
-        if($request->VendorSide == true){
+        $BillingData = $InvoiceController->getVendorBillingData($decID);
+        if ($request->VendorSide == true) {
             $vmConfig = VmSetup::first();
             $mailData = [
                 'subject' => 'Portal - Vendor Profile Updates',
-                'title' => 'The vendor has made changes to their data',               
-                'billingData' => $BillingData,                
+                'title' => 'The vendor has made changes to their data',
+                'billingData' => $BillingData,
 
             ];
             Mail::to($vmConfig->vm_email)->send(new UpdateDataMail($mailData));
-            
         }
-          return response()->json($BillingData, 200);
+        return response()->json($BillingData, 200);
     }
     public function setPassword(Request $request)
     {
@@ -1382,8 +1391,9 @@ class VendorProfileController extends Controller
             ], 500);
         }
     }
-    public function NDA_vendor(Request $request){
-        if ( !$request->hasFile('nda_file')) {
+    public function NDA_vendor(Request $request)
+    {
+        if (!$request->hasFile('nda_file')) {
             return response()->json(['error' => ' NDA files are required.'], 400);
         }
         $ndaFile = $request->file('nda_file');
@@ -1413,12 +1423,13 @@ class VendorProfileController extends Controller
             return response()->json([
                 'message' => 'Files uploaded and vendor updated successfully.'
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             Storage::disk('external')->delete([$ndaFilePath]);
             return response()->json([
                 'error' => 'An error occurred while processing the request.',
-            ], 500);}
+            ], 500);
+        }
     }
 
 
@@ -1730,15 +1741,16 @@ class VendorProfileController extends Controller
             'special_rate' => 'nullable|numeric',
             'Status' => 'required|string',
             'currency' => 'nullable|integer',
+            'sheet_brand' => 'required|integer',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
         $data = $request->all();
-        $data['dialect'] = $data['dialect'] ?? null;  
-        $data['dialect_target'] = $data['dialect_target'] ?? null; 
-        $data['currency'] = $data['currency'] ?? null; 
-        $data['sub_subject'] = $data['sub_subject'] ?? null; 
+        $data['dialect'] = $data['dialect'] ?? null;
+        $data['dialect_target'] = $data['dialect_target'] ?? null;
+        $data['currency'] = $data['currency'] ?? null;
+        $data['sub_subject'] = $data['sub_subject'] ?? null;
 
         // Create the VendorSheet
         $vendorSheet = VendorSheet::create($data);
@@ -1754,7 +1766,9 @@ class VendorProfileController extends Controller
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'sub_subject:id,name'
+            'sub_subject:id,name',
+            'sheet_brand:id,name',
+
         ]);
 
         return response()->json($vendorSheet, 201);
@@ -1771,8 +1785,9 @@ class VendorProfileController extends Controller
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'sub_subject:id,name'
-        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency']);
+            'sub_subject:id,name',
+            'sheet_brand:id,name'
+        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency','sheet_brand']);
 
         if ($vendorData->isEmpty()) {
             return response()->json([
@@ -1803,6 +1818,7 @@ class VendorProfileController extends Controller
             'special_rate' => 'nullable|numeric',
             'Status' => 'required|string',
             'currency' => 'nullable|integer',
+            'sheet_brand' => 'required|integer',
         ]);
 
         if ($validator->fails()) {
@@ -1810,10 +1826,10 @@ class VendorProfileController extends Controller
         }
 
         $vendorSheet = VendorSheet::findOrFail($request->input("id"));
-        $data = $request->except(['vendor']);  
-        $data['dialect'] = $data['dialect'] ?? null;  
-        $data['dialect_target'] = $data['dialect_target'] ?? null; 
-        $data['currency'] = $data['currency'] ?? null; 
+        $data = $request->except(['vendor']);
+        $data['dialect'] = $data['dialect'] ?? null;
+        $data['dialect_target'] = $data['dialect_target'] ?? null;
+        $data['currency'] = $data['currency'] ?? null;
         $data['sub_subject'] = $data['sub_subject'] ?? null;
         // Update the VendorSheet with the new data
         $vendorSheet->update($data);
@@ -1829,7 +1845,8 @@ class VendorProfileController extends Controller
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'sub_subject:id,name'
+            'sub_subject:id,name',
+            'sheet_brand:id,name'
         ]);
 
         $vendorSheet->makeHidden([
@@ -2162,8 +2179,9 @@ class VendorProfileController extends Controller
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'sub_subject:id,name'
-        ])->where('id', $id)->get(['id',  'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency']);
+            'sub_subject:id,name',
+            'sheet_brand:id,name'
+        ])->where('id', $id)->get(['id',  'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency', 'sheet_brand']);
 
         if ($vendorData->isEmpty()) {
             return response()->json([
@@ -2176,7 +2194,7 @@ class VendorProfileController extends Controller
     public function getDashboardChart(Request $request)
     {
         $cacheKey = 'dashboard_chart_data';
-        $cacheTime = now()->addMinutes(60); 
+        $cacheTime = now()->addMinutes(60);
         $data = Cache::remember($cacheKey, $cacheTime, function () {
             return [
                 "Vendors" => $this->getVendorsChart(),
@@ -2333,7 +2351,7 @@ class VendorProfileController extends Controller
             'account'    => $request->account,
             'defaults'       => 1,
             'billing_data_id' => $request->billing_data_id,
-          
+
         ]);
         $walletData->load('method');
 
@@ -2386,7 +2404,7 @@ class VendorProfileController extends Controller
             ]
         ], 201);
     }
-   
+
     public function getUserTasks(Request $request)
     {
         try {
@@ -2398,8 +2416,8 @@ class VendorProfileController extends Controller
             return response()->json(['error' => 'Token invalid or expired'], 401);
         }
 
-        $limit = $request->input('limit', 5); 
-        $offset = $request->input('offset', 0); 
+        $limit = $request->input('limit', 5);
+        $offset = $request->input('offset', 0);
 
         $query = DB::table('user_tasks')->where('user_id', $user->id);
 

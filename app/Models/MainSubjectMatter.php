@@ -14,7 +14,7 @@ class MainSubjectMatter extends Model
     protected $table = 'mainsubject';
     public static function insert($data)
     {
-        $data['status'] = 0;
+        // $data['status'] = 0;
         $insertedData = self::create($data);
         unset($insertedData['status']);
         return $insertedData;

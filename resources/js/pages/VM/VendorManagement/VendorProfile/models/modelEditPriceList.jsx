@@ -13,11 +13,13 @@ const EditNewBtn = (props) => {
         switch (toastname) {
             case 'successToast':
                 toast.success(status, {
-                    position: "top-right"                });
+                    position: "top-right"
+                });
                 break;
             case 'dangerToast':
                 toast.error(status, {
-                    position: "top-right"                });
+                    position: "top-right"
+                });
                 break;
             default:
         }
@@ -41,6 +43,8 @@ const EditNewBtn = (props) => {
     const [optionsTL, setOptionsTL] = useState([]);
 
     const [optionsD, setOptionsD] = useState([]);
+
+    const [optionsB, setOptionsB] = useState([]);
 
     const [initialOptions, setInitialOptions] = useState({});
     const [loading, setLoading] = useState(false);
@@ -84,19 +88,19 @@ const EditNewBtn = (props) => {
         }
     };
     useEffect(() => {
-        let isMounted = true; 
+        let isMounted = true;
         const fetchData = async (id) => {
             const payload = { id: id };
             try {
                 setLoading2(true);
                 const { data } = await axiosClient.post("getPriceList", payload);
-          
-                    setPriceList(data);
-                
+
+                setPriceList(data);
+
             } catch (err) {
                 if (isMounted) console.error(err);
             } finally {
-                if (isMounted) setLoading2(false); 
+                if (isMounted) setLoading2(false);
             }
         };
 
@@ -132,9 +136,10 @@ const EditNewBtn = (props) => {
             setValue("special_rate", data?.special_rate)
             setValue("Status", { value: data?.Status || "", label: statusLabels[data?.Status] || "Unknown" })
             setValue("currency", renameKeys(data?.currency, { id: "value", name: "label" }))
+            setValue("sheet_brand", renameKeys(data?.sheet_brand, { id: "value", name: "label" }))
             handelingSelectTasks(data?.service?.id)
-            handelingSelectSub(data?.subject?.id)
-
+            handelingSelectSub(data?.subject?.id)          
+            
         }
 
     }, [props?.data, priceList, props?.id, modal])
@@ -265,6 +270,7 @@ const EditNewBtn = (props) => {
     const [inputValD, setInputD] = useState('');
     const [inputValD2, setInputD2] = useState('');
     const [inputValU, setInputU] = useState('');
+    const [inputValB, setInputB] = useState('');
 
 
 
@@ -272,491 +278,533 @@ const EditNewBtn = (props) => {
         <Fragment>
             <Btn attrBtn={{ color: 'btn btn-primary-light', onClick: toggle }} className="me-2" > <i className="icofont icofont-ui-edit"></i></Btn>
             <CommonModal isOpen={modal} title='Edit price list' icon={<><i className="fa fa-info-circle" style={{ fontSize: '18px', color: 'darkred', marginRight: '1%' }}>  </i><span style={{ fontSize: '14px', color: 'darkred' }}>Type in the fields to search.</span></>} toggler={toggle} size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
-               
-                  {
-                             loading2 ? (
-                               <div className="loader-box" >
-                                 <Spinner attrSpinner={{ className: 'loader-6' }} />
-                               </div>
-                             ) :  <Row className="g-3 mb-3">
-                    <Col md="6">
-                        <FormGroup className="row">
-                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Main-Subject Matter</Label>
-                            <Col sm="8">
-                                <Controller
-                                    name="subject"
-                                    control={control}
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            value={field.value}
-                                            options={optionsMain}
-                                            inputValue={inputValMain}
-                                            onInputChange={(newInputValue, { action }) => {
-                                                if (action !== "input-blur" && action !== "menu-close") {
-                                                    setInputValMain(newInputValue);
+
+                {
+                    loading2 ? (
+                        <div className="loader-box" >
+                            <Spinner attrSpinner={{ className: 'loader-6' }} />
+                        </div>
+                    ) : <Row className="g-3 mb-3">
+                        <Col md="6">
+                            <FormGroup className="row">
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Main-Subject Matter</Label>
+                                <Col sm="8">
+                                    <Controller
+                                        name="subject"
+                                        control={control}
+                                        rules={{ required: true }}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                value={field.value}
+                                                options={optionsMain}
+                                                inputValue={inputValMain}
+                                                onInputChange={(newInputValue, { action }) => {
+                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                        setInputValMain(newInputValue);
+                                                    }
+                                                    handleInputChange(newInputValue, "fields", "subject", setOptionsMain, optionsMain);
+                                                }}
+
+                                                className="js-example-basic-single col-sm-12"
+                                                isSearchable
+                                                noOptionsMessage={() =>
+                                                    loading ? (
+                                                        <div className="loader-box">
+                                                            <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                        </div>
+                                                    ) : "No options found"
                                                 }
-                                                handleInputChange(newInputValue, "MainSubjectMatter", "subject", setOptionsMain, optionsMain);
-                                            }}
+                                                onChange={(option) => {
+                                                    handelingSelectSub(option.value)
+                                                    field.onChange(option);
+                                                }}
+                                                onFocus={() => {
+                                                    if (field.value) {
+                                                        setInputValMain(field.value.label);
+                                                    }
+                                                }}
 
-                                            className="js-example-basic-single col-sm-12"
-                                            isSearchable
-                                            noOptionsMessage={() =>
-                                                loading ? (
-                                                    <div className="loader-box">
-                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
-                                                    </div>
-                                                ) : "No options found"
-                                            }
-                                            onChange={(option) => {
-                                                handelingSelectSub(option.value)
-                                                field.onChange(option);
-                                            }}
-                                            onFocus={() => {
-                                                if (field.value) {
-                                                    setInputValMain(field.value.label);
+                                            />
+                                        )}
+                                    />
+                                </Col>
+
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01">Sub–Subject Matter</Label>
+                                <Col sm="8">
+                                    <Controller
+                                        name="sub_subject"
+                                        control={control}
+                                        rules={{ required: false }}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                value={field.value}
+                                                options={optionsSub}
+                                                className="js-example-basic-single col-sm-12"
+                                                isSearchable
+                                                inputValue={inputValSub}
+                                                onInputChange={(newInputValue, { action }) => {
+                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                        setInputValSub(newInputValue);
+                                                    }
+                                                }}
+                                                noOptionsMessage={() =>
+                                                    loading ? (
+                                                        <div className="loader-box">
+                                                            <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                        </div>
+                                                    ) : "No options found"
                                                 }
-                                            }}
+                                                onChange={(option) => {
+                                                    field.onChange(option);
+                                                }}
+                                                onFocus={() => {
+                                                    if (field.value) {
+                                                        setInputValSub(field.value.label);
+                                                    }
+                                                }}
 
-                                        />
-                                    )}
-                                />
-                            </Col>
+                                            />
+                                        )}
+                                    />
 
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Sub–Subject Matter</Label>
-                            <Col sm="8">
-                                <Controller
-                                    name="sub_subject"
-                                    control={control}
-                                    rules={{ required: false }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            value={field.value}
-                                            options={optionsSub}
-                                            className="js-example-basic-single col-sm-12"
-                                            isSearchable
-                                            inputValue={inputValSub}
-                                            onInputChange={(newInputValue, { action }) => {
-                                                if (action !== "input-blur" && action !== "menu-close") {
-                                                    setInputValSub(newInputValue);
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
+
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Service</Label>
+                                <Col sm="8">
+
+                                    {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Service --' }} className="js-example-basic-single col-sm-12" /> */}
+
+                                    <Controller
+                                        name="service"
+                                        control={control}
+                                        rules={{ required: true }}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                value={field.value}
+                                                options={optionsSre}
+                                                inputValue={inputVal}
+                                                onInputChange={(newInputValue, { action }) => {
+                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                        setInputVal(newInputValue);
+                                                    }
+                                                    handleInputChange(newInputValue, "services", "service", setOptionsSer, optionsSre);
+                                                }}
+                                                className="js-example-basic-single col-sm-12"
+                                                isSearchable
+                                                noOptionsMessage={() =>
+                                                    loading ? (
+                                                        <div className="loader-box">
+                                                            <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                        </div>
+                                                    ) : "No options found"
                                                 }
-                                            }}
-                                            noOptionsMessage={() =>
-                                                loading ? (
-                                                    <div className="loader-box">
-                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
-                                                    </div>
-                                                ) : "No options found"
-                                            }
-                                            onChange={(option) => {
-                                                field.onChange(option);
-                                            }}
-                                            onFocus={() => {
-                                                if (field.value) {
-                                                    setInputValSub(field.value.label);
+                                                onChange={(option) => {
+                                                    handelingSelectTasks(option.value);
+                                                    field.onChange(option);
+                                                }}
+                                                onFocus={() => {
+                                                    if (field.value) {
+                                                        setInputVal(field.value.label);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
+
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Task Type</Label>
+                                <Col sm="8">
+                                    {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Task Type --' }} className="js-example-basic-single col-sm-12" /> */}
+                                    <Controller
+                                        name="task_type"
+                                        control={control}
+                                        rules={{ required: true }}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                value={field.value}
+                                                options={optionsT}
+                                                className="js-example-basic-single col-sm-12"
+                                                isSearchable
+                                                inputValue={inputValTask}
+                                                onInputChange={(newInputValue, { action }) => {
+                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                        setInputTask(newInputValue);
+                                                    }
+                                                }}
+                                                noOptionsMessage={() =>
+                                                    loading ? (
+                                                        <div className="loader-box">
+                                                            <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                        </div>
+                                                    ) : "No options found"
                                                 }
-                                            }}
+                                                onChange={(option) => {
+                                                    field.onChange(option);
+                                                }}
+                                                onFocus={() => {
+                                                    if (field.value) {
+                                                        setInputTask(field.value.label);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
 
-                                        />
-                                    )}
-                                />
-
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
-
-                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Service</Label>
-                            <Col sm="8">
-
-                                {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Service --' }} className="js-example-basic-single col-sm-12" /> */}
-
-                                <Controller
-                                    name="service"
-                                    control={control}
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            value={field.value}
-                                            options={optionsSre}
-                                            inputValue={inputVal}
-                                            onInputChange={(newInputValue, { action }) => {
-                                                if (action !== "input-blur" && action !== "menu-close") {
-                                                    setInputVal(newInputValue);
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Source Language</Label>
+                                <Col sm="8">
+                                    {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Source Language --' }} className="js-example-basic-single col-sm-12" /> */}
+                                    <Controller
+                                        name="source_lang"
+                                        control={control}
+                                        rules={{ required: true }}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                value={field.value}
+                                                options={optionsSL}
+                                                inputValue={inputValSL}
+                                                onInputChange={(newInputValue, { action }) => {
+                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                        setInputSL(newInputValue);
+                                                    }
+                                                    handleInputChange(newInputValue, "languages", "source_lang", setOptionsSL, optionsSL);
+                                                }}
+                                                className="js-example-basic-single col-sm-12"
+                                                isSearchable
+                                                noOptionsMessage={() =>
+                                                    loading ? (
+                                                        <div className="loader-box">
+                                                            <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                        </div>
+                                                    ) : "No options found"
                                                 }
-                                                handleInputChange(newInputValue, "services", "service", setOptionsSer, optionsSre);
-                                            }}
-                                            className="js-example-basic-single col-sm-12"
-                                            isSearchable
-                                            noOptionsMessage={() =>
-                                                loading ? (
-                                                    <div className="loader-box">
-                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
-                                                    </div>
-                                                ) : "No options found"
-                                            }
-                                            onChange={(option) => {
-                                                handelingSelectTasks(option.value);
-                                                field.onChange(option);
-                                            }}
-                                            onFocus={() => {
-                                                if (field.value) {
-                                                    setInputVal(field.value.label);
-                                                }
-                                            }}
-                                        />
-                                    )}
-                                />
+                                                onChange={(option) => {
+                                                    field.onChange(option);
+                                                }}
+                                                onFocus={() => {
+                                                    if (field.value) {
+                                                        setInputSL(field.value.label);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
 
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Target Language</Label>
+                                <Col sm="8">
+                                    {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Target Language --' }} className="js-example-basic-single col-sm-12" /> */}
+                                    <Controller
+                                        name="target_lang"
+                                        control={control}
+                                        rules={{ required: true }}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                value={field.value}
+                                                options={optionsTL}
+                                                inputValue={inputValTL}
+                                                onInputChange={(newInputValue, { action }) => {
+                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                        setInputTL(newInputValue);
+                                                    }
+                                                    handleInputChange(newInputValue, "languages", "target_lang", setOptionsTL, optionsTL);
+                                                }}
 
-                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Task Type</Label>
-                            <Col sm="8">
-                                {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Task Type --' }} className="js-example-basic-single col-sm-12" /> */}
-                                <Controller
-                                    name="task_type"
-                                    control={control}
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            value={field.value}
-                                            options={optionsT}
-                                            className="js-example-basic-single col-sm-12"
-                                            isSearchable
-                                            inputValue={inputValTask}
-                                            onInputChange={(newInputValue, { action }) => {
-                                                if (action !== "input-blur" && action !== "menu-close") {
-                                                    setInputTask(newInputValue);
+                                                className="js-example-basic-single col-sm-12"
+                                                isSearchable
+                                                noOptionsMessage={() =>
+                                                    loading ? (
+                                                        <div className="loader-box">
+                                                            <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                        </div>
+                                                    ) : "No options found"
                                                 }
-                                            }}
-                                            noOptionsMessage={() =>
-                                                loading ? (
-                                                    <div className="loader-box">
-                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
-                                                    </div>
-                                                ) : "No options found"
-                                            }
-                                            onChange={(option) => {
-                                                field.onChange(option);
-                                            }}
-                                            onFocus={() => {
-                                                if (field.value) {
-                                                    setInputTask(field.value.label);
-                                                }
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
+                                                onChange={(option) => {
+                                                    field.onChange(option);
+                                                }}
+                                                onFocus={() => {
+                                                    if (field.value) {
+                                                        setInputTL(field.value.label);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
 
-                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Source Language</Label>
-                            <Col sm="8">
-                                {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Source Language --' }} className="js-example-basic-single col-sm-12" /> */}
-                                <Controller
-                                    name="source_lang"
-                                    control={control}
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            value={field.value}
-                                            options={optionsSL}
-                                            inputValue={inputValSL}
-                                            onInputChange={(newInputValue, { action }) => {
-                                                if (action !== "input-blur" && action !== "menu-close") {
-                                                    setInputSL(newInputValue);
-                                                }
-                                                handleInputChange(newInputValue, "languages", "source_lang", setOptionsSL, optionsSL);
-                                            }}
-                                            className="js-example-basic-single col-sm-12"
-                                            isSearchable
-                                            noOptionsMessage={() =>
-                                                loading ? (
-                                                    <div className="loader-box">
-                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
-                                                    </div>
-                                                ) : "No options found"
-                                            }
-                                            onChange={(option) => {
-                                                field.onChange(option);
-                                            }}
-                                            onFocus={() => {
-                                                if (field.value) {
-                                                    setInputSL(field.value.label);
-                                                }
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01">Source Dialect</Label>
+                                <Col sm="8">
+                                    {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Dialect --' }} className="js-example-basic-single col-sm-12" /> */}
+                                    <Controller
+                                        name="dialect"
+                                        control={control}
+                                        rules={{ required: false }}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                value={field.value}
+                                                options={optionsD}
+                                                inputValue={inputValD}
+                                                onInputChange={(newInputValue, { action }) => {
+                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                        setInputD(newInputValue);
+                                                    }
+                                                    handleInputChange(newInputValue, "languages_dialect", "dialect", setOptionsD, optionsD);
+                                                }}
 
-                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Target Language</Label>
-                            <Col sm="8">
-                                {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Target Language --' }} className="js-example-basic-single col-sm-12" /> */}
-                                <Controller
-                                    name="target_lang"
-                                    control={control}
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            value={field.value}
-                                            options={optionsTL}
-                                            inputValue={inputValTL}
-                                            onInputChange={(newInputValue, { action }) => {
-                                                if (action !== "input-blur" && action !== "menu-close") {
-                                                    setInputTL(newInputValue);
+                                                className="js-example-basic-single col-sm-12"
+                                                isSearchable
+                                                noOptionsMessage={() =>
+                                                    loading ? (
+                                                        <div className="loader-box">
+                                                            <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                        </div>
+                                                    ) : "No options found"
                                                 }
-                                                handleInputChange(newInputValue, "languages", "target_lang", setOptionsTL, optionsTL);
-                                            }}
-                                           
-                                            className="js-example-basic-single col-sm-12"
-                                            isSearchable
-                                            noOptionsMessage={() =>
-                                                loading ? (
-                                                    <div className="loader-box">
-                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
-                                                    </div>
-                                                ) : "No options found"
-                                            }
-                                            onChange={(option) => {
-                                                field.onChange(option);
-                                            }}
-                                            onFocus={() => {
-                                                if (field.value) {
-                                                    setInputTL(field.value.label);
+                                                onChange={(option) => {
+                                                    field.onChange(option);
+                                                }}
+                                                onFocus={() => {
+                                                    if (field.value) {
+                                                        setInputD(field.value.label);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
+
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01">Target Dialect</Label>
+                                <Col sm="8">
+                                    {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Dialect --' }} className="js-example-basic-single col-sm-12" /> */}
+                                    <Controller
+                                        name="dialect_target"
+                                        control={control}
+                                        rules={{ required: false }}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                value={field.value}
+                                                options={optionsD}
+                                                inputValue={inputValD2}
+                                                onInputChange={(newInputValue, { action }) => {
+                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                        setInputD2(newInputValue);
+                                                    }
+                                                    handleInputChange(newInputValue, "languages_dialect", "dialect_target", setOptionsD, optionsD);
+                                                }}
+
+                                                className="js-example-basic-single col-sm-12"
+                                                isSearchable
+                                                noOptionsMessage={() =>
+                                                    loading ? (
+                                                        <div className="loader-box">
+                                                            <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                        </div>
+                                                    ) : "No options found"
                                                 }
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
+                                                onChange={(option) => {
+                                                    field.onChange(option);
+                                                }}
+                                                onFocus={() => {
+                                                    if (field.value) {
+                                                        setInputD2(field.value.label);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Source Dialect</Label>
-                            <Col sm="8">
-                                {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Dialect --' }} className="js-example-basic-single col-sm-12" /> */}
-                                <Controller
-                                    name="dialect"
-                                    control={control}
-                                    rules={{ required: false }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            value={field.value}
-                                            options={optionsD}
-                                            inputValue={inputValD}
-                                            onInputChange={(newInputValue, { action }) => {
-                                                if (action !== "input-blur" && action !== "menu-close") {
-                                                    setInputD(newInputValue);
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Unit</Label>
+                                <Col sm="8">
+                                    {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Unit --' }} className="js-example-basic-single col-sm-12" /> */}
+                                    <Controller
+                                        name="unit"
+                                        control={control}
+                                        rules={{ required: true }}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                value={field.value}
+                                                options={optionsUnit}
+                                                inputValue={inputValU}
+                                                onInputChange={(newInputValue, { action }) => {
+                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                        setInputVal(newInputValue);
+                                                    }
+                                                    handleInputChange(newInputValue, "unit", "unit", setOptionsUnit, optionsUnit);
+                                                }}
+
+                                                className="js-example-basic-single col-sm-12"
+                                                isSearchable
+                                                noOptionsMessage={() =>
+                                                    loading ? (
+                                                        <div className="loader-box">
+                                                            <Spinner attrSpinner={{ className: "loader-6" }} />
+                                                        </div>
+                                                    ) : "No options found"
                                                 }
-                                                handleInputChange(newInputValue, "languages_dialect", "dialect", setOptionsD, optionsD);
-                                            }}
-                                           
-                                            className="js-example-basic-single col-sm-12"
-                                            isSearchable
-                                            noOptionsMessage={() =>
-                                                loading ? (
-                                                    <div className="loader-box">
-                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
-                                                    </div>
-                                                ) : "No options found"
-                                            }
-                                            onChange={(option) => {
-                                                field.onChange(option);
-                                            }}
-                                            onFocus={() => {
-                                                if (field.value) {
-                                                    setInputD(field.value.label);
+                                                onChange={(option) => {
+                                                    field.onChange(option);
+                                                }}
+                                                onFocus={() => {
+                                                    if (field.value) {
+                                                        setInputU(field.value.label);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
+
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Rate</Label>
+                                <Col sm="8">
+                                    {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
+                                    <input
+                                        defaultValue={props?.data?.rate}
+                                        className="form-control"
+                                        type="number"
+                                        name="rate"
+                                        {...register("rate", { required: true })}
+
+                                    />
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
+
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01">Rush Rate</Label>
+                                <Col sm="8">
+                                    {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
+                                    <input
+
+                                        defaultValue={props?.data?.special_rate}
+                                        className="form-control"
+                                        type="number"
+                                        name="special_rate"
+                                        {...register("special_rate", { required: false })}
+                                    />
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Status</Label>
+                                <Col sm="8">
+
+                                    <Controller
+                                        name="Status"
+                                        control={control}
+                                        rules={{ required: true }}
+                                        render={({ field }) => (
+                                            <Select
+                                                id='Status'
+                                                {...field}
+                                                value={field.value}
+                                                options={[
+                                                    { value: '0', label: 'Active' },
+                                                    { value: '1', label: 'Not Active' },
+                                                    { value: '2', label: 'Pending by PM' }
+                                                ]}
+                                                className="js-example-basic-single col-sm-12"
+                                                onChange={(option) => {
+                                                    field.onChange(option);
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Col>
+                            </FormGroup>
+                        </Col>
+                        <Col md="6">
+                            <FormGroup className="row">
+                                <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Brand</Label>
+                                <Col sm="8">                                 
+
+                                    <Controller
+                                        name="sheet_brand"
+                                        control={control}
+                                        rules={{ required: true }}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                value={field.value}
+                                                options={optionsB}
+                                                inputValue={inputValB}
+                                                isSearchable
+                                                onInputChange={(newInputValue, { action }) => {
+                                                    if (action !== "input-blur" && action !== "menu-close") {
+                                                        setInputB(newInputValue);
+                                                    }
+                                                    handleInputChange(newInputValue, "brand", "sheet_brand", setOptionsB, optionsB)
+                                                }}
+                                                noOptionsMessage={() =>
+                                                    loading ? (
+                                                        <div className="loader-box">
+                                                            <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                        </div>
+                                                    ) : 'No options found'
                                                 }
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
+                                                onChange={(option) => {
+                                                    field.onChange(option);
+                                                }}
+                                                onFocus={() => {
+                                                    if (field.value) {
+                                                        setInputB(field.value.label);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Col>
+                            </FormGroup>
+                        </Col>
 
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Target Dialect</Label>
-                            <Col sm="8">
-                                {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Dialect --' }} className="js-example-basic-single col-sm-12" /> */}
-                                <Controller
-                                    name="dialect_target"
-                                    control={control}
-                                    rules={{ required: false }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            value={field.value}
-                                            options={optionsD}
-                                            inputValue={inputValD2}
-                                            onInputChange={(newInputValue, { action }) => {
-                                                if (action !== "input-blur" && action !== "menu-close") {
-                                                    setInputD2(newInputValue);
-                                                }
-                                                handleInputChange(newInputValue, "languages_dialect", "dialect_target", setOptionsD, optionsD);
-                                            }}
-                                           
-                                            className="js-example-basic-single col-sm-12"
-                                            isSearchable
-                                            noOptionsMessage={() =>
-                                                loading ? (
-                                                    <div className="loader-box">
-                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
-                                                    </div>
-                                                ) : "No options found"
-                                            }
-                                            onChange={(option) => {
-                                                field.onChange(option);
-                                            }}
-                                            onFocus={() => {
-                                                if (field.value) {
-                                                    setInputD2(field.value.label);
-                                                }
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
-
-                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Unit</Label>
-                            <Col sm="8">
-                                {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Unit --' }} className="js-example-basic-single col-sm-12" /> */}
-                                <Controller
-                                    name="unit"
-                                    control={control}
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            value={field.value}
-                                            options={optionsUnit}
-                                            inputValue={inputValU}
-                                            onInputChange={(newInputValue, { action }) => {
-                                                if (action !== "input-blur" && action !== "menu-close") {
-                                                    setInputVal(newInputValue);
-                                                }
-                                                handleInputChange(newInputValue, "unit", "unit", setOptionsUnit, optionsUnit);
-                                            }}
-                                           
-                                            className="js-example-basic-single col-sm-12"
-                                            isSearchable
-                                            noOptionsMessage={() =>
-                                                loading ? (
-                                                    <div className="loader-box">
-                                                        <Spinner attrSpinner={{ className: "loader-6" }} />
-                                                    </div>
-                                                ) : "No options found"
-                                            }
-                                            onChange={(option) => {
-                                                field.onChange(option);
-                                            }}
-                                            onFocus={() => {
-                                                if (field.value) {
-                                                    setInputU(field.value.label);
-                                                }
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
-
-                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Rate</Label>
-                            <Col sm="8">
-                                {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
-                                <input
-                                    defaultValue={props?.data?.rate}
-                                    className="form-control"
-                                    type="number"
-                                    name="rate"
-                                    {...register("rate", { required: true })}
-
-                                />
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Rush Rate</Label>
-                            <Col sm="8">
-                                {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
-                                <input
-
-                                    defaultValue={props?.data?.special_rate}
-                                    className="form-control"
-                                    type="number"
-                                    name="special_rate"
-                                    {...register("special_rate", { required: false })}
-                                />
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                    <Col md="6">
-                        <FormGroup className="row">
-
-                                    <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Status</Label>
-                            <Col sm="8">
-
-                                <Controller
-                                    name="Status"
-                                    control={control}
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <Select
-                                            id='Status'
-                                            {...field}
-                                            value={field.value}
-                                            options={[
-                                                { value: '0', label: 'Active' },
-                                                { value: '1', label: 'Not Active' },
-                                                { value: '2', label: 'Pending by PM' }
-                                            ]}
-                                            className="js-example-basic-single col-sm-12"
-                                            onChange={(option) => {
-                                                field.onChange(option);
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Col>
-                        </FormGroup>
-                    </Col>
-                 
                     </Row>}
                 {/* <Row className="g-0">
                     <Col  >

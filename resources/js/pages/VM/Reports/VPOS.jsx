@@ -26,6 +26,7 @@ const VPOs = (props) => {
     const [optionsTY, setOptionsTY] = useState([]);
     const [optionsUnit, setOptionsUnit] = useState([]);
     const [optionsCU, setOptionsCU] = useState([]);
+    const [optionsB, setOptionsB] = useState([]);
 
     
     const options = [
@@ -46,6 +47,7 @@ const VPOs = (props) => {
         { value: 'currency', label: 'Currency' },
         { value: 'totalamount', label: 'P.O amount' },
         { value: 'invoice_dated', label: 'Invoice date ' },
+        { value: 'brand', label: 'Brand ' },
 
         
 
@@ -143,6 +145,7 @@ const VPOs = (props) => {
 
     };
     useEffect(() => {
+        handelingSelect("brand", setOptionsB, "brand");
         handelingSelectUsers();
     }, []);
     const vpo_status = [
@@ -389,6 +392,7 @@ const VPOs = (props) => {
                 'Payment Status': 'PaidStat',
                 'Payment method': 'payment_date',
                 'System': 'portalStat',
+                'brand': 'Brand',
 
             };
             format?.flatMap(element =>
@@ -673,6 +677,17 @@ const VPOs = (props) => {
                                                             isMulti />
                                                     </FormGroup>
                                                 </Col>
+                                            }{
+                                                selectedSearchCol.indexOf("brand") > -1 &&
+                                                <Col md='4'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Brand'}</Label>
+                                                        <Select id='brand' required
+                                                            name='brand'
+                                                            options={optionsB} className="js-example-basic-single "
+                                                            isMulti />
+                                                    </FormGroup>
+                                                </Col>
                                             }
 
                                         </Row>
@@ -730,6 +745,7 @@ const VPOs = (props) => {
                                         { value: 'payment_date', label: 'Payment Date' },
                                         { value: 'payment_method_name', label: 'Payment Method' },
                                         { value: 'portalStat', label: 'System' },
+                                        { value: 'brand', label: 'Brand' },
 
 
                                     ]} table="VPOS"

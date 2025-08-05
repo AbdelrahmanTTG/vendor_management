@@ -24,8 +24,10 @@ class VendorSheet extends Model
         'special_rate',
         'Status',
         'currency',
-        'dialect_target'
-        ,'i','ticket_id'
+        'dialect_target',
+        'i',
+        'ticket_id',
+        'sheet_brand'
     ];
     public function source_lang()
     {
@@ -70,10 +72,13 @@ class VendorSheet extends Model
         return $this->belongsTo(MainSubjectMatter::class, 'subject')->select('id', 'name');
     }
 
- public function sub_subject()
-{
-    return $this->belongsTo(SubSubjectMatter::class, 'sub_subject')->select('id', 'name');
-}
+    public function sub_subject()
+    {
+        return $this->belongsTo(SubSubjectMatter::class, 'sub_subject')->select('id', 'name');
+    }
 
-
+    public function sheet_brand()
+    {
+        return $this->belongsTo(Brand::class, 'sheet_brand')->select('id', 'name');
+    }
 }

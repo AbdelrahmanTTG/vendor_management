@@ -11,47 +11,49 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Vendor extends Authenticatable  implements JWTSubject
 {
-    use HasFactory, Notifiable ,HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens;
     protected $table = 'vendor';
-        public $timestamps = true;
-         const UPDATED_AT = null;
+    public $timestamps = true;
+    const UPDATED_AT = null;
+    protected $appends = ['brands'];
 
-    public static function vendor($email , $password){
+    public static function vendor($email, $password)
+    {
         $encryptedPassword = base64_encode($password);
         $vendor =  self::where('email', $email)
-        ->where('password', $encryptedPassword)
-        ->first();
-        return $vendor; 
+            ->where('password', $encryptedPassword)
+            ->first();
+        return $vendor;
     }
     public function country()
     {
-        return $this->belongsTo(Countries::class, 'country'); 
+        return $this->belongsTo(Countries::class, 'country');
     }
 
     public function nationality()
     {
-        return $this->belongsTo(Countries::class, 'nationality'); 
+        return $this->belongsTo(Countries::class, 'nationality');
     }
     public function countryName()
     {
-        return $this->belongsTo(Countries::class, 'country')->select('name');; 
+        return $this->belongsTo(Countries::class, 'country')->select('name');;
     }
 
     public function nationalityName()
     {
-        return $this->belongsTo(Countries::class, 'nationality')->select('name');; 
+        return $this->belongsTo(Countries::class, 'nationality')->select('name');;
     }
-   public function source_lang()
+    public function source_lang()
     {
-        return $this->hasOne (Language::class, "id","source_lang");
+        return $this->hasOne(Language::class, "id", "source_lang");
     }
     public function major()
     {
-        return $this->hasOne(Major::class, "id",'major');
+        return $this->hasOne(Major::class, "id", 'major');
     }
     public function target_lang()
     {
-        return $this->hasOne (Language::class, "id","target_lang");
+        return $this->hasOne(Language::class, "id", "target_lang");
     }
     public function main_subject()
     {
@@ -87,17 +89,17 @@ class Vendor extends Authenticatable  implements JWTSubject
         return $this->hasMany(VendorSheet::class, 'vendor', 'id');
     }
 
-      public function vendor_education()
+    public function vendor_education()
     {
-        return $this->belongsTo(VendorEducation::class, "id",'vendor_id');
+        return $this->belongsTo(VendorEducation::class, "id", 'vendor_id');
     }
-      public function vendor_test()
+    public function vendor_test()
     {
-        return $this->belongsTo(vendorTest::class, "id",'vendor_id');
+        return $this->belongsTo(vendorTest::class, "id", 'vendor_id');
     }
-       public function vendor_experiences()
+    public function vendor_experiences()
     {
-        return $this->belongsTo(Experience::class,"id", 'vendor_id');
+        return $this->belongsTo(Experience::class, "id", 'vendor_id');
     }
     public function billing_data()
     {
@@ -105,14 +107,14 @@ class Vendor extends Authenticatable  implements JWTSubject
     }
     public function bank_details()
     {
-    return $this->hasOneThrough(
-        BankDetails::class,
-        BillingData::class, 
-        'vendor_id', 
-        'billing_data_id', 
-        'id', 
-        'id' 
-    );
+        return $this->hasOneThrough(
+            BankDetails::class,
+            BillingData::class,
+            'vendor_id',
+            'billing_data_id',
+            'id',
+            'id'
+        );
     }
     public function wallets_payment_methods()
     {
@@ -125,7 +127,7 @@ class Vendor extends Authenticatable  implements JWTSubject
             'id'
         );
     }
-      public function vendorBillingData()
+    public function vendorBillingData()
     {
         return $this->hasMany(BillingData::class, 'vendor_id');
     }
@@ -134,26 +136,26 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return  $this->belongsTo(BrandUsers::class, 'created_by');
     }
-    
+
     protected $fillable = [
         'name',
         'email',
         'password',
         'type',
-        'status' ,
+        'status',
         'prfx_name',
-        'contact_name' ,
-        'legal_Name' ,
+        'contact_name',
+        'legal_Name',
         'phone_number',
-        'contact' ,
+        'contact',
         'region',
         'country',
-        'nationality' ,
+        'nationality',
         'timezone',
-        'street' ,
-        'city' ,
-        'note' ,
-        'address' ,
+        'street',
+        'city',
+        'note',
+        'address',
         'reject_reason',
         'contact_ProZ',
         'contact_linked_in',
@@ -162,8 +164,8 @@ class Vendor extends Authenticatable  implements JWTSubject
         'contact_other3',
         'Anothernumber',
         "PM",
-        "vendor_source"
-
+        "vendor_source",
+        "vendor_brands"
     ];
 
     /**
@@ -185,7 +187,7 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return [
             'email_verified_at' => 'datetime',
-          //  'password' => 'hashed',
+            //  'password' => 'hashed',
         ];
     }
     public function getJWTIdentifier()
@@ -206,5 +208,9 @@ class Vendor extends Authenticatable  implements JWTSubject
         }
         return $query->get();
     }
-
+    public function getBrandsAttribute()
+    {
+        $brandIds = array_filter(explode(',', $this->vendor_brands));
+        return \App\Models\Brand::whereIn('id', $brandIds)->select('id', 'name')->get();
+    }  
 }

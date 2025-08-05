@@ -416,6 +416,7 @@ class ReportsController extends Controller
             "payment_method_name" => "ifnull(pm.name,'') as payment_method_name",
             "portalStat" => "case when (t.job_portal = '1' and t.job_portal is not null) then 'Nexus System' else '' end as portalStat",
             "job_portal" => 't.job_portal',
+            "brand" => 'b.name as brand',
         ];
 
         $formats = (new VendorProfileController)->format($request);
@@ -435,7 +436,7 @@ class ReportsController extends Controller
         $renameMap = [
             'p.status AS payment_status' => ["Payment status", "payment_status"],
             'u.user_name' => ["PM name", "user_name"],
-            't.code' => ['P.O Number', 'code'],
+            't.code' => ['P.O Number', 'code'],            
             't.status' => ['VPO status', 'status'],
             't.vpo_file' => ['VPO file', 'vpo_file'],
             't.closed_date' => ['VPO date', 'closed_date'],
@@ -462,6 +463,7 @@ class ReportsController extends Controller
             "ifnull(p.payment_date,'') AS payment_date" =>['Payment date', "payment_date"],
             "ifnull(pm.name,'') as payment_method_name" => ['Payment method', "payment_method_name"],
             "case when (t.job_portal = '1' and t.job_portal is not null) then 'Nexus System' else '' end as portalStat"=>['System',"portalStat"],
+            'b.name as brand' => ['brand', 'brand'],
         ];
 
        
@@ -480,6 +482,7 @@ class ReportsController extends Controller
             ->leftJoin('languages As slang', 'jo.source', '=', 'slang.id')
             ->leftJoin('languages As tlang', 'jo.target', '=', 'tlang.id')
             ->leftJoin('po as po', 'j.po', '=', 'po.id')
+            ->leftJoin('brand as b', 't.brand', '=', 'b.id')
             ->selectRaw($columns);
         if ($request->has('queryParams') && is_array($request->queryParams)) {
             $stander_format_Search = [
@@ -500,13 +503,14 @@ class ReportsController extends Controller
                 "user_name" => ['t.created_by', DB::raw("u.user_name as user_name"), 'u.user_name'],
                 "closed_date" => ['t.closed_date', DB::raw("t.closed_date as closed_date"), 't.closed_date'],
                 "invoice_dated"=> ["t.invoice_date", DB::raw("t.invoice_date as invoice_dated"), "STR_TO_DATE(t.invoice_date,\"%m/%d/%Y\") as invoice_dated"],
+                "brand" => ["b.name" , DB::raw("b.name AS brand") ,"b.name as brand"],
             ];
            
 
              $queryParams = $request->queryParams;
             foreach ($queryParams as $key => $val) {
                 if ($stander_format_Search[$key] !== 'filters' && !empty($val)) {
-                    if (!in_array($stander_format_Search[$key][0], $formatArray)) {
+                    if (!in_array($stander_format_Search[$key][2], $formatArray)) {
                         $query->addSelect($stander_format_Search[$key][1]);
                         $formatArray[] = $stander_format_Search[$key][2];
                     }

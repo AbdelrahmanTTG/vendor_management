@@ -13,11 +13,13 @@ const AddNewBtn = (props) => {
         switch (toastname) {
             case 'successToast':
                 toast.success(status, {
-                    position: "top-right"                });
+                    position: "top-right"
+                });
                 break;
             case 'dangerToast':
                 toast.error(status, {
-                    position: "top-right"                });
+                    position: "top-right"
+                });
                 break;
             default:
         }
@@ -41,6 +43,8 @@ const AddNewBtn = (props) => {
     const [optionsTL, setOptionsTL] = useState([]);
 
     const [optionsD, setOptionsD] = useState([]);
+       
+    const [optionsB, setOptionsB] = useState([]);
 
     const [initialOptions, setInitialOptions] = useState({});
     const [loading, setLoading] = useState(false);
@@ -229,7 +233,7 @@ const AddNewBtn = (props) => {
                                             value={field.value}
                                             options={optionsMain}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "MainSubjectMatter", "subject", setOptionsMain, optionsMain)
+                                                handleInputChange(inputValue, "fields", "subject", setOptionsMain, optionsMain)
                                             }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
@@ -242,7 +246,7 @@ const AddNewBtn = (props) => {
                                                 handelingSelectSub(option.value)
                                                 field.onChange(option);
                                             }}
-                                            
+
 
                                         />
                                     )}
@@ -582,6 +586,40 @@ const AddNewBtn = (props) => {
                                                 { value: '2', label: 'Pending by PM' }
                                             ]}
                                             className="js-example-basic-single col-sm-12"
+                                            onChange={(option) => {
+                                                field.onChange(option);
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </Col>
+                        </FormGroup>
+                    </Col>
+                    <Col md="6">
+                        <FormGroup className="row">
+                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Brand</Label>
+                            < Col sm="8" >
+                                <Controller
+                                    name="sheet_brand"
+                                    control={control}
+                                    rules={{ required: true }}
+                                    render={({ field }) => (
+                                        <Select
+                                            {...field}
+                                           value={field.value}
+                                            options={optionsB}                                           
+                                            className="js-example-basic-single col-sm-12"
+                                            isSearchable
+                                            onInputChange={(inputValue) =>
+                                                handleInputChange(inputValue, "brand", "sheet_brand", setOptionsB, optionsB)
+                                            }
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                    </div>
+                                                ) : 'No options found'
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}

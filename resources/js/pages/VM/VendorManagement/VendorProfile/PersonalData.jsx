@@ -48,6 +48,9 @@ const PersonalData = React.memo((props) => {
   const [selectedOptionT, setSelectedOptionT] = useState(null);
   const [optionsT, setOptionsT] = useState([]);
 
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [optionsB, setOptionsB] = useState([]);
+
   const [loading, setLoading] = useState(false);
 
   const [initialOptions, setInitialOptions] = useState({});
@@ -171,9 +174,9 @@ const PersonalData = React.memo((props) => {
         }
       });
       const formattedOptions = [{ value: data.id || "", label: data.gmt || "" }]
-      setSelectedOptionT(formattedOptions )
-      setOptionsT(formattedOptions );
-      setValue("timezone", data?.id )
+      setSelectedOptionT(formattedOptions)
+      setOptionsT(formattedOptions);
+      setValue("timezone", data?.id)
       if (!searchTerm) {
         setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
       }
@@ -221,6 +224,7 @@ const PersonalData = React.memo((props) => {
     formData.type = vendorTypeValue
     formData.status = vendorstatusValue
     delete formData.contacts;
+    formData.vendor_brands = formData.vendor_brands.join(',');
     try {
       const response = await axiosClient.post("PersonalInformation", formData);
       setIsSubmitting(true)
@@ -258,7 +262,8 @@ const PersonalData = React.memo((props) => {
     formData.status = formData.status.value;
     delete formData.contacts;
     idVendor ? formData.id = idVendor : false;
-    formData.VendorSide = props?.VendorSide ? true: false;
+    formData.VendorSide = props?.VendorSide ? true : false;
+    formData.vendor_brands = formData.vendor_brands.join(',');
     try {
       const response = await axiosClient.post("updatePersonalInformation", formData);
       basictoaster("successToast", response.data.message);
@@ -311,6 +316,9 @@ const PersonalData = React.memo((props) => {
           return;
         case "nationality":
           basictoaster("dangerToast", "Nationality is required");
+          return;
+        case "vendor_brands":
+          basictoaster("dangerToast", "Brands is required");
           return;
 
         case "email":
@@ -478,7 +486,15 @@ const PersonalData = React.memo((props) => {
           setValue('reject_reason', data.reject_reason);
           setValue('note', data.note);
           setValue('vendor_source', data.vendor_source);
-
+          if (data?.brands) {
+            const selected = data.brands.map(brand => ({
+              value: brand.id.toString(),
+              label: brand.name
+            }));
+            setSelectedBrands(selected);
+            setOptionsB(selected);
+            setValue("vendor_brands", selected.map(opt => opt.value));
+          }
           setLoading2(false);
 
         }
@@ -486,7 +502,6 @@ const PersonalData = React.memo((props) => {
     }
 
   }, [props.vendorPersonalData, setValue]);
-
 
 
   return (
@@ -512,7 +527,7 @@ const PersonalData = React.memo((props) => {
                 <Row className="g-3 mb-3" >
                   <Col md="6" id="type-wrapper" >
                     <FormGroup className="row" >
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Vendor Type </Label>
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Vendor Type </Label>
                       < Col sm="9" >
                         <Controller
                           name="type"
@@ -545,7 +560,7 @@ const PersonalData = React.memo((props) => {
                   </Col>
                   < Col md="6" id="status-wrapper" style={{ display: props?.permission?.status ? "none" : "block" }} >
                     <FormGroup className="row" >
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Status </Label>
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Status </Label>
                       < Col sm="9" >
                         <Controller
                           name="status"
@@ -576,7 +591,7 @@ const PersonalData = React.memo((props) => {
                   < Col md="6" id="name-wrapper" >
                     <FormGroup className="row" >
 
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> {nameLabel} </Label>
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> {nameLabel} </Label>
                       < Col sm="9" >
                         <input
                           defaultValue=""
@@ -723,46 +738,46 @@ const PersonalData = React.memo((props) => {
                         </div>
                       </Col>
                     </FormGroup>
-                    </Col>
-                    < Col md="6" >
-                      <FormGroup className="row" >
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Country of residence</Label>
-                        < Col sm="9" >
-                          <Controller
-                            name="country"
-                            control={control}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                              <Select
-                                {...field}
-                                value={selectedOptionC }
-                                options={optionsC}
-                                className="js-example-basic-single col-sm-12"
-                                isSearchable
-                                onInputChange={(inputValue) =>
-                                  handleInputChange(inputValue, "countries", "Country", setOptionsC, optionsC)
-                                }
-                                noOptionsMessage={() => loading ? (
-                                  <div className="loader-box" >
-                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                  </div>
-                                ) : 'No options found'}
-                                onChange={(option) => {
-                                  setSelectedOptionC(option);
-                                  handelingSelectTimeZone(option?.value)
-                                  handelingRegions(option?.regions)
-                                  field.onChange(option?.value);
-                                }}
-
-                              />
-                            )}
-                          />
-                        </Col>
-                      </FormGroup>
-                    </Col>
+                  </Col>
                   < Col md="6" >
                     <FormGroup className="row" >
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Region </Label>
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Country of residence</Label>
+                      < Col sm="9" >
+                        <Controller
+                          name="country"
+                          control={control}
+                          rules={{ required: true }}
+                          render={({ field }) => (
+                            <Select
+                              {...field}
+                              value={selectedOptionC}
+                              options={optionsC}
+                              className="js-example-basic-single col-sm-12"
+                              isSearchable
+                              onInputChange={(inputValue) =>
+                                handleInputChange(inputValue, "countries", "Country", setOptionsC, optionsC)
+                              }
+                              noOptionsMessage={() => loading ? (
+                                <div className="loader-box" >
+                                  <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                </div>
+                              ) : 'No options found'}
+                              onChange={(option) => {
+                                setSelectedOptionC(option);
+                                handelingSelectTimeZone(option?.value)
+                                handelingRegions(option?.regions)
+                                field.onChange(option?.value);
+                              }}
+
+                            />
+                          )}
+                        />
+                      </Col>
+                    </FormGroup>
+                  </Col>
+                  < Col md="6" >
+                    <FormGroup className="row" >
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Region </Label>
                       < Col sm="9" >
                         <Controller
                           name="region"
@@ -795,10 +810,10 @@ const PersonalData = React.memo((props) => {
                       </Col>
                     </FormGroup>
                   </Col>
-                 
+
                   < Col md="6" >
                     <FormGroup className="row" >
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Nationality </Label>
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Nationality </Label>
                       < Col sm="9" >
                         <Controller
                           name="nationality"
@@ -850,7 +865,7 @@ const PersonalData = React.memo((props) => {
                   </Col>
                   < Col md="6" >
                     <FormGroup className="row" >
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Time Zone </Label>
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Time Zone </Label>
                       < Col sm="9" >
                         <Controller
                           name="timezone"
@@ -859,9 +874,9 @@ const PersonalData = React.memo((props) => {
                           render={({ field }) => (
                             <Select
                               {...field}
-                              value={selectedOptionT || { value: "", label :"" }}
+                              value={selectedOptionT || { value: "", label: "" }}
                               options={optionsT}
-                           
+
                               className="js-example-basic-single col-sm-12"
                               isSearchable
                               noOptionsMessage={() => loading ? (
@@ -917,7 +932,7 @@ const PersonalData = React.memo((props) => {
                   </Col>
                   < Col md="6" >
                     <FormGroup className="row" >
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Vendor Source </Label>
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Vendor Source </Label>
                       < Col sm="9" >
                         <input
                           className="form-control"
@@ -957,6 +972,42 @@ const PersonalData = React.memo((props) => {
                       </Col>
                     </FormGroup>
                   </Col>
+                  < Col md="6">
+                    <FormGroup>
+                      <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Brands</Label>
+                      < Col sm="9" >
+                        <Controller
+                          name="vendor_brands"
+                          control={control}
+                          rules={{ required: true }}
+                          render={({ field }) => (
+                            <Select
+                              {...field}
+                              value={selectedBrands}
+                              options={optionsB}
+                              isMulti
+                              className="js-example-basic-single col-sm-12"
+                              isSearchable
+                              onInputChange={(inputValue) =>
+                                handleInputChange(inputValue, "brand", "vendor_brands", setOptionsB, optionsB)
+                              }
+                              noOptionsMessage={() =>
+                                loading ? (
+                                  <div className="loader-box">
+                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                  </div>
+                                ) : 'No options found'
+                              }
+                              onChange={(selectedOptions) => {
+                                setSelectedBrands(selectedOptions);
+                                field.onChange(selectedOptions?.map(option => option.value));
+                              }}
+                            />
+                          )}
+                        />
+                      </Col>
+                    </FormGroup>
+                  </Col>
                   {props.vendorPersonalData?.PersonalData?.contact || props?.personal?.contact ? (
                     <Col md="6" id="Old_Contact-wrapper">
                       <FormGroup className="row">
@@ -981,7 +1032,7 @@ const PersonalData = React.memo((props) => {
                       <Col md="12" id="reject_reason-wrapper">
                         <FormGroup className="row">
                           <Label className="col-form-label" style={{ width: '12.5%' }} for="validationCustom01">
-                              <span style={{ color: 'red', fontSize: "18px" }}>*</span> Rejection Reason
+                            <span style={{ color: 'red', fontSize: "18px" }}>*</span> Rejection Reason
                           </Label>
 
 
@@ -1114,6 +1165,8 @@ const PersonalData = React.memo((props) => {
                   {...registerContact("other3", { required: false, })} />
               </Col>
             </FormGroup>
+
+
           </Col>
         </Row>
 

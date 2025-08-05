@@ -324,6 +324,7 @@ const PriceList = (props) => {
                                     <th cope="col">{"Unit"}</th>
                                     <th cope="col">{'Rate'}</th>
                                     <th cope="col">{'Currency'}</th>
+                                    <th cope="col">{'brand'} </th>
                                     <th cope="col">{'Status'} </th>
                                     {props.backPermissions?.edit == 1 && (
                                         <th cope="col">{'Edit'}</th>
@@ -345,6 +346,7 @@ const PriceList = (props) => {
                                         <td>{item?.unit?.name}</td>
                                         <td>{item?.rate}</td>
                                         <td>{item?.currency?.name}</td>
+                                        <td>{item?.sheet_brand?.name}</td>
                                         <td>
                                             {item?.Status == 0 ? "Active"
                                                 : item?.Status == 1 ? "Not Active"
