@@ -973,7 +973,7 @@ const PersonalData = React.memo((props) => {
                     </FormGroup>
                   </Col>
                   < Col md="6">
-                    <FormGroup>
+                     <FormGroup className="row">
                       <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Brands</Label>
                       < Col sm="9" >
                         <Controller
