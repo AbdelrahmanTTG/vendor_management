@@ -167,85 +167,77 @@ const Vendor = (props) => {
         {
             label: "Personal information",
             options: [
-                { value: 'name', label: 'Name' },
-                { value: 'legal_name', label: 'Legal Name' },
-                { value: 'prefix', label: 'Prefix' },
-                { value: 'contact_name', label: 'Contact Name' },
-                { value: 'email', label: 'Email' },
-                { value: 'phone_number', label: 'Phone Number' },
-                { value: 'AnotherNumber', label: 'Another Number' },
-                { value: 'status', label: 'Status' },
-                { value: 'type', label: 'Type' },
-                { value: 'region', label: 'Region' },
-                { value: 'timezone', label: 'Time Zone' },
-                { value: 'country', label: 'Country' },
-                { value: 'city', label: 'City' },
-                { value: 'nationality', label: 'Nationality' },
-                { value: 'contact_linked_in', label: 'LinkedIn' },
-                { value: 'contact_ProZ', label: 'ProZ' },
-                { value: 'contact_other1', label: 'Other Contact 1' },
-                { value: 'contact_other2', label: 'Other Contact 2' },
-                { value: 'contact_other3', label: 'Other Contact 3' },
-                { value: 'vendor_brands', label: 'Brands' },
+                { value: "name", label: "Name" },
+                { value: "legal_name", label: "Legal Name" },
+                { value: "prefix", label: "Prefix" },
+                { value: "contact_name", label: "Contact Name" },
+                { value: "email", label: "Email" },
+                { value: "phone_number", label: "Phone Number" },
+                { value: "AnotherNumber", label: "Another Number" },
+                { value: "status", label: "Status" },
+                { value: "type", label: "Type" },
+                { value: "region", label: "Region" },
+                { value: "timezone", label: "Time Zone" },
+                { value: "country", label: "Country" },
+                { value: "city", label: "City" },
+                { value: "nationality", label: "Nationality" },
+                { value: "contact_linked_in", label: "LinkedIn" },
+                { value: "contact_ProZ", label: "ProZ" },
+                { value: "contact_other1", label: "Other Contact 1" },
+                { value: "contact_other2", label: "Other Contact 2" },
+                { value: "contact_other3", label: "Other Contact 3" },
+                { value: "vendor_brands", label: "Brands" },
+                { value: "profile_status", label: "Profile Status" },
             ],
         },
         {
             label: "Price List",
             options: [
-                { value: 'source_lang', label: 'Source language' },
-                { value: 'target_lang', label: 'Target language' },
-                { value: 'rate', label: 'rate' },
-                { value: 'special_rate', label: 'Special rate' },
-                { value: 'subject', label: 'Main-Subject Matter' },
-                { value: 'sub_subject', label: 'Sub–Subject Matter' },
-                { value: 'currency', label: 'Currency' },
-                { value: 'task_type', label: ' Task type' },
-                { value: 'unit', label: 'Unit' },
-                { value: 'service', label: 'Service' },
-                { value: 'sheet_brand', label: 'Sheet Brand' },
+                { value: "source_lang", label: "Source language" },
+                { value: "target_lang", label: "Target language" },
+                { value: "rate", label: "rate" },
+                { value: "special_rate", label: "Special rate" },
+                { value: "subject", label: "Main-Subject Matter" },
+                { value: "sub_subject", label: "Sub–Subject Matter" },
+                { value: "currency", label: "Currency" },
+                { value: "task_type", label: " Task type" },
+                { value: "unit", label: "Unit" },
+                { value: "service", label: "Service" },
+                { value: "sheet_brand", label: "Sheet Brand" },
             ],
         },
         {
             label: "Education",
             options: [
-                { value: 'university_name', label: 'Institute Name' },
-                { value: 'latest_degree', label: 'latest degree' },
-                { value: 'major', label: 'Major' },
-                { value: 'year_of_graduation', label: 'Year of graduation' },
-
-
-
+                { value: "university_name", label: "Institute Name" },
+                { value: "latest_degree", label: "latest degree" },
+                { value: "major", label: "Major" },
+                { value: "year_of_graduation", label: "Year of graduation" },
             ],
         },
         {
             label: "Test",
             options: [
-                { value: 'source_lang2', label: 'Source language' },
-                { value: 'target_lang2', label: 'Target language' },
-                { value: 'main_subject', label: 'Main-Subject Matter' },
-                { value: 'sub_subject2', label: 'Sub–Subject Matter' },
-                { value: 'test_type', label: 'Test Type' },
-                { value: 'test_result', label: 'Test result' },
+                { value: "source_lang2", label: "Source language" },
+                { value: "target_lang2", label: "Target language" },
+                { value: "main_subject", label: "Main-Subject Matter" },
+                { value: "sub_subject2", label: "Sub–Subject Matter" },
+                { value: "test_type", label: "Test Type" },
+                { value: "test_result", label: "Test result" },
             ],
         },
         {
             label: "experiences",
-            options: [
-                { value: 'experience_year', label: 'Experience year' },
-
-            ],
+            options: [{ value: "experience_year", label: "Experience year" }],
         },
         {
             label: "Bank",
             options: [
-                { value: 'bank_name', label: 'Bank name' },
-                { value: 'billing_status', label: 'Billing status' },
-                { value: 'method', label: 'Wallet payment method' },
-
-
+                { value: "bank_name", label: "Bank name" },
+                { value: "billing_status", label: "Billing status" },
+                { value: "method", label: "Wallet payment method" },
             ],
         },
-
     ];
     const customStyles = {
         groupHeading: (provided) => ({
@@ -587,7 +579,9 @@ const Vendor = (props) => {
             'billing_data.billing_status': 'Billing status',
             "wallets_payment_methods.method": 'Wallet payment method',
             'brands': 'Brands',
-            'sheet_brand': 'Sheet Brand'
+            'sheet_brand': 'Sheet Brand',
+            'profile_status': 'Profile status',
+
         };
         format?.flatMap(element =>
             element.format = element.format.split(',').map(value => {
@@ -632,6 +626,11 @@ const Vendor = (props) => {
                             processedItem[key] == 1 ? processedItem[key] = 'Inactive' : "";
                             processedItem[key] == 2 ? processedItem[key] = 'Wait for Approval' : "";
                             processedItem[key] == 3 ? processedItem[key] = 'Rejected' : "";
+                        }
+                        if (key === 'profile_status') {
+                            processedItem[key] == 0 ? processedItem[key] = 'Pending' : "";
+                            processedItem[key] == 1 ? processedItem[key] = 'Complete' : "";
+                           
                         }
                         if (key === 'type') {
                             processedItem[key] == 0 ? processedItem[key] = 'Freelance' : "";
@@ -799,7 +798,8 @@ const Vendor = (props) => {
             'vendorTest.target_lang': 'Target language',
             'vendorTest.main_subject': 'Main-Subject Matter',
             'vendorTest.sub_subject': 'Sub–Subject Matter',
-            'sheet_brand': 'Sheet Brand'
+            'sheet_brand': 'Sheet Brand',
+            'profile_status': 'Profile status',
 
 
         };
@@ -1070,6 +1070,23 @@ const Vendor = (props) => {
                                                     </FormGroup>
                                                 </Col>
                                             }{
+                                                selectedSearchCol.indexOf("profile_status") > -1 &&
+                                                <Col md='3'>
+                                                    <FormGroup>
+                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Profile status'}</Label>
+                                                        <Select id='profile_status' required
+                                                            name='profile_status'
+                                                            options={
+                                                                [
+                                                                    { value: '0', label: 'Pending' },
+                                                                    { value: '1', label: 'Complete' },
+                                                                   
+                                                                ]} className="js-example-basic-multiple profile_statusInput mb-1" isMulti
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                            }
+                                            {
                                                 selectedSearchCol.indexOf("region") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>
@@ -1637,6 +1654,8 @@ const Vendor = (props) => {
                                                 { value: 'address', label: 'Address' },
                                                 { value: 'note', label: 'Note' },
                                                 { value: 'brands', label: 'Brands' },
+                                                { value: 'profile_status', label: 'Profile status' },
+
                                             ]
                                         },
                                         {
@@ -1740,7 +1759,7 @@ const Vendor = (props) => {
                                                         <tr>
                                                             {rowData.map((value, index) => (
                                                                 <td key={index}>
-                                                                    {fields[index] === 'status' || fields[index] === 'method' || fields[index] === 'billing_status' || fields[index] === 'test_result' || fields[index] === 'test_type' || fields[index] === 'type' || fields[index] === 'cv' || fields[index] === 'NDA' || fields[index] === 'priceList' ? (
+                                                                    {fields[index] === 'status' || fields[index] === 'profile_status' || fields[index] === 'method' || fields[index] === 'billing_status' || fields[index] === 'test_result' || fields[index] === 'test_type' || fields[index] === 'type' || fields[index] === 'cv' || fields[index] === 'NDA' || fields[index] === 'priceList' ? (
                                                                         <div>
                                                                             {fields[index] === 'cv' && (
                                                                                 <div>
@@ -1827,6 +1846,13 @@ const Vendor = (props) => {
                                                                                     {value == 4 && <span style={{ color: 'black' }}> Other</span>}
 
                                                                                     {(value < 0 || value > 3 || value == null) && <span></span>}
+                                                                                </div>
+                                                                            )}
+                                                                            {fields[index] === 'profile_status' && (
+                                                                                <div>
+                                                                                    {value == 0 && <span style={{ color: 'yellow' }}> Pending</span>}
+                                                                                    {value == 1 && <span style={{ color: 'green' }}> Complete</span>}
+                                                                                    {(value < 0 || value > 3 || value == null) && <span>Type: Unknown</span>}
                                                                                 </div>
                                                                             )}
                                                                         </div>

@@ -211,6 +211,8 @@ const PersonalData = React.memo((props) => {
       return;
     }
     const formData = { ...data };
+    // console.log(formData);
+
     const contacts = formData.contacts || [];
 
     contacts.forEach(contact => {
@@ -221,10 +223,15 @@ const PersonalData = React.memo((props) => {
     });
     const vendorTypeValue = formData.type.value;
     const vendorstatusValue = formData.status.value;
+    const vendorprofileValue = formData.profile_status.value;
+
     formData.type = vendorTypeValue
     formData.status = vendorstatusValue
+    formData.profile_status = vendorprofileValue;
+
     delete formData.contacts;
     formData.vendor_brands = formData.vendor_brands.join(',');
+    // console.log(formData);
     try {
       const response = await axiosClient.post("PersonalInformation", formData);
       setIsSubmitting(true)
@@ -260,6 +267,8 @@ const PersonalData = React.memo((props) => {
     });
     formData.type = formData.type.value;
     formData.status = formData.status.value;
+    formData.profile_status = formData.profile_status.value;
+
     delete formData.contacts;
     idVendor ? formData.id = idVendor : false;
     formData.VendorSide = props?.VendorSide ? true : false;
@@ -430,6 +439,22 @@ const PersonalData = React.memo((props) => {
             }; handleStatusChange(statusOption);
             setValue("status", statusOption);
           }
+           if (
+               data.profile_status !== null &&
+               data.profile_status !== undefined
+           ) {
+               const profile_status = {
+                   value: data.profile_status,
+                   label:
+                       data.profile_status == 1
+                           ? "Complete"
+                           : data.profile_status == 0
+                           ? "pending"
+                           : "Unknown",
+               };
+              
+               setValue("profile_status", profile_status);
+           }
           setValue("name", data.name);
           setValue("email", data.email);
           setValue("prfx_name", data.prfx_name);
@@ -505,674 +530,1273 @@ const PersonalData = React.memo((props) => {
 
 
   return (
-    <Fragment>
-      <Card>
-        <CardHeader
-          className="pb-3 d-flex justify-content-between align-items-center"
-          onClick={toggleCollapse}
-          style={{ cursor: 'pointer', paddingBottom: '25px' }
-          }
-        >
-          <H5>Personal Information </H5>
-          < i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '24px' }}> </i>
-        </CardHeader>
-        < Collapse isOpen={isOpen} >
-          <CardBody>
-            {
-              loading2 ? (
-                <div className="loader-box" >
-                  <Spinner attrSpinner={{ className: 'loader-6' }} />
-                </div>
-              ) : <Form className="needs-validation" noValidate="" autoComplete="off" >
-                <Row className="g-3 mb-3" >
-                  <Col md="6" id="type-wrapper" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Vendor Type </Label>
-                      < Col sm="9" >
-                        <Controller
-                          name="type"
-                          control={control}
-                          rules={{ required: true }}
-                          render={({ field }) => (
-                            <Select
-                              id='type'
-                              {...field}
-                              value={field.value || { value: '', label: '-- Select Type --' }}
-                              options={
-                                [
-                                  { value: '0', label: 'Freelance' },
-                                  { value: '2', label: 'Agency' },
-                                  { value: '3', label: 'Contractor' },
-                                  { value: '1', label: 'In House' },
-                                ]}
-                              className="js-example-basic-single col-sm-12"
-                              onChange={(option) => {
-                                handleVendorTypeChange(option);
-                                field.onChange(option);
-                              }}
-                              isDisabled={(props.permission && props.permission.type === "disable")}
-                            />
-                          )}
-                        />
-
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" id="status-wrapper" style={{ display: props?.permission?.status ? "none" : "block" }} >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Status </Label>
-                      < Col sm="9" >
-                        <Controller
-                          name="status"
-                          control={control}
-                          rules={{ required: true }}
-                          render={({ field }) => (
-                            <Select
-                              id='status'
-                              {...field}
-                              value={field.value ?? { value: '', label: '-- Select Status --' }}
-                              options={
-                                [
-                                  { value: '0', label: 'Active' },
-                                  { value: '1', label: 'Inactive' },
-                                  { value: '2', label: 'Wait for Approval' },
-                                  { value: '3', label: 'Rejected' },
-                                ]} className="js-example-basic-single col-sm-12"
-                              onChange={(option) => {
-                                handleStatusChange(option);
-                                field.onChange(option);
-                              }}
-                              isDisabled={(props.permission && props.permission.status === "disable")}
-                            />
-                          )} />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" id="name-wrapper" >
-                    <FormGroup className="row" >
-
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> {nameLabel} </Label>
-                      < Col sm="9" >
-                        <input
-                          defaultValue=""
-                          className="form-control"
-                          // id="name"
-                          type="text"
-                          name="name"
-                          {...register("name", { required: true })}
-                          placeholder={nameLabel}
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" id="contact-wrapper" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > {ContactLabel} </Label>
-                      < Col sm="9" >
-                        <InputGroup>
-                          <select disabled={(props.permission && props.permission.contact === "disable")} className="input-group-text" id="inputGroup" defaultValue="" {...register("prfx_name", { required: false })} >
-                            <option value="" disabled > Prefix </option>
-                            < option value="Mr" > Mr </option>
-                            < option value="Ms" > Ms </option>
-                            < option value="Mss" > Mss </option>
-                            < option value="Mrs" > Mrs </option>
-
-                          </select>
-                          < input
-                            className="form-control"
-
-                            defaultValue=""
-                            type="text"
-                            name="contact_name"
-                            {...register("contact_name", { required: false })}
-                            placeholder={ContactLabel}
-                          />
-                        </InputGroup>
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Legal Name </Label>
-                      < Col sm="9" >
-                        <input
-                          className="form-control leg"
-                          id="Legal_Name"
-                          type="text"
-                          name="legal_Name"
-                          {...register("legal_Name", { required: false })}
-                          placeholder="As Mentioned in ID and Passport"
-
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Email </Label>
-                      < Col sm="9" >
-                        < input
-                          className="form-control"
-                          disabled={props?.permission?.email ? true : false}
-                          // id="email"
-                          type="email"
-                          name="email"
-                          placeholder="Email"
-                          {...register("email", {
-                            required: "Email is required",
-                            pattern: {
-                              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                              message: "Invalid email address"
-                            }
-                          })
-                          }
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Phone Number </Label>
-                      < Col sm="9" >
-
-                        <InputGroup>
-                          <input
-                            className="form-control"
-                            // id="Phone_number"
-                            type="tel"
-                            name="Phone_number"
-                            placeholder="Phone number"
-                            {...register("phone_number", {
-                              required: "Phone number is required",
-                              pattern: {
-                                value: /^\+[1-9]{1}[0-9]{3,14}$/
-                              }
-                            })
-                            }
-                            onInput={(e) => {
-                              e.target.value = e.target.value.replace(/[^+\d]/g, '');
-                            }}
-                          />
-                          < input
-                            className="form-control "
-                            // id="Anothernumber"
-                            type="tel"
-                            name="Another-number"
-                            pattern="[789][0-9]{9}"
-                            placeholder="Another number"
-                            {...register("Anothernumber", { required: false })}
-                          />
-
-
-                        </InputGroup>
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Contact </Label>
-                      < Col sm="9" >
-
-                        <div className="input-group flex-nowrap" >
-                          <div className="input-group-prepend" >
-                            <span className="input-group-text " onClick={toggle} >
-                              <i className={`icofont ${inputValues.length <= 0 ? 'icofont-plus' : 'icofont-ui-edit'}`} style={{ fontSize: "10px" }}> </i>
-                            </span>
-
-                          </div>
-                          < Controller
-                            name="contacts"
-                            control={control}
-                            rules={{ required: false }}
-                            render={({ field }) => (
-                              <Select
-                                {...field}
-                                className="js-example-basic-single col-sm-11"
-                                isMulti
-                                value={inputValues}
-                                isDisabled
-                              />
-                            )}
-                          />
-                        </div>
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Country of residence</Label>
-                      < Col sm="9" >
-                        <Controller
-                          name="country"
-                          control={control}
-                          rules={{ required: true }}
-                          render={({ field }) => (
-                            <Select
-                              {...field}
-                              value={selectedOptionC}
-                              options={optionsC}
-                              className="js-example-basic-single col-sm-12"
-                              isSearchable
-                              onInputChange={(inputValue) =>
-                                handleInputChange(inputValue, "countries", "Country", setOptionsC, optionsC)
-                              }
-                              noOptionsMessage={() => loading ? (
-                                <div className="loader-box" >
-                                  <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                </div>
-                              ) : 'No options found'}
-                              onChange={(option) => {
-                                setSelectedOptionC(option);
-                                handelingSelectTimeZone(option?.value)
-                                handelingRegions(option?.regions)
-                                field.onChange(option?.value);
-                              }}
-
-                            />
-                          )}
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Region </Label>
-                      < Col sm="9" >
-                        <Controller
-                          name="region"
-                          control={control}
-                          rules={{ required: true }}
-                          render={({ field }) => (
-                            <Select
-                              {...field}
-                              value={selectedOptionR}
-                              options={optionsR}
-                              // onInputChange={(inputValue) =>
-                              //   handleInputChange(inputValue, "regions", "region", setOptionsR, optionsR)
-                              // }
-                              className="js-example-basic-single col-sm-12"
-                              isSearchable
-                              noOptionsMessage={() => loading ? (
-                                <div className="loader-box" >
-                                  <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                </div>
-                              ) : 'Select Country first'}
-                              onChange={(option) => {
-                                setSelectedOptionR(option);
-                                field.onChange(option.value);
-                                // handelingSelectCountry(option.value)
-                              }}
-
-                            />
-                          )}
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-
-                  < Col md="6" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Nationality </Label>
-                      < Col sm="9" >
-                        <Controller
-                          name="nationality"
-                          control={control}
-                          rules={{ required: true }}
-                          render={({ field }) => (
-                            <Select
-                              {...field}
-                              value={selectedOptionN}
-                              options={optionsN}
-                              onInputChange={(inputValue) =>
-                                handleInputChange(inputValue, "countries", "Nationality", setOptionsN, optionsN)
-                              }
-                              className="js-example-basic-single col-sm-12"
-                              isSearchable
-                              noOptionsMessage={() => loading ? (
-                                <div className="loader-box" >
-                                  <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                </div>
-                              ) : 'No options found'}
-                              onChange={(option) => {
-                                setSelectedOptionN(option);
-                                field.onChange(option.value);
-                              }}
-
-                            />
-                          )}
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Rank </Label>
-                      < Col sm="9" >
-
-                        <div className="d-flex justify-content-between align-items-center" >
-                          <div className="ratings" style={{ fontSize: "25px" }}>
-                            <i className="fa fa-star rating-color" > </i>
-                            < i className="fa fa-star rating-color" > </i>
-                            < i className="fa fa-star rating-color" > </i>
-                            < i className="fa fa-star rating-color" > </i>
-                            < i className="fa fa-star" > </i>
-                          </div>
-                        </div>
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Time Zone </Label>
-                      < Col sm="9" >
-                        <Controller
-                          name="timezone"
-                          control={control}
-                          rules={{ required: true }}
-                          render={({ field }) => (
-                            <Select
-                              {...field}
-                              value={selectedOptionT || { value: "", label: "" }}
-                              options={optionsT}
-
-                              className="js-example-basic-single col-sm-12"
-                              isSearchable
-                              noOptionsMessage={() => loading ? (
-                                <div className="loader-box" >
-                                  <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                </div>
-                              ) : 'Select Country first'}
-                              onChange={(option) => {
-                                setSelectedOptionT(option);
-                                field.onChange(option.value);
-                              }}
-
-                            />
-                          )}
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Street </Label>
-                      < Col sm="9" >
-
-                        <input
-
-                          className="form-control"
-                          id="Street"
-                          type="text"
-                          name="Street"
-                          {...register("street", { required: false })}
-                          placeholder="Street"
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > City / state </Label>
-                      < Col sm="9" >
-                        <input
-
-                          className="form-control"
-                          id="City_state"
-                          type="text"
-                          name="City_state"
-                          {...register("city", { required: false })}
-                          placeholder="City / state"
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" ><span style={{ color: 'red', fontSize: "18px" }}>*</span> Vendor Source </Label>
-                      < Col sm="9" >
-                        <input
-                          className="form-control"
-                          id="vendor_source"
-                          type="text"
-                          name="vendor_source"
-                          {...register("vendor_source", { required: true })}
-                          placeholder="Vendor Source"
-                        />
-
-
-                      </Col>
-                    </FormGroup>
-                  </Col>
-
-
-                  < Col md="6" id="address-wrapper" >
-                    <FormGroup className="row" >
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01" > Address </Label>
-                      < Col sm="9" >
-
-                        <CKEditor
-                          editor={ClassicEditor}
-                          data={props.vendorPersonalData?.PersonalData?.address || props?.personal?.address || ""}
-
-                          onChange={(event, editor) => {
-                            const data = editor.getData();
-                            setValue('address', data);
-                          }}
-                          disabled={(props.permission && props.permission.address === "disable")}
-                        />
-                        < input
-                          id='address'
-                          hidden disabled
-                          {...register('address', { required: false })}
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  < Col md="6">
-                     <FormGroup className="row">
-                      <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Brands</Label>
-                      < Col sm="9" >
-                        <Controller
-                          name="vendor_brands"
-                          control={control}
-                          rules={{ required: true }}
-                          render={({ field }) => (
-                            <Select
-                              {...field}
-                              value={selectedBrands}
-                              options={optionsB}
-                              isMulti
-                              className="js-example-basic-single col-sm-12"
-                              isSearchable
-                              onInputChange={(inputValue) =>
-                                handleInputChange(inputValue, "brand", "vendor_brands", setOptionsB, optionsB)
-                              }
-                              noOptionsMessage={() =>
-                                loading ? (
-                                  <div className="loader-box">
-                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                  </div>
-                                ) : 'No options found'
-                              }
-                              onChange={(selectedOptions) => {
-                                setSelectedBrands(selectedOptions);
-                                field.onChange(selectedOptions?.map(option => option.value));
-                              }}
-                            />
-                          )}
-                        />
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  {props.vendorPersonalData?.PersonalData?.contact || props?.personal?.contact ? (
-                    <Col md="6" id="Old_Contact-wrapper">
-                      <FormGroup className="row">
-                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Old Contact</Label>
-                        <Col sm="9">
-                          <input
-                            className="form-control"
-                            defaultValue={props.vendorPersonalData.PersonalData.contact || props?.personal?.contact}
-                            // onChange={(e) => console.log(e.target.value)}
-                            placeholder="Old Contact Info"
-                          />
-                        </Col>
-                      </FormGroup>
-                    </Col>
-                  ) : (
-                    <Col md="6" id="Old_Contact-wrapper" style={{ minHeight: '100px' }}>
-                      <div style={{ height: '100%' }} />
-                    </Col>
-                  )}
-                  {
-                    Status && (
-                      <Col md="12" id="reject_reason-wrapper">
-                        <FormGroup className="row">
-                          <Label className="col-form-label" style={{ width: '12.5%' }} for="validationCustom01">
-                            <span style={{ color: 'red', fontSize: "18px" }}>*</span> Rejection Reason
-                          </Label>
-
-
-                          <Col style={{ width: '87.5%' }}>
-                            <CKEditor
-                              editor={ClassicEditor}
-                              data={props.vendorPersonalData?.PersonalData?.reject_reason || props?.personal?.reject_reason || ""}
-                              onChange={(event, editor) => {
-                                const data = editor.getData();
-                                setValue('reject_reason', data);
-                              }}
-                              disabled={(props.permission && props.permission.reject_reason === "disable")}
-                            />
-                            <input
-                              disabled
-                              hidden
-                              {...register('reject_reason', { required: false })}
-                            />
-                          </Col>
-                        </FormGroup>
-                      </Col>
-                    )
-                  }
-
-
-
-                </Row>
-                < div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <Btn
-                    attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError), }}
+      <Fragment>
+          <Card>
+              <CardHeader
+                  className="pb-3 d-flex justify-content-between align-items-center"
+                  onClick={toggleCollapse}
+                  style={{ cursor: "pointer", paddingBottom: "25px" }}
+              >
+                  <H5>Personal Information </H5>
+                  <i
+                      className={`icon-angle-${isOpen ? "down" : "left"}`}
+                      style={{ fontSize: "24px" }}
                   >
-                    Submit
-                  </Btn>
-                </div>
-              </Form>}
+                      {" "}
+                  </i>
+              </CardHeader>
+              <Collapse isOpen={isOpen}>
+                  <CardBody>
+                      {loading2 ? (
+                          <div className="loader-box">
+                              <Spinner
+                                  attrSpinner={{ className: "loader-6" }}
+                              />
+                          </div>
+                      ) : (
+                          <Form
+                              className="needs-validation"
+                              noValidate=""
+                              autoComplete="off"
+                          >
+                              <Row className="g-3 mb-3">
+                                  <Col md="6" id="type-wrapper">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              Vendor Type{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <Controller
+                                                  name="type"
+                                                  control={control}
+                                                  rules={{ required: true }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          id="type"
+                                                          {...field}
+                                                          value={
+                                                              field.value || {
+                                                                  value: "",
+                                                                  label: "-- Select Type --",
+                                                              }
+                                                          }
+                                                          options={[
+                                                              {
+                                                                  value: "0",
+                                                                  label: "Freelance",
+                                                              },
+                                                              {
+                                                                  value: "2",
+                                                                  label: "Agency",
+                                                              },
+                                                              {
+                                                                  value: "3",
+                                                                  label: "Contractor",
+                                                              },
+                                                              {
+                                                                  value: "1",
+                                                                  label: "In House",
+                                                              },
+                                                          ]}
+                                                          className="js-example-basic-single col-sm-12"
+                                                          onChange={(
+                                                              option
+                                                          ) => {
+                                                              handleVendorTypeChange(
+                                                                  option
+                                                              );
+                                                              field.onChange(
+                                                                  option
+                                                              );
+                                                          }}
+                                                          isDisabled={
+                                                              props.permission &&
+                                                              props.permission
+                                                                  .type ===
+                                                                  "disable"
+                                                          }
+                                                      />
+                                                  )}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col
+                                      md="6"
+                                      id="status-wrapper"
+                                      style={{
+                                          display: props?.permission?.status
+                                              ? "none"
+                                              : "block",
+                                      }}
+                                  >
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              Status{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <Controller
+                                                  name="status"
+                                                  control={control}
+                                                  rules={{ required: true }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          id="status"
+                                                          {...field}
+                                                          value={
+                                                              field.value ?? {
+                                                                  value: "",
+                                                                  label: "-- Select Status --",
+                                                              }
+                                                          }
+                                                          options={[
+                                                              {
+                                                                  value: "0",
+                                                                  label: "Active",
+                                                              },
+                                                              {
+                                                                  value: "1",
+                                                                  label: "Inactive",
+                                                              },
+                                                              {
+                                                                  value: "2",
+                                                                  label: "Wait for Approval",
+                                                              },
+                                                              {
+                                                                  value: "3",
+                                                                  label: "Rejected",
+                                                              },
+                                                          ]}
+                                                          className="js-example-basic-single col-sm-12"
+                                                          onChange={(
+                                                              option
+                                                          ) => {
+                                                              handleStatusChange(
+                                                                  option
+                                                              );
+                                                              field.onChange(
+                                                                  option
+                                                              );
+                                                          }}
+                                                          isDisabled={
+                                                              props.permission &&
+                                                              props.permission
+                                                                  .status ===
+                                                                  "disable"
+                                                          }
+                                                      />
+                                                  )}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6" id="name-wrapper">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              {nameLabel}{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <input
+                                                  defaultValue=""
+                                                  className="form-control"
+                                                  // id="name"
+                                                  type="text"
+                                                  name="name"
+                                                  {...register("name", {
+                                                      required: true,
+                                                  })}
+                                                  placeholder={nameLabel}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6" id="contact-wrapper">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              {" "}
+                                              {ContactLabel}{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <InputGroup>
+                                                  <select
+                                                      disabled={
+                                                          props.permission &&
+                                                          props.permission
+                                                              .contact ===
+                                                              "disable"
+                                                      }
+                                                      className="input-group-text"
+                                                      id="inputGroup"
+                                                      defaultValue=""
+                                                      {...register(
+                                                          "prfx_name",
+                                                          { required: false }
+                                                      )}
+                                                  >
+                                                      <option value="" disabled>
+                                                          {" "}
+                                                          Prefix{" "}
+                                                      </option>
+                                                      <option value="Mr">
+                                                          {" "}
+                                                          Mr{" "}
+                                                      </option>
+                                                      <option value="Ms">
+                                                          {" "}
+                                                          Ms{" "}
+                                                      </option>
+                                                      <option value="Mss">
+                                                          {" "}
+                                                          Mss{" "}
+                                                      </option>
+                                                      <option value="Mrs">
+                                                          {" "}
+                                                          Mrs{" "}
+                                                      </option>
+                                                  </select>
+                                                  <input
+                                                      className="form-control"
+                                                      defaultValue=""
+                                                      type="text"
+                                                      name="contact_name"
+                                                      {...register(
+                                                          "contact_name",
+                                                          { required: false }
+                                                      )}
+                                                      placeholder={ContactLabel}
+                                                  />
+                                              </InputGroup>
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              {" "}
+                                              Legal Name{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <input
+                                                  className="form-control leg"
+                                                  id="Legal_Name"
+                                                  type="text"
+                                                  name="legal_Name"
+                                                  {...register("legal_Name", {
+                                                      required: false,
+                                                  })}
+                                                  placeholder="As Mentioned in ID and Passport"
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              {" "}
+                                              Email{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <input
+                                                  className="form-control"
+                                                  disabled={
+                                                      props?.permission?.email
+                                                          ? true
+                                                          : false
+                                                  }
+                                                  // id="email"
+                                                  type="email"
+                                                  name="email"
+                                                  placeholder="Email"
+                                                  {...register("email", {
+                                                      required:
+                                                          "Email is required",
+                                                      pattern: {
+                                                          value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                                                          message:
+                                                              "Invalid email address",
+                                                      },
+                                                  })}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              {" "}
+                                              Phone Number{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <InputGroup>
+                                                  <input
+                                                      className="form-control"
+                                                      // id="Phone_number"
+                                                      type="tel"
+                                                      name="Phone_number"
+                                                      placeholder="Phone number"
+                                                      {...register(
+                                                          "phone_number",
+                                                          {
+                                                              required:
+                                                                  "Phone number is required",
+                                                              pattern: {
+                                                                  value: /^\+[1-9]{1}[0-9]{3,14}$/,
+                                                              },
+                                                          }
+                                                      )}
+                                                      onInput={(e) => {
+                                                          e.target.value =
+                                                              e.target.value.replace(
+                                                                  /[^+\d]/g,
+                                                                  ""
+                                                              );
+                                                      }}
+                                                  />
+                                                  <input
+                                                      className="form-control "
+                                                      // id="Anothernumber"
+                                                      type="tel"
+                                                      name="Another-number"
+                                                      pattern="[789][0-9]{9}"
+                                                      placeholder="Another number"
+                                                      {...register(
+                                                          "Anothernumber",
+                                                          { required: false }
+                                                      )}
+                                                  />
+                                              </InputGroup>
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              {" "}
+                                              Contact{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <div className="input-group flex-nowrap">
+                                                  <div className="input-group-prepend">
+                                                      <span
+                                                          className="input-group-text "
+                                                          onClick={toggle}
+                                                      >
+                                                          <i
+                                                              className={`icofont ${
+                                                                  inputValues.length <=
+                                                                  0
+                                                                      ? "icofont-plus"
+                                                                      : "icofont-ui-edit"
+                                                              }`}
+                                                              style={{
+                                                                  fontSize:
+                                                                      "10px",
+                                                              }}
+                                                          >
+                                                              {" "}
+                                                          </i>
+                                                      </span>
+                                                  </div>
+                                                  <Controller
+                                                      name="contacts"
+                                                      control={control}
+                                                      rules={{
+                                                          required: false,
+                                                      }}
+                                                      render={({ field }) => (
+                                                          <Select
+                                                              {...field}
+                                                              className="js-example-basic-single col-sm-11"
+                                                              isMulti
+                                                              value={
+                                                                  inputValues
+                                                              }
+                                                              isDisabled
+                                                          />
+                                                      )}
+                                                  />
+                                              </div>
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              Country of residence
+                                          </Label>
+                                          <Col sm="9">
+                                              <Controller
+                                                  name="country"
+                                                  control={control}
+                                                  rules={{ required: true }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          {...field}
+                                                          value={
+                                                              selectedOptionC
+                                                          }
+                                                          options={optionsC}
+                                                          className="js-example-basic-single col-sm-12"
+                                                          isSearchable
+                                                          onInputChange={(
+                                                              inputValue
+                                                          ) =>
+                                                              handleInputChange(
+                                                                  inputValue,
+                                                                  "countries",
+                                                                  "Country",
+                                                                  setOptionsC,
+                                                                  optionsC
+                                                              )
+                                                          }
+                                                          noOptionsMessage={() =>
+                                                              loading ? (
+                                                                  <div className="loader-box">
+                                                                      <Spinner
+                                                                          attrSpinner={{
+                                                                              className:
+                                                                                  "loader-6",
+                                                                          }}
+                                                                      />
+                                                                  </div>
+                                                              ) : (
+                                                                  "No options found"
+                                                              )
+                                                          }
+                                                          onChange={(
+                                                              option
+                                                          ) => {
+                                                              setSelectedOptionC(
+                                                                  option
+                                                              );
+                                                              handelingSelectTimeZone(
+                                                                  option?.value
+                                                              );
+                                                              handelingRegions(
+                                                                  option?.regions
+                                                              );
+                                                              field.onChange(
+                                                                  option?.value
+                                                              );
+                                                          }}
+                                                      />
+                                                  )}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              Region{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <Controller
+                                                  name="region"
+                                                  control={control}
+                                                  rules={{ required: true }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          {...field}
+                                                          value={
+                                                              selectedOptionR
+                                                          }
+                                                          options={optionsR}
+                                                          // onInputChange={(inputValue) =>
+                                                          //   handleInputChange(inputValue, "regions", "region", setOptionsR, optionsR)
+                                                          // }
+                                                          className="js-example-basic-single col-sm-12"
+                                                          isSearchable
+                                                          noOptionsMessage={() =>
+                                                              loading ? (
+                                                                  <div className="loader-box">
+                                                                      <Spinner
+                                                                          attrSpinner={{
+                                                                              className:
+                                                                                  "loader-6",
+                                                                          }}
+                                                                      />
+                                                                  </div>
+                                                              ) : (
+                                                                  "Select Country first"
+                                                              )
+                                                          }
+                                                          onChange={(
+                                                              option
+                                                          ) => {
+                                                              setSelectedOptionR(
+                                                                  option
+                                                              );
+                                                              field.onChange(
+                                                                  option.value
+                                                              );
+                                                              // handelingSelectCountry(option.value)
+                                                          }}
+                                                      />
+                                                  )}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
 
-          </CardBody>
-        </Collapse>
-      </Card>
-      < CommonModal isOpen={modal} title="Add Contact" toggler={toggle} onSave={handleSubmitContact(contact)} >
-        <Row className="g-0" >
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              Nationality{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <Controller
+                                                  name="nationality"
+                                                  control={control}
+                                                  rules={{ required: true }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          {...field}
+                                                          value={
+                                                              selectedOptionN
+                                                          }
+                                                          options={optionsN}
+                                                          onInputChange={(
+                                                              inputValue
+                                                          ) =>
+                                                              handleInputChange(
+                                                                  inputValue,
+                                                                  "countries",
+                                                                  "Nationality",
+                                                                  setOptionsN,
+                                                                  optionsN
+                                                              )
+                                                          }
+                                                          className="js-example-basic-single col-sm-12"
+                                                          isSearchable
+                                                          noOptionsMessage={() =>
+                                                              loading ? (
+                                                                  <div className="loader-box">
+                                                                      <Spinner
+                                                                          attrSpinner={{
+                                                                              className:
+                                                                                  "loader-6",
+                                                                          }}
+                                                                      />
+                                                                  </div>
+                                                              ) : (
+                                                                  "No options found"
+                                                              )
+                                                          }
+                                                          onChange={(
+                                                              option
+                                                          ) => {
+                                                              setSelectedOptionN(
+                                                                  option
+                                                              );
+                                                              field.onChange(
+                                                                  option.value
+                                                              );
+                                                          }}
+                                                      />
+                                                  )}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              {" "}
+                                              Rank{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <div className="d-flex justify-content-between align-items-center">
+                                                  <div
+                                                      className="ratings"
+                                                      style={{
+                                                          fontSize: "25px",
+                                                      }}
+                                                  >
+                                                      <i className="fa fa-star rating-color">
+                                                          {" "}
+                                                      </i>
+                                                      <i className="fa fa-star rating-color">
+                                                          {" "}
+                                                      </i>
+                                                      <i className="fa fa-star rating-color">
+                                                          {" "}
+                                                      </i>
+                                                      <i className="fa fa-star rating-color">
+                                                          {" "}
+                                                      </i>
+                                                      <i className="fa fa-star">
+                                                          {" "}
+                                                      </i>
+                                                  </div>
+                                              </div>
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              Time Zone{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <Controller
+                                                  name="timezone"
+                                                  control={control}
+                                                  rules={{ required: true }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          {...field}
+                                                          value={
+                                                              selectedOptionT || {
+                                                                  value: "",
+                                                                  label: "",
+                                                              }
+                                                          }
+                                                          options={optionsT}
+                                                          className="js-example-basic-single col-sm-12"
+                                                          isSearchable
+                                                          noOptionsMessage={() =>
+                                                              loading ? (
+                                                                  <div className="loader-box">
+                                                                      <Spinner
+                                                                          attrSpinner={{
+                                                                              className:
+                                                                                  "loader-6",
+                                                                          }}
+                                                                      />
+                                                                  </div>
+                                                              ) : (
+                                                                  "Select Country first"
+                                                              )
+                                                          }
+                                                          onChange={(
+                                                              option
+                                                          ) => {
+                                                              setSelectedOptionT(
+                                                                  option
+                                                              );
+                                                              field.onChange(
+                                                                  option.value
+                                                              );
+                                                          }}
+                                                      />
+                                                  )}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              {" "}
+                                              Street{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <input
+                                                  className="form-control"
+                                                  id="Street"
+                                                  type="text"
+                                                  name="Street"
+                                                  {...register("street", {
+                                                      required: false,
+                                                  })}
+                                                  placeholder="Street"
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              {" "}
+                                              City / state{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <input
+                                                  className="form-control"
+                                                  id="City_state"
+                                                  type="text"
+                                                  name="City_state"
+                                                  {...register("city", {
+                                                      required: false,
+                                                  })}
+                                                  placeholder="City / state"
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              Vendor Source{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <input
+                                                  className="form-control"
+                                                  id="vendor_source"
+                                                  type="text"
+                                                  name="vendor_source"
+                                                  {...register(
+                                                      "vendor_source",
+                                                      { required: true }
+                                                  )}
+                                                  placeholder="Vendor Source"
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
 
-          <Col>
-            <FormGroup className="row" >
-              <Label className="col-sm-3 col-form-label" for="validationCustom01" > linked In </Label>
-              < Col md="9" >
-                <input
-                  className="form-control"
-                  id="linkedIn"
-                  type="url"
-                  name="LinkedIn"
-                  placeholder="Linked In"
-                  {...registerContact("LinkedIn", {
-                    required: false,
-                    // validate: {
-                    //   isValidURL: value => {
-                    //     const regex = /^(ftp|http|https):\/\/[^ "]+$/;
-                    //     return regex.test(value) || "Please enter a valid URL";
-                    //   }
-                    // }
-                  })
-                  }
-                />
-              </Col>
-              {/* < span style={{ color: '#dc3545', fontStyle: 'italic' }}>
+                                  <Col md="6" id="address-wrapper">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              {" "}
+                                              Address{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <CKEditor
+                                                  editor={ClassicEditor}
+                                                  data={
+                                                      props.vendorPersonalData
+                                                          ?.PersonalData
+                                                          ?.address ||
+                                                      props?.personal
+                                                          ?.address ||
+                                                      ""
+                                                  }
+                                                  onChange={(event, editor) => {
+                                                      const data =
+                                                          editor.getData();
+                                                      setValue("address", data);
+                                                  }}
+                                                  disabled={
+                                                      props.permission &&
+                                                      props.permission
+                                                          .address === "disable"
+                                                  }
+                                              />
+                                              <input
+                                                  id="address"
+                                                  hidden
+                                                  disabled
+                                                  {...register("address", {
+                                                      required: false,
+                                                  })}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              Brands
+                                          </Label>
+                                          <Col sm="9">
+                                              <Controller
+                                                  name="vendor_brands"
+                                                  control={control}
+                                                  rules={{ required: true }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          {...field}
+                                                          value={selectedBrands}
+                                                          options={optionsB}
+                                                          isMulti
+                                                          className="js-example-basic-single col-sm-12"
+                                                          isSearchable
+                                                          onInputChange={(
+                                                              inputValue
+                                                          ) =>
+                                                              handleInputChange(
+                                                                  inputValue,
+                                                                  "brand",
+                                                                  "vendor_brands",
+                                                                  setOptionsB,
+                                                                  optionsB
+                                                              )
+                                                          }
+                                                          noOptionsMessage={() =>
+                                                              loading ? (
+                                                                  <div className="loader-box">
+                                                                      <Spinner
+                                                                          attrSpinner={{
+                                                                              className:
+                                                                                  "loader-6",
+                                                                          }}
+                                                                      />
+                                                                  </div>
+                                                              ) : (
+                                                                  "No options found"
+                                                              )
+                                                          }
+                                                          onChange={(
+                                                              selectedOptions
+                                                          ) => {
+                                                              setSelectedBrands(
+                                                                  selectedOptions
+                                                              );
+                                                              field.onChange(
+                                                                  selectedOptions?.map(
+                                                                      (
+                                                                          option
+                                                                      ) =>
+                                                                          option.value
+                                                                  )
+                                                              );
+                                                          }}
+                                                      />
+                                                  )}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6" id="profile-wrapper">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              profile completed{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <Controller
+                                                  name="profile_status"
+                                                  control={control}
+                                                  rules={{ required: false }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          id="profile_status"
+                                                          {...field}
+                                                          value={
+                                                              field.value || {
+                                                                  value: "",
+                                                                  label: "-- Select Profile status --",
+                                                              }
+                                                          }
+                                                          options={[
+                                                              {
+                                                                  value: "0",
+                                                                  label: "pending",
+                                                              },
+                                                              {
+                                                                  value: "1",
+                                                                  label: "Complete",
+                                                              },
+                                                          ]}
+                                                          className="js-example-basic-single col-sm-12"
+                                                          onChange={(
+                                                              option
+                                                          ) => {
+                                                              handleVendorTypeChange(
+                                                                  option
+                                                              );
+                                                              field.onChange(
+                                                                  option
+                                                              );
+                                                          }}
+                                                          isDisabled={
+                                                              props.permission &&
+                                                              props.permission
+                                                                  .profile_status ===
+                                                                  "disable"
+                                                          }
+                                                      />
+                                                  )}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  {props.vendorPersonalData?.PersonalData
+                                      ?.contact || props?.personal?.contact ? (
+                                      <Col md="6" id="Old_Contact-wrapper">
+                                          <FormGroup className="row">
+                                              <Label
+                                                  className="col-sm-3 col-form-label"
+                                                  for="validationCustom01"
+                                              >
+                                                  Old Contact
+                                              </Label>
+                                              <Col sm="9">
+                                                  <input
+                                                      className="form-control"
+                                                      defaultValue={
+                                                          props
+                                                              .vendorPersonalData
+                                                              .PersonalData
+                                                              .contact ||
+                                                          props?.personal
+                                                              ?.contact
+                                                      }
+                                                      // onChange={(e) => console.log(e.target.value)}
+                                                      placeholder="Old Contact Info"
+                                                  />
+                                              </Col>
+                                          </FormGroup>
+                                      </Col>
+                                  ) : (
+                                      <Col
+                                          md="6"
+                                          id="Old_Contact-wrapper"
+                                          style={{ minHeight: "100px" }}
+                                      >
+                                          <div style={{ height: "100%" }} />
+                                      </Col>
+                                  )}
+                                  {Status && (
+                                      <Col md="12" id="reject_reason-wrapper">
+                                          <FormGroup className="row">
+                                              <Label
+                                                  className="col-form-label"
+                                                  style={{ width: "12.5%" }}
+                                                  for="validationCustom01"
+                                              >
+                                                  <span
+                                                      style={{
+                                                          color: "red",
+                                                          fontSize: "18px",
+                                                      }}
+                                                  >
+                                                      *
+                                                  </span>{" "}
+                                                  Rejection Reason
+                                              </Label>
+
+                                              <Col style={{ width: "87.5%" }}>
+                                                  <CKEditor
+                                                      editor={ClassicEditor}
+                                                      data={
+                                                          props
+                                                              .vendorPersonalData
+                                                              ?.PersonalData
+                                                              ?.reject_reason ||
+                                                          props?.personal
+                                                              ?.reject_reason ||
+                                                          ""
+                                                      }
+                                                      onChange={(
+                                                          event,
+                                                          editor
+                                                      ) => {
+                                                          const data =
+                                                              editor.getData();
+                                                          setValue(
+                                                              "reject_reason",
+                                                              data
+                                                          );
+                                                      }}
+                                                      disabled={
+                                                          props.permission &&
+                                                          props.permission
+                                                              .reject_reason ===
+                                                              "disable"
+                                                      }
+                                                  />
+                                                  <input
+                                                      disabled
+                                                      hidden
+                                                      {...register(
+                                                          "reject_reason",
+                                                          { required: false }
+                                                      )}
+                                                  />
+                                              </Col>
+                                          </FormGroup>
+                                      </Col>
+                                  )}
+                              </Row>
+                              <div
+                                  style={{
+                                      display: "flex",
+                                      justifyContent: "flex-end",
+                                  }}
+                              >
+                                  <Btn
+                                      attrBtn={{
+                                          color: "primary",
+                                          onClick: handleSubmit(
+                                              handleClick,
+                                              onError
+                                          ),
+                                      }}
+                                  >
+                                      Submit
+                                  </Btn>
+                              </div>
+                          </Form>
+                      )}
+                  </CardBody>
+              </Collapse>
+          </Card>
+          <CommonModal
+              isOpen={modal}
+              title="Add Contact"
+              toggler={toggle}
+              onSave={handleSubmitContact(contact)}
+          >
+              <Row className="g-0">
+                  <Col>
+                      <FormGroup className="row">
+                          <Label
+                              className="col-sm-3 col-form-label"
+                              for="validationCustom01"
+                          >
+                              {" "}
+                              linked In{" "}
+                          </Label>
+                          <Col md="9">
+                              <input
+                                  className="form-control"
+                                  id="linkedIn"
+                                  type="url"
+                                  name="LinkedIn"
+                                  placeholder="Linked In"
+                                  {...registerContact("LinkedIn", {
+                                      required: false,
+                                      // validate: {
+                                      //   isValidURL: value => {
+                                      //     const regex = /^(ftp|http|https):\/\/[^ "]+$/;
+                                      //     return regex.test(value) || "Please enter a valid URL";
+                                      //   }
+                                      // }
+                                  })}
+                              />
+                          </Col>
+                          {/* < span style={{ color: '#dc3545', fontStyle: 'italic' }}>
                 {errorsContact.LinkedIn?.type === 'required' && 'LinkedIn link is required'}
                 {errorsContact.LinkedIn?.type === 'isValidURL' && 'Please enter a valid URL'}
               </span> */}
-            </FormGroup>
-            < FormGroup className="row" >
-              <Label className="col-sm-3 col-form-label" for="validationCustom01" > ProZ </Label>
-              < Col md="9" >
-                <input
-                  className="form-control"
-                  id="ProZ"
-                  type="url"
-                  name="ProZ"
-                  placeholder="ProZ"
-                  {...registerContact("ProZ", {
-                    required: false,
-                    // validate: {
-                    //   isValidURL: value => {
-                    //     const regex = /^(ftp|http|https):\/\/[^ "]+$/;
-                    //     return regex.test(value) || "Please enter a valid URL";
-                    //   }
-                    // }
-                  })
-                  } />
-
-              </Col>
-              {/* < span style={{ color: '#dc3545', fontStyle: 'italic' }}>
+                      </FormGroup>
+                      <FormGroup className="row">
+                          <Label
+                              className="col-sm-3 col-form-label"
+                              for="validationCustom01"
+                          >
+                              {" "}
+                              ProZ{" "}
+                          </Label>
+                          <Col md="9">
+                              <input
+                                  className="form-control"
+                                  id="ProZ"
+                                  type="url"
+                                  name="ProZ"
+                                  placeholder="ProZ"
+                                  {...registerContact("ProZ", {
+                                      required: false,
+                                      // validate: {
+                                      //   isValidURL: value => {
+                                      //     const regex = /^(ftp|http|https):\/\/[^ "]+$/;
+                                      //     return regex.test(value) || "Please enter a valid URL";
+                                      //   }
+                                      // }
+                                  })}
+                              />
+                          </Col>
+                          {/* < span style={{ color: '#dc3545', fontStyle: 'italic' }}>
                 {errorsContact.ProZ?.type === 'required' && 'ProZ link is required'}
                 {errorsContact.ProZ?.type === 'isValidURL' && 'Please enter a valid URL'}
               </span> */}
-            </FormGroup>
-            < FormGroup className="row" >
-              <Label className="col-sm-3 col-form-label" for="validationCustom01" > other 1 </Label>
-              < Col md="9" >
-                <input
-                  className="form-control"
-                  id="other1"
-                  type="url"
-                  name="other1"
-                  placeholder="other 1"
-                  {...registerContact("other1", { required: false, })} />
-              </Col>
-            </FormGroup>
-            < FormGroup className="row" >
-              <Label className="col-sm-3 col-form-label" for="validationCustom01" > other 2 </Label>
-              < Col md="9" >
-                <input
-                  className="form-control"
-                  id="other2"
-                  type="url"
-                  name="other2"
-                  placeholder="other 2"
-                  {...registerContact("other2", { required: false, })}
-                />
-              </Col>
-            </FormGroup>
-            < FormGroup className="row" >
-              <Label className="col-sm-3 col-form-label" for="validationCustom01" > other 3 </Label>
-              < Col md="9" >
-                <input
-                  className="form-control"
-                  id="other3"
-                  type="url"
-                  name="other3"
-                  placeholder="other3"
-                  {...registerContact("other3", { required: false, })} />
-              </Col>
-            </FormGroup>
-
-
-          </Col>
-        </Row>
-
-
-      </CommonModal>
-    </Fragment>
+                      </FormGroup>
+                      <FormGroup className="row">
+                          <Label
+                              className="col-sm-3 col-form-label"
+                              for="validationCustom01"
+                          >
+                              {" "}
+                              other 1{" "}
+                          </Label>
+                          <Col md="9">
+                              <input
+                                  className="form-control"
+                                  id="other1"
+                                  type="url"
+                                  name="other1"
+                                  placeholder="other 1"
+                                  {...registerContact("other1", {
+                                      required: false,
+                                  })}
+                              />
+                          </Col>
+                      </FormGroup>
+                      <FormGroup className="row">
+                          <Label
+                              className="col-sm-3 col-form-label"
+                              for="validationCustom01"
+                          >
+                              {" "}
+                              other 2{" "}
+                          </Label>
+                          <Col md="9">
+                              <input
+                                  className="form-control"
+                                  id="other2"
+                                  type="url"
+                                  name="other2"
+                                  placeholder="other 2"
+                                  {...registerContact("other2", {
+                                      required: false,
+                                  })}
+                              />
+                          </Col>
+                      </FormGroup>
+                      <FormGroup className="row">
+                          <Label
+                              className="col-sm-3 col-form-label"
+                              for="validationCustom01"
+                          >
+                              {" "}
+                              other 3{" "}
+                          </Label>
+                          <Col md="9">
+                              <input
+                                  className="form-control"
+                                  id="other3"
+                                  type="url"
+                                  name="other3"
+                                  placeholder="other3"
+                                  {...registerContact("other3", {
+                                      required: false,
+                                  })}
+                              />
+                          </Col>
+                      </FormGroup>
+                  </Col>
+              </Row>
+          </CommonModal>
+      </Fragment>
   );
 });
 

@@ -336,3 +336,5 @@ ALTER TABLE `vendor_sheet` ADD COLUMN `sheet_brand` INT NULL ;
 UPDATE `vendor_sheet` vs
 JOIN `vendor` v ON vs.vendor = v.id
 SET vs.sheet_brand = v.brand;
+
+ALTER TABLE `vendor` ADD `profile_status` TINYINT(1) NOT NULL DEFAULT '0' AFTER `Approval_nda_date`;

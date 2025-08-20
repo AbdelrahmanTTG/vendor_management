@@ -66,6 +66,7 @@ const Notifications = () => {
     useEffect(() => {
         axiosClient.post("MyAlias", { account_id: userId.id })
             .then(({ data }) => {
+                // console.log(data)
                 setAlias(data);
 
             });

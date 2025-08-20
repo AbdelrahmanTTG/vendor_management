@@ -165,7 +165,8 @@ class Vendor extends Authenticatable  implements JWTSubject
         'Anothernumber',
         "PM",
         "vendor_source",
-        "vendor_brands"
+        "vendor_brands",
+        "profile_status",
     ];
 
     /**

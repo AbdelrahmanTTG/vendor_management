@@ -532,6 +532,9 @@ class VendorProfileController extends Controller
             'address' => 'nullable|string',
             'reject_reason' => 'nullable|string',
             'vendor_brands' => 'required|string',
+            'profile_status' => 'nullable|string',
+
+
         ]);
 
         if ($validator->fails()) {
@@ -593,6 +596,8 @@ class VendorProfileController extends Controller
             'address' => 'sometimes|nullable|string',
             'reject_reason' => 'sometimes|nullable|string',
             'vendor_brands' => 'required|string',
+            'profile_status' => 'sometimes|required|integer',
+
         ]);
 
         if ($validator->fails()) {
