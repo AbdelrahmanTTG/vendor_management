@@ -14,7 +14,7 @@ const Notifications = () => {
     const [loading, setLoading] = useState(false);
     const [sound, setSound] = useState(0);
     const [total, setTotal] = useState(0);
-    const [audio] = useState(new Audio("/audio/smile-ringtone.mp3"));
+    // const [audio] = useState(new Audio("/audio/smile-ringtone.mp3"));
 
     useEffect(() => {
         fetchNotifications(page);
@@ -29,22 +29,26 @@ const Notifications = () => {
                 params: { account_id: userId.id, page: pageNumber },
             });
             setTotal(data.total)
-            setNotifications((prev) => [...prev, ...data.data]);
+            setNotifications((prev) => [
+                ...prev,
+                ...(Array.isArray(data?.data) ? data.data : []),
+            ]);
+
             setHasMore(data.next_page_url !== null);
             setPage(pageNumber + 1);
-            if (audio.muted === false && audio.currentTime === 0) {
-                audio.muted = true;
-                audio
-                    .play()
-                    .then(() => {
-                        audio.pause();
-                        audio.currentTime = 0;
-                        audio.muted = false;
-                    })
-                    .catch((err) => {
-                        console.error("Silent pre-play failed:", err);
-                    });
-            }
+            // if (audio.muted === false && audio.currentTime === 0) {
+            //     audio.muted = true;
+            //     audio
+            //         .play()
+            //         .then(() => {
+            //             audio.pause();
+            //             audio.currentTime = 0;
+            //             audio.muted = false;
+            //         })
+            //         .catch((err) => {
+            //             console.error("Silent pre-play failed:", err);
+            //         });
+            // }
         } catch (error) {
             console.error("Error fetching notifications", error);
         }
@@ -67,7 +71,7 @@ const Notifications = () => {
         axiosClient.post("MyAlias", { account_id: userId.id })
             .then(({ data }) => {
                 // console.log(data)
-                setAlias(data);
+setAlias(Array.isArray(data) ? data : []);
 
             });
 
@@ -76,30 +80,30 @@ const Notifications = () => {
         const loadEcho = async () => {
             const { echo } = await import('../../../real-time');
             if (alias.length === 0) return;
-            alias?.forEach((email) => {
-                echo.private(`notice-private-channel.User.${email}`).listen(
-                    ".notice",
-                    (e) => {
-                        if (!e?.data) return;
-                        if (e.data.brake === userId?.email) return;
+           (Array.isArray(alias) ? alias : []).forEach((email) => {
+               echo.private(`notice-private-channel.User.${email}`).listen(
+                   ".notice",
+                   (e) => {
+                       if (!e?.data) return;
+                       if (e.data?.brake === userId?.email) return;
 
-                        
-                        setNotifications((prev) => [
-                            ...(Array.isArray(e.data) ? e.data : [e.data]),
-                            ...prev,
-                        ]);
-                        setTotal((prev) => prev + 1);
-                        try {
-                            audio.currentTime = 0;
-                            audio.play().catch((error) => {
-                                console.error("Failed to play sound:", error);
-                            });
-                        } catch (error) {
-                            console.error("Sound error:", error);
-                        }
-                    }
-                );
-            });
+                       setNotifications((prev) => [
+                           ...(Array.isArray(e.data) ? e.data : [e.data]),
+                           ...prev,
+                       ]);
+
+                       setTotal((prev) => prev + 1);
+                       try {
+                           audio.currentTime = 0;
+                           audio.play().catch((error) => {
+                               console.error("Failed to play sound:", error);
+                           });
+                       } catch (error) {
+                           console.error("Sound error:", error);
+                       }
+                   }
+               );
+           });
             
             return () => {
                 alias.forEach(email => {
@@ -141,28 +145,42 @@ const Notifications = () => {
 
     return (
         <Fragment>
-                      <LI attrLI={{ className: 'onhover-dropdown' }} >
+            <LI attrLI={{ className: "onhover-dropdown" }}>
                 <div className="notification-box">
-                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                    <div
+                        style={{
+                            position: "relative",
+                            display: "inline-block",
+                        }}
+                    >
                         <Bell />
                         {notifications.length > 0 && (
-
                             <span
                                 style={{
-                                    position: 'absolute',
-                                    top: '-15px',
-                                    right: '-15px',
-                                    minWidth: '18px',
-                                    height: '18px',
-                                    padding: '0 5px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    whiteSpace: 'nowrap'
+                                    position: "absolute",
+                                    top: "-15px",
+                                    right: "-15px",
+                                    minWidth: "18px",
+                                    height: "18px",
+                                    padding: "0 5px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    whiteSpace: "nowrap",
                                 }}
                             >
-                                <Badges attrBadge={{ className: 'badge rounded-pill', color: 'danger', pill: true }} >
-                                    {total > 99 ? "99+" : total > 0 ? total : ""}
+                                <Badges
+                                    attrBadge={{
+                                        className: "badge rounded-pill",
+                                        color: "danger",
+                                        pill: true,
+                                    }}
+                                >
+                                    {total > 99
+                                        ? "99+"
+                                        : total > 0
+                                        ? total
+                                        : ""}
                                 </Badges>
                             </span>
                         )}
@@ -171,7 +189,6 @@ const Notifications = () => {
                     {/* <span className="dot-animated"></span> */}
                 </div>
 
-
                 <ul
                     className="notification-dropdown onhover-show-div"
                     style={{
@@ -179,34 +196,55 @@ const Notifications = () => {
                         overflowY: "auto",
                         padding: "10px",
                         border: "1px solid #ddd",
-                        borderRadius: "5px"
+                        borderRadius: "5px",
                     }}
                     onScroll={handleScroll}
                 >
-                    {notifications.map((item) => (
-                        <li key={item.id} className="noti-primary">
-                            <a onClick={(event) => {
-                                handleNavigation(event, item.screen, item.screen_id);
-                                Seen(item.id); 
-                            }}>
-                                <div className="media">
-                                    <span className={`notification-bg ${item.status === 0 ? "bg-light-primary" : "bg-light-secondary"}`}>
-                                        {item.status === 0 ? <Activity /> : <CheckCircle />}
-                                    </span>
-                                    <div className="media-body">
-                                        <p>{item.content}</p>
-                                        <span>{new Date(item.created_at).toLocaleString()}</span>
+                    {Array.isArray(notifications) &&
+                        notifications.map((item) => (
+                            <li key={item.id} className="noti-primary">
+                                <a
+                                    onClick={(event) => {
+                                        handleNavigation(
+                                            event,
+                                            item.screen,
+                                            item.screen_id
+                                        );
+                                        Seen(item.id);
+                                    }}
+                                >
+                                    <div className="media">
+                                        <span
+                                            className={`notification-bg ${
+                                                item.status === 0
+                                                    ? "bg-light-primary"
+                                                    : "bg-light-secondary"
+                                            }`}
+                                        >
+                                            {item.status === 0 ? (
+                                                <Activity />
+                                            ) : (
+                                                <CheckCircle />
+                                            )}
+                                        </span>
+                                        <div className="media-body">
+                                            <p>{item.content}</p>
+                                            <span>
+                                                {new Date(
+                                                    item.created_at
+                                                ).toLocaleString()}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                            </a>
-                        </li>
-                    ))}
-                    {loading && <div className="loader-box">
-                        <Spinner attrSpinner={{ className: 'loader-9' }} />
-                    </div>}
+                                </a>
+                            </li>
+                        ))}
+                    {loading && (
+                        <div className="loader-box">
+                            <Spinner attrSpinner={{ className: "loader-9" }} />
+                        </div>
+                    )}
                 </ul>
-
-
             </LI>
         </Fragment>
     );
