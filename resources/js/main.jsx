@@ -6,7 +6,7 @@ import { ContextProvider } from './pages/context/contextAuth'
 // import SearchResultProvider from './_helper/SearchResult/SearchResult';
 // import ProductProvider from './_helper/Ecommerce/Product/ProductProvider';
 import CartProvider from './_helper/Ecommerce/Cart/CardProvider';
-import FilterProvider from './_helper/Ecommerce/Filter/FilterProvider';
+import FilterProvider from './_helper/Ecommerce/Filter/FilterProvider'; 
 import WishListProvider from './_helper/Ecommerce/Wishlist/WishlistProvider';
 // import JobSearchProvider from './_helper/JobSearch/JobSearchProvider';
 // import LearningProvider from './_helper/Learning/LearningProvider';
