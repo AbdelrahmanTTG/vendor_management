@@ -213,5 +213,10 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         $brandIds = array_filter(explode(',', $this->vendor_brands));
         return \App\Models\Brand::whereIn('id', $brandIds)->select('id', 'name')->get();
-    }  
+    }
+    public function motherTongueLanguages()
+    {
+        return $this->hasMany(VendorMotherTongue::class, 'vendor_id')
+            ->with('language');
+    }
 }

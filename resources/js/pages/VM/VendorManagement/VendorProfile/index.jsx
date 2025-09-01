@@ -99,8 +99,8 @@ const Vendor = (props) => {
                     table: tablename
                 }
             });
-            const formattedOptions = data.map(item => ({
-                value: item.id,
+            const formattedOptions = data.map((item) => ({
+                value: item.gmt ? item.gmt : item.id,
                 label: item.name || item.gmt,
             }));
 
@@ -361,6 +361,7 @@ const Vendor = (props) => {
 
             ].filter(Boolean),
         };
+        // console.log(queryParams);
 
         setQueryParams(queryParams);
         setCurrentPage(1);
@@ -1100,16 +1101,40 @@ const Vendor = (props) => {
                                                     </FormGroup>
                                                 </Col>
                                             }{
-                                                selectedSearchCol.indexOf("timezone") > -1 &&
-                                                <Col md='3'>
-                                                    <FormGroup>
-                                                        <Label className="col-form-label-sm f-12" htmlFor='name'>{'Time Zone'}</Label>
-                                                        <Select name='timezone' id='timezone' required
-                                                            options={optionsT} className="js-example-basic-single"
-                                                            isMulti />
-                                                    </FormGroup>
-                                                </Col>
-                                            }{
+    selectedSearchCol.indexOf("timezone") > -1 &&
+    <>
+        <Col md='3'>
+            <FormGroup>
+                <Label className="col-form-label-sm f-12" htmlFor='timezone_from'>
+                    {'Time Zone From'}
+                </Label>
+                <Select
+                    name='timezone_from'
+                    id='timezone_from'
+                    options={optionsT}
+                    className="js-example-basic-single"
+                    isMulti={false} 
+                />
+            </FormGroup>
+        </Col>
+
+        <Col md='3'>
+            <FormGroup>
+                <Label className="col-form-label-sm f-12" htmlFor='timezone_to'>
+                    {'Time Zone To'}
+                </Label>
+                <Select
+                    name='timezone_to'
+                    id='timezone_to'
+                    options={optionsT}
+                    className="js-example-basic-single"
+                    isMulti={false}
+                />
+            </FormGroup>
+        </Col>
+    </>
+}
+{
                                                 selectedSearchCol.indexOf("country") > -1 &&
                                                 <Col md='3'>
                                                     <FormGroup>

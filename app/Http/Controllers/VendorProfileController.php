@@ -187,10 +187,31 @@ class VendorProfileController extends Controller
         if ($request->has('queryParams') && is_array($request->queryParams)) {
 
             $queryParams = $request->queryParams;
+            if (!empty($queryParams['timezone_from']) && !empty($queryParams['timezone_to'])) {
+                $timezoneFrom = $queryParams['timezone_from'][0];
+                $timezoneTo = $queryParams['timezone_to'][0];
+
+                $vendorsQuery->whereHas('timezone', function ($query) use ($timezoneFrom, $timezoneTo) {
+                    $query->where('gmt', '>=', $timezoneFrom)
+                        ->where('gmt', '<=', $timezoneTo);
+                });
+
+                if (!in_array('timezone', $formatArray)) {
+                    $formatArray[] = 'timezone';
+                }
+
+                $vendorsQuery->with(['timezone' => function ($query) {
+                    $query->select(['id', 'gmt']);
+                }]);
+            }
 
             foreach ($queryParams as $key => $val) {
                 if ($key !== 'filters' && !empty($val)) {
                     // check vendor brands
+                    if ($key === 'timezone_from' || $key === 'timezone_to') {
+                        continue;
+                    }
+
                     if ($key === 'vendor_brands') {
                         if (!in_array('brands', $formatArray)) {
                             $formatArray[] = 'brands';
@@ -533,8 +554,8 @@ class VendorProfileController extends Controller
             'reject_reason' => 'nullable|string',
             'vendor_brands' => 'required|string',
             'profile_status' => 'nullable|string',
-
-
+            'mother_tongue_language' => 'nullable|array', 
+            'mother_tongue_language.*.value' => 'required|int' 
         ]);
 
         if ($validator->fails()) {
@@ -543,11 +564,34 @@ class VendorProfileController extends Controller
 
         $vendor = Vendor::create($validator->validated());
 
+        if ($request->has('mother_tongue_language') && is_array($request->mother_tongue_language)) {
+            $motherTongues = [];
+
+            foreach ($request->mother_tongue_language as $lang) {
+                if (isset($lang['value']) && !empty($lang['value'])) {
+                    $motherTongues[] = [
+                        'vendor_id'   => $vendor->id,
+                        'language_id' => $lang['value'],
+                        'created_at'  => now(),
+                        'updated_at'  => now()
+                    ];
+                }
+            }
+
+            if (!empty($motherTongues)) {
+                DB::table('vendors_mother_tongue')->insert($motherTongues);
+            }
+        }
+
         return response()->json([
             'message' => 'Vendor created successfully!',
-            'vendor' => ['id' => $vendor->id, "data" => $this->PersonalData($vendor->id)]
+            'vendor' => [
+                'id' => $vendor->id,
+                'data' => $this->PersonalData($vendor->id)
+            ]
         ], 201);
     }
+
 
     public function updatePersonalInfo(Request $request)
     {
@@ -597,29 +641,55 @@ class VendorProfileController extends Controller
             'reject_reason' => 'sometimes|nullable|string',
             'vendor_brands' => 'required|string',
             'profile_status' => 'sometimes|required|integer',
-
+            'mother_tongue_language' => 'nullable|array',
+            'mother_tongue_language.*.value' => 'required_with:mother_tongue_language|integer'
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-
         $vendor->update($validator->validated());
+        if ($request->has('mother_tongue_language') && is_array($request->mother_tongue_language)) {
+            DB::table('vendors_mother_tongue')
+                ->where('vendor_id', $vendor->id)
+                ->delete();
+
+            $motherTongues = [];
+            foreach ($request->mother_tongue_language as $lang) {
+                if (isset($lang['value']) && !empty($lang['value'])) {
+                    $motherTongues[] = [
+                        'vendor_id'   => $vendor->id,
+                        'language_id' => $lang['value'],
+                        'created_at'  => now(),
+                        'updated_at'  => now()
+                    ];
+                }
+            }
+
+            if (!empty($motherTongues)) {
+                DB::table('vendors_mother_tongue')->insert($motherTongues);
+            }
+        }
+
         if ($request->VendorSide == true) {
             $vmConfig = VmSetup::first();
             $mailData = [
                 'subject' => 'Portal - Vendor Profile Updates',
                 'title' => 'The vendor has made changes to their data',
                 'personalData' => $this->PersonalData($vendor->id),
-
             ];
             Mail::to($vmConfig->vm_email)->send(new UpdateDataMail($mailData));
         }
+
         return response()->json([
             'message' => 'Vendor updated successfully!',
-            'vendor' => ['id' => $vendor->id, "vendor" => $this->PersonalData($vendor->id)]
+            'vendor' => [
+                'id' => $vendor->id,
+                'vendor' => $this->PersonalData($vendor->id)
+            ]
         ], 200);
     }
+
 
     public function storeBilling(Request $request)
     {
@@ -842,11 +912,24 @@ class VendorProfileController extends Controller
 
     public function PersonalData($id)
     {
-        $vendor = Vendor::with(['country:id,name', 'nationality:id,name', 'region:id,name', 'timezone:id,gmt'])->findOrFail($id);
-        if ($vendor) {
-            return $vendor;
-        }
+        $vendor = Vendor::with([
+            'country:id,name',
+            'nationality:id,name',
+            'region:id,name',
+            'timezone:id,gmt',
+            'motherTongueLanguages.language:id,name' 
+        ])->findOrFail($id);
+
+        $vendor->mother_tongue_languages = $vendor->motherTongueLanguages->map(function ($item) {
+            return [
+                'value' => $item->language_id,
+                'label' => $item->language ? $item->language->name : null
+            ];
+        })->values();
+        unset($vendor->motherTongueLanguages);
+        return $vendor;
     }
+
     public function getPM($id)
     {
         $pm = Vendor::where('id', $id)->value('PM');

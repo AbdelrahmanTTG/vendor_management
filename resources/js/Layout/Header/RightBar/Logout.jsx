@@ -24,12 +24,12 @@ const LogoutClass = () => {
     <Fragment>
       <ButtonGroup>
 
-      <LI attrLI={{ className: "onhover-dropdown p-0" }}>
+      <LI attrLI={{ className: "onhover-dropdown pl-5" }}>
           <button className="btn btn-primary-light" onClick={() => handleLogout() }  style={{ padding: "5px" }}>
           <LogOut />
           Log out
           </button>
-          {user.userType == "admin" && <button className="btn btn-primary-light" onClick={() => convert()} style={{ padding: "5px" }}> Vendor portal</button>}
+          {/* {user.userType == "admin" && <button className="btn btn-primary-light" onClick={() => convert()} style={{ padding: "5px" }}> Vendor portal</button>} */}
         </LI>
         </ButtonGroup>
     </Fragment>

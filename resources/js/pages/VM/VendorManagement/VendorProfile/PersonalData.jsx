@@ -8,6 +8,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import CommonModal from '../../Model';
 import { toast } from 'react-toastify';
+import { t } from 'i18next';
 
 const PersonalData = React.memo((props) => {
   // toast.configure();
@@ -41,6 +42,9 @@ const PersonalData = React.memo((props) => {
 
   const [selectedOptionN, setSelectedOptionN] = useState(null);
   const [optionsN, setOptionsN] = useState([]);
+ 
+  const [selectedOptionML, setSelectedOptionML] = useState(null);
+  const [optionsML, setOptionsML] = useState([]);
 
   const [selectedOptionC, setSelectedOptionC] = useState(null);
   const [optionsC, setOptionsC] = useState([]);
@@ -520,6 +524,17 @@ const PersonalData = React.memo((props) => {
             setOptionsB(selected);
             setValue("vendor_brands", selected.map(opt => opt.value));
           }
+             if (
+                 data?.mother_tongue_languages &&
+                 data.mother_tongue_languages.length > 0
+             ) {
+                 const selectedMotherTongues = data.mother_tongue_languages
+                 setValue("mother_tongue_language", selectedMotherTongues);
+                 setSelectedOptionML(selectedMotherTongues);
+             } else {
+                 setValue("mother_tongue_language", []);
+                 setSelectedOptionML([]);
+             }
           setLoading2(false);
 
         }
@@ -1533,6 +1548,78 @@ const PersonalData = React.memo((props) => {
                                                                   .profile_status ===
                                                                   "disable"
                                                           }
+                                                      />
+                                                  )}
+                                              />
+                                          </Col>
+                                      </FormGroup>
+                                  </Col>
+                                  <Col md="6" id="profile-wrapper">
+                                      <FormGroup className="row">
+                                          <Label
+                                              className="col-sm-3 col-form-label"
+                                              for="validationCustom01"
+                                          >
+                                              <span
+                                                  style={{
+                                                      color: "red",
+                                                      fontSize: "18px",
+                                                  }}
+                                              >
+                                                  *
+                                              </span>{" "}
+                                              Mother Tongue{" "}
+                                          </Label>
+                                          <Col sm="9">
+                                              <Controller
+                                                  name="mother_tongue_language"
+                                                  control={control}
+                                                  rules={{ required: true }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          {...field}
+                                                          value={
+                                                              selectedOptionML
+                                                          }
+                                                          options={optionsML}
+                                                          onInputChange={(
+                                                              inputValue
+                                                          ) =>
+                                                              handleInputChange(
+                                                                  inputValue,
+                                                                  "languages",
+                                                                  "mother_tongue_language",
+                                                                  setOptionsML,
+                                                                  optionsML
+                                                              )
+                                                          }
+                                                          className="js-example-basic-single col-sm-12"
+                                                          isSearchable
+                                                          noOptionsMessage={() =>
+                                                              loading ? (
+                                                                  <div className="loader-box">
+                                                                      <Spinner
+                                                                          attrSpinner={{
+                                                                              className:
+                                                                                  "loader-6",
+                                                                          }}
+                                                                      />
+                                                                  </div>
+                                                              ) : (
+                                                                  "No options found"
+                                                              )
+                                                          }
+                                                          onChange={(
+                                                              option
+                                                          ) => {
+                                                              setSelectedOptionML(
+                                                                  option
+                                                              );
+                                                              field.onChange(
+                                                                  option
+                                                              );
+                                                          }}
+                                                          isMulti
                                                       />
                                                   )}
                                               />
