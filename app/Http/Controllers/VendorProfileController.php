@@ -1676,7 +1676,7 @@ class VendorProfileController extends Controller
                 $message->to($email)
                     ->from($vm_email)
                     ->subject($subject)
-                    ->setBody($htmlTemplate, 'text/html');
+                    ->html($htmlTemplate);
             });
 
             return response()->json(['message' => 'Password updated successfully'], 200);
