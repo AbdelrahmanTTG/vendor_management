@@ -672,14 +672,38 @@ class VendorProfileController extends Controller
         }
 
         if ($request->VendorSide == true) {
-            $vmConfig = VmSetup::first();
+            $brand = $vendor->vendor_brands;
+            $from = "vm@thetranslationgate.com"; 
+            $cc = [$from];
+
+            if ($brand == 1) {
+                $from = "vm@thetranslationgate.com";
+                $cc = [$from];
+            } elseif ($brand == 2) {
+                $from = "vm.support@localizera.com";
+                $cc = [$from];
+            } elseif ($brand == 3) {
+                $from = "vm.support@europelocalize.com";
+                $cc = [$from];
+            } elseif ($brand == 4) {
+                $from = "vm@afaqtranslations.com";
+                $cc = ["vm@afaqtranslations.com", "nour.mahmoud@afaqtranslations.com"];
+            } elseif ($brand == 11) {
+                $from = "vm.support@columbuslang.com";
+                $cc = [$from];
+            }
+
             $mailData = [
                 'subject' => 'Portal - Vendor Profile Updates',
                 'title' => 'The vendor has made changes to their data',
                 'personalData' => $this->PersonalData($vendor->id),
             ];
-            Mail::to($vmConfig->vm_email)->send(new UpdateDataMail($mailData));
+
+            Mail::to($from)
+                ->cc($cc)
+                ->send(new UpdateDataMail($mailData));
         }
+
 
         return response()->json([
             'message' => 'Vendor updated successfully!',
@@ -689,6 +713,102 @@ class VendorProfileController extends Controller
             ]
         ], 200);
     }
+    // public function updatePersonalInfo(Request $request)
+    // {
+    //     if (!$request->has('id')) {
+    //         return response()->json([
+    //             'message' => 'ID is required'
+    //         ], 400);
+    //     }
+
+    //     $id = $request->input('id');
+    //     $vendor = Vendor::find($id);
+
+    //     if (!$vendor) {
+    //         return response()->json([
+    //             'message' => 'Vendor not found'
+    //         ], 404);
+    //     }
+
+    //     $validator = Validator::make($request->all(), [
+    //         'name' => 'sometimes|required|string',
+    //         'type' => 'sometimes|required|string',
+    //         'status' => 'sometimes|required|string',
+    //         'prfx_name' => 'sometimes|nullable|string',
+    //         'contact_name' => 'sometimes|nullable|string',
+    //         'legal_Name' => 'sometimes|nullable|string',
+    //         'phone_number' => 'sometimes|required|string',
+    //         'email' => [
+    //             'sometimes',
+    //             'required',
+    //             'email',
+    //             Rule::unique('vendor', 'email')->ignore($vendor->id)
+    //         ],
+    //         'contact_linked_in' => 'sometimes|nullable|string',
+    //         'contact_ProZ' => 'sometimes|nullable|string',
+    //         'contact_other1' => 'sometimes|nullable|string',
+    //         'contact_other2' => 'sometimes|nullable|string',
+    //         'contact_other3' => 'sometimes|nullable|string',
+    //         'Anothernumber' => 'sometimes|nullable|string',
+    //         'region' => 'sometimes|required|integer',
+    //         'country' => 'sometimes|required|integer',
+    //         'vendor_source' => 'sometimes|required|string',
+    //         'nationality' => 'sometimes|required|integer',
+    //         'timezone' => 'sometimes|required|integer',
+    //         'street' => 'sometimes|nullable|string',
+    //         'city' => 'sometimes|nullable|string',
+    //         'address' => 'sometimes|nullable|string',
+    //         'reject_reason' => 'sometimes|nullable|string',
+    //         'vendor_brands' => 'required|string',
+    //         'profile_status' => 'sometimes|required|integer',
+    //         'mother_tongue_language' => 'nullable|array',
+    //         'mother_tongue_language.*.value' => 'required_with:mother_tongue_language|integer'
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+    //     $vendor->update($validator->validated());
+    //     if ($request->has('mother_tongue_language') && is_array($request->mother_tongue_language)) {
+    //         DB::table('vendors_mother_tongue')
+    //             ->where('vendor_id', $vendor->id)
+    //             ->delete();
+
+    //         $motherTongues = [];
+    //         foreach ($request->mother_tongue_language as $lang) {
+    //             if (isset($lang['value']) && !empty($lang['value'])) {
+    //                 $motherTongues[] = [
+    //                     'vendor_id'   => $vendor->id,
+    //                     'language_id' => $lang['value'],
+    //                     'created_at'  => now(),
+    //                     'updated_at'  => now()
+    //                 ];
+    //             }
+    //         }
+
+    //         if (!empty($motherTongues)) {
+    //             DB::table('vendors_mother_tongue')->insert($motherTongues);
+    //         }
+    //     }
+
+    //     if ($request->VendorSide == true) {
+    //         $vmConfig = VmSetup::first();
+    //         $mailData = [
+    //             'subject' => 'Portal - Vendor Profile Updates',
+    //             'title' => 'The vendor has made changes to their data',
+    //             'personalData' => $this->PersonalData($vendor->id),
+    //         ];
+    //         Mail::to($vmConfig->vm_email)->send(new UpdateDataMail($mailData));
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Vendor updated successfully!',
+    //         'vendor' => [
+    //             'id' => $vendor->id,
+    //             'vendor' => $this->PersonalData($vendor->id)
+    //         ]
+    //     ], 200);
+    // }
 
 
     public function storeBilling(Request $request)
@@ -947,54 +1067,141 @@ class VendorProfileController extends Controller
         }
     }
 
+    // public function Message_VM_to_Vendor(Request $request)
+    // {
+    //     try {
+    //         $validator = Validator::make($request->all(), [
+    //             'sender_id' => 'required|string|max:255',
+    //             'receiver_id' => 'required|string|max:255',
+    //             'content' => 'nullable|string',
+    //             "status" => 'nullable|string',
+    //         ]);
+    //         if ($validator->fails()) {
+    //             return response()->json($validator->errors(), 422);
+    //         }
+    //         $sender_email = app('decrypt')(base64_decode($request->input('sender_id')));
+    //         $receiver_email = $request->input('receiver_id');
+    //         $content = $request->input('content');
+    //         $status = $request->input('status');
+    //         $sender_email = app('decrypt')(base64_decode($request->input('sender_id')));
+    //         $data = Messages::updateOrCreate(
+    //             [
+    //                 'sender_email' => $sender_email,
+    //                 'receiver_email' => $receiver_email,
+    //             ],
+    //             [
+    //                 'content' => $content,
+    //                 'status' => $status,
+    //                 "is_read" => 0
+    //             ]
+    //         );
+    //         if ($status == 1) {
+    //             $details = [
+    //                 'subject' => 'New notifications ',
+    //                 'title' => 'notifications',
+    //                 'body' =>  $content,
+    //                 'brand' => env('BRAND', "Nexus"),
+    //             ];
+    //             Mail::to($receiver_email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
+    //             event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
+    //         }
+
+    //         return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "updated_at" => $data->updated_at, "status" => $status]], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             // 'error' => "Server error",
+    //             'error' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString(),
+    //         ], 500);
+    //     }
+    // }
     public function Message_VM_to_Vendor(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
-                'sender_id' => 'required|string|max:255',
+                'sender_id'   => 'required|string|max:255',
                 'receiver_id' => 'required|string|max:255',
-                'content' => 'nullable|string',
-                "status" => 'nullable|string',
+                'content'     => 'nullable|string',
+                "status"      => 'nullable|string',
             ]);
+
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
-            $sender_email = app('decrypt')(base64_decode($request->input('sender_id')));
+
+            $sender_email   = app('decrypt')(base64_decode($request->input('sender_id')));
             $receiver_email = $request->input('receiver_id');
-            $content = $request->input('content');
-            $status = $request->input('status');
-            $sender_email = app('decrypt')(base64_decode($request->input('sender_id')));
+            $content        = $request->input('content');
+            $status         = $request->input('status');
+
+            $vendor = Vendor::where('email', $receiver_email)->first();
+
+            if (!$vendor) {
+                return response()->json(['error' => 'Vendor not found'], 404);
+            }
+
+            $vendor_brand = $vendor->brand;
+
+            if ($vendor_brand == 1) {
+                $subject   = "TTG || Nexus New Notification";
+                $vm_email  = "vm@thetranslationgate.com";
+            } elseif ($vendor_brand == 3) {
+                $subject   = "Europe Localize || Nexus New Notification";
+                $vm_email  = "vm.support@europelocalize.com";
+            } elseif ($vendor_brand == 11) {
+                $subject   = "ColumbusLang || Nexus New Notification";
+                $vm_email  = "vm.support@columbuslang.com";
+            } elseif ($vendor_brand == 2) {
+                $subject   = "Localizera || Nexus New Notification";
+                $vm_email  = "vm.support@localizera.com";
+            } else {
+                $subject   = "Nexus || New Notification";
+                $vm_email  = env('MAIL_FROM_ADDRESS');
+            }
+
             $data = Messages::updateOrCreate(
                 [
-                    'sender_email' => $sender_email,
+                    'sender_email'   => $sender_email,
                     'receiver_email' => $receiver_email,
                 ],
                 [
                     'content' => $content,
-                    'status' => $status,
+                    'status'  => $status,
                     "is_read" => 0
                 ]
             );
+
             if ($status == 1) {
                 $details = [
-                    'subject' => 'New notifications ',
-                    'title' => 'notifications',
-                    'body' =>  $content,
-                    'brand' => env('BRAND', "Nexus"),
+                    'subject' => $subject,
+                    'title'   => 'Notification',
+                    'body'    => $content,
+                    'brand'   => $vendor_brand,
                 ];
-                Mail::to($receiver_email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
+
+                Mail::to($receiver_email)->send(new VMmail($details, $vm_email));
+
                 event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
             }
 
-            return response()->json(['Message' => "The message has been sent.", "data" => ["id" => $data->id, "content" => $content, "is_read" => 0, "updated_at" => $data->updated_at, "status" => $status]], 200);
+            return response()->json([
+                'Message' => "The message has been sent.",
+                "data" => [
+                    "id"         => $data->id,
+                    "content"    => $content,
+                    "is_read"    => 0,
+                    "updated_at" => $data->updated_at,
+                    "status"     => $status
+                ]
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                // 'error' => "Server error",
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ], 500);
         }
     }
+
     public function Message_VM_to_PM(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -1189,46 +1396,439 @@ class VendorProfileController extends Controller
         $InvoiceController = new InvoiceController();
         $decID = Crypt::encrypt($request->input('vendor_id'));
         $BillingData = $InvoiceController->getVendorBillingData($decID);
+
+        $vendor = Vendor::find($decID);
         if ($request->VendorSide == true) {
-            $vmConfig = VmSetup::first();
+            $brand = $vendor->vendor_brands;
+            $from = "vm@thetranslationgate.com";  
+            $cc = [$from];
+
+            if ($brand == 1) {
+                $from = "vm@thetranslationgate.com";
+                $cc = [$from];
+            } elseif ($brand == 2) {
+                $from = "vm.support@localizera.com";
+                $cc = [$from];
+            } elseif ($brand == 3) {
+                $from = "vm.support@europelocalize.com";
+                $cc = [$from];
+            } elseif ($brand == 4) {
+                $from = "vm@afaqtranslations.com";
+                $cc = ["vm@afaqtranslations.com", "nour.mahmoud@afaqtranslations.com"];
+            } elseif ($brand == 11) {
+                $from = "vm.support@columbuslang.com";
+                $cc = [$from];
+            }
+
             $mailData = [
                 'subject' => 'Portal - Vendor Profile Updates',
                 'title' => 'The vendor has made changes to their data',
                 'billingData' => $BillingData,
-
             ];
-            Mail::to($vmConfig->vm_email)->send(new UpdateDataMail($mailData));
+
+            Mail::to($from)
+                ->cc($cc)
+                ->send(new UpdateDataMail($mailData));
         }
+
         return response()->json($BillingData, 200);
     }
+    // public function updateBillingData(Request $request)
+    // {
+    //     $hasBankDetails = $request->filled('bank_name') && $request->filled('account_holder') && $request->filled('swift_bic') && $request->filled('iban');
+    //     $hasWalletMethods = $request->has('Wallets Payment methods') && is_array($request->input('Wallets Payment methods')) && count($request->input('Wallets Payment methods')) > 0;
+    //     if ($request['wallet_required'] == 0 && $request['bank_required']) {
+    //         return response()->json([
+    //             'message' => 'You must provide either bank details or wallet payment methods.',
+    //             'error' => true,
+    //             'code' => 422
+    //         ]);
+    //     }
+    //     try {
+    //         $request['vendor_id'] = Crypt::decrypt($request->vendor_id);
+    //     } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+    //         $request['vendor_id'] = $request->vendor_id;
+    //     }
+
+    //     $validator = Validator::make($request->all(), [
+    //         'vendor_id' => 'required|integer',
+    //         'BillingData_id' => 'nullable|integer',
+    //         'BankData_id' => 'nullable|integer',
+    //         'billing_status' => 'nullable|string|max:1',
+    //         'billing_legal_name' => 'required|string|max:255',
+    //         'billing_currency' => 'required|integer',
+    //         'city' => 'required|string|max:255',
+    //         'street' => 'required|string|max:255',
+    //         'billing_address' => 'required|string|max:255',
+    //         'Wallets Payment methods' => 'nullable|array|min:1',
+    //         'Wallets Payment methods.*.method' => 'int|max:10',
+    //         'Wallets Payment methods.*.account' => 'string|max:255',
+    //         'Wallets Payment defaults.*.defaults' => 'int|max:1',
+
+    //     ]);
+
+    //     $validator->after(function ($validator) use ($request) {
+    //         $hasBankDetails = $request->filled('bank_name') && $request->filled('account_holder') && $request->filled('swift_bic') && $request->filled('iban');
+    //         $hasWalletMethods = $request->has('Wallets Payment methods') && is_array($request->input('Wallets Payment methods')) && count($request->input('Wallets Payment methods')) > 0;
+
+    //         if (!$hasBankDetails && !$hasWalletMethods) {
+    //             $validator->errors()->add('bank_or_wallet', 'You must provide either complete bank details or wallet payment methods.');
+    //         }
+    //     });
+
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+
+    //     if ($request->filled('BillingData_id')) {
+    //         $billingData = BillingData::find($request->input('BillingData_id'));
+    //         if ($billingData) {
+    //             $requestData = $request->only([
+    //                 'billing_legal_name',
+    //                 'billing_currency',
+    //                 'city',
+    //                 'street',
+    //                 'billing_address',
+    //                 'billing_status',
+    //                 "wallet_required",
+    //                 "bank_required"
+    //             ]);
+    //             if (empty($requestData['billing_status'])) {
+    //                 $requestData['billing_status'] = '2';
+    //             }
+    //             $billingData->update($requestData);
+    //         } else {
+    //             $billingData = BillingData::create([
+    //                 'vendor_id' => $request->input('vendor_id'),
+    //                 'billing_legal_name' => $request->input('billing_legal_name'),
+    //                 'billing_currency' => $request->input('billing_currency'),
+    //                 'city' => $request->input('city'),
+    //                 'street' => $request->input('street'),
+    //                 'billing_address' => $request->input('billing_address'),
+    //                 'billing_status' => "2",
+    //                 "wallet_required" => $request->input('wallet_required'),
+    //                 "bank_required" => $request->input('bank_required')
+    //             ]);
+    //         }
+    //     } else {
+    //         $billingData = BillingData::create([
+    //             'vendor_id' => $request->input('vendor_id'),
+    //             'billing_legal_name' => $request->input('billing_legal_name'),
+    //             'billing_currency' => $request->input('billing_currency'),
+    //             'city' => $request->input('city'),
+    //             'street' => $request->input('street'),
+    //             'billing_address' => $request->input('billing_address'),
+    //             'billing_status' => "2",
+    //             "wallet_required" => $request->input('wallet_required'),
+    //             "bank_required" => $request->input('bank_required')
+    //         ]);
+    //     }
+
+    //     if ($hasBankDetails) {
+    //         if ($request->filled('BankData_id')) {
+    //             $bankDetails = BankDetails::find($request->input('BankData_id'));
+    //             if ($bankDetails) {
+    //                 $bankDetails->update($request->only([
+    //                     'bank_name',
+    //                     'account_holder',
+    //                     'swift_bic',
+    //                     'iban',
+    //                     'payment_terms',
+    //                     'bank_address',
+    //                 ]));
+    //             } else {
+    //                 $bankDetails = BankDetails::create([
+    //                     'billing_data_id' => $billingData->id,
+    //                     'bank_name' => $request->input('bank_name'),
+    //                     'account_holder' => $request->input('account_holder'),
+    //                     'swift_bic' => $request->input('swift_bic'),
+    //                     'iban' => $request->input('iban'),
+    //                     'payment_terms' => $request->input('payment_terms'),
+    //                     'bank_address' => $request->input('bank_address'),
+    //                 ]);
+    //             }
+    //         } else {
+    //             $bankDetails = BankDetails::create([
+    //                 'billing_data_id' => $billingData->id,
+    //                 'bank_name' => $request->input('bank_name'),
+    //                 'account_holder' => $request->input('account_holder'),
+    //                 'swift_bic' => $request->input('swift_bic'),
+    //                 'iban' => $request->input('iban'),
+    //                 'payment_terms' => $request->input('payment_terms'),
+    //                 'bank_address' => $request->input('bank_address'),
+    //             ]);
+    //         }
+    //     }
+
+    //     if ($hasWalletMethods) {
+    //         foreach ($request->input('Wallets Payment methods') as $wallet) {
+    //             if (isset($wallet['id'])) {
+    //                 $walletUpdate = WalletsPaymentMethods::find($wallet['id']);
+    //                 if ($walletUpdate) {
+    //                     $walletUpdate->update([
+    //                         'method' => $wallet['method'],
+    //                         'account' => $wallet['account'],
+    //                         'defaults' => $wallet['defaults'],
+
+    //                     ]);
+    //                 }
+    //             } else {
+    //                 WalletsPaymentMethods::create([
+    //                     'billing_data_id' => $billingData->id,
+    //                     'method' => $wallet['method'],
+    //                     'account' => $wallet['account'],
+    //                     'defaults' => $wallet['defaults'],
+
+    //                 ]);
+    //             }
+    //         }
+    //     }
+
+    //     $InvoiceController = new InvoiceController();
+    //     $decID = Crypt::encrypt($request->input('vendor_id'));
+    //     $BillingData = $InvoiceController->getVendorBillingData($decID);
+    //     if ($request->VendorSide == true) {
+    //         $vmConfig = VmSetup::first();
+    //         $mailData = [
+    //             'subject' => 'Portal - Vendor Profile Updates',
+    //             'title' => 'The vendor has made changes to their data',
+    //             'billingData' => $BillingData,
+
+    //         ];
+    //         Mail::to($vmConfig->vm_email)->send(new UpdateDataMail($mailData));
+    //     }
+    //     return response()->json($BillingData, 200);
+    // }
+    // public function setPassword(Request $request)
+    // {
+    //     $request->validate([
+    //         'email' => 'required|email|exists:vendor,email',
+    //         'password' => 'required|min:8',
+    //     ]);
+
+    //     $email = $request->input('email');
+    //     $password = $request->input('password');
+
+    //     $vendor = Vendor::where('email', $email)->first();
+
+    //     if ($vendor) {
+    //         $vendor->password = base64_encode($password);
+    //         $vendor->save();
+    //         $details = [
+    //             'subject' => 'Create password ',
+    //             'title' => 'Create_password',
+    //             'body' =>  $password,
+    //             'brand' => env('BRAND', "Nexus"),
+
+    //         ];
+    //         Mail::to($email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
+    //         return response()->json(['message' => 'Password updated successfully'], 200);
+    //     }
+
+    //     return response()->json(['message' => 'Vendor not found'], 404);
+    // }
     public function setPassword(Request $request)
     {
         $request->validate([
             'email' => 'required|email|exists:vendor,email',
             'password' => 'required|min:8',
         ]);
-
         $email = $request->input('email');
         $password = $request->input('password');
-
         $vendor = Vendor::where('email', $email)->first();
-
         if ($vendor) {
             $vendor->password = base64_encode($password);
             $vendor->save();
-            $details = [
-                'subject' => 'Create password ',
-                'title' => 'Create_password',
-                'body' =>  $password,
-                'brand' => env('BRAND', "Nexus"),
+            $nexusLink = env('NEXUS_LINK');
+            switch ($vendor->brand) {
+                case 1: 
+                    $subject   = "TTG || Nexus New Profile";
+                    $vm_email  = "vm@thetranslationgate.com";
+                    break;
 
-            ];
-            Mail::to($email)->send(new VMmail($details, env('MAIL_FROM_ADDRESS')));
+                case 3: 
+                    $subject   = "Europe Localize || Nexus New Profile";
+                    $vm_email  = "vm.support@europelocalize.com";
+                    break;
+
+                case 11: 
+                    $subject   = "ColumbusLang || Nexus New Profile";
+                    $vm_email  = "vm.support@columbuslang.com";
+                    break;
+
+                case 2: 
+                    $subject   = "Localizera || Nexus New Profile";
+                    $vm_email  = "vm.support@localizera.com";
+                    break;
+
+                default:
+                    $subject   = "Nexus || New Profile";
+                    $vm_email  = env('MAIL_FROM_ADDRESS');
+            }
+
+            $htmlTemplate = $this->getVendorEmailTemplate($vendor, $vendor->brand, $nexusLink);
+
+            if (!$htmlTemplate) {
+                return response()->json(['message' => 'Brand template not found'], 404);
+            }
+
+            Mail::send([], [], function ($message) use ($email, $htmlTemplate, $subject, $vm_email) {
+                $message->to($email)
+                    ->from($vm_email)
+                    ->subject($subject)
+                    ->setBody($htmlTemplate, 'text/html');
+            });
+
             return response()->json(['message' => 'Password updated successfully'], 200);
         }
 
         return response()->json(['message' => 'Vendor not found'], 404);
     }
+
+    private function getVendorEmailTemplate($vendor, $brand, $nexusLink)
+    {
+        $password = base64_decode($vendor->password);
+
+        switch ($brand) {
+            case 1:
+                return "
+            <!DOCTYPE html>
+            <html lang='en'>
+            <head>
+                <meta charset='utf-8'>
+                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                <title>Nexus | Site Manager</title>
+                <style>
+                    body {font-family: Helvetica, Arial, sans-serif; font-size:14px; color:#333;}
+                </style>
+            </head>
+            <body>
+                <p>Hello {$vendor->name},</p>
+                <p>Hope you’re doing well. </p>
+                <p>1<sup>st</sup>: We’d like to update you with our system process from now on :- </p>
+                <p>2<sup>nd</sup>: We will create a new profile for you on <b>Nexus</b></p>
+                <p>3<sup>rd</sup>: Initial username and password, and you can update your password later on</p>
+                <p>4<sup>th</sup>: Your profile will include all of your data (to receive and accept jobs, Pos, create the invoice)</p>
+                <p>5<sup>th</sup>: We will NOT consider any offline work, ONLY through the system as per the explained process above</p>
+                <p>Below is your account information on Nexus:-</p>
+                <p>Link: <a href='{$nexusLink}'>{$nexusLink}</a></p>
+                <p>Email: {$vendor->email}</p>
+                <p>Password: {$password}</p>
+                <p><b>KINDLY UPDATE YOUR PASSWORD ONCE YOU LOGGED IN!</b></p>
+                <p>For more instructions about Nexus: <a href='{$nexusLink}/home/instructions'>Click Here</a></p>
+                <p>If you have any questions or feedback, contact us via 
+                <a href='mailto:vendor.support@aixnexus.com'>vendor.support@aixnexus.com</a></p>
+                <p>Thank you</p>
+            </body>
+            </html>";
+
+            case 3:
+                return "
+            <!DOCTYPE html>
+            <html lang='en'>
+            <head>
+                <meta charset='utf-8'>
+                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                <title>Europe Localize | Site Manager</title>
+                <style>
+                    body {font-family: Helvetica, Arial, sans-serif; font-size:14px; color:#333;}
+                </style>
+            </head>
+            <body>
+                <p>Hello {$vendor->name},</p>
+                <p>We hope this finds you safe and sound. </p>
+                <p>We would like to announce our upcoming system processes, as we are going to use a new portal called “Nexus” </p>
+                <p>In order to get our work process done through “Nexus” please follow the below steps</p>
+                <p>1<sup>st</sup> step: You need to create a new profile on Nexus</p>
+                <p>2<sup>nd</sup>: You will create your Initial username and password. Afterwards, you can definitely change your password.</p>
+                <p>3<sup>rd</sup>: Profile contains all your data (job acquisition and acceptance, POS, created invoices)</p>
+                <p><b>Note :</b> Any offline work is not taken into consideration. We only consider online work through the system, following the process explained up above.</p>
+                <p>Your Nexus account information is as follows:</p>
+                <p>Link: <a href='{$nexusLink}'>{$nexusLink}</a></p>
+                <p>Email: {$vendor->email}</p>
+                <p>Password: {$password}</p>
+                <p><b>After logging in, please change your password.</b></p>
+                <p>For more information on using the system, kindly check: 
+                <a href='{$nexusLink}/home/instructions'>Click Here</a></p>
+                <p>For any questions, feedbacks, or comments, we are always happy to hear from you. 
+                Please contact us at <a href='mailto:vendor.support@aixnexus.com'>vendor.support@aixnexus.com</a></p>
+                <p>Thanks for your hard work on this. Please accept our deepest gratitude.</p>
+            </body>
+            </html>";
+
+            case 11:
+                return "
+            <!DOCTYPE html>
+            <html lang='en'>
+            <head>
+                <meta charset='utf-8'>
+                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                <title>Columbuslang | Site Manager</title>
+                <style>
+                    body {font-family: Helvetica, Arial, sans-serif; font-size:14px; color:#333;}
+                </style>
+            </head>
+            <body>
+                <p>Dear {$vendor->name},</p>
+                <p>We hope this finds you well and in good health. </p>
+                <p>Columbus Lang would like to announce the launch of our new system and the related processes; our new portal is now called “Nexus”. </p>
+                <p>The following steps will introduce the process and how to get our work done through “Nexus”:</p>
+                <p><b>Step 1:</b> You need to create a new profile on Nexus.</p>
+                <p><b>Step 2:</b> You need to create your initial username and password. Your password can be changed later on.</p>
+                <p><b>Step 3:</b> The profile includes all your data: Job Acquisition, Job Acceptance, Purchase Orders, and the Created Invoices.</p>
+                <p><b>N.B:</b> Any offline work is not allowed. We only take into consideration the work completed online through Nexus.</p>
+                <p><b>Please find below your login credentials for your Nexus account:</b></p>
+                <p><b>Link:</b> <a href='{$nexusLink}'>{$nexusLink}</a></p>
+                <p><b>Email:</b> {$vendor->email}</p>
+                <p><b>Password:</b> {$password}</p>
+                <p><b>Please make sure to change your password after signing in.</b></p>
+                <p>For more information on using the system, kindly 
+                <a href='{$nexusLink}/home/instructions'>Click Here</a></p>
+                <p>For any questions, feedbacks or comments, please contact us at 
+                <a href='mailto:vendor.support@aixnexus.com'>vendor.support@aixnexus.com</a></p>
+                <p>We sincerely appreciate your time and efforts.</p>
+            </body>
+            </html>";
+
+            case 2:
+                return "
+            <!DOCTYPE html>
+            <html lang='en'>
+            <head>
+                <meta charset='utf-8'>
+                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                <title>Localizera | Site Manager</title>
+                <style>
+                    body {font-family: Helvetica, Arial, sans-serif; font-size:14px; color:#333;}
+                </style>
+            </head>
+            <body>
+                <p>Hello {$vendor->name},</p>
+                <p>We hope this email finds you well and safe. </p>
+                <p>We would like to announce the launch of Localizera’s new system “Nexus” and the respected processes. </p>
+                <p>We will pave the way for you and share the required steps to complete our work on “Nexus”:</p>
+                <p><b>• First Step:</b> You must create a new profile on Nexus.</p>
+                <p><b>• Second Step:</b> You must create the initial username and password. You can update or change your password in the future.</p>
+                <p><b>• Third Step:</b> The profile contains your data like Job Acquisition, Job Acceptance, Purchase Orders, and the Created Invoices.</p>
+                <p><b>Note:</b> It is not permitted to perform any offline work. We take into account only the work completed online via Nexus.</p>
+                <p><b>You may find below your login details for your Nexus account:</b></p>
+                <p><b>Link:</b> <a href='{$nexusLink}'>{$nexusLink}</a></p>
+                <p><b>Email:</b> {$vendor->email}</p>
+                <p><b>Password:</b> {$password}</p>
+                <p><b>Kindly update your password after signing in.</b></p>
+                <p>For more information on how to navigate Nexus, please check out this link 
+                <a href='{$nexusLink}/home/instructions'>Click Here</a></p>
+                <p>For any questions, feedbacks or comments, please contact us at 
+                <a href='mailto:vendor.support@aixnexus.com'>vendor.support@aixnexus.com</a></p>
+                <p>Thank you so much for your time and attention.</p>
+            </body>
+            </html>";
+
+            default:
+                return null;
+        }
+    }
+
     public function AddExperience(Request $request)
     {
         $validator = Validator::make($request->all(), [

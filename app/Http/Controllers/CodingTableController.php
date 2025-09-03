@@ -53,23 +53,49 @@ class CodingTableController extends Controller
         "vendor_payment_methods" => VendorPaymentMethod::class,
 
     ];
+    // public function SelectDatatTable(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'search' => 'nullable|string|max:255',
+    //         'table' => 'required|string|in:' . implode(',', self::$validTables),
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['errors' => $validator->errors()], 400);
+    //     }
+    //     $searchTerm = $request->input('search');
+    //     $table = $request->input('table');
+    //     if (!array_key_exists($table, self::$models)) {
+    //         return response()->json(['error' => 'Invalid table'], 400);
+    //     }
+    //     $modelClass = self::$models[$table];
+
+    //         $data = $modelClass::SelectData($searchTerm);
+    //     return response()->json($data, 200);
+    // }
     public function SelectDatatTable(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'search' => 'nullable|string|max:255',
             'table' => 'required|string|in:' . implode(',', self::$validTables),
         ]);
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
+
         $searchTerm = $request->input('search');
         $table = $request->input('table');
+
         if (!array_key_exists($table, self::$models)) {
             return response()->json(['error' => 'Invalid table'], 400);
         }
         $modelClass = self::$models[$table];
-   
+        $extraFilters = $request->except(['search', 'table']);
+        if (!empty($extraFilters)) {
+            $data = $modelClass::SelectData($searchTerm, $extraFilters);
+        } else {
             $data = $modelClass::SelectData($searchTerm);
+        }
         return response()->json($data, 200);
     }
 

@@ -200,12 +200,17 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return [];
     }
-    public static function SelectData($searchTerm = null)
+    public static function SelectData($searchTerm = null, $filters = [])
     {
         if ($searchTerm) {
             $query = self::where('name', 'like', '%' . $searchTerm . '%');
         } else {
             $query = self::select('id', 'name')->limit(5);
+        }
+        foreach ($filters as $column => $values) {
+            if (is_array($values) && !empty($values)) {
+                $query->whereIn($column, $values);
+            }
         }
         return $query->get();
     }

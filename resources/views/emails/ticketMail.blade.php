@@ -1,25 +1,22 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-
-    <title>Lingo Talents</title>
-
+    <meta charset="UTF-8">
+    <title>Nexus | Site Manager</title>
 </head>
+<body style="font-family: Arial, sans-serif; font-size:14px; color:#333;">
+    <p>Dear {{ $mailData['user_name'] }},</p>
 
-<body>
+    <p>{!! $mailData['body'] ?? '' !!}</p>
 
-    <p>Dear  {{$mailData['user_name'] }},</p>
+    @if(isset($mailData['comment']) && !empty($mailData['comment']))
+        <p><strong>Reply:</strong> {!! $mailData['comment'] !!}</p>
+    @endif
 
-    <p>{!! $mailData['body']??'' !!}</p>
-
-    @if(isset($mailData['comment']))
-        <p>{!! $mailData['comment'] !!}</p>
+    @if(isset($mailData['msgData']) && !empty($mailData['msgData']))
+        <p>{!! $mailData['msgData'] !!}</p>
     @endif
 
     <p>Thank you</p>
-
 </body>
-
 </html>
