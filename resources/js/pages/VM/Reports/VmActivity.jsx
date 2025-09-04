@@ -327,13 +327,13 @@ const Report = (props) => {
                                         <Col md='6'>
                                             <FormGroup>
                                                 <Label className="col-form-label-sm f-12" >{'Start Date'}</Label>
-                                                <Input className='form-control digits' type='date' defaultValue='' name='start_date' required />
+                                                <Input className='form-control digits' type='date' defaultValue='' name='start_date'  />
                                             </FormGroup>
                                         </Col>
                                         <Col md='6'>
                                             <FormGroup>
                                                 <Label className="col-form-label-sm f-12" >{'End Date'}</Label>
-                                                <Input className='form-control digits' type='date' defaultValue='' name='end_date' required />
+                                                <Input className='form-control digits' type='date' defaultValue='' name='end_date'  />
                                             </FormGroup>
                                         </Col>
                                     </Row>
@@ -342,7 +342,7 @@ const Report = (props) => {
                                             <Col md='12'>
                                                 <FormGroup>
                                                     <Label className="col-form-label-sm f-12" >{'VM Name'}</Label>
-                                                    <Select name='created_by' id='created_by' required
+                                                    <Select name='created_by' id='created_by' 
                                                         options={optionsU} className="js-example-basic-single "
                                                         isMulti />
                                                 </FormGroup>

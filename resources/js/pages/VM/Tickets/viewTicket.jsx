@@ -44,7 +44,9 @@ const ViewTicket = (props) => {
     useEffect(() => {
         if (!ticket) {
             setRedirect(true);
-        } else {
+        } else { 
+            setBrand([ticket.brand.id])
+
             const fetchData = async () => {
                 try {
                     const data = await axiosClient.post("getTicketData", res);
@@ -116,9 +118,6 @@ const ViewTicket = (props) => {
         }
 
     };
-      useEffect(() => {
-            handelingSelect("brand", setOptionsB, "brand");
-        }, []);
     const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
         if (inputValue.length === 0) {
             setOptions([]);
@@ -459,24 +458,6 @@ const ViewTicket = (props) => {
                                     <>
                                         {ticketData.statusVal == 2 &&
                                        <FormGroup className="row mt-3">
-                                       
-                                       <Col md="12" className="mb-3">
-                                        <Label className="col-form-label-sm f-12 mb-1" htmlFor="brand">
-                                        Filter by brand
-                                        </Label>
-                                        <Select
-                                        id="brand"
-                                        name="brand"
-                                        options={optionsB}
-                                        isMulti
-                                        onChange={(selectedOptions) =>
-                                            setBrand(selectedOptions ? selectedOptions.map(option => option.value) : [])
-                                            } 
-                                        className="js-example-basic-single"
-                                        required
-                                        />
-                                    </Col>
-
                                         {/* Vendor */}
                                         <Col md="12">
                                             <Label className="col-form-label-sm f-12 mb-1" htmlFor="vendor">
