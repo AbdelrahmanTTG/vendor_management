@@ -933,20 +933,23 @@ class TicketsController extends Controller
                 $data['assigned_to'] = $vm_id;
                 if ($ticket->update($data)) {
                     $this->addTicketTimeStatus($ticket_id, $user, 6);
-                    // send email to user assigned to  
-                    // setup mail data         
-                    $to = BrandUsers::select('email', 'user_name')->where('id', $vm_id)->first();
-                    $ccEmail = BrandUsers::select('email')->where('id', $user)->first()->email;
-                    $toEmail = $to->email;
-                    $user_name = $to->user_name;
-                    //end setup mail                 
-                    $mailData = [
-                        'user_name' =>  $user_name,
-                        'subject' => "New Ticket Assigned : # " . $ticket_id,
-                        'body' =>  "New Ticket Assigned to you at " . date("Y-m-d H:i:s") . ", please Check ...",
-                    ];
-                    Mail::to($toEmail)->cc($ccEmail)->send(new TicketMail($mailData));
-                    //end                               
+                    try {
+                        $to = BrandUsers::select('email', 'user_name')->where('id', $vm_id)->first();
+                        $ccEmail = BrandUsers::select('email')->where('id', $user)->first()->email;
+                        $toEmail = $to->email;
+                        $user_name = $to->user_name;
+
+                        $mailData = [
+                            'user_name' =>  $user_name,
+                            'subject' => "New Ticket Assigned : # " . $ticket_id,
+                            'body' =>  "New Ticket Assigned to you at " . date("Y-m-d H:i:s") . ", please Check ...",
+                        ];
+
+                        Mail::to($toEmail)->cc($ccEmail)->send(new TicketMail($mailData));
+                    } catch (\Exception $e) {
+                        // \Log::error("Mail sending failed: " . $e->getMessage());
+                    }
+
                     return response()->json(['message' => 'Ticket Assigned Successfully', 'type' => 'success']);
                 }
             } else {
