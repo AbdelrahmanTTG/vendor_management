@@ -32,9 +32,11 @@ class User extends Authenticatable implements JWTSubject
     }
     public static function getUserAccount($user)
     {
-        $brand = !empty($user->favourite_brand_id)
-            ? $user->favourite_brand_id
-            : DB::table('users')
+        // $brand = !empty($user->favourite_brand_id)
+        //     ? $user->favourite_brand_id
+        //     :
+             DB::table('users')
+
             ->where('master_user_id', $user->id)
             ->where('status', '1')
             ->orderBy('id', 'asc') 
@@ -43,7 +45,7 @@ class User extends Authenticatable implements JWTSubject
         $userAccount = DB::table('users')
             ->where('employees_id', $user->employees_id)
             ->where('master_user_id', $user->id)
-            ->where('brand', $brand)
+            // ->where('brand', $brand)
             ->where('status', '1')
             ->first();
 
