@@ -40,22 +40,21 @@ class User extends Authenticatable implements JWTSubject
             ->value('brand');
 
         $userAccount = DB::table('users')
-            ->where('employees_id', $user->employees_id)
-            ->where('master_user_id', $user->id)
+            ->where('id', $user->id) 
             ->where('brand', $brand)
             ->where('status', '1')
             ->first();
 
         if (!$userAccount) {
             $userAccount = DB::table('users')
-                ->where('employees_id', $user->employees_id)
-                ->where('master_user_id', $user->id)
+                ->where('id', $user->id)
                 ->where('status', '1')
                 ->first();
         }
 
         return $userAccount;
     }
+
     public static function updateAccountData($userAccount)
     {
         $accountData = [
