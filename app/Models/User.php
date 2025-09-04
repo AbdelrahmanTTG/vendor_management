@@ -37,18 +37,22 @@ class User extends Authenticatable implements JWTSubject
             : DB::table('users')
             ->where('master_user_id', $user->id)
             ->where('status', '1')
+            ->orderBy('id', 'asc') 
             ->value('brand');
 
         $userAccount = DB::table('users')
-            ->where('id', $user->id) 
+            ->where('employees_id', $user->employees_id)
+            ->where('master_user_id', $user->id)
             ->where('brand', $brand)
             ->where('status', '1')
             ->first();
 
         if (!$userAccount) {
             $userAccount = DB::table('users')
-                ->where('id', $user->id)
+                ->where('employees_id', $user->employees_id)
+                ->where('master_user_id', $user->id)
                 ->where('status', '1')
+                ->orderBy('id', 'asc') 
                 ->first();
         }
 
