@@ -159,6 +159,7 @@ class ReportsController extends Controller
         $permissions = $request->permissions;
         $user = Crypt::decrypt($request->user);
 
+        // default columns array to display
         $defaultArray = [
             'id',
             'brand',
@@ -189,6 +190,7 @@ class ReportsController extends Controller
             'status'
         ];
 
+        // check for special format
         $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
@@ -220,9 +222,12 @@ class ReportsController extends Controller
 
         if (!empty($request->queryParams)) {
 
-            $created_by = $request->queryParams['created_by'] ?? null;
+            $created_by = array_filter($request->queryParams['created_by'] ?? [], function ($val) {
+                return !empty($val);
+            });
+
             $start_date = $request->queryParams['start_date'] ?? null;
-            $end_date = $request->queryParams['end_date'] ?? null;
+            $end_date   = $request->queryParams['end_date'] ?? null;
 
             if (empty($created_by) && empty($start_date) && empty($end_date)) {
                 return response()->json([
@@ -295,6 +300,7 @@ class ReportsController extends Controller
             "formats" => $formats,
         ]);
     }
+
 
 
     public function getVmData()
