@@ -30,6 +30,7 @@ const Education = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialOptions, setInitialOptions] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [Sub, setSub] = useState(false);
 
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
@@ -100,6 +101,7 @@ const Education = (props) => {
                 })
             );
             formDate['vendor_id'] = props.id;
+            setSub(true);
             try {
                 const response = await axiosClient.post("VendorEducation", formDate);
                 basictoaster("successToast", isSubmitting || props?.mode == "edit" ? " Updated successfully !" : "Added successfully !");
@@ -117,6 +119,8 @@ const Education = (props) => {
                         }
                     });
                 }
+            }finally {
+                setSub(false);
             }
         } else {
             basictoaster("dangerToast", "Make sure to send your personal information first.");
@@ -168,25 +172,40 @@ const Education = (props) => {
     return (
         <Fragment>
             <Card>
-
                 <CardHeader
                     className="pb-3 d-flex justify-content-between align-items-center"
                     onClick={toggleCollapse}
-                    style={{ cursor: 'pointer', paddingBottom: '25px' }}
+                    style={{ cursor: "pointer", paddingBottom: "25px" }}
                 >
                     <H5>Education</H5>
-                    <i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '24px' }}></i>
+                    <i
+                        className={`icon-angle-${isOpen ? "down" : "left"}`}
+                        style={{ fontSize: "24px" }}
+                    ></i>
                 </CardHeader>
                 <Collapse isOpen={isOpen}>
                     <CardBody>
                         <Row className="g-3 mb-3">
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">
-                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                                        <span style={{ color: 'red', fontSize: "18px" }}>*</span>
-                                    }
-                                         Institute Name</Label>
+                                    <Label
+                                        className="col-sm-3 col-form-label"
+                                        for="validationCustom01"
+                                    >
+                                        {(props.backPermissions?.add == 1 ||
+                                            props.backPermissions?.edit ==
+                                                1) && (
+                                            <span
+                                                style={{
+                                                    color: "red",
+                                                    fontSize: "18px",
+                                                }}
+                                            >
+                                                *
+                                            </span>
+                                        )}
+                                        Institute Name
+                                    </Label>
                                     <Col sm="9">
                                         {/* <Input className="form-control" type="text" placeholder="University name" /> */}
                                         <input
@@ -194,8 +213,14 @@ const Education = (props) => {
                                             className="form-control"
                                             type="text"
                                             name="university_name"
-                                            {...register("university_name", { required: true })}
-                                            disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
+                                            {...register("university_name", {
+                                                required: true,
+                                            })}
+                                            disabled={
+                                                props.backPermissions?.add !=
+                                                    1 &&
+                                                props.backPermissions?.edit != 1
+                                            }
                                         />
                                     </Col>
                                 </FormGroup>
@@ -203,11 +228,24 @@ const Education = (props) => {
 
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">
-                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                                    <span style={{ color: 'red', fontSize: "18px" }}>*</span>
-                                    }
-                                    last Degree</Label>
+                                    <Label
+                                        className="col-sm-3 col-form-label"
+                                        for="validationCustom01"
+                                    >
+                                        {(props.backPermissions?.add == 1 ||
+                                            props.backPermissions?.edit ==
+                                                1) && (
+                                            <span
+                                                style={{
+                                                    color: "red",
+                                                    fontSize: "18px",
+                                                }}
+                                            >
+                                                *
+                                            </span>
+                                        )}
+                                        last Degree
+                                    </Label>
                                     <Col sm="9">
                                         <Controller
                                             name="latest_degree"
@@ -218,21 +256,42 @@ const Education = (props) => {
                                                     {...field}
                                                     value={field.value}
                                                     options={optionsLD}
-                                                    onInputChange={(inputValue) =>
-                                                        handleInputChange(inputValue, "University_Degree", "latest_degree", setoptionsLD, optionsLD)
+                                                    onInputChange={(
+                                                        inputValue
+                                                    ) =>
+                                                        handleInputChange(
+                                                            inputValue,
+                                                            "University_Degree",
+                                                            "latest_degree",
+                                                            setoptionsLD,
+                                                            optionsLD
+                                                        )
                                                     }
                                                     className="js-example-basic-single col-sm-12"
                                                     isSearchable
-                                                    noOptionsMessage={() => loading ? (
-                                                        <div className="loader-box" >
-                                                            <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                        </div>
-                                                    ) : 'No options found'}
+                                                    noOptionsMessage={() =>
+                                                        loading ? (
+                                                            <div className="loader-box">
+                                                                <Spinner
+                                                                    attrSpinner={{
+                                                                        className:
+                                                                            "loader-6",
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            "No options found"
+                                                        )
+                                                    }
                                                     onChange={(option) => {
                                                         field.onChange(option);
                                                     }}
-                                                    isDisabled={props.backPermissions?.add != 1&&props.backPermissions?.edit != 1}
-
+                                                    isDisabled={
+                                                        props.backPermissions
+                                                            ?.add != 1 &&
+                                                        props.backPermissions
+                                                            ?.edit != 1
+                                                    }
                                                 />
                                             )}
                                         />
@@ -241,31 +300,62 @@ const Education = (props) => {
                             </Col>
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">
-                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                                        <span style={{ color: 'red', fontSize: "18px" }}>*</span>
-                                    }
-                                    Year of graduation</Label>
+                                    <Label
+                                        className="col-sm-3 col-form-label"
+                                        for="validationCustom01"
+                                    >
+                                        {(props.backPermissions?.add == 1 ||
+                                            props.backPermissions?.edit ==
+                                                1) && (
+                                            <span
+                                                style={{
+                                                    color: "red",
+                                                    fontSize: "18px",
+                                                }}
+                                            >
+                                                *
+                                            </span>
+                                        )}
+                                        Year of graduation
+                                    </Label>
                                     <Col sm="9">
                                         <input
                                             defaultValue=""
                                             className="form-control"
                                             type="text"
                                             name="year_of_graduation"
-                                            {...register("year_of_graduation", { required: true })}
-                                            disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
+                                            {...register("year_of_graduation", {
+                                                required: true,
+                                            })}
+                                            disabled={
+                                                props.backPermissions?.add !=
+                                                    1 &&
+                                                props.backPermissions?.edit != 1
+                                            }
                                         />
                                     </Col>
                                 </FormGroup>
                             </Col>
                             <Col md="6" className="mb-3">
                                 <FormGroup className="row">
-
-                                    <Label className="col-sm-3 col-form-label" for="validationCustom01">
-                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                                        <span style={{ color: 'red', fontSize: "18px" }}>*</span>
-                                    }
-                                    Major</Label>
+                                    <Label
+                                        className="col-sm-3 col-form-label"
+                                        for="validationCustom01"
+                                    >
+                                        {(props.backPermissions?.add == 1 ||
+                                            props.backPermissions?.edit ==
+                                                1) && (
+                                            <span
+                                                style={{
+                                                    color: "red",
+                                                    fontSize: "18px",
+                                                }}
+                                            >
+                                                *
+                                            </span>
+                                        )}
+                                        Major
+                                    </Label>
                                     <Col sm="9">
                                         <Col sm="9">
                                             <input
@@ -273,8 +363,15 @@ const Education = (props) => {
                                                 className="form-control"
                                                 type="text"
                                                 name="major"
-                                                {...register("major", { required: true })}
-                                                disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
+                                                {...register("major", {
+                                                    required: true,
+                                                })}
+                                                disabled={
+                                                    props.backPermissions
+                                                        ?.add != 1 &&
+                                                    props.backPermissions
+                                                        ?.edit != 1
+                                                }
                                             />
                                         </Col>
                                         {/* <Controller
@@ -303,15 +400,40 @@ const Education = (props) => {
                                                 />
                                             )}
                                         /> */}
-                                        </Col>
-                                    </FormGroup>
+                                    </Col>
+                                </FormGroup>
                             </Col>
                         </Row>
-                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: "2%" }}>
-                                <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit, onError)}}>Submit</Btn>
+                        {(props.backPermissions?.add == 1 ||
+                            props.backPermissions?.edit == 1) && (
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                    marginTop: "2%",
+                                }}
+                            >
+                                <Btn
+                                    attrBtn={{
+                                        color: "primary",
+                                        disabled: Sub,
+                                        onClick: handleSubmit(
+                                            onSubmit,
+                                            onError
+                                        ),
+                                    }}
+                                >
+                                    {Sub ? (
+                                                                              <>
+                                                                                  <Spinner size="sm" />{" "}
+                                                                                  Submitting...
+                                                                              </>
+                                                                          ) : (
+                                                                              "Submit"
+                                                                          )}
+                                </Btn>
                             </div>
-                        }
+                        )}
                     </CardBody>
                 </Collapse>
             </Card>

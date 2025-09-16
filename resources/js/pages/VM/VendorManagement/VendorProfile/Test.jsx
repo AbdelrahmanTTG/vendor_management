@@ -4,7 +4,7 @@ import { Btn, H5, Spinner } from '../../../../AbstractElements';
 import Select from 'react-select';
 import axiosClient from "../../../AxiosClint";
 import { toast } from 'react-toastify';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, set } from 'react-hook-form';
 
 const Test = (props) => {
     // toast.configure();
@@ -41,6 +41,7 @@ const Test = (props) => {
     const [selectedOption, setSelectedOption] = useState("1");
     const [testResult, setTestResult] = useState("1");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [Sub, setSub] = useState(false);
 
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -157,6 +158,7 @@ const Test = (props) => {
             const section = document.getElementById("personal-data");
             section.scrollIntoView({ behavior: 'smooth' });
         } else {
+            setSub(true);
             const formData = new FormData();
             formData.append('test', testFileName);
             Object.entries(data).forEach(([key, value]) => {
@@ -180,6 +182,8 @@ const Test = (props) => {
 
             } catch (err) {
                 console.error("Error:", err.response ? err.response.data : err.message);
+            }finally {
+                setSub(false);
             }
 
         }
@@ -246,31 +250,59 @@ const Test = (props) => {
                 <CardHeader
                     className="pb-3 d-flex justify-content-between align-items-center"
                     onClick={toggleCollapse}
-                    style={{ cursor: 'pointer', paddingBottom: '25px' }}
+                    style={{ cursor: "pointer", paddingBottom: "25px" }}
                 >
                     <H5>Test</H5>
-                    <i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '24px' }}></i>
+                    <i
+                        className={`icon-angle-${isOpen ? "down" : "left"}`}
+                        style={{ fontSize: "24px" }}
+                    ></i>
                 </CardHeader>
                 <Collapse isOpen={isOpen}>
                     <CardBody>
                         <Col sm="2">
                             <Media>
-                                <Label className="col-form-label m-r-10">Tested ?</Label>
-                                <Media body className="text-end icon-state switch-outline">
+                                <Label className="col-form-label m-r-10">
+                                    Tested ?
+                                </Label>
+                                <Media
+                                    body
+                                    className="text-end icon-state switch-outline"
+                                >
                                     <Label className="switch">
-                                        <Input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} />
+                                        <Input
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={handleCheckboxChange}
+                                        />
                                         <span className="switch-state bg-primary"></span>
                                     </Label>
                                 </Media>
                             </Media>
                         </Col>
-                        {isChecked &&
+                        {isChecked && (
                             <div>
-                                <div className="border border-default p-3 mb-3 " style={{ borderStyle: "dashed!important" }}>
-                                    <Label className="col-form-label m-r-10">Test Status</Label>
+                                <div
+                                    className="border border-default p-3 mb-3 "
+                                    style={{ borderStyle: "dashed!important" }}
+                                >
+                                    <Label className="col-form-label m-r-10">
+                                        Test Status
+                                    </Label>
                                     <Col className="d-flex align-items-center ms-5 gap-4 mt-3">
-                                        <Label className="col-form-label m-0" style={{ lineHeight: '1.5' }}>
-                                            <span style={{ color: 'red', fontSize: "18px" }}>*</span> Test Type :
+                                        <Label
+                                            className="col-form-label m-0"
+                                            style={{ lineHeight: "1.5" }}
+                                        >
+                                            <span
+                                                style={{
+                                                    color: "red",
+                                                    fontSize: "18px",
+                                                }}
+                                            >
+                                                *
+                                            </span>{" "}
+                                            Test Type :
                                         </Label>
                                         <div className="radio radio-primary me-3 ms-4">
                                             <Input
@@ -282,8 +314,16 @@ const Test = (props) => {
                                                 checked={selectedOption == "1"}
                                                 onChange={handleChange}
                                             />
-                                            <Label for="radio11" style={{ margin: 0, lineHeight: '1.5' }}>
-                                                <span className="digits">{"Client Test"}</span>
+                                            <Label
+                                                for="radio11"
+                                                style={{
+                                                    margin: 0,
+                                                    lineHeight: "1.5",
+                                                }}
+                                            >
+                                                <span className="digits">
+                                                    {"Client Test"}
+                                                </span>
                                             </Label>
                                         </div>
                                         <div className="radio radio-danger ">
@@ -296,15 +336,34 @@ const Test = (props) => {
                                                 checked={selectedOption == "0"}
                                                 onChange={handleChange}
                                             />
-                                            <Label for="radio12" style={{ margin: 0, lineHeight: '1.5' }}>
-                                                <span className="digits">{"On boarding test"}</span>
+                                            <Label
+                                                for="radio12"
+                                                style={{
+                                                    margin: 0,
+                                                    lineHeight: "1.5",
+                                                }}
+                                            >
+                                                <span className="digits">
+                                                    {"On boarding test"}
+                                                </span>
                                             </Label>
                                         </div>
                                     </Col>
 
                                     <Col className="d-flex align-items-center ms-5 gap-4 mt-3">
-                                        <Label className="col-form-label m-0" style={{ lineHeight: '1.5' }}>
-                                            <span style={{ color: 'red', fontSize: "18px" }}>*</span> Test result :
+                                        <Label
+                                            className="col-form-label m-0"
+                                            style={{ lineHeight: "1.5" }}
+                                        >
+                                            <span
+                                                style={{
+                                                    color: "red",
+                                                    fontSize: "18px",
+                                                }}
+                                            >
+                                                *
+                                            </span>{" "}
+                                            Test result :
                                         </Label>
                                         <div className="radio radio-primary me-3 ms-3">
                                             <Input
@@ -313,10 +372,20 @@ const Test = (props) => {
                                                 name="radio2"
                                                 value="1"
                                                 checked={testResult == "1"}
-                                                onChange={handleTestResultChange}
+                                                onChange={
+                                                    handleTestResultChange
+                                                }
                                             />
-                                            <Label for="radio21" style={{ margin: 0, lineHeight: '1.5' }}>
-                                                <span className="digits">{"Pass"}</span>
+                                            <Label
+                                                for="radio21"
+                                                style={{
+                                                    margin: 0,
+                                                    lineHeight: "1.5",
+                                                }}
+                                            >
+                                                <span className="digits">
+                                                    {"Pass"}
+                                                </span>
                                             </Label>
                                         </div>
                                         <div className="radio radio-danger ms-5">
@@ -326,16 +395,37 @@ const Test = (props) => {
                                                 name="radio2"
                                                 value="0"
                                                 checked={testResult == "0"}
-                                                onChange={handleTestResultChange}
+                                                onChange={
+                                                    handleTestResultChange
+                                                }
                                             />
-                                            <Label for="radio22" style={{ margin: 0, lineHeight: '1.5' }}>
-                                                <span className="digits">{"Fail"}</span>
+                                            <Label
+                                                for="radio22"
+                                                style={{
+                                                    margin: 0,
+                                                    lineHeight: "1.5",
+                                                }}
+                                            >
+                                                <span className="digits">
+                                                    {"Fail"}
+                                                </span>
                                             </Label>
                                         </div>
                                     </Col>
                                     <Col className="d-flex align-items-center ms-5 gap-4 mt-3">
-                                        <Label className="col-form-label m-0" style={{ lineHeight: '1.5' }}>
-                                            <span style={{ color: 'red', fontSize: "18px" }}>*</span> Test Upload :
+                                        <Label
+                                            className="col-form-label m-0"
+                                            style={{ lineHeight: "1.5" }}
+                                        >
+                                            <span
+                                                style={{
+                                                    color: "red",
+                                                    fontSize: "18px",
+                                                }}
+                                            >
+                                                *
+                                            </span>{" "}
+                                            Test Upload :
                                         </Label>
                                         <div className="radio radio-primary me-3">
                                             <Controller
@@ -347,20 +437,48 @@ const Test = (props) => {
                                                         type="file"
                                                         className="form-control"
                                                         onChange={(e) => {
-                                                            const file = e.target.files[0];
+                                                            const file =
+                                                                e.target
+                                                                    .files[0];
                                                             if (file) {
-                                                                const fileName = file.name.toLowerCase();
-                                                                const fileSize = file.size;
-                                                                const allowedExtensions = [".zip", ".rar"];
-                                                                if (fileSize > 5 * 1024 * 1024) {
-                                                                    if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
-                                                                        alert("If the file is larger than 5MB, it must be a ZIP or RAR file.");
-                                                                        e.target.value = "";
+                                                                const fileName =
+                                                                    file.name.toLowerCase();
+                                                                const fileSize =
+                                                                    file.size;
+                                                                const allowedExtensions =
+                                                                    [
+                                                                        ".zip",
+                                                                        ".rar",
+                                                                    ];
+                                                                if (
+                                                                    fileSize >
+                                                                    5 *
+                                                                        1024 *
+                                                                        1024
+                                                                ) {
+                                                                    if (
+                                                                        !allowedExtensions.some(
+                                                                            (
+                                                                                ext
+                                                                            ) =>
+                                                                                fileName.endsWith(
+                                                                                    ext
+                                                                                )
+                                                                        )
+                                                                    ) {
+                                                                        alert(
+                                                                            "If the file is larger than 5MB, it must be a ZIP or RAR file."
+                                                                        );
+                                                                        e.target.value =
+                                                                            "";
                                                                         return;
                                                                     }
                                                                 }
                                                             }
-                                                            handleFileChange(e, setTestFileName);
+                                                            handleFileChange(
+                                                                e,
+                                                                setTestFileName
+                                                            );
                                                             field.onChange(e);
                                                         }}
                                                     />
@@ -368,61 +486,114 @@ const Test = (props) => {
                                             />
 
                                             {testFile ? (
-                                                <span className="form-text text-muted py-2 m-1">Download.
-
-                                                <button
-                                                style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    marginLeft: '10px'
-                                                }}
-                                                color="transparent"
-                                                onClick={() => handleDownload(testFileName)}
-                                            >
-                                                <i style={{ fontSize: '1.6em', marginTop: '3px' }} className="fa fa-cloud-download"></i>
-                                                    </button> </span>)  : (
+                                                <span className="form-text text-muted py-2 m-1">
+                                                    Download.
+                                                    <button
+                                                        style={{
+                                                            backgroundColor:
+                                                                "transparent",
+                                                            border: "none",
+                                                            cursor: "pointer",
+                                                            marginLeft: "10px",
+                                                        }}
+                                                        color="transparent"
+                                                        onClick={() =>
+                                                            handleDownload(
+                                                                testFileName
+                                                            )
+                                                        }
+                                                    >
+                                                        <i
+                                                            style={{
+                                                                fontSize:
+                                                                    "1.6em",
+                                                                marginTop:
+                                                                    "3px",
+                                                            }}
+                                                            className="fa fa-cloud-download"
+                                                        ></i>
+                                                    </button>{" "}
+                                                </span>
+                                            ) : (
                                                 <></>
                                             )}
                                         </div>
-
                                     </Col>
-
-
-
-
                                 </div>
-                                <div className="border border-default p-3 mb-3 test_details" style={{ borderStyle: "dashed!important" }}>
-                                    <Label className="col-form-label m-r-10 mb-3 fw-bold">Test specification</Label>
+                                <div
+                                    className="border border-default p-3 mb-3 test_details"
+                                    style={{ borderStyle: "dashed!important" }}
+                                >
+                                    <Label className="col-form-label m-r-10 mb-3 fw-bold">
+                                        Test specification
+                                    </Label>
                                     <Row>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Source</Label>
+                                                <Label
+                                                    className="col-sm-3 col-form-label"
+                                                    for="validationCustom01"
+                                                >
+                                                    <span
+                                                        style={{
+                                                            color: "red",
+                                                            fontSize: "18px",
+                                                        }}
+                                                    >
+                                                        *
+                                                    </span>{" "}
+                                                    Source
+                                                </Label>
                                                 <Col sm="9">
-
                                                     <Controller
                                                         name="source_lang"
                                                         control={control}
-                                                        rules={{ required: true }}
+                                                        rules={{
+                                                            required: true,
+                                                        }}
                                                         render={({ field }) => (
                                                             <Select
                                                                 {...field}
-                                                                value={field.value}
-                                                                options={optionsSL}
-                                                                onInputChange={(inputValue) =>
-                                                                    handleInputChange(inputValue, "languages", "source_lang", setOptionsSL, optionsSL)
+                                                                value={
+                                                                    field.value
+                                                                }
+                                                                options={
+                                                                    optionsSL
+                                                                }
+                                                                onInputChange={(
+                                                                    inputValue
+                                                                ) =>
+                                                                    handleInputChange(
+                                                                        inputValue,
+                                                                        "languages",
+                                                                        "source_lang",
+                                                                        setOptionsSL,
+                                                                        optionsSL
+                                                                    )
                                                                 }
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
-                                                                noOptionsMessage={() => loading ? (
-                                                                    <div className="loader-box" >
-                                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                                    </div>
-                                                                ) : 'No options found'}
-                                                                onChange={(option) => {
-                                                                    field.onChange(option);
+                                                                noOptionsMessage={() =>
+                                                                    loading ? (
+                                                                        <div className="loader-box">
+                                                                            <Spinner
+                                                                                attrSpinner={{
+                                                                                    className:
+                                                                                        "loader-6",
+                                                                                }}
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        "No options found"
+                                                                    )
+                                                                }
+                                                                onChange={(
+                                                                    option
+                                                                ) => {
+                                                                    field.onChange(
+                                                                        option
+                                                                    );
                                                                 }}
-
                                                             />
                                                         )}
                                                     />
@@ -432,34 +603,70 @@ const Test = (props) => {
 
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Target</Label>
+                                                <Label
+                                                    className="col-sm-3 col-form-label"
+                                                    for="validationCustom01"
+                                                >
+                                                    <span
+                                                        style={{
+                                                            color: "red",
+                                                            fontSize: "18px",
+                                                        }}
+                                                    >
+                                                        *
+                                                    </span>{" "}
+                                                    Target
+                                                </Label>
                                                 <Col sm="9">
-
-
                                                     <Controller
                                                         name="target_lang"
                                                         control={control}
-                                                        rules={{ required: true }}
+                                                        rules={{
+                                                            required: true,
+                                                        }}
                                                         render={({ field }) => (
                                                             <Select
                                                                 {...field}
-                                                                value={field.value}
-                                                                options={optionsTL}
-                                                                onInputChange={(inputValue) =>
-                                                                    handleInputChange(inputValue, "languages", "target_lang", setOptionsTL, optionsTL)
+                                                                value={
+                                                                    field.value
+                                                                }
+                                                                options={
+                                                                    optionsTL
+                                                                }
+                                                                onInputChange={(
+                                                                    inputValue
+                                                                ) =>
+                                                                    handleInputChange(
+                                                                        inputValue,
+                                                                        "languages",
+                                                                        "target_lang",
+                                                                        setOptionsTL,
+                                                                        optionsTL
+                                                                    )
                                                                 }
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
-                                                                noOptionsMessage={() => loading ? (
-                                                                    <div className="loader-box" >
-                                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                                    </div>
-                                                                ) : 'No options found'}
-                                                                onChange={(option) => {
-                                                                    field.onChange(option);
+                                                                noOptionsMessage={() =>
+                                                                    loading ? (
+                                                                        <div className="loader-box">
+                                                                            <Spinner
+                                                                                attrSpinner={{
+                                                                                    className:
+                                                                                        "loader-6",
+                                                                                }}
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        "No options found"
+                                                                    )
+                                                                }
+                                                                onChange={(
+                                                                    option
+                                                                ) => {
+                                                                    field.onChange(
+                                                                        option
+                                                                    );
                                                                 }}
-
                                                             />
                                                         )}
                                                     />
@@ -468,34 +675,74 @@ const Test = (props) => {
                                         </Col>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Main-Subject Matter</Label>
+                                                <Label
+                                                    className="col-sm-3 col-form-label"
+                                                    for="validationCustom01"
+                                                >
+                                                    <span
+                                                        style={{
+                                                            color: "red",
+                                                            fontSize: "18px",
+                                                        }}
+                                                    >
+                                                        *
+                                                    </span>{" "}
+                                                    Main-Subject Matter
+                                                </Label>
                                                 <Col sm="9">
                                                     <Controller
                                                         name="main_subject"
                                                         control={control}
-                                                        rules={{ required: true }}
+                                                        rules={{
+                                                            required: true,
+                                                        }}
                                                         render={({ field }) => (
                                                             <Select
                                                                 {...field}
-                                                                value={field.value}
-                                                                options={optionsMain}
-                                                                onInputChange={(inputValue) =>
-                                                                    handleInputChange(inputValue, "MainSubjectMatter", "main_subject", setOptionsMain, optionsMain)
+                                                                value={
+                                                                    field.value
+                                                                }
+                                                                options={
+                                                                    optionsMain
+                                                                }
+                                                                onInputChange={(
+                                                                    inputValue
+                                                                ) =>
+                                                                    handleInputChange(
+                                                                        inputValue,
+                                                                        "mainsubject",
+                                                                        "main_subject",
+                                                                        setOptionsMain,
+                                                                        optionsMain
+                                                                    )
                                                                 }
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
-                                                                noOptionsMessage={() => loading ? (
-                                                                    <div className="loader-box" >
-                                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                                    </div>
-                                                                ) : 'No options found'}
-                                                                onChange={(option) => {
-                                                                    handelingSelectSub(option.value)
+                                                                noOptionsMessage={() =>
+                                                                    loading ? (
+                                                                        <div className="loader-box">
+                                                                            <Spinner
+                                                                                attrSpinner={{
+                                                                                    className:
+                                                                                        "loader-6",
+                                                                                }}
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        "No options found"
+                                                                    )
+                                                                }
+                                                                onChange={(
+                                                                    option
+                                                                ) => {
+                                                                    handelingSelectSub(
+                                                                        option.value
+                                                                    );
 
-                                                                    field.onChange(option);
+                                                                    field.onChange(
+                                                                        option
+                                                                    );
                                                                 }}
-
                                                             />
                                                         )}
                                                     />
@@ -504,61 +751,131 @@ const Test = (props) => {
                                         </Col>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Sub–Subject Matter</Label>
+                                                <Label
+                                                    className="col-sm-3 col-form-label"
+                                                    for="validationCustom01"
+                                                >
+                                                    <span
+                                                        style={{
+                                                            color: "red",
+                                                            fontSize: "18px",
+                                                        }}
+                                                    >
+                                                        *
+                                                    </span>{" "}
+                                                    Sub–Subject Matter
+                                                </Label>
                                                 <Col sm="9">
                                                     <Controller
                                                         name="sub_subject"
                                                         control={control}
-                                                        rules={{ required: true }}
+                                                        rules={{
+                                                            required: true,
+                                                        }}
                                                         render={({ field }) => (
                                                             <Select
                                                                 {...field}
-                                                                value={field.value}
-                                                                options={optionsSub}
+                                                                value={
+                                                                    field.value
+                                                                }
+                                                                options={
+                                                                    optionsSub
+                                                                }
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
-                                                                noOptionsMessage={() => loading ? (
-                                                                    <div className="loader-box" >
-                                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                                    </div>
-                                                                ) : 'Select Sub Subject Matter'}
-                                                                onChange={(option) => {
-                                                                    field.onChange(option);
+                                                                noOptionsMessage={() =>
+                                                                    loading ? (
+                                                                        <div className="loader-box">
+                                                                            <Spinner
+                                                                                attrSpinner={{
+                                                                                    className:
+                                                                                        "loader-6",
+                                                                                }}
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        "Select Sub Subject Matter"
+                                                                    )
+                                                                }
+                                                                onChange={(
+                                                                    option
+                                                                ) => {
+                                                                    field.onChange(
+                                                                        option
+                                                                    );
                                                                 }}
-
                                                             />
                                                         )}
                                                     />
                                                 </Col>
-                                            </FormGroup></Col>
+                                            </FormGroup>
+                                        </Col>
                                         <Col md="6" className="mb-3">
                                             <FormGroup className="row">
-                                                <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Service</Label>
+                                                <Label
+                                                    className="col-sm-3 col-form-label"
+                                                    for="validationCustom01"
+                                                >
+                                                    <span
+                                                        style={{
+                                                            color: "red",
+                                                            fontSize: "18px",
+                                                        }}
+                                                    >
+                                                        *
+                                                    </span>{" "}
+                                                    Service
+                                                </Label>
                                                 <Col sm="9">
                                                     <Controller
                                                         name="service"
                                                         control={control}
-                                                        rules={{ required: true }}
+                                                        rules={{
+                                                            required: true,
+                                                        }}
                                                         render={({ field }) => (
                                                             <Select
                                                                 {...field}
-                                                                value={field.value}
-                                                                options={optionsSre}
-                                                                onInputChange={(inputValue) =>
-                                                                    handleInputChange(inputValue, "services", "service", setOptionsSer, optionsSre)
+                                                                value={
+                                                                    field.value
+                                                                }
+                                                                options={
+                                                                    optionsSre
+                                                                }
+                                                                onInputChange={(
+                                                                    inputValue
+                                                                ) =>
+                                                                    handleInputChange(
+                                                                        inputValue,
+                                                                        "services",
+                                                                        "service",
+                                                                        setOptionsSer,
+                                                                        optionsSre
+                                                                    )
                                                                 }
                                                                 className="js-example-basic-single col-sm-12"
                                                                 isSearchable
-                                                                noOptionsMessage={() => loading ? (
-                                                                    <div className="loader-box" >
-                                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                                    </div>
-                                                                ) : 'No options found'}
-                                                                onChange={(option) => {
-                                                                    field.onChange(option);
+                                                                noOptionsMessage={() =>
+                                                                    loading ? (
+                                                                        <div className="loader-box">
+                                                                            <Spinner
+                                                                                attrSpinner={{
+                                                                                    className:
+                                                                                        "loader-6",
+                                                                                }}
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        "No options found"
+                                                                    )
+                                                                }
+                                                                onChange={(
+                                                                    option
+                                                                ) => {
+                                                                    field.onChange(
+                                                                        option
+                                                                    );
                                                                 }}
-
                                                             />
                                                         )}
                                                     />
@@ -567,12 +884,34 @@ const Test = (props) => {
                                         </Col>
                                     </Row>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                    <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(onSubmit, onError) }}>Submit</Btn>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "flex-end",
+                                    }}
+                                >
+                                    <Btn
+                                        attrBtn={{
+                                            color: "primary",
+                                            disabled: Sub,
+                                            onClick: handleSubmit(
+                                                onSubmit,
+                                                onError
+                                            ),
+                                        }}
+                                    >
+                                        {Sub ? (
+                                            <>
+                                                <Spinner size="sm" />{" "}
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            "Submit"
+                                        )}
+                                    </Btn>
                                 </div>
                             </div>
-                        }
-
+                        )}
                     </CardBody>
                 </Collapse>
             </Card>

@@ -74,6 +74,13 @@ const VMnote = (props) => {
         }
     };
     const Submit = (data) => {
+         if (!data.content) {
+             showToast(
+                 "error",
+                 "Make sure to write the content of the message."
+             );
+             return;
+         }
         const type = { ...data, status: "0" }
         onSubmit(type)
     };
@@ -104,6 +111,14 @@ const VMnote = (props) => {
             document.getElementById("personal-data")?.scrollIntoView({ behavior: 'smooth' });
             return;
         }
+           if (!data.PM) {
+               showToast(
+                   "error",
+                   "Make sure to write the content of the message."
+               );
+               return;
+        }
+            setIsSubmitting(true);
         try {
             const formData = { ...data, id: props?.id };
             const response = await axios.post('/MessagePM', formData);
@@ -176,91 +191,210 @@ const VMnote = (props) => {
     return (
         <Fragment>
             <Card>
-                <CardHeader className="pb-3 d-flex justify-content-between align-items-center" onClick={toggleCollapse} style={{ cursor: 'pointer' }}>
+                <CardHeader
+                    className="pb-3 d-flex justify-content-between align-items-center"
+                    onClick={toggleCollapse}
+                    style={{ cursor: "pointer" }}
+                >
                     <H5>VM Notes</H5>
-                    <i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '24px' }}></i>
+                    <i
+                        className={`icon-angle-${isOpen ? "down" : "left"}`}
+                        style={{ fontSize: "24px" }}
+                    ></i>
                 </CardHeader>
                 <Collapse isOpen={isOpen}>
                     <CardBody>
                         <Row className="g-3 mb-3">
-                            <Col md="12" className="border border-default p-3 mb-3" style={{ borderStyle: "dashed" }}>
+                            <Col
+                                md="12"
+                                className="border border-default p-3 mb-3"
+                                style={{ borderStyle: "dashed" }}
+                            >
                                 <div className="d-flex justify-content-between align-items-center mb-3">
-                                    <Label className="form-label">VM/Vendor</Label>
+                                    <Label className="form-label">
+                                        VM/Vendor
+                                    </Label>
                                     <ButtonGroup>
-                                        <Btn attrBtn={{ color: 'secondary', onClick: handleSubmit(Submit), disabled: isSubmitting }}>
-                                            Submit
+                                        <Btn
+                                            attrBtn={{
+                                                color: "secondary",
+                                                onClick: handleSubmit(Submit),
+                                                disabled: isSubmitting,
+                                            }}
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <Spinner size="sm" />{" "}
+                                                    Submitting...
+                                                </>
+                                            ) : (
+                                                "Submit"
+                                            )}
                                         </Btn>
-                                        <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(Send, onError), disabled: isSubmitting }}>
-                                            Send
+                                        <Btn
+                                            attrBtn={{
+                                                color: "primary",
+                                                onClick: handleSubmit(
+                                                    Send,
+                                                    onError
+                                                ),
+                                                disabled: isSubmitting,
+                                            }}
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <Spinner size="sm" />{" "}
+                                                    Sending...
+                                                </>
+                                            ) : (
+                                                "Send"
+                                            )}
                                         </Btn>
                                     </ButtonGroup>
-
                                 </div>
 
                                 <CKEditor
                                     editor={ClassicEditor}
-                                    data={props?.lastMessage?.VMNotes?.status == "0" ? props?.lastMessage?.VMNotes?.content : ""}
-                                    onChange={(event, editor) => setValue('content', editor.getData())}
-                                />
-                                <input hidden disabled {...register('content', { required: false })} />
-
-                                <div className="border border-default p-3 mb-3" style={{ borderStyle: "dashed" }}>
-                                    {
-                                        loading ? (
-                                            <div className="loader-box" >
-                                                <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                            </div>
-                                        ) :
-                                            <div style={styles.chatBox}>
-                                                <div style={styles.messages}>
-                                                    {messages.length > 0 ? (
-                                                        messages.map((msg) => (
-                                                            <div key={msg.id} style={styles.message}>
-                                                                <p style={styles.messageText}>{msg.content}</p>
-
-                                                                <span style={{ position: "absolute", top: 0, right: "0.5vw" }}>
-                                                                    {msg.status == "0" ? "✓ Submit  " : "✓✓Sent"}
-                                                                </span>
-
-
-                                                                <span style={styles.timestamp}>
-                                                                    {new Date(msg.updated_at).toLocaleString()}
-                                                                </span>
-
-                                                                <span style={{
-                                                                    ...styles.status,
-                                                                    ...(msg.is_read === 0 ? styles.statusRead : styles.statusSent)
-                                                                }}>
-
-                                                                    {msg.is_read === 1 ? "✓✓ Read" : "✓ Not readable"}
-                                                                </span>
-
-                                                            </div>
-                                                        ))
-                                                    ) : (
-                                                        <p style={styles.noNotesMessage}>There are no Notes yet.</p>
-                                                    )}
-
-                                                </div>
-                                            </div>
+                                    data={
+                                        props?.lastMessage?.VMNotes?.status ==
+                                        "0"
+                                            ? props?.lastMessage?.VMNotes
+                                                  ?.content
+                                            : ""
                                     }
+                                    onChange={(event, editor) =>
+                                        setValue("content", editor.getData())
+                                    }
+                                />
+                                <input
+                                    hidden
+                                    disabled
+                                    {...register("content", {
+                                        required: false,
+                                    })}
+                                />
+
+                                <div
+                                    className="border border-default p-3 mb-3"
+                                    style={{ borderStyle: "dashed" }}
+                                >
+                                    {loading ? (
+                                        <div className="loader-box">
+                                            <Spinner
+                                                attrSpinner={{
+                                                    className: "loader-6",
+                                                }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div style={styles.chatBox}>
+                                            <div style={styles.messages}>
+                                                {messages.length > 0 ? (
+                                                    messages.map((msg) => (
+                                                        <div
+                                                            key={msg.id}
+                                                            style={
+                                                                styles.message
+                                                            }
+                                                        >
+                                                            <p
+                                                                style={
+                                                                    styles.messageText
+                                                                }
+                                                            >
+                                                                {msg.content}
+                                                            </p>
+
+                                                            <span
+                                                                style={{
+                                                                    position:
+                                                                        "absolute",
+                                                                    top: 0,
+                                                                    right: "0.5vw",
+                                                                }}
+                                                            >
+                                                                {msg.status ==
+                                                                "0"
+                                                                    ? "✓ Submit  "
+                                                                    : "✓✓Sent"}
+                                                            </span>
+
+                                                            <span
+                                                                style={
+                                                                    styles.timestamp
+                                                                }
+                                                            >
+                                                                {new Date(
+                                                                    msg.updated_at
+                                                                ).toLocaleString()}
+                                                            </span>
+
+                                                            <span
+                                                                style={{
+                                                                    ...styles.status,
+                                                                    ...(msg.is_read ===
+                                                                    0
+                                                                        ? styles.statusRead
+                                                                        : styles.statusSent),
+                                                                }}
+                                                            >
+                                                                {msg.is_read ===
+                                                                1
+                                                                    ? "✓✓ Read"
+                                                                    : "✓ Not readable"}
+                                                            </span>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p
+                                                        style={
+                                                            styles.noNotesMessage
+                                                        }
+                                                    >
+                                                        There are no Notes yet.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </Col>
 
                             <Col md="12" className="mb-3">
                                 <div className="d-flex justify-content-between align-items-center mb-3">
                                     <Label className="form-label">VM/PM</Label>
-                                    <Btn attrBtn={{ color: 'primary', onClick: handleSubmitPM(onSubmitPM, onErrorPM), disabled: isSubmitting }}>
-                                        Submit
+                                    <Btn
+                                        attrBtn={{
+                                            color: "primary",
+                                            onClick: handleSubmitPM(
+                                                onSubmitPM,
+                                                onErrorPM
+                                            ),
+                                            disabled: isSubmitting,
+                                        }}
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <Spinner size="sm" />{" "}
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            "Submit"
+                                        )}
                                     </Btn>
                                 </div>
                                 <CKEditor
                                     data={props?.lastMessage?.pm}
                                     editor={ClassicEditor}
-                                    onChange={(event, editor) => setValuePM('PM', editor.getData())}
+                                    onChange={(event, editor) =>
+                                        setValuePM("PM", editor.getData())
+                                    }
                                 />
-                                <input hidden disabled {...registerPM('PM', { required: false })} />
-
+                                <input
+                                    hidden
+                                    disabled
+                                    {...registerPM("PM", { required: false })}
+                                />
                             </Col>
                         </Row>
                     </CardBody>

@@ -318,10 +318,13 @@ const FilesCertificate = (props) => {
                 <CardHeader
                     className="pb-3 d-flex justify-content-between align-items-center"
                     onClick={toggleCollapse}
-                    style={{ cursor: 'pointer', paddingBottom: '25px' }}
+                    style={{ cursor: "pointer", paddingBottom: "25px" }}
                 >
                     <H5>Files & Certificate</H5>
-                    <i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '24px' }}></i>
+                    <i
+                        className={`icon-angle-${isOpen ? "down" : "left"}`}
+                        style={{ fontSize: "24px" }}
+                    ></i>
                 </CardHeader>
                 <Collapse isOpen={isOpen}>
                     <CardBody>
@@ -329,151 +332,295 @@ const FilesCertificate = (props) => {
                             <Col md="6">
                                 <FormGroup className="row">
                                     <Label className="col-sm-3 col-form-label">
-                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                                        <span style={{ color: 'red', fontSize: "18px" }}>*</span>
-                                    }
-                                    CV</Label>
-
+                                        {(props.backPermissions?.add == 1 ||
+                                            props.backPermissions?.edit ==
+                                                1) && (
+                                            <span
+                                                style={{
+                                                    color: "red",
+                                                    fontSize: "18px",
+                                                }}
+                                            >
+                                                *
+                                            </span>
+                                        )}
+                                        CV
+                                    </Label>
 
                                     <Col sm="9">
-                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) ? 
-                                    <>
-                                        <Controller
-                                            name="cv"
-                                            control={control}
-                                            rules={{ required: "CV is required" }}
-                                            render={({ field }) => (
-                                                <input
-                                                    type="file"
-                                                    className="form-control"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files[0];
-                                                        if (file) {
-                                                            const fileName = file.name.toLowerCase();
-                                                            const fileSize = file.size;
-                                                            const allowedExtensions = [".zip", ".rar"];
-                                                            if (fileSize > 5 * 1024 * 1024) {
-                                                                if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
-                                                                    alert("If the file is larger than 5MB, it must be a ZIP or RAR file.");
-                                                                    e.target.value = "";
-                                                                    return;
-                                                                }
-                                                            }
-                                                        }
-
-                                                        handleFileChange(e, setCvFileName);
-                                                        field.onChange(e); // Pass the file to react-hook-form
+                                        {props.backPermissions?.add == 1 ||
+                                        props.backPermissions?.edit == 1 ? (
+                                            <>
+                                                <Controller
+                                                    name="cv"
+                                                    control={control}
+                                                    rules={{
+                                                        required:
+                                                            "CV is required",
                                                     }}
+                                                    render={({ field }) => (
+                                                        <input
+                                                            type="file"
+                                                            className="form-control"
+                                                            onChange={(e) => {
+                                                                const file =
+                                                                    e.target
+                                                                        .files[0];
+                                                                if (file) {
+                                                                    const fileName =
+                                                                        file.name.toLowerCase();
+                                                                    const fileSize =
+                                                                        file.size;
+                                                                    const allowedExtensions =
+                                                                        [
+                                                                            ".zip",
+                                                                            ".rar",
+                                                                        ];
+                                                                    if (
+                                                                        fileSize >
+                                                                        5 *
+                                                                            1024 *
+                                                                            1024
+                                                                    ) {
+                                                                        if (
+                                                                            !allowedExtensions.some(
+                                                                                (
+                                                                                    ext
+                                                                                ) =>
+                                                                                    fileName.endsWith(
+                                                                                        ext
+                                                                                    )
+                                                                            )
+                                                                        ) {
+                                                                            alert(
+                                                                                "If the file is larger than 5MB, it must be a ZIP or RAR file."
+                                                                            );
+                                                                            e.target.value =
+                                                                                "";
+                                                                            return;
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                handleFileChange(
+                                                                    e,
+                                                                    setCvFileName
+                                                                );
+                                                                field.onChange(
+                                                                    e
+                                                                ); // Pass the file to react-hook-form
+                                                            }}
+                                                        />
+                                                    )}
                                                 />
-                                            )}
-                                        />
-                                        <span className="form-text text-muted py-2 m-1">Note: if exceeds 5MB please zip it.
-                                            {cvFileNames ? (     <button
+                                                <span className="form-text text-muted py-2 m-1">
+                                                    Note: if exceeds 5MB please
+                                                    zip it.
+                                                    {cvFileNames ? (
+                                                        <button
+                                                            style={{
+                                                                backgroundColor:
+                                                                    "transparent",
+                                                                border: "none",
+                                                                cursor: "pointer",
+                                                                marginLeft:
+                                                                    "10px",
+                                                            }}
+                                                            color="transparent"
+                                                            onClick={() =>
+                                                                handleDownload(
+                                                                    cvFileName
+                                                                )
+                                                            }
+                                                        >
+                                                            <i
+                                                                style={{
+                                                                    fontSize:
+                                                                        "1.6em",
+                                                                    marginTop:
+                                                                        "3px",
+                                                                }}
+                                                                className="fa fa-cloud-download"
+                                                            ></i>
+                                                        </button>
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </span>
+                                            </>
+                                        ) : cvFileNames ? (
+                                            <button
                                                 style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    marginLeft: '10px' 
+                                                    backgroundColor:
+                                                        "transparent",
+                                                    border: "none",
+                                                    cursor: "pointer",
+                                                    marginLeft: "10px",
                                                 }}
                                                 color="transparent"
-                                                onClick={() => handleDownload(cvFileName)}
+                                                onClick={() =>
+                                                    handleDownload(cvFileName)
+                                                }
                                             >
-                                                <i style={{ fontSize: '1.6em', marginTop: '3px' }} className="fa fa-cloud-download"></i>
-                                            </button>) : (
-                                                <></>
-                                            )}
-                                        </span>
-                                     </>     :
-                                       cvFileNames ? (     <button
-                                        style={{
-                                            backgroundColor: 'transparent',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            marginLeft: '10px' 
-                                        }}
-                                        color="transparent"
-                                        onClick={() => handleDownload(cvFileName)}
-                                    >
-                                     <i style={{ fontSize: '1.6em', marginTop: '3px' }} className="fa fa-cloud-download"></i> Click to Download the file  
-                                    </button>) : (
-                                        <></>
-                                    )  
-                                }
+                                                <i
+                                                    style={{
+                                                        fontSize: "1.6em",
+                                                        marginTop: "3px",
+                                                    }}
+                                                    className="fa fa-cloud-download"
+                                                ></i>{" "}
+                                                Click to Download the file
+                                            </button>
+                                        ) : (
+                                            <></>
+                                        )}
                                     </Col>
                                 </FormGroup>
                             </Col>
                             <Col md="6">
                                 <FormGroup className="row">
                                     <Label className="col-sm-3 col-form-label">
-                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) && 
-                                        <span style={{ color: 'red', fontSize: "18px" }}>*</span>
-                                    }
-                                    NDA</Label>
-                                    <Col sm="9">
-                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) ? 
-                                    <>
-                                        <Controller
-                                            name="NDA"
-                                            control={control}
-                                            rules={{ required: "NDA is required" }}
-                                            render={({ field }) => (
-                                                <input
-                                                    type="file"
-                                                    className="form-control"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files[0];
-                                                        if (file) {
-                                                            const fileName = file.name.toLowerCase();
-                                                            const fileSize = file.size;
-                                                            const allowedExtensions = [".zip", ".rar"];
-                                                            if (fileSize > 5 * 1024 * 1024) {
-                                                                if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
-                                                                    alert("If the file is larger than 5MB, it must be a ZIP or RAR file.");
-                                                                    e.target.value = "";
-                                                                    return;
-                                                                }
-                                                            }
-                                                        }
-                                                        handleFileChange(e, setNdaFileName);
-                                                        field.onChange(e); // Pass the file to react-hook-form
-                                                    }}
-                                                />
-                                            )}
-                                        />
-                                        {/* <Input type="file" onChange={(e) => handleFileChange(e, setNdaFileName)} /> */}
-                                        <span className="form-text text-muted py-2 m-1">Note: if exceeds 5MB please zip it.
-                                            {ndaFileNames ? (<button
+                                        {(props.backPermissions?.add == 1 ||
+                                            props.backPermissions?.edit ==
+                                                1) && (
+                                            <span
                                                 style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    marginLeft: '10px'
+                                                    color: "red",
+                                                    fontSize: "18px",
+                                                }}
+                                            >
+                                                *
+                                            </span>
+                                        )}
+                                        NDA
+                                    </Label>
+                                    <Col sm="9">
+                                        {props.backPermissions?.add == 1 ||
+                                        props.backPermissions?.edit == 1 ? (
+                                            <>
+                                                <Controller
+                                                    name="NDA"
+                                                    control={control}
+                                                    rules={{
+                                                        required:
+                                                            "NDA is required",
+                                                    }}
+                                                    render={({ field }) => (
+                                                        <input
+                                                            type="file"
+                                                            className="form-control"
+                                                            onChange={(e) => {
+                                                                const file =
+                                                                    e.target
+                                                                        .files[0];
+                                                                if (file) {
+                                                                    const fileName =
+                                                                        file.name.toLowerCase();
+                                                                    const fileSize =
+                                                                        file.size;
+                                                                    const allowedExtensions =
+                                                                        [
+                                                                            ".zip",
+                                                                            ".rar",
+                                                                        ];
+                                                                    if (
+                                                                        fileSize >
+                                                                        5 *
+                                                                            1024 *
+                                                                            1024
+                                                                    ) {
+                                                                        if (
+                                                                            !allowedExtensions.some(
+                                                                                (
+                                                                                    ext
+                                                                                ) =>
+                                                                                    fileName.endsWith(
+                                                                                        ext
+                                                                                    )
+                                                                            )
+                                                                        ) {
+                                                                            alert(
+                                                                                "If the file is larger than 5MB, it must be a ZIP or RAR file."
+                                                                            );
+                                                                            e.target.value =
+                                                                                "";
+                                                                            return;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                handleFileChange(
+                                                                    e,
+                                                                    setNdaFileName
+                                                                );
+                                                                field.onChange(
+                                                                    e
+                                                                ); // Pass the file to react-hook-form
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                                {/* <Input type="file" onChange={(e) => handleFileChange(e, setNdaFileName)} /> */}
+                                                <span className="form-text text-muted py-2 m-1">
+                                                    Note: if exceeds 5MB please
+                                                    zip it.
+                                                    {ndaFileNames ? (
+                                                        <button
+                                                            style={{
+                                                                backgroundColor:
+                                                                    "transparent",
+                                                                border: "none",
+                                                                cursor: "pointer",
+                                                                marginLeft:
+                                                                    "10px",
+                                                            }}
+                                                            color="transparent"
+                                                            onClick={() =>
+                                                                handleDownload(
+                                                                    ndaFileName
+                                                                )
+                                                            }
+                                                        >
+                                                            <i
+                                                                style={{
+                                                                    fontSize:
+                                                                        "1.6em",
+                                                                    marginTop:
+                                                                        "3px",
+                                                                }}
+                                                                className="fa fa-cloud-download"
+                                                            ></i>
+                                                        </button>
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </span>
+                                            </>
+                                        ) : ndaFileNames ? (
+                                            <button
+                                                style={{
+                                                    backgroundColor:
+                                                        "transparent",
+                                                    border: "none",
+                                                    cursor: "pointer",
+                                                    marginLeft: "10px",
                                                 }}
                                                 color="transparent"
-                                                onClick={() => handleDownload(ndaFileName)}
+                                                onClick={() =>
+                                                    handleDownload(ndaFileName)
+                                                }
                                             >
-                                                <i style={{ fontSize: '1.6em', marginTop: '3px' }} className="fa fa-cloud-download"></i>
-                                            </button>) : (
-                                                <></>
-                                            )}
-
-                                        </span>
-                                        </> :
-                                         ndaFileNames ? (<button
-                                            style={{
-                                                backgroundColor: 'transparent',
-                                                border: 'none',
-                                                cursor: 'pointer',
-                                                marginLeft: '10px'
-                                            }}
-                                            color="transparent"
-                                            onClick={() => handleDownload(ndaFileName)}
-                                        >
-                                        <i style={{ fontSize: '1.6em', marginTop: '3px' }} className="fa fa-cloud-download"></i> Click to Download the file 
-                                        </button>) : (
+                                                <i
+                                                    style={{
+                                                        fontSize: "1.6em",
+                                                        marginTop: "3px",
+                                                    }}
+                                                    className="fa fa-cloud-download"
+                                                ></i>{" "}
+                                                Click to Download the file
+                                            </button>
+                                        ) : (
                                             <></>
-                                        )
-                                    }
+                                        )}
                                     </Col>
                                 </FormGroup>
                             </Col>
@@ -485,13 +632,21 @@ const FilesCertificate = (props) => {
                                     <th>File Title</th>
                                     <th>File Content</th>
                                     <th style={{ width: "30%" }}>File</th>
-                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) && 
-                                        <th style={{ width: "10%" }} onClick={addRow}>
-                                            <Btn attrBtn={{ color: 'btn btn-light'}}>
+                                    {(props.backPermissions?.add == 1 ||
+                                        props.backPermissions?.edit == 1) && (
+                                        <th
+                                            style={{ width: "10%" }}
+                                            onClick={addRow}
+                                        >
+                                            <Btn
+                                                attrBtn={{
+                                                    color: "btn btn-light",
+                                                }}
+                                            >
                                                 <i className="fa fa-plus-circle"></i>
                                             </Btn>
                                         </th>
-                                    }
+                                    )}
                                 </tr>
                             </thead>
                             <tbody>
@@ -502,75 +657,153 @@ const FilesCertificate = (props) => {
                                             <input
                                                 type="text"
                                                 value={row.File_Title}
-                                                onChange={(e) => handleInputChange(e, row.id, "File_Title")}
+                                                onChange={(e) =>
+                                                    handleInputChange(
+                                                        e,
+                                                        row.id,
+                                                        "File_Title"
+                                                    )
+                                                }
                                                 className="form-control"
-                                                disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
-
+                                                disabled={
+                                                    props.backPermissions
+                                                        ?.add != 1 &&
+                                                    props.backPermissions
+                                                        ?.edit != 1
+                                                }
                                             />
                                         </td>
                                         <td>
                                             <textarea
-                                                style={{ height: '35px' }}
+                                                style={{ height: "35px" }}
                                                 className="form-control"
                                                 value={row.File_Content}
-                                                onChange={(e) => handleInputChange(e, row.id, "File_Content")}
-                                                disabled={props.backPermissions?.add != 1 && props.backPermissions?.edit != 1}
-
+                                                onChange={(e) =>
+                                                    handleInputChange(
+                                                        e,
+                                                        row.id,
+                                                        "File_Content"
+                                                    )
+                                                }
+                                                disabled={
+                                                    props.backPermissions
+                                                        ?.add != 1 &&
+                                                    props.backPermissions
+                                                        ?.edit != 1
+                                                }
                                             />
                                         </td>
                                         <td>
-                                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) && 
-                                            <input
-                                                type="file"
-                                                onChange={(e) => {
-                                                    const file = e.target.files[0];
-                                                    if (file) {
-                                                        const fileName = file.name.toLowerCase();
-                                                        const fileSize = file.size;
-                                                        const allowedExtensions = [".zip", ".rar"];
-                                                        if (fileSize > 5 * 1024 * 1024) {
-                                                            if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
-                                                                alert("If the file is larger than 5MB, it must be a ZIP or RAR file.");
-                                                                e.target.value = "";
-                                                                return;
+                                            {(props.backPermissions?.add == 1 ||
+                                                props.backPermissions?.edit ==
+                                                    1) && (
+                                                <input
+                                                    type="file"
+                                                    onChange={(e) => {
+                                                        const file =
+                                                            e.target.files[0];
+                                                        if (file) {
+                                                            const fileName =
+                                                                file.name.toLowerCase();
+                                                            const fileSize =
+                                                                file.size;
+                                                            const allowedExtensions =
+                                                                [
+                                                                    ".zip",
+                                                                    ".rar",
+                                                                ];
+                                                            if (
+                                                                fileSize >
+                                                                5 * 1024 * 1024
+                                                            ) {
+                                                                if (
+                                                                    !allowedExtensions.some(
+                                                                        (ext) =>
+                                                                            fileName.endsWith(
+                                                                                ext
+                                                                            )
+                                                                    )
+                                                                ) {
+                                                                    alert(
+                                                                        "If the file is larger than 5MB, it must be a ZIP or RAR file."
+                                                                    );
+                                                                    e.target.value =
+                                                                        "";
+                                                                    return;
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                    handleRowFileChange(e, row.id)
-                                                }}
-                                                className="form-control"
-
-                                            />
-                                            }
+                                                        handleRowFileChange(
+                                                            e,
+                                                            row.id
+                                                        );
+                                                    }}
+                                                    className="form-control"
+                                                />
+                                            )}
                                             {row.File_URL ? (
-                                                <button style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                }}  onClick={() => handleDownload(row.File_URL)}>
-                                                    <span >Click to Download the file </span>
+                                                <button
+                                                    style={{
+                                                        backgroundColor:
+                                                            "transparent",
+                                                        border: "none",
+                                                        cursor: "pointer",
+                                                    }}
+                                                    onClick={() =>
+                                                        handleDownload(
+                                                            row.File_URL
+                                                        )
+                                                    }
+                                                >
+                                                    <span>
+                                                        Click to Download the
+                                                        file{" "}
+                                                    </span>
                                                 </button>
                                             ) : (
                                                 <></>
                                             )}
                                         </td>
-                                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) && 
-                                        <td style={{ width: "10%" }} onClick={() => deleteRow(row.id , row.idUpdate)}>
-                                                    
-                                            <button  className="btn btn-danger">
-                                                <i className="fa fa-trash"></i>
-                                            </button>
-                                        </td>
-                                        }
+                                        {(props.backPermissions?.add == 1 ||
+                                            props.backPermissions?.edit ==
+                                                1) && (
+                                            <td
+                                                style={{ width: "10%" }}
+                                                onClick={() =>
+                                                    deleteRow(
+                                                        row.id,
+                                                        row.idUpdate
+                                                    )
+                                                }
+                                            >
+                                                <button className="btn btn-danger">
+                                                    <i className="fa fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
                         </Table>
-                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) && 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                <Btn attrBtn={{ color: 'primary', onClick: handleClick, disabled: loading }}>{loading ? 'Loading...' : 'Submit'}</Btn>
+                        {(props.backPermissions?.add == 1 ||
+                            props.backPermissions?.edit == 1) && (
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                }}
+                            >
+                                <Btn
+                                    attrBtn={{
+                                        color: "primary",
+                                        onClick: handleClick,
+                                        disabled: loading,
+                                    }}
+                                >
+                                    {loading ? "Submitting..." : "Submit"}
+                                </Btn>
                             </div>
-                        }
+                        )}
                     </CardBody>
                 </Collapse>
             </Card>

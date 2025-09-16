@@ -2505,7 +2505,7 @@ class VendorProfileController extends Controller
             'rate' => 'required|numeric',
             'special_rate' => 'nullable|numeric',
             'Status' => 'required|string',
-            'currency' => 'nullable|integer',
+            'currency' => 'required|integer',
             'sheet_brand' => 'required|integer',
         ]);
 

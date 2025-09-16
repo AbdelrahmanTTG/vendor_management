@@ -25,7 +25,7 @@ const EditNewBtn = (props) => {
         }
     };
     const [modal, setModal] = useState(false);
-    const toggle = () => setModal(!modal);
+    const toggle = () => setModal(!props.isOpen);
     const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
 
     const [optionsMain, setOptionsMain] = useState([]);
@@ -276,8 +276,8 @@ const EditNewBtn = (props) => {
 
     return (
         <Fragment>
-            <Btn attrBtn={{ color: 'btn btn-primary-light', onClick: toggle }} className="me-2" > <i className="icofont icofont-ui-edit"></i></Btn>
-            <CommonModal isOpen={modal} title='Edit price list' icon={<><i className="fa fa-info-circle" style={{ fontSize: '18px', color: 'darkred', marginRight: '1%' }}>  </i><span style={{ fontSize: '14px', color: 'darkred' }}>Type in the fields to search.</span></>} toggler={toggle} size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
+            {/* <Btn attrBtn={{ color: 'btn btn-primary-light', onClick: toggle }} className="me-2" > <i className="icofont icofont-ui-edit"></i></Btn> */}
+            <CommonModal  toggler={props.onClose}  isOpen={ props.isOpen} title='Edit price list' icon={<><i className="fa fa-info-circle" style={{ fontSize: '18px', color: 'darkred', marginRight: '1%' }}>  </i><span style={{ fontSize: '14px', color: 'darkred' }}>Type in the fields to search.</span></>}  size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
 
                 {
                     loading2 ? (
@@ -806,13 +806,7 @@ const EditNewBtn = (props) => {
                         </Col>
 
                     </Row>}
-                {/* <Row className="g-0">
-                    <Col  >
-                        <Label htmlFor="validationDefault01">Language</Label>
-                        <input className="form-control" id="validationCustom01" type="text" placeholder="Language" name="Language" {...register('Language', { required: true })} />
-                        <span style={{ color: '#dc3545', fontStyle: 'italic' }}>{errors.Language && 'Language name is required'}</span>
-                    </Col>
-                </Row> */}
+               
 
             </CommonModal>
         </Fragment>

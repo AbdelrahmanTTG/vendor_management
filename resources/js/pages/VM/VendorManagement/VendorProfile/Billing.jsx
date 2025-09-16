@@ -30,6 +30,7 @@ const Billing = (props) => {
     const [BankData_id, setBankData_id] = useState("");
     const [dataB, setdataB] = useState();
     const [add, setAdd] = useState(false);
+    const [Sub, setSub] = useState(false);
 
 
 
@@ -387,7 +388,7 @@ const Billing = (props) => {
             const section = document.getElementById("personal-data");
             section.scrollIntoView({ behavior: 'smooth' });
         } else {
-
+            setSub(true);
             const formData = { ...data };
             const result = rows?.map((row, index) => ({
                 defaults: selectedDefaults[row.id],
@@ -433,6 +434,8 @@ const Billing = (props) => {
 
                 }
                 setIsSubmitting(false)
+            }finally {
+                setSub(false);
             }
 
 
@@ -569,467 +572,1031 @@ const Billing = (props) => {
                 <CardHeader
                     className="pb-3 d-flex justify-content-between align-items-center"
                     onClick={toggleCollapse}
-                    style={{ cursor: 'pointer', paddingBottom: '25px' }}
+                    style={{ cursor: "pointer", paddingBottom: "25px" }}
                 >
                     <H5>Billing Data</H5>
-                    <i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '24px' }}></i>
+                    <i
+                        className={`icon-angle-${isOpen ? "down" : "left"}`}
+                        style={{ fontSize: "24px" }}
+                    ></i>
                 </CardHeader>
                 <Collapse isOpen={isOpen}>
                     <CardBody>
                         <Form>
-                            {
-                                loading ? (
-                                    <div className="loader-box" >
-                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                    </div>
-                                ) :
-                                    <div>
-                                        <div className="border border-default p-3 mb-3 " style={{ borderStyle: "dashed!important" }}>
-                                            {props.mode !== "edit" && (
-                                                <Col className="d-flex align-items-center mb-3">
-                                                    <Label className="col-form-label m-0" style={{ lineHeight: '1.5', paddingRight: '10px' }}>
-                                                        Use Same Vendor Data :
+                            {loading ? (
+                                <div className="loader-box">
+                                    <Spinner
+                                        attrSpinner={{ className: "loader-6" }}
+                                    />
+                                </div>
+                            ) : (
+                                <div>
+                                    <div
+                                        className="border border-default p-3 mb-3 "
+                                        style={{
+                                            borderStyle: "dashed!important",
+                                        }}
+                                    >
+                                        {props.mode !== "edit" && (
+                                            <Col className="d-flex align-items-center mb-3">
+                                                <Label
+                                                    className="col-form-label m-0"
+                                                    style={{
+                                                        lineHeight: "1.5",
+                                                        paddingRight: "10px",
+                                                    }}
+                                                >
+                                                    Use Same Vendor Data :
+                                                </Label>
+                                                <Input
+                                                    className="radio_animated"
+                                                    id="edo-ani"
+                                                    type="checkbox"
+                                                    onChange={
+                                                        handleCheckboxChange
+                                                    }
+                                                    name="rdo-ani"
+                                                />
+                                            </Col>
+                                        )}
+
+                                        <Row>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        <span
+                                                            style={{
+                                                                color: "red",
+                                                                fontSize:
+                                                                    "18px",
+                                                            }}
+                                                        >
+                                                            *
+                                                        </span>{" "}
+                                                        Billing Legal Name
                                                     </Label>
-                                                    <Input className="radio_animated" id="edo-ani" type="checkbox" onChange={handleCheckboxChange} name="rdo-ani" />
-                                                </Col>
-                                            )}
-
-
-                                            <Row>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Billing Legal Name</Label>
-                                                        <Col sm="9">
-                                                            <input
-                                                                defaultValue={isChecked.billing_legal_name}
-                                                                className="form-control"
-                                                                type="text"
-                                                                name="billing_legal_name"
-                                                                {...register("billing_legal_name", { required: true })}
-                                                                placeholder="Legal Name"
-                                                            />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Billing Currency</Label>
-                                                        <Col sm="9">
-                                                            <Controller
-                                                                name="billing_currency"
-                                                                control={control}
-                                                                rules={{ required: true }}
-                                                                render={({ field }) => (
-                                                                    <Select
-                                                                        {...field}
-                                                                        value={selectedOptionC}
-                                                                        options={optionsC}
-                                                                        onInputChange={(inputValue) =>
-                                                                            handleInputChangeSelect(inputValue, "currency", "Currency", setOptionsC, optionsC)
-                                                                        }
-                                                                        className="js-example-basic-single col-sm-12"
-                                                                        isSearchable
-                                                                        noOptionsMessage={() => loading2 ? (
+                                                    <Col sm="9">
+                                                        <input
+                                                            defaultValue={
+                                                                isChecked.billing_legal_name
+                                                            }
+                                                            className="form-control"
+                                                            type="text"
+                                                            name="billing_legal_name"
+                                                            {...register(
+                                                                "billing_legal_name",
+                                                                {
+                                                                    required: true,
+                                                                }
+                                                            )}
+                                                            placeholder="Legal Name"
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        {" "}
+                                                        <span
+                                                            style={{
+                                                                color: "red",
+                                                                fontSize:
+                                                                    "18px",
+                                                            }}
+                                                        >
+                                                            *
+                                                        </span>{" "}
+                                                        Billing Currency
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <Controller
+                                                            name="billing_currency"
+                                                            control={control}
+                                                            rules={{
+                                                                required: true,
+                                                            }}
+                                                            render={({
+                                                                field,
+                                                            }) => (
+                                                                <Select
+                                                                    {...field}
+                                                                    value={
+                                                                        selectedOptionC
+                                                                    }
+                                                                    options={
+                                                                        optionsC
+                                                                    }
+                                                                    onInputChange={(
+                                                                        inputValue
+                                                                    ) =>
+                                                                        handleInputChangeSelect(
+                                                                            inputValue,
+                                                                            "currency",
+                                                                            "Currency",
+                                                                            setOptionsC,
+                                                                            optionsC
+                                                                        )
+                                                                    }
+                                                                    className="js-example-basic-single col-sm-12"
+                                                                    isSearchable
+                                                                    noOptionsMessage={() =>
+                                                                        loading2 ? (
                                                                             <div className="loader-box">
-                                                                                <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                                                <Spinner
+                                                                                    attrSpinner={{
+                                                                                        className:
+                                                                                            "loader-6",
+                                                                                    }}
+                                                                                />
                                                                             </div>
-                                                                        ) : 'No options found'}
-                                                                        onChange={(option) => {
-                                                                            setSelectedOptionC(option);
-                                                                            field.onChange(option.value);
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                            />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> City / state</Label>
-                                                        <Col sm="9">
-                                                            <input
-                                                                defaultValue={isChecked.city}
-                                                                className="form-control"
-                                                                type="text"
-                                                                name="city"
-                                                                {...register("city", { required: true })}
-                                                                placeholder="City / state"
-                                                            />
-                                                        </Col> </FormGroup> </Col>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Street</Label>
-                                                        <Col sm="9">
-                                                            <input
-                                                                defaultValue={isChecked.street}
-                                                                className="form-control"
-                                                                type="text"
-                                                                name="Street"
-                                                                {...register("street", { required: true })}
-                                                                placeholder="Street"
-                                                            />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span> Billing Address</Label>
-                                                        <Col sm="9">
-                                                            <CKEditor
-                                                                editor={ClassicEditor}
-                                                                data={isChecked.billing_address || props.BillingData?.BillingData?.billingData?.billing_address || props.Bill?.billingData.billing_address || ""}
-                                                                onChange={(event, editor) => {
-                                                                    const data = editor.getData();
-                                                                    setValue('billing_address', data);
-                                                                }}
-                                                            />
-                                                            <input
-                                                                hidden
-                                                                {...register('billing_address', { required: true })}
-                                                            />
-
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                                {(props.backPermissions.edit == 1 && props?.permission?.billing_status != "hide") &&
-                                                    < Col md="6" id="status-wrapper" >
-                                                        <FormGroup className="row" >
-                                                            <Label className="col-sm-3 col-form-label" for="validationCustom01" > Status </Label>
-                                                            < Col sm="9" >
+                                                                        ) : (
+                                                                            "No options found"
+                                                                        )
+                                                                    }
+                                                                    onChange={(
+                                                                        option
+                                                                    ) => {
+                                                                        setSelectedOptionC(
+                                                                            option
+                                                                        );
+                                                                        field.onChange(
+                                                                            option.value
+                                                                        );
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        {" "}
+                                                        <span
+                                                            style={{
+                                                                color: "red",
+                                                                fontSize:
+                                                                    "18px",
+                                                            }}
+                                                        >
+                                                            *
+                                                        </span>{" "}
+                                                        City / state
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <input
+                                                            defaultValue={
+                                                                isChecked.city
+                                                            }
+                                                            className="form-control"
+                                                            type="text"
+                                                            name="city"
+                                                            {...register(
+                                                                "city",
+                                                                {
+                                                                    required: true,
+                                                                }
+                                                            )}
+                                                            placeholder="City / state"
+                                                        />
+                                                    </Col>{" "}
+                                                </FormGroup>{" "}
+                                            </Col>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        {" "}
+                                                        <span
+                                                            style={{
+                                                                color: "red",
+                                                                fontSize:
+                                                                    "18px",
+                                                            }}
+                                                        >
+                                                            *
+                                                        </span>{" "}
+                                                        Street
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <input
+                                                            defaultValue={
+                                                                isChecked.street
+                                                            }
+                                                            className="form-control"
+                                                            type="text"
+                                                            name="Street"
+                                                            {...register(
+                                                                "street",
+                                                                {
+                                                                    required: true,
+                                                                }
+                                                            )}
+                                                            placeholder="Street"
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        {" "}
+                                                        <span
+                                                            style={{
+                                                                color: "red",
+                                                                fontSize:
+                                                                    "18px",
+                                                            }}
+                                                        >
+                                                            *
+                                                        </span>{" "}
+                                                        Billing Address
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <CKEditor
+                                                            editor={
+                                                                ClassicEditor
+                                                            }
+                                                            data={
+                                                                isChecked.billing_address ||
+                                                                props
+                                                                    .BillingData
+                                                                    ?.BillingData
+                                                                    ?.billingData
+                                                                    ?.billing_address ||
+                                                                props.Bill
+                                                                    ?.billingData
+                                                                    .billing_address ||
+                                                                ""
+                                                            }
+                                                            onChange={(
+                                                                event,
+                                                                editor
+                                                            ) => {
+                                                                const data =
+                                                                    editor.getData();
+                                                                setValue(
+                                                                    "billing_address",
+                                                                    data
+                                                                );
+                                                            }}
+                                                        />
+                                                        <input
+                                                            hidden
+                                                            {...register(
+                                                                "billing_address",
+                                                                {
+                                                                    required: true,
+                                                                }
+                                                            )}
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            {props.backPermissions.edit == 1 &&
+                                                props?.permission
+                                                    ?.billing_status !=
+                                                    "hide" && (
+                                                    <Col
+                                                        md="6"
+                                                        id="status-wrapper"
+                                                    >
+                                                        <FormGroup className="row">
+                                                            <Label
+                                                                className="col-sm-3 col-form-label"
+                                                                for="validationCustom01"
+                                                            >
+                                                                {" "}
+                                                                Status{" "}
+                                                            </Label>
+                                                            <Col sm="9">
                                                                 <Controller
                                                                     name="billing_status"
-                                                                    control={control}
-                                                                    rules={{ required: false }}
-                                                                    render={({ field }) => (
+                                                                    control={
+                                                                        control
+                                                                    }
+                                                                    rules={{
+                                                                        required: false,
+                                                                    }}
+                                                                    render={({
+                                                                        field,
+                                                                    }) => (
                                                                         <Select
-                                                                            id='status'
+                                                                            id="status"
                                                                             {...field}
-                                                                            value={field.value}
-                                                                            options={
-                                                                                [
-                                                                                    { value: '1', label: 'Active' },
-                                                                                    { value: '0', label: 'Inactive' },
-                                                                                    { value: '2', label: 'Pending' },
-                                                                                ]} className="js-example-basic-single col-sm-12"
-                                                                            onChange={(option) => {
-                                                                                field.onChange(option);
+                                                                            value={
+                                                                                field.value
+                                                                            }
+                                                                            options={[
+                                                                                {
+                                                                                    value: "1",
+                                                                                    label: "Active",
+                                                                                },
+                                                                                {
+                                                                                    value: "0",
+                                                                                    label: "Inactive",
+                                                                                },
+                                                                                {
+                                                                                    value: "2",
+                                                                                    label: "Pending",
+                                                                                },
+                                                                            ]}
+                                                                            className="js-example-basic-single col-sm-12"
+                                                                            onChange={(
+                                                                                option
+                                                                            ) => {
+                                                                                field.onChange(
+                                                                                    option
+                                                                                );
                                                                             }}
-                                                                            isDisabled={(props.permission && props.permission.billing_status === "disable" || add)}
+                                                                            isDisabled={
+                                                                                (props.permission &&
+                                                                                    props
+                                                                                        .permission
+                                                                                        .billing_status ===
+                                                                                        "disable") ||
+                                                                                add
+                                                                            }
                                                                         />
-                                                                    )} />
+                                                                    )}
+                                                                />
                                                             </Col>
                                                         </FormGroup>
                                                     </Col>
-                                                    
-                                                }
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span>Country</Label>
-                                                        <Col sm="9">
-                                                            <Select
+                                                )}
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        {" "}
+                                                        <span
+                                                            style={{
+                                                                color: "red",
+                                                                fontSize:
+                                                                    "18px",
+                                                            }}
+                                                        >
+                                                            *
+                                                        </span>
+                                                        Country
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <Select
                                                             isDisabled={true}
-                                                                value={props?.countryAndNationality?.country?.name ? { label: props.countryAndNationality.country.name } : null}
-                                                                className="js-example-basic-single col-sm-12" />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span>Nationality</Label>
-                                                        <Col sm="9">
-                                                            <Select
-                                                                isDisabled={true}
-                                                              
-                                                                value={props?.countryAndNationality?.nationality?.name ? { label: props.countryAndNationality.nationality.name } : null}
-
-                                                                className="js-example-basic-single col-sm-12" />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                                {(props.backPermissions.edit == 1 && props?.permission?.bank_required != "hide") &&
-
-                                                 <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-
-                                                        <Label className="col-sm-6 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span>Bank required in invoice</Label>
-                                                        <Col sm="6">
-                                                           
-                                                    <Controller
-                                                    name="bank_required"
-                                                    control={control}
-                                                     defaultValue={true}
-                                                    rules={{ required: false }}
-                                                    render={({ field }) => (
-                                                        <Input
-                                                        type="checkbox"
-                                                        id=""
-                                                        className="checkbox_animated mt-3"
-                                                        checked={field.value}
-                                                        onChange={(e) => field.onChange(e.target.checked)}
+                                                            value={
+                                                                props
+                                                                    ?.countryAndNationality
+                                                                    ?.country
+                                                                    ?.name
+                                                                    ? {
+                                                                          label: props
+                                                                              .countryAndNationality
+                                                                              .country
+                                                                              .name,
+                                                                      }
+                                                                    : null
+                                                            }
+                                                            className="js-example-basic-single col-sm-12"
                                                         />
-                                                    )}
-                                                    />
-                                                        </Col>
-                                                    </FormGroup>
-                                                    </Col>}
-                                                {(props.backPermissions.edit == 1 && props?.permission?.wallet_required != "hide") &&
-                                                
-                                                    <Col md="6" className="mb-3">
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        {" "}
+                                                        <span
+                                                            style={{
+                                                                color: "red",
+                                                                fontSize:
+                                                                    "18px",
+                                                            }}
+                                                        >
+                                                            *
+                                                        </span>
+                                                        Nationality
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <Select
+                                                            isDisabled={true}
+                                                            value={
+                                                                props
+                                                                    ?.countryAndNationality
+                                                                    ?.nationality
+                                                                    ?.name
+                                                                    ? {
+                                                                          label: props
+                                                                              .countryAndNationality
+                                                                              .nationality
+                                                                              .name,
+                                                                      }
+                                                                    : null
+                                                            }
+                                                            className="js-example-basic-single col-sm-12"
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            {props.backPermissions.edit == 1 &&
+                                                props?.permission
+                                                    ?.bank_required !=
+                                                    "hide" && (
+                                                    <Col
+                                                        md="6"
+                                                        className="mb-3"
+                                                    >
                                                         <FormGroup className="row">
-
-                                                            <Label className="col-sm-6 col-form-label" for="validationCustom01"> <span style={{ color: 'red', fontSize: "18px" }}>*</span>Wallet required in invoice</Label>
+                                                            <Label
+                                                                className="col-sm-6 col-form-label"
+                                                                for="validationCustom01"
+                                                            >
+                                                                {" "}
+                                                                <span
+                                                                    style={{
+                                                                        color: "red",
+                                                                        fontSize:
+                                                                            "18px",
+                                                                    }}
+                                                                >
+                                                                    *
+                                                                </span>
+                                                                Bank required in
+                                                                invoice
+                                                            </Label>
                                                             <Col sm="6">
-                                                           
                                                                 <Controller
-                                                                    name="wallet_required"
-                                                                    control={control}
-                                                                    defaultValue={true}
-                                                                    rules={{ required: false }}
-                                                                    render={({ field }) => (
+                                                                    name="bank_required"
+                                                                    control={
+                                                                        control
+                                                                    }
+                                                                    defaultValue={
+                                                                        true
+                                                                    }
+                                                                    rules={{
+                                                                        required: false,
+                                                                    }}
+                                                                    render={({
+                                                                        field,
+                                                                    }) => (
                                                                         <Input
                                                                             type="checkbox"
                                                                             id=""
                                                                             className="checkbox_animated mt-3"
-                                                                            checked={field.value}
-                                                                            onChange={(e) => field.onChange(e.target.checked)}
+                                                                            checked={
+                                                                                field.value
+                                                                            }
+                                                                            onChange={(
+                                                                                e
+                                                                            ) =>
+                                                                                field.onChange(
+                                                                                    e
+                                                                                        .target
+                                                                                        .checked
+                                                                                )
+                                                                            }
                                                                         />
                                                                     )}
                                                                 />
                                                             </Col>
                                                         </FormGroup>
                                                     </Col>
-                                                }
-
-                                            </Row>
-
-                                        </div>
-                                        <div className="border border-default p-3 mb-3 " style={{ borderStyle: "dashed!important" }}>
-                                            <Label className="col-col-sm-3 col-form-label m-r-10 mb-3 fw-bold">Bank details</Label>
-                                            <Row>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Bank name</Label>
-                                                        <Col sm="9">
-                                                            <input
-                                                                defaultValue=""
-                                                                className="form-control"
-                                                                type="text"
-                                                                name="Bank_name"
-                                                                {...register("bank_name", { required: !hasWalletMethods })}
-                                                                placeholder="Bank name"
-                                                            />
-                                                        </Col></FormGroup>
-                                                </Col>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Account holder</Label>
-                                                        <Col sm="9">
-                                                            <input
-                                                                defaultValue=""
-                                                                className="form-control"
-                                                                type="text"
-                                                                name="account_holder"
-                                                                {...register("account_holder", { required: !hasWalletMethods })}
-                                                                placeholder="Account holder"
-                                                            />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">SWIFT / BIC</Label>
-                                                        <Col sm="9">
-                                                            <input
-                                                                defaultValue=""
-                                                                className="form-control"
-                                                                type="text"
-                                                                name="swift_bic"
-                                                                {...register("swift_bic", {
-                                                                    required: !hasWalletMethods,
-                                                                    validate: value => {
-                                                                        if (hasWalletMethods) {
-                                                                            return true;
-                                                                        }
-                                                                        const swiftRegex = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
-                                                                        return swiftRegex.test(value) || "SWIFT/BIC is invalid";
-                                                                    }
-                                                                })}
-                                                                placeholder="SWIFT / BIC"
-                                                            />
-
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">IBAN</Label>
-                                                        <Col sm="9">
-                                                            <input
-                                                                defaultValue=""
-                                                                className="form-control"
-                                                                type="text"
-                                                                name="iban"
-                                                                {...register("iban", {
-                                                                    required: !hasWalletMethods,
-                                                                    validate: value => {
-                                                                        if (hasWalletMethods) {
-                                                                            return true;
-                                                                        }
-                                                                        const cleanValue = value.replace(/\s+/g, '');
-                                                                        const ibanRegex = /^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/;
-                                                                        return ibanRegex.test(cleanValue) || "IBAN is invalid";
-                                                                    }
-                                                                })}
-                                                                placeholder="IBAN"
-                                                            />
-
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Payment terms</Label>
-                                                        <Col sm="9">
-                                                            <input
-                                                                defaultValue=""
-                                                                className="form-control"
-                                                                type="text"
-                                                                name="payment_terms"
-                                                                {...register("payment_terms", { required: !hasWalletMethods })}
-                                                                placeholder="Payment terms"
-                                                            />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                                <Col md="6" className="mb-3">
-                                                    <FormGroup className="row">
-
-                                                        <Label className="col-sm-3 col-form-label" for="validationCustom01">Bank Address</Label>
-                                                        <Col sm="9">
-                                                            <CKEditor
-                                                                editor={ClassicEditor}
-                                                                data={props.BillingData?.BillingData?.bankData?.bank_address || props.Bill?.bankData?.bank_address}
-                                                                onChange={(event, editor) => {
-                                                                    const data = editor.getData();
-                                                                    setValue('bank_address', data);
-                                                                }}
-                                                            />
-                                                            <input
-                                                                type="hidden"
-                                                                {...register('bank_address', { required: !hasWalletMethods })}
-                                                            />
-                                                        </Col>
-                                                    </FormGroup>
-                                                </Col>
-                                            </Row>
-                                        </div>
-                                        <div className="border border-default p-3 mb-3 " style={{ borderStyle: "dashed!important" }}>
-                                            <Label className="col-col-sm-3 col-form-label m-r-10 mb-3 fw-bold">Wallets Payment methods</Label>
-                                            <Table hover>
-
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">{'#'}</th>
-                                                        <th scope="col">{'Default'}</th>
-                                                        <th scope="col">{'Method'}</th>
-                                                        <th scope="col">Account</th>
-                                                        <th style={{ width: "10%" }} scope="col"
-                                                            onClick={(event) => {
-                                                                event.preventDefault();
-                                                                addRow()
-                                                            }} >
-                                                            <Btn attrBtn={{ color: 'btn btn-light' }} >
-                                                                <i className="fa fa-plus-circle"></i>
-                                                            </Btn>
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {rows.map((row, index) => (
-                                                        <tr key={row.id}>
-                                                            <td>{index+1}</td>
-                                                            <td>
-                                                                <input
-                                                                    {...register(`defaults[${row.id}]`, { required: false })}
-                                                                    name={`defaults[${row.id}]`}
-                                                                    type="radio"
-                                                                    value={row.id}
-                                                                    checked={selectedDefaults[row.id] == 1} 
-                                                                    onChange={handleRadioChange}
-                                                                />
-                                                            </td>
-                                                            <td>
+                                                )}
+                                            {props.backPermissions.edit == 1 &&
+                                                props?.permission
+                                                    ?.wallet_required !=
+                                                    "hide" && (
+                                                    <Col
+                                                        md="6"
+                                                        className="mb-3"
+                                                    >
+                                                        <FormGroup className="row">
+                                                            <Label
+                                                                className="col-sm-6 col-form-label"
+                                                                for="validationCustom01"
+                                                            >
+                                                                {" "}
+                                                                <span
+                                                                    style={{
+                                                                        color: "red",
+                                                                        fontSize:
+                                                                            "18px",
+                                                                    }}
+                                                                >
+                                                                    *
+                                                                </span>
+                                                                Wallet required
+                                                                in invoice
+                                                            </Label>
+                                                            <Col sm="6">
                                                                 <Controller
-                                                                    name={`method[${row.id}]`}
-                                                                    control={control}
-                                                                    rules={{ required: true }}
-                                                                    render={({ field }) => (
-                                                                        <Select
-                                                                            {...field}
-                                                                            value={selectedOptionM[row.id] || null}
-                                                                            options={optionsM[row.id] || []}
-                                                                            onInputChange={(inputValue) =>
-                                                                                handleInputChangeSelect(inputValue, "vendor_payment_methods", `method[${row.id}]`, setOptionsM, optionsM, row.id)
+                                                                    name="wallet_required"
+                                                                    control={
+                                                                        control
+                                                                    }
+                                                                    defaultValue={
+                                                                        true
+                                                                    }
+                                                                    rules={{
+                                                                        required: false,
+                                                                    }}
+                                                                    render={({
+                                                                        field,
+                                                                    }) => (
+                                                                        <Input
+                                                                            type="checkbox"
+                                                                            id=""
+                                                                            className="checkbox_animated mt-3"
+                                                                            checked={
+                                                                                field.value
                                                                             }
-                                                                            className="js-example-basic-single col-sm-12"
-                                                                            isSearchable
-                                                                            noOptionsMessage={() => loading2 ? (
-                                                                                <div className="loader-box">
-                                                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                                                </div>
-                                                                            ) : 'No options found'}
-                                                                            onChange={(option) => {
-                                                                                setSelectedOptionM(prev => ({ ...prev, [row.id]: option })); 
-                                                                                field.onChange(option.value);
-                                                                            }}
+                                                                            onChange={(
+                                                                                e
+                                                                            ) =>
+                                                                                field.onChange(
+                                                                                    e
+                                                                                        .target
+                                                                                        .checked
+                                                                                )
+                                                                            }
                                                                         />
                                                                     )}
                                                                 />
-                                                            </td>
-
-                                                            <td>
-                                                                <input
-                                                                    type="text"
-                                                                    value={row.inputValue}
-                                                                    {...register(`account[${row.id}]`, { required: true })}
-                                                                    onChange={(e) => handleInputChange(e, row.id)}
-                                                                    className="form-control"
-                                                                    placeholder="Account"
-                                                                />
-                                                            </td>
-
-                                                            <td onClick={(event) => {
-                                                                event.preventDefault();
-                                                                deleteRow(row.id, row.idUpdate, selectedDefaults);
-                                                            }}>
-                                                                <Btn attrBtn={{ color: 'btn btn-danger' }}>
-                                                                    <i className="fa fa-trash"></i>
-                                                                </Btn>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-
-                                                </tbody>
-                                            </Table>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(handleClick, onError) }}>Submit</Btn>
-                                        </div>
+                                                            </Col>
+                                                        </FormGroup>
+                                                    </Col>
+                                                )}
+                                        </Row>
                                     </div>
-                            }
+                                    <div
+                                        className="border border-default p-3 mb-3 "
+                                        style={{
+                                            borderStyle: "dashed!important",
+                                        }}
+                                    >
+                                        <Label className="col-col-sm-3 col-form-label m-r-10 mb-3 fw-bold">
+                                            Bank details
+                                        </Label>
+                                        <Row>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        Bank name
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <input
+                                                            defaultValue=""
+                                                            className="form-control"
+                                                            type="text"
+                                                            name="Bank_name"
+                                                            {...register(
+                                                                "bank_name",
+                                                                {
+                                                                    required:
+                                                                        !hasWalletMethods,
+                                                                }
+                                                            )}
+                                                            placeholder="Bank name"
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        Account holder
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <input
+                                                            defaultValue=""
+                                                            className="form-control"
+                                                            type="text"
+                                                            name="account_holder"
+                                                            {...register(
+                                                                "account_holder",
+                                                                {
+                                                                    required:
+                                                                        !hasWalletMethods,
+                                                                }
+                                                            )}
+                                                            placeholder="Account holder"
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        SWIFT / BIC
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <input
+                                                            defaultValue=""
+                                                            className="form-control"
+                                                            type="text"
+                                                            name="swift_bic"
+                                                            {...register(
+                                                                "swift_bic",
+                                                                {
+                                                                    required:
+                                                                        !hasWalletMethods,
+                                                                    validate: (
+                                                                        value
+                                                                    ) => {
+                                                                        if (
+                                                                            hasWalletMethods
+                                                                        ) {
+                                                                            return true;
+                                                                        }
+                                                                        const swiftRegex =
+                                                                            /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
+                                                                        return (
+                                                                            swiftRegex.test(
+                                                                                value
+                                                                            ) ||
+                                                                            "SWIFT/BIC is invalid"
+                                                                        );
+                                                                    },
+                                                                }
+                                                            )}
+                                                            placeholder="SWIFT / BIC"
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        IBAN
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <input
+                                                            defaultValue=""
+                                                            className="form-control"
+                                                            type="text"
+                                                            name="iban"
+                                                            {...register(
+                                                                "iban",
+                                                                {
+                                                                    required:
+                                                                        !hasWalletMethods,
+                                                                    validate: (
+                                                                        value
+                                                                    ) => {
+                                                                        if (
+                                                                            hasWalletMethods
+                                                                        ) {
+                                                                            return true;
+                                                                        }
+                                                                        const cleanValue =
+                                                                            value.replace(
+                                                                                /\s+/g,
+                                                                                ""
+                                                                            );
+                                                                        const ibanRegex =
+                                                                            /^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/;
+                                                                        return (
+                                                                            ibanRegex.test(
+                                                                                cleanValue
+                                                                            ) ||
+                                                                            "IBAN is invalid"
+                                                                        );
+                                                                    },
+                                                                }
+                                                            )}
+                                                            placeholder="IBAN"
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        Payment terms
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <input
+                                                            defaultValue=""
+                                                            className="form-control"
+                                                            type="text"
+                                                            name="payment_terms"
+                                                            {...register(
+                                                                "payment_terms",
+                                                                {
+                                                                    required:
+                                                                        !hasWalletMethods,
+                                                                }
+                                                            )}
+                                                            placeholder="Payment terms"
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                            <Col md="6" className="mb-3">
+                                                <FormGroup className="row">
+                                                    <Label
+                                                        className="col-sm-3 col-form-label"
+                                                        for="validationCustom01"
+                                                    >
+                                                        Bank Address
+                                                    </Label>
+                                                    <Col sm="9">
+                                                        <CKEditor
+                                                            editor={
+                                                                ClassicEditor
+                                                            }
+                                                            data={
+                                                                props
+                                                                    .BillingData
+                                                                    ?.BillingData
+                                                                    ?.bankData
+                                                                    ?.bank_address ||
+                                                                props.Bill
+                                                                    ?.bankData
+                                                                    ?.bank_address
+                                                            }
+                                                            onChange={(
+                                                                event,
+                                                                editor
+                                                            ) => {
+                                                                const data =
+                                                                    editor.getData();
+                                                                setValue(
+                                                                    "bank_address",
+                                                                    data
+                                                                );
+                                                            }}
+                                                        />
+                                                        <input
+                                                            type="hidden"
+                                                            {...register(
+                                                                "bank_address",
+                                                                {
+                                                                    required:
+                                                                        !hasWalletMethods,
+                                                                }
+                                                            )}
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                            </Col>
+                                        </Row>
+                                    </div>
+                                    <div
+                                        className="border border-default p-3 mb-3 "
+                                        style={{
+                                            borderStyle: "dashed!important",
+                                        }}
+                                    >
+                                        <Label className="col-col-sm-3 col-form-label m-r-10 mb-3 fw-bold">
+                                            Wallets Payment methods
+                                        </Label>
+                                        <Table hover>
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">{"#"}</th>
+                                                    <th scope="col">
+                                                        {"Default"}
+                                                    </th>
+                                                    <th scope="col">
+                                                        {"Method"}
+                                                    </th>
+                                                    <th scope="col">Account</th>
+                                                    <th
+                                                        style={{ width: "10%" }}
+                                                        scope="col"
+                                                        onClick={(event) => {
+                                                            event.preventDefault();
+                                                            addRow();
+                                                        }}
+                                                    >
+                                                        <Btn
+                                                            attrBtn={{
+                                                                color: "btn btn-light",
+                                                            }}
+                                                        >
+                                                            <i className="fa fa-plus-circle"></i>
+                                                        </Btn>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {rows.map((row, index) => (
+                                                    <tr key={row.id}>
+                                                        <td>{index + 1}</td>
+                                                        <td>
+                                                            <input
+                                                                {...register(
+                                                                    `defaults[${row.id}]`,
+                                                                    {
+                                                                        required: false,
+                                                                    }
+                                                                )}
+                                                                name={`defaults[${row.id}]`}
+                                                                type="radio"
+                                                                value={row.id}
+                                                                checked={
+                                                                    selectedDefaults[
+                                                                        row.id
+                                                                    ] == 1
+                                                                }
+                                                                onChange={
+                                                                    handleRadioChange
+                                                                }
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Controller
+                                                                name={`method[${row.id}]`}
+                                                                control={
+                                                                    control
+                                                                }
+                                                                rules={{
+                                                                    required: true,
+                                                                }}
+                                                                render={({
+                                                                    field,
+                                                                }) => (
+                                                                    <Select
+                                                                        {...field}
+                                                                        value={
+                                                                            selectedOptionM[
+                                                                                row
+                                                                                    .id
+                                                                            ] ||
+                                                                            null
+                                                                        }
+                                                                        options={
+                                                                            optionsM[
+                                                                                row
+                                                                                    .id
+                                                                            ] ||
+                                                                            []
+                                                                        }
+                                                                        onInputChange={(
+                                                                            inputValue
+                                                                        ) =>
+                                                                            handleInputChangeSelect(
+                                                                                inputValue,
+                                                                                "vendor_payment_methods",
+                                                                                `method[${row.id}]`,
+                                                                                setOptionsM,
+                                                                                optionsM,
+                                                                                row.id
+                                                                            )
+                                                                        }
+                                                                        className="js-example-basic-single col-sm-12"
+                                                                        isSearchable
+                                                                        noOptionsMessage={() =>
+                                                                            loading2 ? (
+                                                                                <div className="loader-box">
+                                                                                    <Spinner
+                                                                                        attrSpinner={{
+                                                                                            className:
+                                                                                                "loader-6",
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                "No options found"
+                                                                            )
+                                                                        }
+                                                                        onChange={(
+                                                                            option
+                                                                        ) => {
+                                                                            setSelectedOptionM(
+                                                                                (
+                                                                                    prev
+                                                                                ) => ({
+                                                                                    ...prev,
+                                                                                    [row.id]:
+                                                                                        option,
+                                                                                })
+                                                                            );
+                                                                            field.onChange(
+                                                                                option.value
+                                                                            );
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                            />
+                                                        </td>
+
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                value={
+                                                                    row.inputValue
+                                                                }
+                                                                {...register(
+                                                                    `account[${row.id}]`,
+                                                                    {
+                                                                        required: true,
+                                                                    }
+                                                                )}
+                                                                onChange={(e) =>
+                                                                    handleInputChange(
+                                                                        e,
+                                                                        row.id
+                                                                    )
+                                                                }
+                                                                className="form-control"
+                                                                placeholder="Account"
+                                                            />
+                                                        </td>
+
+                                                        <td
+                                                            onClick={(
+                                                                event
+                                                            ) => {
+                                                                event.preventDefault();
+                                                                deleteRow(
+                                                                    row.id,
+                                                                    row.idUpdate,
+                                                                    selectedDefaults
+                                                                );
+                                                            }}
+                                                        >
+                                                            <Btn
+                                                                attrBtn={{
+                                                                    color: "btn btn-danger",
+                                                                }}
+                                                            >
+                                                                <i className="fa fa-trash"></i>
+                                                            </Btn>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </Table>
+                                    </div>
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "flex-end",
+                                        }}
+                                    >
+                                        <Btn
+                                            attrBtn={{
+                                                color: "primary",
+                                                disabled: Sub,
+                                                onClick: handleSubmit(
+                                                    handleClick,
+                                                    onError
+                                                ),
+                                            }}
+                                        >
+                                               {Sub ? (
+                                                                                      <>
+                                                                                          <Spinner size="sm" />{" "}
+                                                                                          Submitting...
+                                                                                      </>
+                                                                                  ) : (
+                                                                                      "Submit"
+                                                                                  )}
+                                        </Btn>
+                                    </div>
+                                </div>
+                            )}
                         </Form>
                     </CardBody>
                 </Collapse>
             </Card>
-
         </Fragment>
     );
 };

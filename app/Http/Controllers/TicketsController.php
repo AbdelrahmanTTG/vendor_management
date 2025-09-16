@@ -135,8 +135,12 @@ class TicketsController extends Controller
                     if (!empty($val)) {
                         if (is_array($val)) {
                             $tickets->where(function ($query) use ($key, $val) {
-                                if ($key != 'brand')
+                                if ($key != 'brand'){
                                     $key = 'vm_ticket.' . $key;
+                                }else{
+                                    $key = 'users.' . $key;
+                                }
+                                    
                                 foreach ($val as $k => $v) {
                                     if ($k == 0) {
                                         $query->where($key,  $v);
@@ -468,7 +472,10 @@ class TicketsController extends Controller
                     'subject'   => "New Reply : # " . $ticket->id . " Project Name : " . $ticket_data->ticket_subject,
                     'body'      => "A new reply has already sent to your ticket, please check ..",
                     'comment'   => $request->comment,
+                    'fromEmail' => $fromEmail,   
+                    'replyTo'   => $replyTo,    
                 ];
+
 
                 Mail::to($toEmail)
                     ->cc($ccEmails)
@@ -486,6 +493,121 @@ class TicketsController extends Controller
         }
     }
 
+    // public function sendTicketResponse(Request $request)
+    // {
+    //     $data['created_by'] = Crypt::decrypt($request->user);
+    //     $data['response']   = $request->comment;
+    //     $data['ticket']     = $request->id;
+    //     $data['created_at'] = date("Y-m-d H:i:s");
+
+    //     $ticket = VmTicket::find($data['ticket']);
+
+    //     if ($ticket) {
+    //         if ($request->file('file') != null) {
+    //             $file = $request->file('file');
+    //             $folderPath = storage_path('app/external/tickets');
+    //             if (!file_exists($folderPath)) {
+    //                 mkdir($folderPath, 0777, true);
+    //             }
+    //             $originalFileName = $file->getClientOriginalName();
+    //             $encryptedFileName = Crypt::encryptString($originalFileName);
+    //             $fullEncryptedFileName = $encryptedFileName . '.' . $file->getClientOriginalExtension();
+    //             $path = $file->storeAs('tickets', $fullEncryptedFileName, 'external');
+    //             if (!$path) {
+    //                 $msg['type'] = "error";
+    //                 $msg['message'] = "Error Uploading File, Please Try Again!";
+    //                 return response()->json($msg);
+    //             } else {
+    //                 $data['file'] = $fullEncryptedFileName;
+    //             }
+    //         }
+
+    //         $newResponse = VmTicketResponse::create($data);
+
+    //         if ($newResponse) {
+    //             $responseData = [
+    //                 'created_by' => $data['created_by'],
+    //                 'response'   => $data['response'],
+    //                 'created_at' => $data['created_at'],
+    //                 'fileLink'   => isset($data['file']) ? $data['file'] : null,
+    //             ];
+
+    //             $to = BrandUsers::select('email', 'user_name')->where('id', $ticket->created_by)->first();
+    //             $toEmail = $to->email;
+    //             $user_name = $to->user_name;
+    //             $ticket_data = DB::table('vm_ticket')->where('id', $ticket->id)->first();
+
+    //             $ccEmails = [];
+    //             if ($ticket_data->ticket_from == 1) {
+    //                 $pmId = DB::table('sales_opportunity')
+    //                     ->where('id', $ticket_data->from_id)
+    //                     ->value('pm');
+
+    //                 if ($pmId) {
+    //                     $pmEmail = DB::table('brand_users')
+    //                         ->where('id', $pmId)
+    //                         ->value('email');
+    //                     if ($pmEmail) {
+    //                         $ccEmails[] = $pmEmail;
+    //                     }
+    //                 }
+    //             }
+
+    //             switch ($ticket_data->brand_id) {
+    //                 case 1:
+    //                     $ccEmails[] = "vm@thetranslationgate.com";
+    //                     $fromEmail = "vm.support@thetranslationgate.com";
+    //                     $replyTo = "vm@thetranslationgate.com";
+    //                     break;
+    //                 case 2:
+    //                     $ccEmails[] = "vm.support@localizera.com";
+    //                     $fromEmail = "vm.support@localizera.com";
+    //                     $replyTo = "vm.support@localizera.com";
+    //                     break;
+    //                 case 3:
+    //                     $ccEmails[] = "vm.support@europelocalize.com";
+    //                     $fromEmail = "vm.support@europelocalize.com";
+    //                     $replyTo = "vm.support@europelocalize.com";
+    //                     break;
+    //                 case 4:
+    //                     $ccEmails[] = "vm@afaqtranslations.com";
+    //                     $ccEmails[] = "nour.mahmoud@afaqtranslations.com";
+    //                     $fromEmail = "vm@afaqtranslations.com";
+    //                     $replyTo = "vm@afaqtranslations.com";
+    //                     break;
+    //                 case 11:
+    //                     $ccEmails[] = "vm.support@columbuslang.com";
+    //                     $fromEmail = "vm.support@columbuslang.com";
+    //                     $replyTo = "vm.support@columbuslang.com";
+    //                     break;
+    //                 default:
+    //                     $fromEmail = "no-reply@thetranslationgate.com";
+    //                     $replyTo = $fromEmail;
+    //             }
+
+    //             $mailData = [
+    //                 'user_name' =>  $user_name,
+    //                 'subject'   => "New Reply : # " . $ticket->id . " Project Name : " . $ticket_data->ticket_subject,
+    //                 'body'      => "A new reply has already sent to your ticket, please check ..",
+    //                 'comment'   => $request->comment,
+    //             ];
+
+    //             Mail::to($toEmail)
+    //                 ->cc($ccEmails)
+    //                 ->send(new TicketMail($mailData));
+
+    //             $msg['type'] = "success";
+    //             $msg['message'] = "Ticket Reply Added Successfully";
+    //             $msg['response'] = $responseData; 
+
+    //         } else {
+    //             $msg['type'] = "error";
+    //             $msg['message'] = "Error, Please Try Again!";
+    //         }
+
+    //         return response()->json($msg);
+    //     }
+    // }
 
     public function download(Request $request)
     {
@@ -726,14 +848,12 @@ class TicketsController extends Controller
             return response()->json(['message' => 'Ticket not found', 'type' => 'error']);
         }
 
-        // بيانات البريد
         $to = BrandUsers::select('email', 'user_name')->where('id', $ticket->created_by)->first();
         $toEmail = $to->email;
         $user_name = $to->user_name;
 
         if (isset($request->status)) {
 
-            // حالة الرفض
             if ($status == 0) {
                 $comment = $request->comment;
                 if ($ticket->update(['status' => $status, 'rejection_reason' => $comment])) {
@@ -751,7 +871,6 @@ class TicketsController extends Controller
                 }
             }
 
-            // رفع CV
             if ($ticket->request_type == 5 && $request->file('file') != null) {
                 $this->changeTicketToOpen($ticket_id, $user);
                 $file = $request->file('file');
@@ -774,7 +893,6 @@ class TicketsController extends Controller
                 }
             }
 
-            // إضافة عدد الموارد
             if ($ticket->request_type == 4 && is_numeric($request->number_of_resource)) {
                 $this->changeTicketToOpen($ticket_id, $user);
                 $data['number_of_resource'] = $request->number_of_resource;
@@ -789,7 +907,6 @@ class TicketsController extends Controller
                 }
             }
 
-            // إضافة Vendors
             if (($ticket->request_type == 1 || $ticket->request_type == 3) && isset($request->vendor)) {
                 foreach ($request->vendor as $i => $vendor) {
                     if (!empty($vendor)) {
@@ -944,7 +1061,6 @@ class TicketsController extends Controller
                             'subject' => "New Ticket Assigned : # " . $ticket_id,
                             'body' =>  "New Ticket Assigned to you at " . date("Y-m-d H:i:s") . ", please Check ...",
                         ];
-
                         Mail::to($toEmail)->cc($ccEmail)->send(new TicketMail($mailData));
                     } catch (\Exception $e) {
                         // \Log::error("Mail sending failed: " . $e->getMessage());

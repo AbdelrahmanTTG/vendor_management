@@ -62,7 +62,8 @@ const PersonalData = React.memo((props) => {
   const [modal, setModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [idVendor, setidVendor] = useState(false);
+    const [idVendor, setidVendor] = useState(false);
+    const [Sub, setSub] = useState(false);
 
   const toggle = () => setModal(!modal);
 
@@ -214,6 +215,7 @@ const PersonalData = React.memo((props) => {
       basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
       return;
     }
+      setSub(true)
     const formData = { ...data };
     // console.log(formData);
 
@@ -255,6 +257,8 @@ const PersonalData = React.memo((props) => {
         });
       }
       setIsSubmitting(false)
+    }finally {
+      setSub(false)
     }
   }
   const Update = async (formData) => {
@@ -262,6 +266,8 @@ const PersonalData = React.memo((props) => {
       basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
       return;
     }
+      setSub(true);
+      
     const contacts = formData.contacts || [];
     contacts.forEach(({ label, value }) => {
       const dbKey = columnMapping[label];
@@ -293,6 +299,8 @@ const PersonalData = React.memo((props) => {
         });
       }
       setIsSubmitting(false)
+    } finally {
+      setSub(false);
     }
   };
 
@@ -1733,13 +1741,21 @@ const PersonalData = React.memo((props) => {
                                   <Btn
                                       attrBtn={{
                                           color: "primary",
+                                          disabled: Sub, 
                                           onClick: handleSubmit(
                                               handleClick,
                                               onError
                                           ),
                                       }}
                                   >
-                                      Submit
+                                      {Sub ? (
+                                          <>
+                                              <Spinner size="sm" />{" "}
+                                              Submitting...
+                                          </>
+                                      ) : (
+                                          "Submit"
+                                      )}
                                   </Btn>
                               </div>
                           </Form>

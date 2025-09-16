@@ -5,7 +5,7 @@ import Select from 'react-select';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import axiosClient from "../../../../pages/AxiosClint";
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, set } from 'react-hook-form';
 import CreatableSelect from 'react-select/creatable';
 import { toast } from 'react-toastify';
 import SweetAlert from 'sweetalert2'
@@ -28,6 +28,7 @@ const Messaging = (props) => {
     };
     const [isOpen, setIsOpen] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(false);
     const { control, register, handleSubmit, unregister, reset, setValue, formState: { errors } } = useForm();
     const [errorMessage, setErrorMessage] = useState(null);
     const [optionsN, setOptionsN] = useState([]);
@@ -35,6 +36,8 @@ const Messaging = (props) => {
     const [selectedOptions, setSelectedOptions] = useState({});
     const [rowIdToDelete, setRowIdToDelete] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [Sub, setSub] = useState(false);
+    
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
@@ -220,6 +223,7 @@ const Messaging = (props) => {
             const section = document.getElementById("personal-data");
             section.scrollIntoView({ behavior: 'smooth' });
         } else {
+            setSub(true);
             const formData = { ...data };
             if (!formData || (typeof formData === 'object' && Object.keys(formData).length === 0) || (Array.isArray(formData) && formData.length === 0)) {
                 return;  
@@ -266,6 +270,8 @@ const Messaging = (props) => {
                         }
                     });
                 }
+            }finally{
+            setSub(false); 
             }
          }
     }
@@ -295,7 +301,7 @@ const Messaging = (props) => {
             if (props.InstantMessaging) {
                 if (props.InstantMessaging.InstantMessaging) {
                     const data = props.InstantMessaging.InstantMessaging;
-                   
+                    setLoading2(true);
                     setRows(data.map((element, index) => {
                         setValue(`contact[${index + 1}]`, element.contact);
                         setValue(`messaging[${index + 1}]`, { value: element.messaging_type?.id, label: element.messaging_type?.name });
@@ -307,7 +313,7 @@ const Messaging = (props) => {
                             inputValue: element.contact
                         };
                     }));
-                    
+                    setLoading2(false);
                 }
             }
         }
@@ -315,96 +321,207 @@ const Messaging = (props) => {
     return (
         <Fragment>
             <Card>
-
                 <CardHeader
                     className="pb-3 d-flex justify-content-between align-items-center"
                     onClick={toggleCollapse}
-                    style={{ cursor: 'pointer', paddingBottom: '25px' }}
+                    style={{ cursor: "pointer", paddingBottom: "25px" }}
                 >
                     <H5>Instant Messaging</H5>
-                    <i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '24px' }}></i>
+                    <i
+                        className={`icon-angle-${isOpen ? "down" : "left"}`}
+                        style={{ fontSize: "24px" }}
+                    ></i>
                 </CardHeader>
                 <Collapse isOpen={isOpen}>
                     <CardBody>
                         <Table hover>
                             <thead>
                                 <tr>
-                                    <th scope="col">{'#'}</th>
-                                    <th scope="col">{'Type'}</th>
+                                    <th scope="col">{"#"}</th>
+                                    <th scope="col">{"Type"}</th>
                                     <th scope="col">Contact</th>
-                                    {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                                        <th style={{ width: "10%" }} scope="col" onClick={addRow}>
-                                            <Btn attrBtn={{ color: 'btn btn-light', disabled: isSubmitting }} >
+                                    {(props.backPermissions?.add == 1 ||
+                                        props.backPermissions?.edit == 1) && (
+                                        <th
+                                            style={{ width: "10%" }}
+                                            scope="col"
+                                            onClick={addRow}
+                                        >
+                                            <Btn
+                                                attrBtn={{
+                                                    color: "btn btn-light",
+                                                    disabled: isSubmitting,
+                                                }}
+                                            >
                                                 <i className="fa fa-plus-circle"></i>
                                             </Btn>
                                         </th>
-                                    }
+                                    )}
                                 </tr>
                             </thead>
                             <tbody>
-                                {rows.map((row) => (
-                                    <tr key={row.id}>
-                                        <td>{row.id}</td>
-                                        <td>
-                                            <Controller
-                                                name={`messaging[${row.id}]`}
-                                                control={control}
-                                                rules={{ required: true }}
-                                                render={({ field }) => (
-                                                    <Select
-                                                        {...field}
-                                                        isDisabled={isSubmitting || (props.backPermissions?.add != 1&&props.backPermissions?.edit != 1)}
-                                                        value={selectedOptions[row.id] || null}
-                                                        options={optionsN}
-                                                        onInputChange={(inputValue) =>
-                                                            handleInputChange(inputValue, "messaging_types", `messaging_types`, setOptionsN, optionsN)
-                                                        }
-                                                        isSearchable
-                                                        noOptionsMessage={() => loading ? (
-                                                            <div className="loader-box">
-                                                                <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                            </div>
-                                                        ) : 'No options found'}
-                                                        onChange={(option) => {
-                                                            handleSelectChange(option, row.id);
-                                                            field.onChange(option);
-                                                        }}
-                                                    />
-                                                )}
-                                            />
+                                {loading2 ? (
+                                    <tr>
+                                        <td colSpan="4" className="text-center">
+                                            <div className="loader-box">
+                                                <Spinner
+                                                    attrSpinner={{
+                                                        className: "loader-6",
+                                                    }}
+                                                />
+                                            </div>
                                         </td>
-                                        <td>
-
-                                            <input
-                                                disabled={isSubmitting || (props.backPermissions?.add != 1&&props.backPermissions?.edit != 1)}
-
-                                                type="text"
-                                                value={row.inputValue}
-                                                {...register(`contact[${row.id}]`, { required: true })}
-                                                onChange={(e) => handleInputChange2(e, row.id)}
-                                                className="form-control"
-                                                placeholder="contact"
-
-                                            />
-
-
-                                        </td>
-                                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                                            <td onClick={() => deleteRow(row.id ,row.idUpdate)}>
-                                                <Btn attrBtn={{ color: 'btn btn-danger', disabled: isSubmitting }}>
-                                                    <i className="fa fa-trash"></i>
-                                                </Btn>
-                                            </td>
-                                        }
                                     </tr>
-                                ))}
+                                ) : (
+                                    rows.map((row) => (
+                                        <tr key={row.id}>
+                                            <td>{row.id}</td>
+                                            <td>
+                                                <Controller
+                                                    name={`messaging[${row.id}]`}
+                                                    control={control}
+                                                    rules={{ required: true }}
+                                                    render={({ field }) => (
+                                                        <Select
+                                                            {...field}
+                                                            isDisabled={
+                                                                isSubmitting ||
+                                                                (props
+                                                                    .backPermissions
+                                                                    ?.add !=
+                                                                    1 &&
+                                                                    props
+                                                                        .backPermissions
+                                                                        ?.edit !=
+                                                                        1)
+                                                            }
+                                                            value={
+                                                                selectedOptions[
+                                                                    row.id
+                                                                ] || null
+                                                            }
+                                                            options={optionsN}
+                                                            onInputChange={(
+                                                                inputValue
+                                                            ) =>
+                                                                handleInputChange(
+                                                                    inputValue,
+                                                                    "messaging_types",
+                                                                    `messaging_types`,
+                                                                    setOptionsN,
+                                                                    optionsN
+                                                                )
+                                                            }
+                                                            isSearchable
+                                                            noOptionsMessage={() =>
+                                                                loading ? (
+                                                                    <div className="loader-box">
+                                                                        <Spinner
+                                                                            attrSpinner={{
+                                                                                className:
+                                                                                    "loader-6",
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                ) : (
+                                                                    "No options found"
+                                                                )
+                                                            }
+                                                            onChange={(
+                                                                option
+                                                            ) => {
+                                                                handleSelectChange(
+                                                                    option,
+                                                                    row.id
+                                                                );
+                                                                field.onChange(
+                                                                    option
+                                                                );
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    disabled={
+                                                        isSubmitting ||
+                                                        (props.backPermissions
+                                                            ?.add != 1 &&
+                                                            props
+                                                                .backPermissions
+                                                                ?.edit != 1)
+                                                    }
+                                                    type="text"
+                                                    value={row.inputValue}
+                                                    {...register(
+                                                        `contact[${row.id}]`,
+                                                        {
+                                                            required: true,
+                                                        }
+                                                    )}
+                                                    onChange={(e) =>
+                                                        handleInputChange2(
+                                                            e,
+                                                            row.id
+                                                        )
+                                                    }
+                                                    className="form-control"
+                                                    placeholder="contact"
+                                                />
+                                            </td>
+                                            {(props.backPermissions?.add == 1 ||
+                                                props.backPermissions?.edit ==
+                                                    1) && (
+                                                <td
+                                                    onClick={() =>
+                                                        deleteRow(
+                                                            row.id,
+                                                            row.idUpdate
+                                                        )
+                                                    }
+                                                >
+                                                    <Btn
+                                                        attrBtn={{
+                                                            color: "btn btn-danger",
+                                                            disabled:
+                                                                isSubmitting,
+                                                        }}
+                                                    >
+                                                        <i className="fa fa-trash"></i>
+                                                    </Btn>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </Table>
-                        {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                <Btn attrBtn={{ color: 'primary', onClick: handleSubmit(Update) }}>Submit</Btn>
+                        {(props.backPermissions?.add == 1 ||
+                            props.backPermissions?.edit == 1) && (
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                }}
+                            >
+                                <Btn
+                                    attrBtn={{
+                                        color: "primary",
+                                        disabled: Sub,
+                                        onClick: handleSubmit(Update),
+                                    }}
+                                >
+                                    {Sub ? (
+                                        <>
+                                            <Spinner size="sm" /> Submitting...
+                                        </>
+                                    ) : (
+                                        "Submit"
+                                    )}
+                                </Btn>
                             </div>
-                        }
+                        )}
                     </CardBody>
                 </Collapse>
             </Card>

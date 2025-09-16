@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect, Suspense } from 'react';
 import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table } from 'reactstrap';
-import { Btn, H5 } from '../../../../AbstractElements';
+import { Btn, H5, Spinner } from "../../../../AbstractElements";
 import Select from 'react-select';
 import { toast } from 'react-toastify';
 import SweetAlert from 'sweetalert2';
@@ -32,8 +32,24 @@ const PriceList = (props) => {
     const [optionsC, setOptionsC] = useState([]);
     const [loading2, setLoading2] = useState(false);
     const [rows, setRows] = useState(false);
+    const [Sub, setSub] = useState(false);
+const [openId, setOpenId] = useState(null);
 
-    
+     const basictoaster = (toastname, status) => {
+        switch (toastname) {
+          case 'successToast':
+            toast.success(status, {
+              position: "top-right"
+            });
+            break;
+          case 'dangerToast':
+            toast.error(status, {
+              position: "top-right"
+            });
+            break;
+          default:
+        }
+      };
     const getData = (newData) => {
         setdataPrice((prevData) => {
             const validData = Array.isArray(prevData) ? prevData : [];
@@ -187,10 +203,11 @@ const PriceList = (props) => {
             vendor_id: props?.id
 
         }
+        setSub(true);
         try {
             const response = await axiosClient.post("AddVendorstools", newData);
-            console.log(response)
-            // basictoaster("successToast", "Added successfully !");
+            // console.log(response)
+            basictoaster("successToast", "Added successfully !");
         } catch (err) {
             const response = err.response;
             if (response && response.data) {
@@ -204,7 +221,9 @@ const PriceList = (props) => {
                     }
                 });
             }
-        }
+        }finally {
+            setSub(false);
+        }   
     }
     useEffect(() => {
         if (props.Currency) {
@@ -218,20 +237,35 @@ const PriceList = (props) => {
                 <CardHeader
                     className="pb-3 d-flex justify-content-between align-items-center"
                     onClick={toggleCollapse}
-                    style={{ cursor: 'pointer', paddingBottom: '25px' }}
+                    style={{ cursor: "pointer", paddingBottom: "25px" }}
                 >
                     <H5>Vendor Price List</H5>
-                    <i className={`icon-angle-${isOpen ? 'down' : 'left'}`} style={{ fontSize: '24px' }}></i>
+                    <i
+                        className={`icon-angle-${isOpen ? "down" : "left"}`}
+                        style={{ fontSize: "24px" }}
+                    ></i>
                 </CardHeader>
                 <Collapse isOpen={isOpen}>
                     <CardBody>
                         <Row className="g-3 mb-3">
                             <Col md="10" className="mb-3">
-                                <Label className="form-label" for="validationCustom01">
-                                {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                                     <span style={{ color: 'red', fontSize: "18px" }}>*</span>
-                                }
-                                      Tools</Label>
+                                <Label
+                                    className="form-label"
+                                    for="validationCustom01"
+                                >
+                                    {(props.backPermissions?.add == 1 ||
+                                        props.backPermissions?.edit == 1) && (
+                                        <span
+                                            style={{
+                                                color: "red",
+                                                fontSize: "18px",
+                                            }}
+                                        >
+                                            *
+                                        </span>
+                                    )}
+                                    Tools
+                                </Label>
                                 {/* <Input className="form-control" type="text" placeholder="" /> */}
                                 <Controller
                                     name="tool"
@@ -242,132 +276,270 @@ const PriceList = (props) => {
                                             {...field}
                                             options={optionsT}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "tools", "tool", setOptionsT, optionsT)
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "tools",
+                                                    "tool",
+                                                    setOptionsT,
+                                                    optionsT
+                                                )
                                             }
                                             className="js-example-basic-single col-sm-11"
                                             isMulti
                                             onChange={(selectedOptions) => {
-                                                const uniqueOptions = selectedOptions.filter((option, index, self) =>
-                                                    index === self.findIndex((o) => o.value === option.value && o.label === option.label)
-                                                );
+                                                const uniqueOptions =
+                                                    selectedOptions.filter(
+                                                        (option, index, self) =>
+                                                            index ===
+                                                            self.findIndex(
+                                                                (o) =>
+                                                                    o.value ===
+                                                                        option.value &&
+                                                                    o.label ===
+                                                                        option.label
+                                                            )
+                                                    );
                                                 field.onChange(uniqueOptions);
                                             }}
-                                            isDisabled={props.backPermissions?.add != 1&&props.backPermissions?.edit != 1}
-
+                                            isDisabled={
+                                                props.backPermissions?.add !=
+                                                    1 &&
+                                                props.backPermissions?.edit != 1
+                                            }
                                         />
                                     )}
                                 />
-
                             </Col>
-                            {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                            <Col md="2" className="mb-3 d-flex flex-column justify-content-end align-items-center">
-                                <Btn attrBtn={{ onClick: handleSubmit(onSubmit) }}>Save</Btn>
-                            </Col>
-                                }
-
-
+                            {(props.backPermissions?.add == 1 ||
+                                props.backPermissions?.edit == 1) && (
+                                <Col
+                                    md="2"
+                                    className="mb-3 d-flex flex-column justify-content-end align-items-center"
+                                >
+                                    <Btn
+                                        attrBtn={{
+                                            disabled: Sub,
+                                            onClick: handleSubmit(onSubmit),
+                                        }}
+                                    >
+                                        {Sub ? (
+                                            <>
+                                                <Spinner size="sm" />{" "}
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            "Submit"
+                                        )}
+                                    </Btn>
+                                </Col>
+                            )}
                         </Row>
                         <Col md="6" className="mb-3">
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">
-                            {(props.backPermissions?.add == 1 || props.backPermissions?.edit == 1) &&
-                                <span style={{ color: 'red', fontSize: "18px" }}>*</span>
-                            }
-                                 Currency</Label>
-                                <Col sm="8">
-                                    <Controller
-                                        name="currency"
-                                        control={control}
-                                        rules={{ required: true }}
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                {(props.backPermissions?.add == 1 ||
+                                    props.backPermissions?.edit == 1) && (
+                                    <span
+                                        style={{
+                                            color: "red",
+                                            fontSize: "18px",
+                                        }}
+                                    >
+                                        *
+                                    </span>
+                                )}
+                                Currency
+                            </Label>
+                            <Col sm="8">
+                                <Controller
+                                    name="currency"
+                                    control={control}
+                                    rules={{ required: false }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
                                             value={selectedOptionC}
                                             options={optionsC}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "currency", "Currency", setOptionsC, optionsC)
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "currency",
+                                                    "Currency",
+                                                    setOptionsC,
+                                                    optionsC
+                                                )
                                             }
                                             isDisabled={props?.Currency || rows}
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading2 ? (
-                                                <div className="loader-box">
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading2 ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "No options found"
+                                                )
+                                            }
                                             onChange={(option) => {
                                                 setSelectedOptionC(option);
                                                 field.onChange(option.value);
                                             }}
                                         />
                                     )}
-                                    />
-                                </Col>
+                                />
+                            </Col>
                         </Col>
-                        <Col md="12" className="d-flex justify-content-end mb-3">
-                            {props.backPermissions?.add == 1 && selectedOptionC && (
-                                <LazyWrapper>
-                                    <Model currency={selectedOptionC} id={props.id} getData={getData} />
-                                </LazyWrapper>
-                            )}
-
+                        <Col
+                            md="12"
+                            className="d-flex justify-content-end mb-3"
+                        >
+                            {props.backPermissions?.add == 1 &&
+                                selectedOptionC && (
+                                    <LazyWrapper>
+                                        <Model
+                                            currency={selectedOptionC}
+                                            id={props.id}
+                                            getData={getData}
+                                        />
+                                    </LazyWrapper>
+                                )}
                         </Col>
                         <div className="table-responsive">
-                        <Table hover>
-                            <thead>
-                                <tr>
-                                    <th scope="col">{'#'}</th>
-                                    <th cope="col">{"Main-Subject Matter"}</th>
-                                    <th cope="col">{'Sub–Subject Matter'}</th>
-                                    <th cope="col">{"Service"}</th>
-                                    <th cope="col">{'Task Type'}</th>
-                                    <th cope="col">{'Source-Target Language'} </th>
-                                    <th cope="col">{"Unit"}</th>
-                                    <th cope="col">{'Rate'}</th>
-                                    <th cope="col">{'Currency'}</th>
-                                    <th cope="col">{'brand'} </th>
-                                    <th cope="col">{'Status'} </th>
-                                    {props.backPermissions?.edit == 1 && (
-                                        <th cope="col">{'Edit'}</th>
-                                    )}
-                                    {props.backPermissions?.delete == 1 && (
-                                        <th cope="col">{'Delete'}</th>
-                                    )}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {dataPrice && dataPrice.length > 0 ? dataPrice.map((item, index) => (
-                                    <tr key={item?.id}>
-                                        <td>{index + 1}</td>
-                                        <td>{item?.subject?.name}</td>
-                                        <td>{item?.sub_subject?.name}</td>
-                                        <td>{item?.service?.name}</td>
-                                        <td>{item?.task_type?.name}</td>
-                                        <td>{item?.source_lang?.name} - {item?.target_lang?.name}</td>
-                                        <td>{item?.unit?.name}</td>
-                                        <td>{item?.rate}</td>
-                                        <td>{item?.currency?.name}</td>
-                                        <td>{item?.sheet_brand?.name}</td>
-                                        <td>
-                                            {item?.Status == 0 ? "Active"
-                                                : item?.Status == 1 ? "Not Active"
-                                                    : item?.Status == 2 ? "Pending by PM"
-                                                        : ""}
-                                        </td>
+                            <Table hover>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">{"#"}</th>
+                                        <th cope="col">
+                                            {"Main-Subject Matter"}
+                                        </th>
+                                        <th cope="col">
+                                            {"Sub–Subject Matter"}
+                                        </th>
+                                        <th cope="col">{"Service"}</th>
+                                        <th cope="col">{"Task Type"}</th>
+                                        <th cope="col">
+                                            {"Source-Target Language"}{" "}
+                                        </th>
+                                        <th cope="col">{"Unit"}</th>
+                                        <th cope="col">{"Rate"}</th>
+                                        <th cope="col">{"Currency"}</th>
+                                        <th cope="col">{"brand"} </th>
+                                        <th cope="col">{"Status"} </th>
                                         {props.backPermissions?.edit == 1 && (
-                                            <td><LazyWrapper><ModelEdit currency={selectedOptionC} data={item} getData={getData} /></LazyWrapper></td>
+                                            <th cope="col">{"Edit"}</th>
                                         )}
                                         {props.backPermissions?.delete == 1 && (
-
-                                            <td><Btn attrBtn={{ color: 'btn btn-danger-gradien', onClick: () => deleteRow(item?.id) }} className="me-2" ><i className="icofont icofont-ui-delete"></i></Btn></td>
+                                            <th cope="col">{"Delete"}</th>
                                         )}
-                                        </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan="11" className="text-center">No data available</td>
                                     </tr>
-                                )}
-                            </tbody>
-                        </Table>
+                                </thead>
+                                <tbody>
+                                    {dataPrice && dataPrice.length > 0 ? (
+                                        dataPrice.map((item, index) => (
+                                            <tr key={item?.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{item?.subject?.name}</td>
+                                                <td>
+                                                    {item?.sub_subject?.name}
+                                                </td>
+                                                <td>{item?.service?.name}</td>
+                                                <td>{item?.task_type?.name}</td>
+                                                <td>
+                                                    {item?.source_lang?.name} -{" "}
+                                                    {item?.target_lang?.name}
+                                                </td>
+                                                <td>{item?.unit?.name}</td>
+                                                <td>{item?.rate}</td>
+                                                <td>{item?.currency?.name}</td>
+                                                <td>
+                                                    {item?.sheet_brand?.name}
+                                                </td>
+                                                <td>
+                                                    {item?.Status == 0
+                                                        ? "Active"
+                                                        : item?.Status == 1
+                                                        ? "Not Active"
+                                                        : item?.Status == 2
+                                                        ? "Pending by PM"
+                                                        : ""}
+                                                </td>
+                                                {props.backPermissions?.edit ==
+                                                    1 && (
+                                                    <td>
+                                                        <Btn
+                                                            attrBtn={{
+                                                                color: "btn btn-primary",
+                                                                onClick: () =>
+                                                                    setOpenId(
+                                                                        item.id
+                                                                    ),
+                                                            }}
+                                                        >
+                                                            Edit
+                                                        </Btn>
+
+                                                        {openId === item.id && (
+                                                            <LazyWrapper>
+                                                                <ModelEdit
+                                                                    currency={
+                                                                        selectedOptionC
+                                                                    }
+                                                                    data={item}
+                                                                    getData={
+                                                                        getData
+                                                                    }
+                                                                    isOpen={
+                                                                        true
+                                                                    }
+                                                                    onClose={() =>
+                                                                        setOpenId(
+                                                                            null
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </LazyWrapper>
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {props.backPermissions
+                                                    ?.delete == 1 && (
+                                                    <td>
+                                                        <Btn
+                                                            attrBtn={{
+                                                                color: "btn btn-danger-gradien",
+                                                                onClick: () =>
+                                                                    deleteRow(
+                                                                        item?.id
+                                                                    ),
+                                                            }}
+                                                            className="me-2"
+                                                        >
+                                                            <i className="icofont icofont-ui-delete"></i>
+                                                        </Btn>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td
+                                                colSpan="11"
+                                                className="text-center"
+                                            >
+                                                No data available
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </Table>
                         </div>
                     </CardBody>
                 </Collapse>
