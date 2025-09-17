@@ -24,21 +24,21 @@ class TicketMail extends Mailable
     /**
      * Build the message.
      */
-    // public function build()
-    // {
-    //     return $this->subject($this->mailData['subject'])
-    //         ->view('emails.ticketMail')
-    //         ->from($this->mailData['fromEmail'])
-    //         ->replyTo($this->mailData['replyTo']);
-    // }
     public function build()
     {
-        $fromEmail = $this->mailData['fromEmail'] ?? 'dev.support@thetranslationgate.com';
-        $replyTo   = $this->mailData['replyTo'] ?? $fromEmail;
-
         return $this->subject($this->mailData['subject'])
             ->view('emails.ticketMail')
-            ->from($fromEmail)
-            ->replyTo($replyTo);
+            ->from($this->mailData['fromEmail'])
+            ->replyTo($this->mailData['replyTo']);
     }
+    // public function build()
+    // {
+    //     $fromEmail = $this->mailData['fromEmail'] ?? 'vm@thetranslationgate.com';
+    //     $replyTo   = $this->mailData['replyTo'] ?? $fromEmail;
+
+    //     return $this->subject($this->mailData['subject'])
+    //         ->view('emails.ticketMail')
+    //         ->from($fromEmail)
+    //         ->replyTo($replyTo);
+    // }
 }
