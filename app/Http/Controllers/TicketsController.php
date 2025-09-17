@@ -366,7 +366,14 @@ class TicketsController extends Controller
                     'body' =>  "A new reply has already sent to your ticket, please check ..",
                     'comment' =>  $request->comment,
                 ];
-                Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
+                Mail::to('abdok7374@gmail.com')
+                    ->cc($this->vmEmail)
+                    ->send(new TicketMail(
+                        $mailData,
+                        'vm.support@thetranslationgate.com',
+                        'Support Team'
+                    ));
+
                 //end  
                 $msg['type'] = "success";
                 $message = "Ticket Reply Added Successfully";
@@ -378,6 +385,8 @@ class TicketsController extends Controller
             return response()->json($msg);
         }
     }
+
+
 
 
 
