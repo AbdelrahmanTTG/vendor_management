@@ -472,7 +472,8 @@ class TicketsController extends Controller
                     'subject'   => "New Reply : # " . $ticket->id . " Project Name : " . $ticket_data->ticket_subject,
                     'body'      => "A new reply has already sent to your ticket, please check ..",
                     'comment'   => $request->comment,
-                    'fromEmail' => $fromEmail,   
+                    // 'fromEmail' => $fromEmail,
+                    'fromEmail' => "dev.support@columbuslang.com",
                     'replyTo'   => $replyTo,    
                 ];
 

@@ -33,7 +33,7 @@ class TicketMail extends Mailable
     // }
     public function build()
     {
-        $fromEmail = $this->mailData['fromEmail'] ?? 'vm@thetranslationgate.com';
+        $fromEmail = $this->mailData['fromEmail'] ?? 'dev.support@thetranslationgate.com';
         $replyTo   = $this->mailData['replyTo'] ?? $fromEmail;
 
         return $this->subject($this->mailData['subject'])
