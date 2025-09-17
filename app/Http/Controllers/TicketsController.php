@@ -323,24 +323,82 @@ class TicketsController extends Controller
         $time['created_at'] = date("Y-m-d H:i:s");
         VmTicketTime::create($time);
     }
+    // public function sendTicketResponse(Request $request)
+    // {
+    //     $data['created_by'] = Crypt::decrypt($request->user);
+    //     $data['response'] = $request->comment;
+    //     $data['ticket'] = $request->id;
+    //     $data['created_at'] = date("Y-m-d H:i:s");
+    //     $ticket = VmTicket::find($data['ticket']);
+    //     if ($ticket) {
+    //         if ($request->file('file') != null) {
+    //             $file = $request->file('file');
+    //             // $path = $file->store('uploads/tickets/', 'public');
+    //             $folderPath = storage_path('app/external/tickets');
+    //             if (!file_exists($folderPath)) {
+    //                 mkdir(
+    //                     $folderPath,
+    //                     0777,
+    //                     true
+    //                 );
+    //             }
+    //             $originalFileName = $file->getClientOriginalName();
+    //             $encryptedFileName = Crypt::encryptString($originalFileName);
+    //             $fullEncryptedFileName = $encryptedFileName . '.' . $file->getClientOriginalExtension();
+    //             $path = $file->storeAs('tickets', $fullEncryptedFileName, 'external');
+    //             if (!$path) {
+    //                 $msg['type'] = "error";
+    //                 $message = "Error Uploading File, Please Try Again!";
+    //             } else {
+    //                 $data['file'] = $fullEncryptedFileName;
+    //             }
+    //         }
+    //         if (VmTicketResponse::create($data)) {
+    //             // send reply to requster   
+    //             // setup mail data              
+    //             $to = BrandUsers::select('email', 'user_name')->where('id', $ticket->created_by)->first();
+    //             $toEmail = $to->email;
+    //             $user_name = $to->user_name;
+    //             //end setup mail                 
+    //             $mailData = [
+    //                 'user_name' =>  $user_name,
+    //                 'subject' => "New Reply : # " . $ticket->id,
+    //                 'body' =>  "A new reply has already sent to your ticket, please check ..",
+    //                 'comment' =>  $request->comment,
+    //             ];
+    //             Mail::to('abdok7374@gmail.com')
+    //                 ->cc($this->vmEmail)
+    //                 ->send(new TicketMail(
+    //                     $mailData,
+    //                     'vm.support@thetranslationgate.com',
+    //                     'Support Team'
+    //                 ));
+
+    //             //end  
+    //             $msg['type'] = "success";
+    //             $message = "Ticket Reply Added Successfully";
+    //         } else {
+    //             $msg['type'] = "error";
+    //             $message = "Error, Please Try Again!";
+    //         }
+    //         $msg['message'] = $message;
+    //         return response()->json($msg);
+    //     }
+    // }
     public function sendTicketResponse(Request $request)
     {
         $data['created_by'] = Crypt::decrypt($request->user);
         $data['response'] = $request->comment;
         $data['ticket'] = $request->id;
         $data['created_at'] = date("Y-m-d H:i:s");
+
         $ticket = VmTicket::find($data['ticket']);
         if ($ticket) {
             if ($request->file('file') != null) {
                 $file = $request->file('file');
-                // $path = $file->store('uploads/tickets/', 'public');
                 $folderPath = storage_path('app/external/tickets');
                 if (!file_exists($folderPath)) {
-                    mkdir(
-                        $folderPath,
-                        0777,
-                        true
-                    );
+                    mkdir($folderPath, 0777, true);
                 }
                 $originalFileName = $file->getClientOriginalName();
                 $encryptedFileName = Crypt::encryptString($originalFileName);
@@ -353,39 +411,38 @@ class TicketsController extends Controller
                     $data['file'] = $fullEncryptedFileName;
                 }
             }
+
             if (VmTicketResponse::create($data)) {
-                // send reply to requster   
-                // setup mail data              
                 $to = BrandUsers::select('email', 'user_name')->where('id', $ticket->created_by)->first();
                 $toEmail = $to->email;
                 $user_name = $to->user_name;
-                //end setup mail                 
-                $mailData = [
-                    'user_name' =>  $user_name,
-                    'subject' => "New Reply : # " . $ticket->id,
-                    'body' =>  "A new reply has already sent to your ticket, please check ..",
-                    'comment' =>  $request->comment,
-                ];
-                Mail::to('abdok7374@gmail.com')
-                    ->cc($this->vmEmail)
-                    ->send(new TicketMail(
-                        $mailData,
-                        'vm.support@thetranslationgate.com',
-                        'Support Team'
-                    ));
 
-                //end  
+                $subject = "New Reply : # " . $ticket->id;
+                $body = "
+                <h3>Hello $user_name,</h3>
+                <p>A new reply has been sent to your ticket.</p>
+                <p><strong>Comment:</strong> {$request->comment}</p>
+                <p>Best regards,<br>Support Team</p>
+            ";
+
+                Mail::send([], [], function ($message) use ($toEmail, $subject, $body) {
+                    $message->to('abdok7374@gmail.com')
+                        ->from('vm.support@thetranslationgate.com', 'Support Team')
+                        ->subject($subject)
+                        ->setBody($body, 'text/html'); // HTML body
+                });
+
                 $msg['type'] = "success";
                 $message = "Ticket Reply Added Successfully";
             } else {
                 $msg['type'] = "error";
                 $message = "Error, Please Try Again!";
             }
+
             $msg['message'] = $message;
             return response()->json($msg);
         }
     }
-
 
 
 
