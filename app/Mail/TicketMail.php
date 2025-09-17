@@ -20,17 +20,37 @@ class TicketMail extends Mailable
     {
         $this->mailData = $mailData;
     }
-
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: $this->mailData['subject'],
+        );
+    }
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.ticketMail',
+        );
+    }
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
+    }
     /**
      * Build the message.
      */
-    public function build()
-    {
-        return $this->subject($this->mailData['subject'])
-            ->view('emails.ticketMail')
-            ->from($this->mailData['fromEmail'])
-            ->replyTo($this->mailData['replyTo']);
-    }
+    // public function build()
+    // {
+    //     return $this->subject($this->mailData['subject'])
+    //         ->view('emails.ticketMail')
+    //         ->from($this->mailData['fromEmail'])
+    //         ->replyTo($this->mailData['replyTo']);
+    // }
     // public function build()
     // {
     //     $fromEmail = $this->mailData['fromEmail'] ?? 'vm@thetranslationgate.com';
