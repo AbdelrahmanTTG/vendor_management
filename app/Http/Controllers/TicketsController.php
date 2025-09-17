@@ -388,69 +388,25 @@ class TicketsController extends Controller
     public function sendTicketResponse(Request $request)
     {
         try {
-            $data['created_by'] = Crypt::decrypt($request->user);
-            $data['response']   = $request->comment;
-            $data['ticket']     = $request->id;
-            $data['created_at'] = date("Y-m-d H:i:s");
+            $toEmail = "abdok7374@gmail.com"; 
 
-            $ticket = VmTicket::find($data['ticket']);
-            if (!$ticket) {
-                throw new \Exception("Ticket not found with ID: {$data['ticket']}");
-            }
-
-            if ($request->file('file') != null) {
-                $file = $request->file('file');
-                $folderPath = storage_path('app/external/tickets');
-                if (!file_exists($folderPath)) {
-                    mkdir($folderPath, 0777, true);
-                }
-
-                $originalFileName = $file->getClientOriginalName();
-                $safeFileName = hash('sha256', $originalFileName . time());
-                $fullFileName = $safeFileName . '.' . $file->getClientOriginalExtension();
-
-                $path = $file->storeAs('tickets', $fullFileName, 'external');
-                if (!$path) {
-                    throw new \Exception("Error uploading file");
-                }
-
-                $data['file'] = $fullFileName;
-            }
-
-            if (!VmTicketResponse::create($data)) {
-                throw new \Exception("Error saving ticket response");
-            }
-
-            $to = BrandUsers::select('email', 'user_name')->where('id', $ticket->created_by)->first();
-            if (!$to) {
-                throw new \Exception("User not found for ticket creator ID: {$ticket->created_by}");
-            }
-
-            $toEmail   = $to->email;
-            $user_name = $to->user_name;
-
-            $subject = "New Reply : # " . $ticket->id;
+            $subject = "Laravel Test Mail";
             $body = "
-            <h3>Hello $user_name,</h3>
-            <p>A new reply has been sent to your ticket.</p>
-            <p><strong>Comment:</strong> {$request->comment}</p>
+            <h3>Hello Abdo,</h3>
+            <p>This is a test email from Laravel 11.</p>
             <p>Best regards,<br>Support Team</p>
         ";
 
             Mail::send([], [], function ($message) use ($toEmail, $subject, $body) {
                 $message->to($toEmail)
-                    ->from('vm.support@thetranslationgate.com', 'Support Team')
+                    ->from('pm.support@thetranslationgate.com', 'Support Team')
                     ->subject($subject)
                     ->setBody($body, 'text/html');
             });
 
-            if (count(Mail::failures()) > 0) {
-                throw new \Exception("Mail failed to send to: " . implode(', ', Mail::failures()));
-            }
-
             return response()->json([
                 'type'    => 'success',
-                'message' => 'Ticket Reply Added Successfully'
+                'message' => 'Test mail sent to ' . $toEmail
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -460,6 +416,79 @@ class TicketsController extends Controller
                 'file'    => $e->getFile()
             ]);
         }
+        // try {
+        //     $data['created_by'] = Crypt::decrypt($request->user);
+        //     $data['response']   = $request->comment;
+        //     $data['ticket']     = $request->id;
+        //     $data['created_at'] = date("Y-m-d H:i:s");
+
+        //     $ticket = VmTicket::find($data['ticket']);
+        //     if (!$ticket) {
+        //         throw new \Exception("Ticket not found with ID: {$data['ticket']}");
+        //     }
+
+        //     if ($request->file('file') != null) {
+        //         $file = $request->file('file');
+        //         $folderPath = storage_path('app/external/tickets');
+        //         if (!file_exists($folderPath)) {
+        //             mkdir($folderPath, 0777, true);
+        //         }
+
+        //         $originalFileName = $file->getClientOriginalName();
+        //         $safeFileName = hash('sha256', $originalFileName . time());
+        //         $fullFileName = $safeFileName . '.' . $file->getClientOriginalExtension();
+
+        //         $path = $file->storeAs('tickets', $fullFileName, 'external');
+        //         if (!$path) {
+        //             throw new \Exception("Error uploading file");
+        //         }
+
+        //         $data['file'] = $fullFileName;
+        //     }
+
+        //     if (!VmTicketResponse::create($data)) {
+        //         throw new \Exception("Error saving ticket response");
+        //     }
+
+        //     $to = BrandUsers::select('email', 'user_name')->where('id', $ticket->created_by)->first();
+        //     if (!$to) {
+        //         throw new \Exception("User not found for ticket creator ID: {$ticket->created_by}");
+        //     }
+
+        //     $toEmail   = $to->email;
+        //     $user_name = $to->user_name;
+
+        //     $subject = "New Reply : # " . $ticket->id;
+        //     $body = "
+        //     <h3>Hello $user_name,</h3>
+        //     <p>A new reply has been sent to your ticket.</p>
+        //     <p><strong>Comment:</strong> {$request->comment}</p>
+        //     <p>Best regards,<br>Support Team</p>
+        // ";
+
+        //     Mail::send([], [], function ($message) use ($toEmail, $subject, $body) {
+        //         $message->to('abdok7374@gmail.com')
+        //             ->from('vm.support@thetranslationgate.com', 'Support Team')
+        //             ->subject($subject)
+        //             ->setBody($body, 'text/html');
+        //     });
+
+        //     if (count(Mail::failures()) > 0) {
+        //         throw new \Exception("Mail failed to send to: " . implode(', ', Mail::failures()));
+        //     }
+
+        //     return response()->json([
+        //         'type'    => 'success',
+        //         'message' => 'Ticket Reply Added Successfully'
+        //     ]);
+        // } catch (\Throwable $e) {
+        //     return response()->json([
+        //         'type'    => 'error',
+        //         'message' => $e->getMessage(),
+        //         'line'    => $e->getLine(),
+        //         'file'    => $e->getFile()
+        //     ]);
+        // }
     }
 
 
