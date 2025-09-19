@@ -240,6 +240,9 @@ const EditBtn = (props) => {
                                                                 onInputChange={(newInputValue, { action }) => {
                                                                     if (action !== "input-blur" && action !== "menu-close") {
                                                                         setInputU(newInputValue);
+                                                                        handleInputChange(
+                                                                            newInputValue
+                                                                        );
                                                                     }
                                                                     handleInputChange
                                                                 }}

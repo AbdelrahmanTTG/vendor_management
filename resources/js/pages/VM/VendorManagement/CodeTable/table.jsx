@@ -189,9 +189,15 @@ const table = (props) => {
                         <H5>{props.table}</H5>
                         {props.permissions?.add == 1 && (
                             <div className="ml-auto">
-                                <Add nameBtm={`Add ${props.table}`} titelModel={`Add New ${props.table}`} fields={props.fields} dataTable={props.dataTable} onAddData={onAddData} />
+                                <Add
+                                    nameBtm={`Add ${props.table}`}
+                                    titelModel={`Add New ${props.table}`}
+                                    fields={props.fields}
+                                    dataTable={props.dataTable}
+                                    onAddData={onAddData}
+                                />
                             </div>
-                        ) }
+                        )}
                     </CardHeader>
                     <div className="table-responsive">
                         <Table hover>
@@ -200,35 +206,59 @@ const table = (props) => {
                                     {props.header ? (
                                         Array.isArray(props.header) ? (
                                             props.header.length > 0 ? (
-                                                props.header.map((col, index) => (
-
-                                                    <th key={index}>
-                                                        
-                                                        {
-                                                            col.trim().toLowerCase() === 'edit'
-                                                                ? (props.permissions?.edit == 1 ? col.trim().toUpperCase() : null)
-                                                                : col.trim().toLowerCase() === 'delete'
-                                                                    ? (props.permissions?.delete == 1 ? col.trim().toUpperCase() : null)
-                                                                    : col.trim().toUpperCase()
-                                                        }
-                                                    </th>
-                                                ))
+                                                props.header.map(
+                                                    (col, index) => (
+                                                        <th key={index}>
+                                                            {col
+                                                                .trim()
+                                                                .toLowerCase() ===
+                                                            "edit"
+                                                                ? props
+                                                                      .permissions
+                                                                      ?.edit ==
+                                                                  1
+                                                                    ? col
+                                                                          .trim()
+                                                                          .toUpperCase()
+                                                                    : null
+                                                                : col
+                                                                      .trim()
+                                                                      .toLowerCase() ===
+                                                                  "delete"
+                                                                ? props
+                                                                      .permissions
+                                                                      ?.delete ==
+                                                                  1
+                                                                    ? col
+                                                                          .trim()
+                                                                          .toUpperCase()
+                                                                    : null
+                                                                : col
+                                                                      .trim()
+                                                                      .toUpperCase()}
+                                                        </th>
+                                                    )
+                                                )
                                             ) : (
-                                                <th>No Data</th> 
+                                                <th>No Data</th>
+                                            )
+                                        ) : Object.keys(props.header).length >
+                                          0 ? (
+                                            Object.keys(props.header).map(
+                                                (key) => (
+                                                    <th key={key}>
+                                                        {props.header[key]
+                                                            .trim()
+                                                            .toUpperCase()}
+                                                    </th>
+                                                )
                                             )
                                         ) : (
-                                            Object.keys(props.header).length > 0 ? (
-                                                Object.keys(props.header).map((key) => (
-                                                    <th key={key}>{props.header[key].trim().toUpperCase()}</th>
-                                                ))
-                                            ) : (
-                                                <th>No Data</th>    
-                                            )
+                                            <th>No Data</th>
                                         )
                                     ) : (
-                                        <th>No Data</th> 
+                                        <th>No Data</th>
                                     )}
-                                    
                                 </tr>
                             </thead>
                             <tbody>
@@ -236,95 +266,140 @@ const table = (props) => {
                                     <tr>
                                         <td colSpan={props.header.length}>
                                             <div className="loader-box">
-                                                <Spinner attrSpinner={{ className: 'loader-9' }} />
+                                                <Spinner
+                                                    attrSpinner={{
+                                                        className: "loader-9",
+                                                    }}
+                                                />
                                             </div>
                                         </td>
                                     </tr>
+                                ) : dataTable.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={props.header.length}>
+                                            No data yet
+                                        </td>
+                                    </tr>
                                 ) : (
-                                    dataTable.length === 0 ? (
-                                        <tr>
-                                                <td colSpan={props.header.length}>No data yet</td>
-                                        </tr>
-                                    ) : (
-                                        dataTable.map((item) => (
-                                            <tr key={item.id}>
-                                                <td key="id">
-                                                    {item.id}
-                                                </td>
-                                             {Object.entries(item).map(([key, value]) => {
-                                                if (key === 'id') return null;
-                                                const fieldInfo = props.fields.find(f => f.name === key);
-                                                if (fieldInfo?.static) {
-                                                    const match = fieldInfo.static.find(opt => opt.value === value);
-                                                    return (
-                                                        <td key={key}>
-                                                            {match ? match.label : value}
-                                                        </td>
+                                    dataTable.map((item) => (
+                                        <tr key={item.id}>
+                                            {props.columns.map((col) => {
+                                                const fieldInfo =
+                                                    props.fields.find(
+                                                        (f) => f.name === col
                                                     );
+
+                                                let value = item[col];
+                                                if (fieldInfo?.static) {
+                                                    const match =
+                                                        fieldInfo.static.find(
+                                                            (opt) =>
+                                                                opt.value ===
+                                                                value
+                                                        );
+                                                    value = match
+                                                        ? match.label
+                                                        : value;
+                                                }
+
+                                                if (
+                                                    typeof value === "object" &&
+                                                    value !== null
+                                                ) {
+                                                    value = value.name;
                                                 }
 
                                                 return (
-                                                    <td key={key}>
-                                                        {typeof value === 'object' && value !== null
-                                                            ? value.name
-                                                            : value}
-                                                    </td>
+                                                    <td key={col}>{value}</td>
                                                 );
                                             })}
 
-                                                {/* <td key="Active">
-                                                    {item.Active == 0 ? <i className="fa fa-circle font-danger f-12" /> : <i className="fa fa-circle font-success f-12" />}
-                                                </td> */}
-                                                {props.permissions?.edit == 1 && (
-                                                    <td>
-                                                        <button onClick={() => handleEditClick(item.id)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
-                                                            <i className="icofont icofont-ui-edit"></i>
-                                                        </button>
-                                                        
-                                                        {activeItem === item.id && <Edit
+                                            {props.permissions?.edit == 1 && (
+                                                <td>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleEditClick(
+                                                                item.id
+                                                            )
+                                                        }
+                                                        style={{
+                                                            border: "none",
+                                                            backgroundColor:
+                                                                "transparent",
+                                                            padding: 0,
+                                                        }}
+                                                    >
+                                                        <i className="icofont icofont-ui-edit"></i>
+                                                    </button>
+                                                    {activeItem === item.id && (
+                                                        <Edit
                                                             data={true}
-                                                            handleEditClick={handleEditClick}
+                                                            handleEditClick={
+                                                                handleEditClick
+                                                            }
                                                             titelModel={`Edit ${props.table}`}
-                                                            fields={props.fields}
-                                                            dataTable={props.dataTable}
+                                                            fields={
+                                                                props.fields
+                                                            }
+                                                            dataTable={
+                                                                props.dataTable
+                                                            }
                                                             selectedRow={item}
-                                                            onUpdateData={onUpdateData}
-                                                        />}
-                                                        {/* <Edit
-                                                            onClick={handleEditClick}
-                                                            data={value}
-                                                            titelModel={`Edit ${props.table}`}
-                                                            fields={props.fields}
-                                                            dataTable={props.dataTable}
-                                                            selectedRow={item}
-                                                            onUpdateData={onUpdateData}
-                                                        /> */}
-                                                    </td>
-                                                )}
-                                                {props.permissions?.delete == 1 && (
-
-                                                    <td>
-                                                        <button onClick={() => handelDelete(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
-                                                            <i className="icofont icofont-ui-delete"></i>
-                                                        </button>
-                                                    </td>
-                                                )}
-                                            </tr>
-                                        ))
-                                    )
+                                                            onUpdateData={
+                                                                onUpdateData
+                                                            }
+                                                        />
+                                                    )}
+                                                </td>
+                                            )}
+                                            {props.permissions?.delete == 1 && (
+                                                <td>
+                                                    <button
+                                                        onClick={() =>
+                                                            handelDelete(item)
+                                                        }
+                                                        style={{
+                                                            border: "none",
+                                                            backgroundColor:
+                                                                "transparent",
+                                                            padding: 0,
+                                                        }}
+                                                    >
+                                                        <i className="icofont icofont-ui-delete"></i>
+                                                    </button>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    ))
                                 )}
                             </tbody>
                         </Table>
-                        <Pagination aria-label="Page navigation example" className="pagination-primary">
-                            <PaginationItem onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><PaginationLink >{Previous}</PaginationLink></PaginationItem>
+                        <Pagination
+                            aria-label="Page navigation example"
+                            className="pagination-primary"
+                        >
+                            <PaginationItem
+                                onClick={() =>
+                                    handlePageChange(currentPage - 1)
+                                }
+                                disabled={currentPage === 1}
+                            >
+                                <PaginationLink>{Previous}</PaginationLink>
+                            </PaginationItem>
                             {getPaginationItems()}
 
-                            <PaginationItem onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}><PaginationLink >{Next}</PaginationLink></PaginationItem>
+                            <PaginationItem
+                                onClick={() =>
+                                    handlePageChange(currentPage + 1)
+                                }
+                                disabled={currentPage === totalPages}
+                            >
+                                <PaginationLink>{Next}</PaginationLink>
+                            </PaginationItem>
                         </Pagination>
                     </div>
                 </Card>
             </Col>
-           
         </Fragment>
     );
 };

@@ -232,7 +232,7 @@ export const VM = (allowedPermissions) => [
                             ],
                         },
                     ]}
-                    columns={["id", "zone", "gmt", "Active"]}
+                    columns={["id", "zone", "gmt", "parent", "Active"]}
                     related={{
                         table: "countries",
                         foreign_key: "parent",

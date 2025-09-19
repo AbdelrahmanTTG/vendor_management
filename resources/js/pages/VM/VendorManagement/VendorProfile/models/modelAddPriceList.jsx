@@ -282,7 +282,7 @@ const AddNewBtn = (props) => {
                                             onInputChange={(inputValue) =>
                                                 handleInputChange(
                                                     inputValue,
-                                                    "fields",
+                                                    "mainsubject",
                                                     "subject",
                                                     setOptionsMain,
                                                     optionsMain
