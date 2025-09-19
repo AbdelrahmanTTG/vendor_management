@@ -6,6 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import Select from 'react-select';
 import axiosClient from "../../../../AxiosClint";
 import { toast } from 'react-toastify';
+import { t } from 'i18next';
 
 const AddNewBtn = (props) => {
     // toast.configure();
@@ -45,10 +46,12 @@ const AddNewBtn = (props) => {
     const [optionsD, setOptionsD] = useState([]);
        
     const [optionsB, setOptionsB] = useState([]);
+    const [selectedOptionC, setSelectedOptionC] = useState(null);
 
     const [initialOptions, setInitialOptions] = useState({});
     const [loading, setLoading] = useState(false);
     const [optionsC, setOptionsC] = useState([]);
+    const [loading2, setLoading2] = useState(false);
 
     const onSubmit = async (data) => {
         if (props.id) {
@@ -61,7 +64,7 @@ const AddNewBtn = (props) => {
                 })
             );
             formDate['vendor'] = props.id;
-            formDate['currency'] = props.currency?.value
+            // formDate['currency'] = props.currency?.value
             try {
                 const response = await axiosClient.post("AddPriceList", formDate);
                 props.getData(response.data)
@@ -98,6 +101,12 @@ const AddNewBtn = (props) => {
             return acc;
         }, {});
     };
+      useEffect(() => {
+            if (props.Currency) {
+                setSelectedOptionC({ value: props?.Currency?.id, label: props?.Currency?.name })
+            }
+    
+        }, [props.Currency]);
     // useEffect(() => {
     //     if (props.currency) {
     //         const updatedData = renameKeys(props.currency, { id: "value", name: "label" });
@@ -216,12 +225,50 @@ const AddNewBtn = (props) => {
     };
     return (
         <Fragment>
-            <Btn attrBtn={{ color: 'btn btn-primary-light', onClick: toggle }} className="me-2" >Add price list</Btn>
-            <CommonModal isOpen={modal} title='Add new price list' icon={<><i className="fa fa-info-circle" style={{ fontSize: '18px', color: 'darkred', marginRight: '1%' }}></i><span style={{ fontSize: '14px', color: 'darkred' }}> Type in the fields to search.</span></>} toggler={toggle} size="xl" marginTop="-1%" onSave={handleSubmit(onSubmit)} >
+            <Btn
+                attrBtn={{ color: "btn btn-primary-light", onClick: toggle }}
+                className="me-2"
+            >
+                Add price list
+            </Btn>
+            <CommonModal
+                isOpen={modal}
+                title="Add new price list"
+                icon={
+                    <>
+                        <i
+                            className="fa fa-info-circle"
+                            style={{
+                                fontSize: "18px",
+                                color: "darkred",
+                                marginRight: "1%",
+                            }}
+                        ></i>
+                        <span style={{ fontSize: "14px", color: "darkred" }}>
+                            {" "}
+                            Type in the fields to search.
+                        </span>
+                    </>
+                }
+                toggler={toggle}
+                size="xl"
+                marginTop="-1%"
+                onSave={handleSubmit(onSubmit)}
+            >
                 <Row className="g-3 mb-3">
                     <Col md="6">
                         <FormGroup className="row">
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Main-Subject Matter</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                <span
+                                    style={{ color: "red", fontSize: "18px" }}
+                                >
+                                    *
+                                </span>{" "}
+                                Main-Subject Matter
+                            </Label>
                             <Col sm="8">
                                 <Controller
                                     name="subject"
@@ -233,31 +280,50 @@ const AddNewBtn = (props) => {
                                             value={field.value}
                                             options={optionsMain}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "fields", "subject", setOptionsMain, optionsMain)
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "fields",
+                                                    "subject",
+                                                    setOptionsMain,
+                                                    optionsMain
+                                                )
                                             }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "No options found"
+                                                )
+                                            }
                                             onChange={(option) => {
-                                                handelingSelectSub(option.value)
+                                                handelingSelectSub(
+                                                    option.value
+                                                );
                                                 field.onChange(option);
                                             }}
-
-
                                         />
                                     )}
                                 />
                             </Col>
-
                         </FormGroup>
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Sub–Subject Matter</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                Sub–Subject Matter
+                            </Label>
                             <Col sm="8">
                                 <Controller
                                     name="sub_subject"
@@ -270,28 +336,43 @@ const AddNewBtn = (props) => {
                                             options={optionsSub}
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'Select Sub Subject Matter'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "Select Sub Subject Matter"
+                                                )
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
                                         />
                                     )}
                                 />
-
                             </Col>
                         </FormGroup>
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Service</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                <span
+                                    style={{ color: "red", fontSize: "18px" }}
+                                >
+                                    *
+                                </span>{" "}
+                                Service
+                            </Label>
                             <Col sm="8">
-
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Service --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
                                     name="service"
@@ -303,20 +384,36 @@ const AddNewBtn = (props) => {
                                             value={field.value}
                                             options={optionsSre}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "services", "service", setOptionsSer, optionsSre)
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "services",
+                                                    "service",
+                                                    setOptionsSer,
+                                                    optionsSre
+                                                )
                                             }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "No options found"
+                                                )
+                                            }
                                             onChange={(option) => {
-                                                handelingSelectTasks(option.value)
+                                                handelingSelectTasks(
+                                                    option.value
+                                                );
                                                 field.onChange(option);
                                             }}
-
                                         />
                                     )}
                                 />
@@ -325,8 +422,17 @@ const AddNewBtn = (props) => {
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Task Type</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                <span
+                                    style={{ color: "red", fontSize: "18px" }}
+                                >
+                                    *
+                                </span>{" "}
+                                Task Type
+                            </Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Task Type --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -340,15 +446,23 @@ const AddNewBtn = (props) => {
                                             options={optionsT}
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "No options found"
+                                                )
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
                                         />
                                     )}
                                 />
@@ -357,8 +471,17 @@ const AddNewBtn = (props) => {
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Source Language</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                <span
+                                    style={{ color: "red", fontSize: "18px" }}
+                                >
+                                    *
+                                </span>{" "}
+                                Source Language
+                            </Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Source Language --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -371,19 +494,33 @@ const AddNewBtn = (props) => {
                                             value={field.value}
                                             options={optionsSL}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "languages", "source_lang", setOptionsSL, optionsSL)
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "languages",
+                                                    "source_lang",
+                                                    setOptionsSL,
+                                                    optionsSL
+                                                )
                                             }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "No options found"
+                                                )
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
                                         />
                                     )}
                                 />
@@ -392,8 +529,17 @@ const AddNewBtn = (props) => {
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Target Language</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                <span
+                                    style={{ color: "red", fontSize: "18px" }}
+                                >
+                                    *
+                                </span>{" "}
+                                Target Language
+                            </Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Target Language --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -406,19 +552,33 @@ const AddNewBtn = (props) => {
                                             value={field.value}
                                             options={optionsTL}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "languages", "target_lang", setOptionsTL, optionsTL)
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "languages",
+                                                    "target_lang",
+                                                    setOptionsTL,
+                                                    optionsTL
+                                                )
                                             }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "No options found"
+                                                )
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
                                         />
                                     )}
                                 />
@@ -427,8 +587,12 @@ const AddNewBtn = (props) => {
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Source Dialect</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                Source Dialect
+                            </Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Dialect --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -441,19 +605,33 @@ const AddNewBtn = (props) => {
                                             value={field.value}
                                             options={optionsD}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "languages_dialect", "dialect", setOptionsD, optionsD)
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "languages_dialect",
+                                                    "dialect",
+                                                    setOptionsD,
+                                                    optionsD
+                                                )
                                             }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "No options found"
+                                                )
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
                                         />
                                     )}
                                 />
@@ -462,8 +640,12 @@ const AddNewBtn = (props) => {
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Target Dialect </Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                Target Dialect{" "}
+                            </Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Dialect --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -476,19 +658,33 @@ const AddNewBtn = (props) => {
                                             value={field.value}
                                             options={optionsD}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "languages_dialect", "dialect_target", setOptionsD, optionsD)
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "languages_dialect",
+                                                    "dialect_target",
+                                                    setOptionsD,
+                                                    optionsD
+                                                )
                                             }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "No options found"
+                                                )
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
                                         />
                                     )}
                                 />
@@ -497,8 +693,17 @@ const AddNewBtn = (props) => {
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Unit</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                <span
+                                    style={{ color: "red", fontSize: "18px" }}
+                                >
+                                    *
+                                </span>{" "}
+                                Unit
+                            </Label>
                             <Col sm="8">
                                 {/* <Select defaultValue={{ isDisabled: true, label: '-- Select Unit --' }} className="js-example-basic-single col-sm-12" /> */}
                                 <Controller
@@ -511,19 +716,33 @@ const AddNewBtn = (props) => {
                                             value={field.value}
                                             options={optionsUnit}
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "unit", "unit", setOptionsUnit, optionsUnit)
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "unit",
+                                                    "unit",
+                                                    setOptionsUnit,
+                                                    optionsUnit
+                                                )
                                             }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
-                                            noOptionsMessage={() => loading ? (
-                                                <div className="loader-box" >
-                                                    <Spinner attrSpinner={{ className: 'loader-6' }} />
-                                                </div>
-                                            ) : 'No options found'}
+                                            noOptionsMessage={() =>
+                                                loading ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "No options found"
+                                                )
+                                            }
                                             onChange={(option) => {
                                                 field.onChange(option);
                                             }}
-
                                         />
                                     )}
                                 />
@@ -532,58 +751,89 @@ const AddNewBtn = (props) => {
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Rate</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                <span
+                                    style={{ color: "red", fontSize: "18px" }}
+                                >
+                                    *
+                                </span>{" "}
+                                Rate
+                            </Label>
                             <Col sm="8">
                                 {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
                                 <input
-
                                     defaultValue=""
                                     className="form-control"
                                     type="number"
                                     name="rate"
                                     {...register("rate", { required: true })}
-
                                 />
                             </Col>
                         </FormGroup>
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Rush Rate</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                Rush Rate
+                            </Label>
                             <Col sm="8">
                                 {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
                                 <input
-
                                     defaultValue=""
                                     className="form-control"
                                     type="number"
                                     name="special_rate"
-                                    {...register("special_rate", { required: false })}
+                                    {...register("special_rate", {
+                                        required: false,
+                                    })}
                                 />
                             </Col>
                         </FormGroup>
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Status</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                <span
+                                    style={{ color: "red", fontSize: "18px" }}
+                                >
+                                    *
+                                </span>{" "}
+                                Status
+                            </Label>
                             <Col sm="8">
-
                                 <Controller
                                     name="Status"
                                     control={control}
                                     rules={{ required: true }}
                                     render={({ field }) => (
                                         <Select
-                                            id='Status'
+                                            id="Status"
                                             {...field}
-                                            value={field.value || { value: '', label: '-- Select Status --' }}
+                                            value={
+                                                field.value || {
+                                                    value: "",
+                                                    label: "-- Select Status --",
+                                                }
+                                            }
                                             options={[
-                                                { value: '0', label: 'Active' },
-                                                { value: '1', label: 'Not Active' },
-                                                { value: '2', label: 'Pending by PM' }
+                                                { value: "0", label: "Active" },
+                                                {
+                                                    value: "1",
+                                                    label: "Not Active",
+                                                },
+                                                {
+                                                    value: "2",
+                                                    label: "Pending by PM",
+                                                },
                                             ]}
                                             className="js-example-basic-single col-sm-12"
                                             onChange={(option) => {
@@ -597,8 +847,18 @@ const AddNewBtn = (props) => {
                     </Col>
                     <Col md="6">
                         <FormGroup className="row">
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01"><span style={{ color: 'red', fontSize: "18px" }}>*</span> Brand</Label>
-                            < Col sm="8" >
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                <span
+                                    style={{ color: "red", fontSize: "18px" }}
+                                >
+                                    *
+                                </span>{" "}
+                                Brand
+                            </Label>
+                            <Col sm="8">
                                 <Controller
                                     name="sheet_brand"
                                     control={control}
@@ -606,19 +866,32 @@ const AddNewBtn = (props) => {
                                     render={({ field }) => (
                                         <Select
                                             {...field}
-                                           value={field.value}
-                                            options={optionsB}                                           
+                                            value={field.value}
+                                            options={optionsB}
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
                                             onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "brand", "sheet_brand", setOptionsB, optionsB)
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "brand",
+                                                    "sheet_brand",
+                                                    setOptionsB,
+                                                    optionsB
+                                                )
                                             }
                                             noOptionsMessage={() =>
                                                 loading ? (
                                                     <div className="loader-box">
-                                                        <Spinner attrSpinner={{ className: 'loader-6' }} />
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
                                                     </div>
-                                                ) : 'No options found'
+                                                ) : (
+                                                    "No options found"
+                                                )
                                             }
                                             onChange={(option) => {
                                                 field.onChange(option);
@@ -629,12 +902,16 @@ const AddNewBtn = (props) => {
                             </Col>
                         </FormGroup>
                     </Col>
-                    {/* <Col md="6" className="mb-3">
+                    <Col md="6" className="mb-3">
                         <FormGroup className="row">
-
-                            <Label className="col-sm-4 col-form-label" for="validationCustom01">Currency</Label>
+                            <Label
+                                className="col-sm-4 col-form-label"
+                                for="validationCustom01"
+                            >
+                                Currency
+                            </Label>
                             <Col sm="8">
-                                <Controller
+                                {/* <Controller
                                     name="currency"
                                     control={control}
                                     rules={{ required: true }}
@@ -650,10 +927,54 @@ const AddNewBtn = (props) => {
 
                                         />
                                     )}
+                                /> */}
+                                <Controller
+                                    name="currency"
+                                    control={control}
+                                    rules={{ required: true }}
+                                    render={({ field }) => (
+                                        <Select
+                                            {...field}
+                                            value={
+                                                selectedOptionC ||
+                                                props?.Currency
+                                            }
+                                            options={optionsC}
+                                            onInputChange={(inputValue) =>
+                                                handleInputChange(
+                                                    inputValue,
+                                                    "currency",
+                                                    "Currency",
+                                                    setOptionsC,
+                                                    optionsC
+                                                )
+                                            }
+                                            className="js-example-basic-single col-sm-12"
+                                            isSearchable
+                                            noOptionsMessage={() =>
+                                                loading2 ? (
+                                                    <div className="loader-box">
+                                                        <Spinner
+                                                            attrSpinner={{
+                                                                className:
+                                                                    "loader-6",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    "No options found"
+                                                )
+                                            }
+                                            onChange={(option) => {
+                                                setSelectedOptionC(option);
+                                                field.onChange(option.value);
+                                            }}
+                                        />
+                                    )}
                                 />
                             </Col>
                         </FormGroup>
-                    </Col> */}
+                    </Col>
                 </Row>
                 {/* <Row className="g-0">
                     <Col  >
@@ -662,7 +983,6 @@ const AddNewBtn = (props) => {
                         <span style={{ color: '#dc3545', fontStyle: 'italic' }}>{errors.Language && 'Language name is required'}</span>
                     </Col>
                 </Row> */}
-
             </CommonModal>
         </Fragment>
     );

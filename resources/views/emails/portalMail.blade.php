@@ -4,7 +4,7 @@
 
 <head>
 
-    <title>Lingo Talents</title>
+    <title>Nexus | Site Manager</title>
 
 </head>
 

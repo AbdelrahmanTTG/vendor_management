@@ -334,7 +334,7 @@ const [openId, setOpenId] = useState(null);
                                 </Col>
                             )}
                         </Row>
-                        <Col md="6" className="mb-3">
+                        {/* <Col md="6" className="mb-3">
                             <Label
                                 className="col-sm-4 col-form-label"
                                 for="validationCustom01"
@@ -396,13 +396,14 @@ const [openId, setOpenId] = useState(null);
                                     )}
                                 />
                             </Col>
-                        </Col>
+                        </Col> */}
                         <Col
                             md="12"
                             className="d-flex justify-content-end mb-3"
                         >
                             {props.backPermissions?.add == 1 &&
-                                selectedOptionC && (
+                                // selectedOptionC &&
+                                (
                                     <LazyWrapper>
                                         <Model
                                             currency={selectedOptionC}

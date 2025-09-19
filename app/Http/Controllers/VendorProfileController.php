@@ -1179,9 +1179,9 @@ class VendorProfileController extends Controller
                     'brand'   => $vendor_brand,
                 ];
 
-                Mail::to($receiver_email)->send(new VMmail($details, $vm_email));
+                Mail::to($receiver_email) ->send(new VMmail($details, $vm_email))->from($vm_email, 'Support Team');
 
-                event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
+                // event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
             }
 
             return response()->json([
@@ -2428,7 +2428,7 @@ class VendorProfileController extends Controller
             'rate' => 'required|numeric',
             'special_rate' => 'nullable|numeric',
             'Status' => 'required|string',
-            'currency' => 'nullable|integer',
+            'currency' => 'required|integer',
             'sheet_brand' => 'required|integer',
         ]);
         if ($validator->fails()) {

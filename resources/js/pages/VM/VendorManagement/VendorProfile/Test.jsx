@@ -201,6 +201,7 @@ const Test = (props) => {
     useEffect(() => {
         if (props.VendorTestData) {
             if (props.VendorTestData.VendorTestData) {
+                setIsChecked(true)
                 const data = props.VendorTestData.VendorTestData
                 setSelectedOption(data?.test_type)
                 setTestResult(data?.test_result)
