@@ -1179,10 +1179,9 @@ class VendorProfileController extends Controller
                     'brand'   => $vendor_brand,
                 ];
 
-                Mail::to($receiver_email) ->send(new VMmail($details, $vm_email))->from($vm_email, 'Support Team');
-
-                // event(new Message($content, base64_encode(app('encrypt')($receiver_email))));
+                Mail::to($receiver_email)->send(new VMmail($details, $vm_email));
             }
+
 
             return response()->json([
                 'Message' => "The message has been sent.",

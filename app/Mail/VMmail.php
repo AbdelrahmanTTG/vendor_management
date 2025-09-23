@@ -45,19 +45,31 @@ class VMmail extends Mailable
             view: 'emails.VMmail',
         );
     }
+    // public function build()
+    // {
+    //     return $this->from($this->sender_email,null)
+    //     ->view('emails.VMmail')
+    //     ->with([
+    //         'title' => $this->details['title'],
+    //         'body'  => $this->details['body'],
+    //         'brand'  => $this->details['brand'],
+
+
+    //     ]);
+    // }
     public function build()
     {
-        return $this->from($this->sender_email,null)
-        ->view('emails.VMmail')
-        ->with([
-            'title' => $this->details['title'],
-            'body'  => $this->details['body'],
-            'brand'  => $this->details['brand'],
-
-
-        ]);
+        return $this->from(config('mail.from.address'), config('mail.from.name'))
+            ->replyTo($this->sender_email) 
+            ->view('emails.VMmail')
+            ->with([
+                'title' => $this->details['title'],
+                'body'  => $this->details['body'],
+                'brand' => $this->details['brand'],
+            ]);
     }
-    
+
+
     /**
      * Get the attachments for the message.
      *
