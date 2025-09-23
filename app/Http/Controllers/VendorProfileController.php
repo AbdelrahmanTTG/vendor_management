@@ -1140,7 +1140,7 @@ class VendorProfileController extends Controller
                 return response()->json(['error' => 'Vendor not found'], 404);
             }
 
-            $vendor_brand = $vendor->brand;
+            $vendor_brand = $vendor->vendor_brands;
 
             if ($vendor_brand == 1) {
                 $subject   = "TTG || Nexus New Notification";
@@ -1647,7 +1647,7 @@ class VendorProfileController extends Controller
             $vendor->password = base64_encode($password);
             $vendor->save();
             $nexusLink = env('NEXUS_LINK');
-            switch ($vendor->brand) {
+            switch ($vendor->vendor_brands) {
                 case 1: 
                     $subject   = "TTG || Nexus New Profile";
                     $vm_email  = "vm.support@thetranslationgate.com";
