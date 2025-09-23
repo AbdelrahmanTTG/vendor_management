@@ -673,11 +673,11 @@ class VendorProfileController extends Controller
 
         if ($request->VendorSide == true) {
             $brand = $vendor->vendor_brands;
-            $from = "vm@thetranslationgate.com"; 
+            $from = "vm.support@thetranslationgate.com"; 
             $cc = [$from];
 
             if ($brand == 1) {
-                $from = "vm@thetranslationgate.com";
+                $from = "vm.support@thetranslationgate.com";
                 $cc = [$from];
             } elseif ($brand == 2) {
                 $from = "vm.support@localizera.com";
@@ -1144,7 +1144,7 @@ class VendorProfileController extends Controller
 
             if ($vendor_brand == 1) {
                 $subject   = "TTG || Nexus New Notification";
-                $vm_email  = "vm@thetranslationgate.com";
+                $vm_email  = "vm.support@thetranslationgate.com";
             } elseif ($vendor_brand == 3) {
                 $subject   = "Europe Localize || Nexus New Notification";
                 $vm_email  = "vm.support@europelocalize.com";
@@ -1400,11 +1400,11 @@ class VendorProfileController extends Controller
         $vendor = Vendor::find($decID);
         if ($request->VendorSide == true) {
             $brand = $vendor->vendor_brands;
-            $from = "vm@thetranslationgate.com";  
+            $from = "vm.support@thetranslationgate.com";  
             $cc = [$from];
 
             if ($brand == 1) {
-                $from = "vm@thetranslationgate.com";
+                $from = "vm.support@thetranslationgate.com";
                 $cc = [$from];
             } elseif ($brand == 2) {
                 $from = "vm.support@localizera.com";
@@ -1643,7 +1643,7 @@ class VendorProfileController extends Controller
             switch ($vendor->brand) {
                 case 1: 
                     $subject   = "TTG || Nexus New Profile";
-                    $vm_email  = "vm@thetranslationgate.com";
+                    $vm_email  = "vm.support@thetranslationgate.com";
                     break;
 
                 case 3: 
