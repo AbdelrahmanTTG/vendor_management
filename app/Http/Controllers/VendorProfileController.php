@@ -1145,18 +1145,23 @@ class VendorProfileController extends Controller
             if ($vendor_brand == 1) {
                 $subject   = "TTG || Nexus New Notification";
                 $vm_email  = "vm.support@thetranslationgate.com";
+                $_brand = 'The translation gate';
             } elseif ($vendor_brand == 3) {
                 $subject   = "Europe Localize || Nexus New Notification";
                 $vm_email  = "vm.support@europelocalize.com";
+                $_brand = 'Europe Localize';
             } elseif ($vendor_brand == 11) {
                 $subject   = "ColumbusLang || Nexus New Notification";
                 $vm_email  = "vm.support@columbuslang.com";
+                $_brand = 'ColumbusLang';
             } elseif ($vendor_brand == 2) {
                 $subject   = "Localizera || Nexus New Notification";
                 $vm_email  = "vm.support@localizera.com";
+                $_brand = 'Localizera';
             } else {
                 $subject   = "Nexus || New Notification";
-                $vm_email  = env('MAIL_FROM_ADDRESS');
+                $_brand = 'Nexus';
+                $vm_email  = 'vm.support@nexus.com';
             }
 
             $data = Messages::updateOrCreate(
@@ -1174,9 +1179,9 @@ class VendorProfileController extends Controller
             if ($status == 1) {
                 $details = [
                     'subject' => $subject,
-                    'title'   => 'Notification',
+                    'title'   => 'notifications',
                     'body'    => $content,
-                    'brand'   => $vendor_brand,
+                    'brand'   => $_brand,
                 ];
                 Mail::to($receiver_email)
                     ->send(

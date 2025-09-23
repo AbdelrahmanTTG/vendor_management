@@ -29,12 +29,18 @@ class VMmail extends Mailable
         );
     }
 
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.VMmail',
-        );
-    }
+   public function content(): Content
+{
+    return new Content(
+        view: 'emails.VMmail',
+        with: [
+            'title' => $this->details['title'],
+            'body' => $this->details['body'],
+            'brand' => $this->details['brand'],
+        ],
+    );
+}
+
 
     /**
      * Get the attachments for the message.
