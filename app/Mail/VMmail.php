@@ -33,8 +33,14 @@ class VMmail extends Mailable
     {
         return new Content(
             view: 'emails.VMmail',
+            with: [
+                'title' => $this->details['title'],
+                'body' => $this->details['body'],
+                'brand' => $this->details['brand'],
+            ],
         );
     }
+
 
     /**
      * Get the attachments for the message.
