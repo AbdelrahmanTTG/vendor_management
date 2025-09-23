@@ -37,22 +37,5 @@
 </style>
 @endsection
 
-<div class="email-container">
-    <div class="email-header">Dear vendor,</div>
-    <div class="email-content">
-@if( $details['title'] == 'Create_password')
-        <p>A password has been created for your account.</p>
-        <p>Your new password is <strong>{{ $body }}</strong></p>
-@endif
-@if( $details['title'] == 'notifications')
-        <p>You have a new notification</p>
-        <p> <strong>{!! $body !!}</strong></p>
-@endif
-    </div>
-    <div class="email-footer">
-        <p>Thank you,</p>
-        <p>Vendor Management Team</p>
-        <p>{{ $brand }}</p>
-    </div>
-</div>
+
 
