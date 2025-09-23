@@ -1178,8 +1178,11 @@ class VendorProfileController extends Controller
                     'body'    => $content,
                     'brand'   => $vendor_brand,
                 ];
-
-                Mail::to($receiver_email)->send(new VMmail($details, $vm_email));
+                Mail::to($receiver_email)
+                    ->send(
+                        (new VMmail($details))->from($vm_email, 'Support Team')
+                    );
+                // Mail::to($receiver_email)->send(new VMmail($details, $vm_email));
             }
 
 
