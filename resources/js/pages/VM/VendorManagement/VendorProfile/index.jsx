@@ -1473,7 +1473,7 @@ const Vendor = (props) => {
                                                 </Col>
                                             )}
                                             {selectedSearchCol.indexOf(
-                                                "anotherNumber"
+                                                "AnotherNumber"
                                             ) > -1 && (
                                                 <Col md="3">
                                                     <FormGroup id="anotherNumberInput">
