@@ -18,7 +18,16 @@ class BrandUsers extends Model
         $query = self::whereIn("role", $role)->select('id', 'user_name');
         return $query->get();
     }
+    public static function SelectData($searchTerm = null)
+    {
 
+        if ($searchTerm) {
+            $query = self::where('user_name', 'like', '%' . $searchTerm . '%')->where('status', 1);
+        } else {
+            $query = self::select('id', 'user_name')->where('status', 1)->limit(5);
+        }
+        return $query->get();
+    }
     public static function SelectPmData()
     {
         $role = ['2,29,16,42,43,45,47,52'];

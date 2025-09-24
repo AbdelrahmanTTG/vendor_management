@@ -23,7 +23,8 @@ class TicketTimeResource extends JsonResource
     {
         return [
             
-            'status' => $this->getStatus(), 
+            'status' => $this->getStatus(),
+            'assign_to' => $this->assigned_to?->user_name,
             'created_by' => $this->user?$this->user->user_name:$this->created_by,         
             'created_at' => $this->created_at,                    
            

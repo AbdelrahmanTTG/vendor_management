@@ -665,3 +665,4 @@ ALTER TABLE `payment_requests` ADD `entry_exit` TINYINT NULL AFTER `user_id`;
 INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`,`use_system`) VALUES ('296', '1', 'Dashboard', 'admin/Excel', '0','ERP');
  CREATE TABLE `vendors_mother_tongue` ( `id` int UNSIGNED NOT NULL AUTO_INCREMENT, `vendor_id` int NOT NULL, `language_id` int NOT NULL, `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   ALTER TABLE `vm_ticket` ADD `requester_function` TINYINT(1) NULL COMMENT '1:sales/2:pm' AFTER `brand_id`;
+  ALTER TABLE `vm_ticket_time` ADD `assign_to` INT NULL AFTER `status`;

@@ -672,6 +672,7 @@ const ViewTicket = (props) => {
                                         <tr>
                                             <th>Username</th>
                                             <th>Ticket Status</th>
+                                            <th>Assigned To</th>
                                             <th>Created At</th>
                                         </tr>
                                     </thead>
@@ -681,6 +682,8 @@ const ViewTicket = (props) => {
                                                 {ticketData.created_by}
                                             </td>
                                             <td>New</td>
+                                            <td></td>
+
                                             <td>
                                                 {ticketData.created_at}
                                             </td>
@@ -692,6 +695,9 @@ const ViewTicket = (props) => {
                                                         <td scope="row">{item.created_by}</td>
                                                         <td scope="row">
                                                             {item.status}
+                                                        </td>
+                                                        <td scope="row">
+                                                            {item?.assign_to}
                                                         </td>
                                                         <td scope="row">{item.created_at}</td>
                                                     </tr>

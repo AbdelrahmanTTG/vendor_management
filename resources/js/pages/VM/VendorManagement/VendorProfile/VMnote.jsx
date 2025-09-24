@@ -62,6 +62,11 @@ const VMnote = (props) => {
             if (response.data.data.content) { 
                 response.data.data.content = response?.data?.data?.content?.replace(/<[^>]*>/g, '');
                 setMessages([response.data.data]);
+                showToast(
+                    "success",
+                    "Sent successfully"
+                );
+
             } else {
                 setMessages([]);
             }

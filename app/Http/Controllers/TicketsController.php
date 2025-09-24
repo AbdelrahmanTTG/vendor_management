@@ -311,14 +311,15 @@ class TicketsController extends Controller
                     $data2['assigned_to'] = $user;
                     $result->update($data2);
                 }
-                $this->addTicketTimeStatus($id, $user, 2);
+                $this->addTicketTimeStatus($id, $user, 2, '');
             }
         }
     }
-    public function addTicketTimeStatus($ticket, $user, $status)
+    public function addTicketTimeStatus($ticket, $user, $status , $assign_to)
     {
         $time['status'] = $status;
         $time['ticket'] = $ticket;
+        $time['assign_to'] = $assign_to;
         $time['created_by'] = $user;
         $time['created_at'] = date("Y-m-d H:i:s");
         VmTicketTime::create($time);
@@ -757,7 +758,7 @@ class TicketsController extends Controller
             if ($status == 0) {
                 $comment = $request->comment;
                 if ($ticket->update(['status' => $status, 'rejection_reason' => $comment])) {
-                    $this->addTicketTimeStatus($ticket_id, $user, $status);
+                    $this->addTicketTimeStatus($ticket_id, $user, $status, '');
 
                     $mailData = [
                         'user_name' => $user_name,
@@ -891,7 +892,7 @@ class TicketsController extends Controller
 
             if ($status == 3) {
                 $ticket->update(['status' => 5]);
-                $this->addTicketTimeStatus($ticket_id, $user, 5);
+                $this->addTicketTimeStatus($ticket_id, $user, 5 , '');
 
                 $mailData = [
                     'user_name' => $user_name,
@@ -922,7 +923,7 @@ class TicketsController extends Controller
                 $message .= "Ticket Status Changed Successfully ...<br/>";
             } elseif ($status == 4) {
                 $ticket->update(['status' => $status]);
-                $this->addTicketTimeStatus($ticket_id, $user, $status);
+                $this->addTicketTimeStatus($ticket_id, $user, $status , '');
 
                 $mailData = [
                     'user_name' => $user_name,
@@ -1024,7 +1025,7 @@ class TicketsController extends Controller
             if (empty($ticket->assigned_to)) {
                 $data['assigned_to'] = $vm_id;
                 if ($ticket->update($data)) {
-                    $this->addTicketTimeStatus($ticket_id, $user, 6);
+                    $this->addTicketTimeStatus($ticket_id, $user, 6 , $ticket->assigned_to);
                     try {
                         $to = BrandUsers::select('email', 'user_name')->where('id', $vm_id)->first();
                         $ccEmail = BrandUsers::select('email')->where('id', $user)->first()->email;

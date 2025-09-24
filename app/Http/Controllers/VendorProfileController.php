@@ -28,6 +28,7 @@ use App\Models\Formatstable;
 use App\Mail\VMmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
+use App\Models\DataLogger;
 
 use App\Http\Controllers\InvoiceController;
 use App\Mail\UpdateDataMail;
@@ -94,15 +95,9 @@ class VendorProfileController extends Controller
         $relationships = [
             'country' => ['id', 'name'],
             'nationality' => ['id', 'name'],
-            'region' => ['id', 'name'],            
-            "timezone" => ['id', 'gmt'],            
-            // "major" => ['id', 'name'],
-            // "source_lang" => ['id', 'name'],
-            // "target_lang" => ['id', 'name'],
-            // "main_subject" => ['id', 'name'],
-            // "sub_subject" => ['id', 'name'],
-            
-
+            'region' => ['id', 'name'],
+            "timezone" => ['id', 'gmt'],
+            'created_by' => ['id', 'user_name'],
         ];
 
         $vendorColumns = Schema::getColumnListing('vendor');
@@ -110,31 +105,44 @@ class VendorProfileController extends Controller
 
         $relatedColumns = array_diff($formatArray, $vendorColumns);
         $relatedColumns = array_diff($relatedColumns, $vendorSheet);
+
+        // Handle created_by specifically - if it's in formatArray or queryParams, include it from vendor table
+        $includeCreatedBy = false;
+        if (in_array('created_by', $formatArray)) {
+            $includeCreatedBy = true;
+        }
+
+        // Check if created_by is requested in queryParams
+        if ($request->has('queryParams') && is_array($request->queryParams)) {
+            if (array_key_exists('created_by', $request->queryParams) && !empty($request->queryParams['created_by'])) {
+                $includeCreatedBy = true;
+                // Add to formatArray if not already there
+                if (!in_array('created_by', $formatArray)) {
+                    $formatArray[] = 'created_by';
+                }
+            }
+        }
+
         $relatedColumns = array_filter($relatedColumns, function ($column) {
             return $column !== 'priceList';
         });
         $relatedColumns = array_values($relatedColumns);
+
         $intersectColumns = array_intersect($formatArray, $vendorColumns);
         $intersectColumnsVendorSheet = array_intersect($formatArray, $vendorSheet);
+
+        // Ensure created_by is included in intersectColumns if needed
+        if ($includeCreatedBy && !in_array('created_by', $intersectColumns)) {
+            $intersectColumns[] = 'created_by';
+        }
 
         if (!empty($intersectColumns)) {
             $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands')
                 ->addSelect(DB::raw(implode(',', $intersectColumns)));
-            // if ($user->use_type != 2 && $view != 3 ) {
-            //     $vendorsQuery->whereIn('created_by', $piv);
-            //     if (count($piv) > 1) {
-            //         $vendorsQuery->orWhereNull('created_by');
-            //     }
-            // }
         } else {
             $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands');
-            // if ($user->use_type !=2 && $view != 3) {
-            //     $vendorsQuery->whereIn('created_by', $piv);
-            //     if (count($piv) > 1) {
-            //         $vendorsQuery->orWhereNull('created_by');
-            //     }
-            // }
         }
+
         if (in_array('priceList', $formatArray) || !empty($intersectColumnsVendorSheet)) {
             if (!in_array('priceList', $formatArray)) {
                 $middleIndex = intval(count($formatArray) / 2);
@@ -148,8 +156,11 @@ class VendorProfileController extends Controller
                 ->with([
                     'vendor_sheet' => function ($query) use ($formatArray, $vendorSheet) {
                         $selectedColumns = array_intersect($formatArray, $vendorSheet);
+                        // Remove created_by from vendor_sheet selection to avoid conflict
+                        $selectedColumns = array_diff($selectedColumns, ['created_by']);
+
                         if (empty($selectedColumns)) {
-                            $selectedColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target","sheet_brand"];
+                            $selectedColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target", "sheet_brand"];
                         }
                         $query->select(array_merge(['id', "vendor"], $selectedColumns));
                         foreach ($selectedColumns as $relation) {
@@ -160,6 +171,7 @@ class VendorProfileController extends Controller
                     }
                 ]);
         }
+
         if (!empty($relatedColumns)) {
             $joinCount = 0;
             foreach ($relatedColumns as $relation) {
@@ -181,11 +193,16 @@ class VendorProfileController extends Controller
                 }
             }
         }
+
         $diffFormatArray = $formatArray;
         $formatArray = array_diff($formatArray, $vendorSheet);
+        // Don't remove created_by from formatArray if it should come from vendor table
+        if ($includeCreatedBy && !in_array('created_by', $formatArray)) {
+            $formatArray[] = 'created_by';
+        }
         $formatArray = array_values($formatArray);
-        if ($request->has('queryParams') && is_array($request->queryParams)) {
 
+        if ($request->has('queryParams') && is_array($request->queryParams)) {
             $queryParams = $request->queryParams;
             if (!empty($queryParams['timezone_from']) && !empty($queryParams['timezone_to'])) {
                 $timezoneFrom = $queryParams['timezone_from'][0];
@@ -218,7 +235,12 @@ class VendorProfileController extends Controller
                         }
                     } else {
                         if (!in_array($key, $formatArray)) {
-                            $vendorsQuery->addSelect($key);
+                            // For created_by, don't add it again if it's already selected from vendor table
+                            if ($key === 'created_by' && $includeCreatedBy) {
+                                // It's already included in intersectColumns
+                            } else {
+                                $vendorsQuery->addSelect($key);
+                            }
                             $formatArray[] = $key;
                         }
                     }
@@ -244,6 +266,7 @@ class VendorProfileController extends Controller
                     }
                 }
             }
+
             if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empty($queryParams['filters'])) {
                 foreach ($queryParams['filters'] as $filter) {
                     if (method_exists(Vendor::class, $filter['table'])) {
@@ -270,8 +293,11 @@ class VendorProfileController extends Controller
                                 });
                             });
                             $selectedColumnsRow = array_intersect($diffFormatArray, $vendorSheet);
+                            // Remove created_by from vendor_sheet columns
+                            $selectedColumnsRow = array_diff($selectedColumnsRow, ['created_by']);
+
                             if (empty($selectedColumnsRow)) {
-                                $selectedColumnsRow = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target","sheet_brand"];
+                                $selectedColumnsRow = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target", "sheet_brand"];
                             }
                             if (!in_array('priceList', $formatArray)) {
                                 $formatArray[] = 'priceList';
@@ -279,7 +305,7 @@ class VendorProfileController extends Controller
                             }
                             $selectedColumns = (array_merge(['id', "vendor"], $selectedColumnsRow));
                             foreach ($filter['columns'] as $columnFilter) {
-                                if (!empty($columnFilter['column'])) {
+                                if (!empty($columnFilter['column']) && $columnFilter['column'] !== 'created_by') {
                                     $selectedColumns[] = $columnFilter['column'];
                                 }
                             }
@@ -304,6 +330,8 @@ class VendorProfileController extends Controller
                                     }
                                 });
                                 $relatedColumns = array_column($filter['columns'], 'column');
+                                // Remove created_by from related columns for vendor_sheet
+                                $relatedColumns = array_diff($relatedColumns, ['created_by']);
                                 $mergedColumns = array_unique(array_merge($relatedColumns, $selectedColumnsRow));
                                 $query->with($relatedColumns);
                                 foreach ($mergedColumns as $relation) {
@@ -346,7 +374,12 @@ class VendorProfileController extends Controller
                             }]);
                             foreach ($filter['columns'] as $columnFilter) {
                                 if (!empty($columnFilter['column'])) {
-                                    $formatArray[] = $columnFilter['column'];
+                                    // For created_by, don't add it again if it's already from vendor table
+                                    if ($columnFilter['column'] === 'created_by' && $includeCreatedBy) {
+                                        // Skip, already handled
+                                    } else {
+                                        $formatArray[] = $columnFilter['column'];
+                                    }
                                 }
                             }
                         }
@@ -363,7 +396,6 @@ class VendorProfileController extends Controller
                 $vendorsQuery = $vendorsQuery->orderBy($sortBy, $sortDirection);
             }
         }
-
 
         $formatArray = array_map(function ($column) {
             if (strpos($column, '.') !== false) {
@@ -382,9 +414,6 @@ class VendorProfileController extends Controller
         $totalVendors = $vendorsQuery->count();
 
         if ($request->has('export') && $request->input('export') === true) {
-            // ini_set('memory_limit', '10284M');
-            // $AllVendors = $vendorsQuery->get()->toArray();
-            // $AllVendors = $this->flattenVendorsWithSheets($AllVendors);
             $AllVendors = [];
             $vendorsQuery->chunk(100, function ($vendorsChunk) use (&$AllVendors) {
                 $flattenedVendors = $this->flattenVendorsWithSheets($vendorsChunk->toArray());
@@ -393,7 +422,7 @@ class VendorProfileController extends Controller
             $diffFormatArrayEx = [];
             $diffFormatArrayEx = array_merge($diffFormatArrayEx, $diffFormatArray);
             if (empty(array_intersect($diffFormatArray, $vendorSheet)) && in_array('priceList', $diffFormatArray)) {
-                $diffFormatArrayEx = array_merge($diffFormatArrayEx, ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target","sheet_brand"]);
+                $diffFormatArrayEx = array_merge($diffFormatArrayEx, ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target", "sheet_brand"]);
             }
             $diffFormatArrayEx = array_map(function ($column) use ($diffFormatArrayEx) {
                 if (strpos($column, '.') !== false) {
@@ -408,6 +437,7 @@ class VendorProfileController extends Controller
             }, $diffFormatArrayEx);
             $diffFormatArrayEx = array_values(array_diff($diffFormatArrayEx, ['priceList']));
         }
+
         $formatArray = array_unique(array_merge(['id'], $formatArray));
         $perPage = $request->input('per_page', 10);
         $vendors = $vendorsQuery->paginate($perPage);
@@ -423,8 +453,6 @@ class VendorProfileController extends Controller
             return $this->flattenObject($vendor, $tableKeys);
         }, $vendorsData['data']);
         $vendors->setCollection(collect($flattenedVendors));
-
-
 
         return response()->json([
             "vendors" => $vendors,
@@ -554,13 +582,16 @@ class VendorProfileController extends Controller
             'reject_reason' => 'nullable|string',
             'vendor_brands' => 'required|string',
             'profile_status' => 'nullable|string',
-            'mother_tongue_language' => 'nullable|array', 
-            'mother_tongue_language.*.value' => 'required|int' 
+            'mother_tongue_language' => 'nullable|array',
+            'mother_tongue_language.*.value' => 'required|int'
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
 
         $vendor = Vendor::create($validator->validated());
 
@@ -583,6 +614,15 @@ class VendorProfileController extends Controller
             }
         }
 
+        DataLogger::addToLogger(
+            $userId,
+            'create_vendor',
+            $request->fullUrl(),
+            'vendor',
+            $request->all(),
+            $vendor->id
+        );
+
         return response()->json([
             'message' => 'Vendor created successfully!',
             'vendor' => [
@@ -591,7 +631,6 @@ class VendorProfileController extends Controller
             ]
         ], 201);
     }
-
 
     public function updatePersonalInfo(Request $request)
     {
@@ -648,7 +687,9 @@ class VendorProfileController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
         $vendor->update($validator->validated());
+
         if ($request->has('mother_tongue_language') && is_array($request->mother_tongue_language)) {
             DB::table('vendors_mother_tongue')
                 ->where('vendor_id', $vendor->id)
@@ -671,9 +712,21 @@ class VendorProfileController extends Controller
             }
         }
 
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
+        DataLogger::addToLogger(
+            $userId,
+            'update_vendor',
+            $request->fullUrl(),
+            'vendor',
+            $request->all(),
+            $vendor->id
+        );
+
         if ($request->VendorSide == true) {
             $brand = $vendor->vendor_brands;
-            $from = "vm.support@thetranslationgate.com"; 
+            $from = "vm.support@thetranslationgate.com";
             $cc = [$from];
 
             if ($brand == 1) {
@@ -703,7 +756,6 @@ class VendorProfileController extends Controller
                 ->cc($cc)
                 ->send(new UpdateDataMail($mailData));
         }
-
 
         return response()->json([
             'message' => 'Vendor updated successfully!',
@@ -810,7 +862,6 @@ class VendorProfileController extends Controller
     //     ], 200);
     // }
 
-
     public function storeBilling(Request $request)
     {
         if ($request['wallet_required'] == 0 && $request['bank_required']) {
@@ -820,6 +871,7 @@ class VendorProfileController extends Controller
                 'code' => 422
             ]);
         }
+
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required|integer',
             'billing_currency' => 'required|integer',
@@ -882,8 +934,6 @@ class VendorProfileController extends Controller
             'billing_status' => "2",
             'bank_required' => $request['bank_required'],
             'wallet_required' => $request['wallet_required'],
-
-
         ]);
 
         if (
@@ -894,7 +944,7 @@ class VendorProfileController extends Controller
             $request->filled('payment_terms') &&
             $request->filled('bank_address')
         ) {
-            $bankDetails = BankDetails::create([
+            BankDetails::create([
                 'billing_data_id' => $billingData->id,
                 'bank_name' => $request['bank_name'],
                 'account_holder' => $request['account_holder'],
@@ -918,11 +968,25 @@ class VendorProfileController extends Controller
             }
         }
 
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
+        DataLogger::addToLogger(
+            $userId,
+            'create_billing',
+            $request->fullUrl(),
+            'billing_data',
+            $request->all(),
+            $billingData->id
+        );
+
         $InvoiceController = new InvoiceController();
         $decID = Crypt::encrypt($request->input('vendor_id'));
         $BillingData = $InvoiceController->getVendorBillingData($decID);
+
         return response()->json($BillingData, 200);
     }
+
 
     public function ModificationComplex(Request $request)
     {
@@ -1037,7 +1101,7 @@ class VendorProfileController extends Controller
             'nationality:id,name',
             'region:id,name',
             'timezone:id,gmt',
-            'motherTongueLanguages.language:id,name' 
+            'motherTongueLanguages.language:id,name'
         ])->findOrFail($id);
 
         $vendor->mother_tongue_languages = $vendor->motherTongueLanguages->map(function ($item) {
@@ -1129,6 +1193,9 @@ class VendorProfileController extends Controller
                 return response()->json($validator->errors(), 422);
             }
 
+            $user = JWTAuth::parseToken()->authenticate();
+            $userId = $user->id;
+
             $sender_email   = app('decrypt')(base64_decode($request->input('sender_id')));
             $receiver_email = $request->input('receiver_id');
             $content        = $request->input('content');
@@ -1187,9 +1254,16 @@ class VendorProfileController extends Controller
                     ->send(
                         (new VMmail($details))->from($vm_email, 'Support Team')
                     );
-                // Mail::to($receiver_email)->send(new VMmail($details, $vm_email));
             }
 
+            DataLogger::addToLogger(
+                $userId,
+                'send_message_vm_to_vendor',
+                $request->fullUrl(),
+                'messages',
+                $request->all(),
+                $data->id
+            );
 
             return response()->json([
                 'Message' => "The message has been sent.",
@@ -1208,7 +1282,6 @@ class VendorProfileController extends Controller
             ], 500);
         }
     }
-
     public function Message_VM_to_PM(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -1218,6 +1291,10 @@ class VendorProfileController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
         $id = $request->input('id');
         $pm = $request->input('PM');
         $vendor = Vendor::find($id);
@@ -1227,28 +1304,76 @@ class VendorProfileController extends Controller
                 'message' => 'Vendor not found'
             ], 404);
         }
+
         $vendor->update(['PM' => $pm]);
+
+        DataLogger::addToLogger(
+            $userId,
+            'update_vendor_PM',
+            $request->fullUrl(),
+            'vendor',
+            ['PM' => $pm],
+            $vendor->id
+        );
 
         return response()->json([
             'message' => 'Vendor updated successfully',
             'vendor' => $vendor
         ], 200);
     }
+
+
     public function deleteWalletsPayment(Request $request)
     {
         $id = $request->input('id');
         $WalletsPaymentMethods = WalletsPaymentMethods::find($id);
+
+        if (!$WalletsPaymentMethods) {
+            return response()->json(['message' => 'Wallet not found'], 404);
+        }
+
         if ($WalletsPaymentMethods->defaults == 1) {
             return response()->json([
                 'message' => 'Cannot delete before default wallet is selected'
             ], 500);
         }
+
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
+        DataLogger::addToLogger(
+            $userId,
+            'delete_wallet_payment',
+            $request->fullUrl(),
+            'wallets_payment_methods',
+            $WalletsPaymentMethods->toArray(),
+            $WalletsPaymentMethods->id
+        );
+
         return $this->deleteItem($request, WalletsPaymentMethods::class);
     }
+
     public function deleteSkill(Request $request)
     {
-        return $this->deleteItem($request, VendorSkill::class);
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
+        $response = $this->deleteItem($request, VendorSkill::class);
+
+        if ($response->getStatusCode() === 200) {
+            DataLogger::addToLogger(
+                $userId,
+                'delete_skill',
+                $request->fullUrl(),
+                'vendor_skills',
+                $request->all(),
+                $request->id ?? null
+            );
+        }
+
+        return $response;
     }
+
     public function updateBillingData(Request $request)
     {
         $hasBankDetails = $request->filled('bank_name') && $request->filled('account_holder') && $request->filled('swift_bic') && $request->filled('iban');
@@ -1280,7 +1405,6 @@ class VendorProfileController extends Controller
             'Wallets Payment methods.*.method' => 'int|max:10',
             'Wallets Payment methods.*.account' => 'string|max:255',
             'Wallets Payment defaults.*.defaults' => 'int|max:1',
-
         ]);
 
         $validator->after(function ($validator) use ($request) {
@@ -1385,7 +1509,6 @@ class VendorProfileController extends Controller
                             'method' => $wallet['method'],
                             'account' => $wallet['account'],
                             'defaults' => $wallet['defaults'],
-
                         ]);
                     }
                 } else {
@@ -1394,7 +1517,6 @@ class VendorProfileController extends Controller
                         'method' => $wallet['method'],
                         'account' => $wallet['account'],
                         'defaults' => $wallet['defaults'],
-
                     ]);
                 }
             }
@@ -1407,7 +1529,7 @@ class VendorProfileController extends Controller
         $vendor = Vendor::find($decID);
         if ($request->VendorSide == true) {
             $brand = $vendor->vendor_brands;
-            $from = "vm.support@thetranslationgate.com";  
+            $from = "vm.support@thetranslationgate.com";
             $cc = [$from];
 
             if ($brand == 1) {
@@ -1438,8 +1560,21 @@ class VendorProfileController extends Controller
                 ->send(new UpdateDataMail($mailData));
         }
 
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
+        DataLogger::addToLogger(
+            $userId,
+            'update_billing_data',
+            $request->fullUrl(),
+            'billing_data',
+            $request->all(),
+            $billingData->id
+        );
+
         return response()->json($BillingData, 200);
     }
+
     // public function updateBillingData(Request $request)
     // {
     //     $hasBankDetails = $request->filled('bank_name') && $request->filled('account_holder') && $request->filled('swift_bic') && $request->filled('iban');
@@ -1634,12 +1769,17 @@ class VendorProfileController extends Controller
 
     //     return response()->json(['message' => 'Vendor not found'], 404);
     // }
+
     public function setPassword(Request $request)
     {
         $request->validate([
             'email' => 'required|email|exists:vendor,email',
             'password' => 'required|min:8',
         ]);
+
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
         $email = $request->input('email');
         $password = $request->input('password');
         $vendor = Vendor::where('email', $email)->first();
@@ -1648,26 +1788,22 @@ class VendorProfileController extends Controller
             $vendor->save();
             $nexusLink = env('NEXUS_LINK');
             switch ($vendor->vendor_brands) {
-                case 1: 
+                case 1:
                     $subject   = "TTG || Nexus New Profile";
                     $vm_email  = "vm.support@thetranslationgate.com";
                     break;
-
-                case 3: 
+                case 3:
                     $subject   = "Europe Localize || Nexus New Profile";
                     $vm_email  = "vm.support@europelocalize.com";
                     break;
-
-                case 11: 
+                case 11:
                     $subject   = "ColumbusLang || Nexus New Profile";
                     $vm_email  = "vm.support@columbuslang.com";
                     break;
-
-                case 2: 
+                case 2:
                     $subject   = "Localizera || Nexus New Profile";
                     $vm_email  = "vm.support@localizera.com";
                     break;
-
                 default:
                     $subject   = "Nexus || New Profile";
                     $vm_email  = env('MAIL_FROM_ADDRESS');
@@ -1686,11 +1822,21 @@ class VendorProfileController extends Controller
                     ->html($htmlTemplate);
             });
 
+            DataLogger::addToLogger(
+                $userId,
+                'set_password',
+                $request->fullUrl(),
+                'vendor',
+                ['vendor_id' => $vendor->id, 'email' => $vendor->email],
+                $vendor->id
+            );
+
             return response()->json(['message' => 'Password updated successfully'], 200);
         }
 
         return response()->json(['message' => 'Vendor not found'], 404);
     }
+
 
     private function getVendorEmailTemplate($vendor, $brand, $nexusLink)
     {
@@ -1851,6 +1997,9 @@ class VendorProfileController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
         $experienceData = [
             'vendor_id' => $request->input('vendor_id'),
             'started_working' => $request->input('started_working'),
@@ -1871,6 +2020,15 @@ class VendorProfileController extends Controller
             }
         }
 
+        DataLogger::addToLogger(
+            $userId,
+            'add_experience',
+            $request->fullUrl(),
+            'experience',
+            $request->all(),
+            $Experience->id
+        );
+
         $data = $this->getVendorExperience($request->input('vendor_id'));
         return response()->json($data, 201);
     }
@@ -1890,6 +2048,9 @@ class VendorProfileController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
         $Experience = Experience::find($request->input("experience"));
 
         if (!$Experience) {
@@ -1899,12 +2060,28 @@ class VendorProfileController extends Controller
                 'experience_year' => $request->input('experience_year'),
                 'summary' => $request->input('summary'),
             ]);
+            DataLogger::addToLogger(
+                $userId,
+                'create_experience',
+                $request->fullUrl(),
+                'experience',
+                $request->all(),
+                $Experience->id
+            );
         } else {
             $Experience->update($request->only([
                 'started_working',
                 'experience_year',
                 'summary',
             ]));
+            DataLogger::addToLogger(
+                $userId,
+                'update_experience',
+                $request->fullUrl(),
+                'experience',
+                $request->all(),
+                $Experience->id
+            );
         }
 
         if ($request->has('skills')) {
@@ -1917,14 +2094,30 @@ class VendorProfileController extends Controller
                     $skillUpdate->update([
                         'skill_id' => $skillId,
                     ]);
+                    DataLogger::addToLogger(
+                        $userId,
+                        'update_skill',
+                        $request->fullUrl(),
+                        'vendor_skills',
+                        $skill,
+                        $skillUpdate->id
+                    );
                 } else {
                     $skillId = is_numeric($skill['skill'])
                         ? $skill['skill']
                         : Skill::firstOrCreate(['name' => $skill['skill']])->id;
-                    VendorSkill::create([
+                    $newSkill = VendorSkill::create([
                         'vendor_id' => $request->input('vendor_id'),
                         'skill_id' => $skillId,
                     ]);
+                    DataLogger::addToLogger(
+                        $userId,
+                        'create_skill',
+                        $request->fullUrl(),
+                        'vendor_skills',
+                        $skill,
+                        $newSkill->id
+                    );
                 }
             }
         }
@@ -1943,6 +2136,7 @@ class VendorProfileController extends Controller
             })
         ], 200);
     }
+
 
     public function getVendorExperience($vendor_id)
     {
@@ -2010,16 +2204,13 @@ class VendorProfileController extends Controller
             }
         }
 
-
         DB::beginTransaction();
 
         try {
-            // $cvFilePath = $cvFile->store('cv_files');
             $originalFileNameCV = $cvFile->getClientOriginalName();
             $encryptedFileName = Crypt::encrypt($originalFileNameCV);
             $cvFilePath = $cvFile->storeAs('cv_files', $encryptedFileName . '.' . $cvFile->getClientOriginalExtension());
 
-            // $ndaFilePath = $ndaFile->store('nda_files');
             $originalFileNameNDA = $ndaFile->getClientOriginalName();
             $encryptedFileName = Crypt::encrypt($originalFileNameNDA);
             $ndaFilePath = $ndaFile->storeAs('nda_files', $encryptedFileName . '.' . $ndaFile->getClientOriginalExtension());
@@ -2033,6 +2224,7 @@ class VendorProfileController extends Controller
             $vendor->cv = $cvFilePath;
             $vendor->NDA = $ndaFilePath;
             $vendor->save();
+
             $additionalFiles = [];
             foreach ($request->all() as $key => $value) {
                 if (strpos($key, 'file_') === 0) {
@@ -2048,7 +2240,6 @@ class VendorProfileController extends Controller
                         }
                     }
                     if ($file) {
-                        // $filePath = $file->store('other_files');
                         $originalFileName = $file->getClientOriginalName();
                         $encryptedFileName = Crypt::encrypt($originalFileName);
                         $filePath = $file->storeAs('other_files', $encryptedFileName . '.' . $file->getClientOriginalExtension());
@@ -2068,6 +2259,23 @@ class VendorProfileController extends Controller
                 }
             }
 
+            $user = JWTAuth::parseToken()->authenticate();
+            $userId = $user->id;
+
+            DataLogger::addToLogger(
+                $userId,
+                'upload_files',
+                $request->fullUrl(),
+                'vendor',
+                [
+                    'vendor_id' => $vendorId,
+                    'cv' => $cvFilePath,
+                    'nda' => $ndaFilePath,
+                    'additional_files' => $additionalFiles
+                ],
+                $vendor->id
+            );
+
             DB::commit();
 
             return response()->json([
@@ -2082,7 +2290,6 @@ class VendorProfileController extends Controller
 
             return response()->json([
                 'error' => 'An error occurred while processing the request.',
-
             ], 500);
         }
     }
@@ -2091,6 +2298,10 @@ class VendorProfileController extends Controller
         if (!$request->hasFile('nda_file')) {
             return response()->json(['error' => ' NDA files are required.'], 400);
         }
+
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
         $ndaFile = $request->file('nda_file');
         DB::beginTransaction();
         try {
@@ -2099,33 +2310,45 @@ class VendorProfileController extends Controller
             if (!$vendor) {
                 return response()->json(['error' => 'Vendor not found.'], 404);
             }
+
             $path = storage_path('app/external/nda_files');
             if (!file_exists($path)) {
-                mkdir(
-                    $path,
-                    0777,
-                    true
-                );
+                mkdir($path, 0777, true);
             }
+
             $originalFileNameN = $ndaFile->getClientOriginalName();
             $encryptedFileName = Crypt::encryptString($originalFileNameN);
             $ndaFilePath = $ndaFile->storeAs('nda_files', $encryptedFileName . '.' . $ndaFile->getClientOriginalExtension(), 'external');
+
             $vendor->NDA = $ndaFilePath;
             $vendor->first_login = 1;
             $vendor->Approval_nda_date = $request->input('date');
             $vendor->save();
+
+            DataLogger::addToLogger(
+                $userId,
+                'upload_nda',
+                $request->fullUrl(),
+                'vendor',
+                ['nda_file' => $originalFileNameN, 'nda_path' => $ndaFilePath, 'approval_date' => $request->input('date')],
+                $vendor->id
+            );
+
             DB::commit();
             return response()->json([
                 'message' => 'Files uploaded and vendor updated successfully.'
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Storage::disk('external')->delete([$ndaFilePath]);
+            if (isset($ndaFilePath)) {
+                Storage::disk('external')->delete([$ndaFilePath]);
+            }
             return response()->json([
                 'error' => 'An error occurred while processing the request.',
             ], 500);
         }
     }
+
 
 
     public function getVendorFiles($vendorId)
@@ -2170,24 +2393,38 @@ class VendorProfileController extends Controller
         }
         return response()->download($filePath, $originalFileName);
     }
-
     public function deleteFile(Request $request)
     {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
         $id = $request->input('id');
         $file = VendorFile::find($id);
         if (!$file) {
             return response()->json(['message' => 'File not found in database'], 404);
         }
+
         $filePath = $file->file_path;
         if (Storage::disk('external')->exists($filePath)) {
             Storage::disk('external')->delete($filePath);
         } else {
             return response()->json(['message' => 'File not found on server'], 404);
         }
+
         $file->delete();
+
+        DataLogger::addToLogger(
+            $userId,
+            'delete_file',
+            $request->fullUrl(),
+            'vendor_files',
+            ['file_id' => $id, 'file_path' => $filePath],
+            $id
+        );
 
         return response()->json(['message' => 'File deleted successfully.'], 200);
     }
+
     public function updateFiles(Request $request)
     {
         $vendorId = $request->input('vendor_id');
@@ -2330,7 +2567,16 @@ class VendorProfileController extends Controller
                     }
                 }
             }
-
+            $user = JWTAuth::parseToken()->authenticate();
+            $userId = $user->id;
+            DataLogger::addToLogger(
+                $userId,
+                'update_vendor_files',
+                $request->fullUrl(),
+                'vendor_files',
+                $request->all(),
+                $vendor->id
+            );
             DB::commit();
             return response()->json([
                 'message' => 'Files updated and vendor information saved successfully.',
@@ -2415,9 +2661,24 @@ class VendorProfileController extends Controller
     //     $data = $this->getMessagesByVendorId($vendor_id);
     //     return response()->json($data, 200);
     // }
+
     public function deleteMessagesByVendorId(Request $request)
     {
-        return $this->deleteItem($request, InstantMessaging::class);
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
+        $response = $this->deleteItem($request, InstantMessaging::class);
+
+        DataLogger::addToLogger(
+            $userId,
+            'delete_message',
+            $request->fullUrl(),
+            'instant_messaging',
+            $request->all(),
+            $request->id ?? null
+        );
+
+        return $response;
     }
     public function AddPriceList(Request $request)
     {
@@ -2438,19 +2699,22 @@ class VendorProfileController extends Controller
             'currency' => 'required|integer',
             'sheet_brand' => 'required|integer',
         ]);
+
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
         $data = $request->all();
         $data['dialect'] = $data['dialect'] ?? null;
         $data['dialect_target'] = $data['dialect_target'] ?? null;
         $data['currency'] = $data['currency'] ?? null;
         $data['sub_subject'] = $data['sub_subject'] ?? null;
 
-        // Create the VendorSheet
         $vendorSheet = VendorSheet::create($data);
 
-        // Load related data
         $vendorSheet->load([
             'source_lang:id,name',
             'target_lang:id,name',
@@ -2463,11 +2727,20 @@ class VendorProfileController extends Controller
             'subject:id,name',
             'sub_subject:id,name',
             'sheet_brand:id,name',
-
         ]);
+
+        DataLogger::addToLogger(
+            $userId,
+            'add_price_list',
+            $request->fullUrl(),
+            'vendor_sheets',
+            $request->all(),
+            $vendorSheet->id
+        );
 
         return response()->json($vendorSheet, 201);
     }
+
     public function getpriceListByVendorId($vendorId)
     {
         $vendorData = VendorSheet::with([
@@ -2482,7 +2755,7 @@ class VendorProfileController extends Controller
             'subject:id,name',
             'sub_subject:id,name',
             'sheet_brand:id,name'
-        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency','sheet_brand']);
+        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency', 'sheet_brand']);
 
         if ($vendorData->isEmpty()) {
             return response()->json([
@@ -2493,11 +2766,25 @@ class VendorProfileController extends Controller
     }
     public function deletePricelist(Request $request)
     {
-        return $this->deleteItem($request, VendorSheet::class);
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
+        $result = $this->deleteItem($request, VendorSheet::class);
+
+        DataLogger::addToLogger(
+            $userId,
+            'delete_pricelist',
+            $request->fullUrl(),
+            'vendor_sheet',
+            $request->all(),
+            $request->id ?? null
+        );
+
+        return $result;
     }
+  
     public function UpdatePriceList(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer',
             'subject' => 'required|integer',
@@ -2520,16 +2807,27 @@ class VendorProfileController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
         $vendorSheet = VendorSheet::findOrFail($request->input("id"));
         $data = $request->except(['vendor']);
         $data['dialect'] = $data['dialect'] ?? null;
         $data['dialect_target'] = $data['dialect_target'] ?? null;
         $data['currency'] = $data['currency'] ?? null;
         $data['sub_subject'] = $data['sub_subject'] ?? null;
-        // Update the VendorSheet with the new data
+
         $vendorSheet->update($data);
 
-        // Reload the related data
+        DataLogger::addToLogger(
+            $userId,
+            'update_price_list',
+            $request->fullUrl(),
+            'vendor_sheet',
+            $request->all(),
+            $vendorSheet->id
+        );
+
         $vendorSheet->load([
             'source_lang:id,name',
             'target_lang:id,name',
@@ -2554,11 +2852,11 @@ class VendorProfileController extends Controller
             'tools',
             'ticket_id',
             'i',
-
         ]);
 
         return response()->json($vendorSheet, 200);
     }
+
     public function AddVendorstools(Request $request)
     {
         $vendorId = $request->input('vendor_id');
@@ -2568,10 +2866,12 @@ class VendorProfileController extends Controller
             $toolIds = array_map(function ($tool) {
                 return $tool['tool'];
             }, $tools);
+
             DB::table('vendor_tools')
                 ->where('Vendor_id', $vendorId)
                 ->whereNotIn('tool', $toolIds)
                 ->delete();
+
             foreach ($tools as $tool) {
                 DB::table('vendor_tools')->updateOrInsert(
                     [
@@ -2581,11 +2881,24 @@ class VendorProfileController extends Controller
                 );
             }
 
+            $user = JWTAuth::parseToken()->authenticate();
+            $userId = $user->id;
+
+            DataLogger::addToLogger(
+                $userId,
+                'add_vendor_tools',
+                $request->fullUrl(),
+                'vendor_tools',
+                $request->all(),
+                $vendorId
+            );
+
             return response()->json(['message' => 'Added successfully']);
         }
 
         return response()->json(['message' => 'Not added, something went wrong'], 400);
     }
+
 
     public function getVendorTools($vendorId)
     {
@@ -2598,12 +2911,14 @@ class VendorProfileController extends Controller
             return $vendorTools;
         }
     }
+ 
     public function AddVendorTest(Request $request)
     {
-
-
         DB::beginTransaction();
         try {
+            $user = JWTAuth::parseToken()->authenticate();
+            $userId = $user->id;
+
             $vendorId = $request->input('vendor_id');
             $testType = $request->input('test_type');
             $testResult = $request->input('test_result');
@@ -2620,7 +2935,6 @@ class VendorProfileController extends Controller
                 if (!$request->hasFile('test')) {
                     return response()->json(['error' => 'Test file is required.'], 400);
                 }
-
                 $testFile = $request->file('test');
             }
 
@@ -2631,17 +2945,14 @@ class VendorProfileController extends Controller
             $vendor->main_subject = $main_subject;
             $vendor->sub_subject = $sub_subject;
             $vendor->service = $service;
+
             if ($request->file('test')) {
                 if ($vendor->test_upload && Storage::disk('external')->exists($vendor->test_upload)) {
                     Storage::disk('external')->delete($vendor->test_upload);
                 }
                 $path = storage_path('app/external/vendortests');
                 if (!file_exists($path)) {
-                    mkdir(
-                        $path,
-                        0777,
-                        true
-                    );
+                    mkdir($path, 0777, true);
                 }
                 $originalFileName = $testFile->getClientOriginalName();
                 $encryptedFileName = Crypt::encryptString($originalFileName);
@@ -2649,8 +2960,16 @@ class VendorProfileController extends Controller
                 $vendor->test_upload = $filePath;
             }
 
-
             $vendor->save();
+
+            DataLogger::addToLogger(
+                $userId,
+                'add_vendor_test',
+                $request->fullUrl(),
+                'vendor_tests',
+                $request->all(),
+                $vendor->id
+            );
 
             DB::commit();
 
@@ -2660,6 +2979,7 @@ class VendorProfileController extends Controller
             return response()->json(['error' => 'An error occurred during the file upload or vendor update.'], 500);
         }
     }
+
     public function getVendorTestData($vendorId)
     {
         $vendorTest = VendorTest::where('vendor_id', $vendorId)
@@ -2686,6 +3006,7 @@ class VendorProfileController extends Controller
             return $vendorTest;
         }
     }
+
     public function saveOrUpdateMessages(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -2698,6 +3019,9 @@ class VendorProfileController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
 
         $vendor_id = $request->input('vendor_id');
 
@@ -2721,9 +3045,20 @@ class VendorProfileController extends Controller
             }
         }
 
+        DataLogger::addToLogger(
+            $userId,
+            'save_or_update_messages',
+            $request->fullUrl(),
+            'instant_messaging',
+            $request->all(),
+            $vendor_id
+        );
+
         $data = $this->getMessagesByVendorId($vendor_id);
         return response()->json($data, 200);
     }
+
+   
     public function saveOrUpdateEducation(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -2738,8 +3073,10 @@ class VendorProfileController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $vendorId = $request->input('vendor_id');
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
 
+        $vendorId = $request->input('vendor_id');
         $vendorEducation = VendorEducation::where('vendor_id', $vendorId)->first();
 
         if ($vendorEducation) {
@@ -2750,18 +3087,38 @@ class VendorProfileController extends Controller
                 'major' => $request->input('major'),
             ]);
 
+            DataLogger::addToLogger(
+                $userId,
+                'update_education',
+                $request->fullUrl(),
+                'vendor_education',
+                $request->all(),
+                $vendorEducation->id
+            );
+
             return response()->json(['message' => 'Education data updated successfully.'], 200);
         } else {
-            VendorEducation::create([
+            $newEducation = VendorEducation::create([
                 'vendor_id' => $vendorId,
                 'university_name' => $request->input('university_name'),
                 'latest_degree' => $request->input('latest_degree'),
                 'year_of_graduation' => $request->input('year_of_graduation'),
                 'major' => $request->input('major'),
             ]);
+
+            DataLogger::addToLogger(
+                $userId,
+                'create_education',
+                $request->fullUrl(),
+                'vendor_education',
+                $request->all(),
+                $newEducation->id
+            );
+
             return response()->json(['message' => 'Education data added successfully.'], 201);
         }
     }
+
 
     public function getEducationByVendorId($vendorId)
     {
@@ -2990,16 +3347,17 @@ class VendorProfileController extends Controller
             ->get();
         return $data;
     }
+
     public function storeBankData(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'account_holder' => 'required|string',
-            'bank_address'   => 'required|string',
-            'bank_name'      => 'required|string',
+            'account_holder'  => 'required|string',
+            'bank_address'    => 'required|string',
+            'bank_name'       => 'required|string',
             'billing_data_id' => 'required|integer|unique:bank_details,billing_data_id',
-            'iban'           => 'required|string',
-            'payment_terms'  => 'required|string',
-            'swift_bic'      => 'required|string',
+            'iban'            => 'required|string',
+            'payment_terms'   => 'required|string',
+            'swift_bic'       => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -3008,6 +3366,9 @@ class VendorProfileController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
+
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
 
         $bankData = BankDetails::create([
             'account_holder'  => $request->account_holder,
@@ -3019,19 +3380,28 @@ class VendorProfileController extends Controller
             'swift_bic'       => $request->swift_bic,
         ]);
 
+        DataLogger::addToLogger(
+            $userId,
+            'create_bank_data',
+            $request->fullUrl(),
+            'bank_details',
+            $request->all(),
+            $bankData->id
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'Bank data saved successfully.',
             'data' => $bankData
         ]);
     }
+
     public function storeWalletData(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'method' => 'required|integer',
             'account'   => 'required|string',
             'billing_data_id' => 'required|integer',
-
         ]);
 
         if ($validator->fails()) {
@@ -3041,14 +3411,26 @@ class VendorProfileController extends Controller
             ], 422);
         }
 
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
         $walletData = WalletsPaymentMethods::create([
             'method'  => $request->method,
             'account'    => $request->account,
             'defaults'       => 1,
             'billing_data_id' => $request->billing_data_id,
-
         ]);
+
         $walletData->load('method');
+
+        DataLogger::addToLogger(
+            $userId,
+            'create_wallet_data',
+            $request->fullUrl(),
+            'wallets_payment_methods',
+            $request->all(),
+            $walletData->id
+        );
 
         return response()->json([
             'status' => true,
@@ -3056,6 +3438,7 @@ class VendorProfileController extends Controller
             'data' => [$walletData]
         ]);
     }
+
     public function storeUserTask(Request $request)
     {
         try {

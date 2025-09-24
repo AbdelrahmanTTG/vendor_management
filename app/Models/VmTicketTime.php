@@ -14,7 +14,10 @@ class VmTicketTime extends Model
     {
         return  $this->belongsTo(BrandUsers::class, 'created_by');
     }
-
+    public function assigned_to()
+    {
+        return  $this->belongsTo(BrandUsers::class, 'assign_to')->select('user_name');
+    }
     public function getStatus()
     {
         $statusArray = array("Rejected", "New", "Opened", "Partly Closed", "Closed", "Closed Waiting Requester Acceptance","Assigned");

@@ -131,6 +131,10 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->hasMany(BillingData::class, 'vendor_id');
     }
+    public function creator()
+    {
+        return $this->belongsTo(BrandUsers::class, 'created_by');
+    }
 
     public function created_by()
     {

@@ -83,6 +83,8 @@ const Vendor = (props) => {
     const [selectedSearchCol, setSelectedSearchCol] = useState([]);
     const [optionsC, setOptionsC] = useState([]);
     const [optionsCU, setOptionsCU] = useState([]);
+    const [optionsUS, setOptionsUS] = useState([]);
+
     const [optionsN, setOptionsN] = useState([]);
     const [optionsR, setOptionsR] = useState([]);
     const [optionsT, setOptionsT] = useState([]);
@@ -146,7 +148,7 @@ const Vendor = (props) => {
             });
             const formattedOptions = data.map((item) => ({
                 value: item.gmt ? item.gmt : item.id,
-                label: item.name || item.gmt,
+                label: item.name || item.gmt || item.user_name,
             }));
 
             setOptions(formattedOptions);
@@ -236,6 +238,7 @@ const Vendor = (props) => {
                 { value: "contact_other3", label: "Other Contact 3" },
                 { value: "vendor_brands", label: "Brands" },
                 { value: "profile_status", label: "Profile Status" },
+                { value: "created_by", label: "Created by" },
             ],
         },
         {
@@ -687,6 +690,7 @@ const Vendor = (props) => {
             brands: "Brands",
             sheet_brand: "Sheet Brand",
             profile_status: "Profile status",
+            created_by: "Created by",
         };
         format?.flatMap(
             (element) =>
@@ -958,6 +962,7 @@ const Vendor = (props) => {
             "vendorTest.sub_subject": "Sub–Subject Matter",
             sheet_brand: "Sheet Brand",
             profile_status: "Profile status",
+            created_by: "Created by",
         };
 
         return mapping[input] || input;
@@ -1024,7 +1029,7 @@ const Vendor = (props) => {
                 .join(", ");
         }
         if (value && typeof value === "object" && value !== null) {
-            return value.name || value.gmt;
+            return value.name || value.gmt || value.user_name;
         }
         if (typeof value === "string") {
             if (/^(https?:\/\/)/.test(value)) {
@@ -1653,6 +1658,39 @@ const Vendor = (props) => {
                                                                     option.value
                                                                 );
                                                             }}
+                                                            isMulti
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                                )}
+                                            {selectedSearchCol.indexOf(
+                                                "created_by"
+                                            ) > -1 && (
+                                                   <Col md="3">
+                                                    <FormGroup>
+                                                        <Label
+                                                            className="col-form-label-sm f-12"
+                                                            htmlFor="name"
+                                                        >
+                                                            {"Created By"}
+                                                        </Label>
+                                                        <Select
+                                                            name="created_by"
+                                                            id="created_by"
+                                                            required
+                                                            options={optionsUS}
+                                                            className="js-example-basic-single "
+                                                            onInputChange={(
+                                                                inputValue
+                                                            ) =>
+                                                                handleInputChange(
+                                                                    inputValue,
+                                                                    "users",
+                                                                    "users",
+                                                                    setOptionsUS,
+                                                                    optionsUS
+                                                                )
+                                                            }
                                                             isMulti
                                                         />
                                                     </FormGroup>
@@ -3340,6 +3378,10 @@ const Vendor = (props) => {
                                                     value: "profile_status",
                                                     label: "Profile status",
                                                 },
+                                                {
+                                                    value: "created_by",
+                                                    label: "Created by",
+                                                },
                                             ],
                                         },
                                         {
@@ -4062,251 +4104,7 @@ const Vendor = (props) => {
                                                                 </td>
                                                             )}
                                                         </tr>
-                                                        {expandedRows.includes(
-                                                            item?.id
-                                                        ) && (
-                                                            <tr>
-                                                                <td colSpan="100%">
-                                                                    <Table
-                                                                        bordered
-                                                                    >
-                                                                        <thead>
-                                                                            <tr>
-                                                                                {Object.keys(
-                                                                                    item
-                                                                                        ?.vendor_sheet?.[0] ||
-                                                                                        {}
-                                                                                )
-                                                                                    .filter(
-                                                                                        (
-                                                                                            key
-                                                                                        ) =>
-                                                                                            key !==
-                                                                                            "vendor"
-                                                                                    )
-                                                                                    .map(
-                                                                                        (
-                                                                                            key
-                                                                                        ) => (
-                                                                                            <th
-                                                                                                key={
-                                                                                                    key
-                                                                                                }
-                                                                                            >
-                                                                                                {" "}
-                                                                                                {formatString(
-                                                                                                    key
-                                                                                                )}
-                                                                                            </th>
-                                                                                        )
-                                                                                    )}
-                                                                                <th cope="col">
-                                                                                    {
-                                                                                        "Edit"
-                                                                                    }
-                                                                                </th>
-                                                                                <th cope="col">
-                                                                                    {
-                                                                                        "Delete"
-                                                                                    }
-                                                                                </th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            {item
-                                                                                ?.vendor_sheet
-                                                                                ?.length >
-                                                                                0 &&
-                                                                                item.vendor_sheet
-                                                                                    .slice(
-                                                                                        0,
-                                                                                        visibleItems[
-                                                                                            item
-                                                                                                .id
-                                                                                        ] ||
-                                                                                            5
-                                                                                    )
-                                                                                    .map(
-                                                                                        (
-                                                                                            detail,
-                                                                                            index
-                                                                                        ) => (
-                                                                                            <tr
-                                                                                                key={
-                                                                                                    index
-                                                                                                }
-                                                                                            >
-                                                                                                {Object.keys(
-                                                                                                    detail ||
-                                                                                                        {}
-                                                                                                )
-                                                                                                    .filter(
-                                                                                                        (
-                                                                                                            key
-                                                                                                        ) =>
-                                                                                                            key !==
-                                                                                                            "vendor"
-                                                                                                    )
-                                                                                                    .map(
-                                                                                                        (
-                                                                                                            key,
-                                                                                                            i
-                                                                                                        ) => (
-                                                                                                            <td
-                                                                                                                key={
-                                                                                                                    i
-                                                                                                                }
-                                                                                                            >
-                                                                                                                {key ===
-                                                                                                                "Status"
-                                                                                                                    ? detail[
-                                                                                                                          key
-                                                                                                                      ] ==
-                                                                                                                      "0"
-                                                                                                                        ? "Active"
-                                                                                                                        : detail[
-                                                                                                                              key
-                                                                                                                          ] ==
-                                                                                                                          "1"
-                                                                                                                        ? "Not Active"
-                                                                                                                        : detail[
-                                                                                                                              key
-                                                                                                                          ] ==
-                                                                                                                          "2"
-                                                                                                                        ? "Pending by PM"
-                                                                                                                        : ""
-                                                                                                                    : typeof detail[
-                                                                                                                          key
-                                                                                                                      ] ===
-                                                                                                                          "object" &&
-                                                                                                                      detail[
-                                                                                                                          key
-                                                                                                                      ] !==
-                                                                                                                          null
-                                                                                                                    ? detail[
-                                                                                                                          key
-                                                                                                                      ]
-                                                                                                                          ?.name ||
-                                                                                                                      detail[
-                                                                                                                          key
-                                                                                                                      ]
-                                                                                                                          ?.dialect ||
-                                                                                                                      "N/A"
-                                                                                                                    : detail[
-                                                                                                                          key
-                                                                                                                      ] ||
-                                                                                                                      "N/A"}
-                                                                                                            </td>
-                                                                                                        )
-                                                                                                    )}
-
-                                                                                                <td>
-                                                                                                    {props
-                                                                                                        .permissions
-                                                                                                        ?.edit ==
-                                                                                                        1 && (
-                                                                                                        <>
-                                                                                                            <Btn
-                                                                                                                attrBtn={{
-                                                                                                                    color: "btn btn-primary",
-                                                                                                                    onClick:
-                                                                                                                        () =>
-                                                                                                                            setOpenId(
-                                                                                                                                detail.id
-                                                                                                                            ),
-                                                                                                                }}
-                                                                                                            >
-                                                                                                                Edit
-                                                                                                            </Btn>
-                                                                                                            {openId ===
-                                                                                                                detail.id && (
-                                                                                                                <LazyWrapper>
-                                                                                                                    <ModelEdit
-                                                                                                                        id={
-                                                                                                                            detail.id
-                                                                                                                        }
-                                                                                                                        getData={
-                                                                                                                            getData
-                                                                                                                        }
-                                                                                                                        isOpen={
-                                                                                                                            true
-                                                                                                                        }
-                                                                                                                        onClose={() =>
-                                                                                                                            setOpenId(
-                                                                                                                                null
-                                                                                                                            )
-                                                                                                                        }
-                                                                                                                    />
-                                                                                                                </LazyWrapper>
-                                                                                                            )}
-                                                                                                        </>
-                                                                                                    )}
-                                                                                                </td>
-
-                                                                                                <td>
-                                                                                                    {props
-                                                                                                        .permissions
-                                                                                                        ?.delete ==
-                                                                                                        1 && (
-                                                                                                        <Btn
-                                                                                                            attrBtn={{
-                                                                                                                color: "btn btn-danger-gradien",
-                                                                                                                onClick:
-                                                                                                                    () =>
-                                                                                                                        deleteRow(
-                                                                                                                            detail?.id
-                                                                                                                        ),
-                                                                                                            }}
-                                                                                                            className="me-2"
-                                                                                                        >
-                                                                                                            <i className="icofont icofont-ui-delete"></i>
-                                                                                                        </Btn>
-                                                                                                    )}
-                                                                                                </td>
-                                                                                            </tr>
-                                                                                        )
-                                                                                    )}
-                                                                        </tbody>
-                                                                        <tfoot>
-                                                                            <tr>
-                                                                                <td
-                                                                                    colSpan="100%"
-                                                                                    style={{
-                                                                                        textAlign:
-                                                                                            "center",
-                                                                                    }}
-                                                                                >
-                                                                                    {visibleItems[
-                                                                                        item
-                                                                                            .id
-                                                                                    ] <
-                                                                                        (item
-                                                                                            ?.vendor_sheet
-                                                                                            ?.length ||
-                                                                                            0) && (
-                                                                                        <Btn
-                                                                                            attrBtn={{
-                                                                                                color: "btn btn-primary-light",
-                                                                                                onClick:
-                                                                                                    () =>
-                                                                                                        handleShowMore(
-                                                                                                            item.id
-                                                                                                        ),
-                                                                                            }}
-                                                                                            className="me-2 w-100"
-                                                                                        >
-                                                                                            Show
-                                                                                            More
-                                                                                            ...
-                                                                                        </Btn>
-                                                                                    )}
-                                                                                </td>
-                                                                            </tr>
-                                                                        </tfoot>
-                                                                    </Table>
-                                                                </td>
-                                                            </tr>
-                                                        )}
+                                                      
                                                     </Fragment>
                                                 );
                                             })}
