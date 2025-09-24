@@ -1283,9 +1283,9 @@ const Vendor = (props) => {
                                                             {"Prefix"}
                                                         </Label>
                                                         <Select
-                                                            id="prefix"
+                                                            id="prfx_name"
                                                             required
-                                                            name="prefix"
+                                                            name="prfx_name"
                                                             options={[
                                                                 {
                                                                     value: "Mr",
@@ -1662,11 +1662,11 @@ const Vendor = (props) => {
                                                         />
                                                     </FormGroup>
                                                 </Col>
-                                                )}
+                                            )}
                                             {selectedSearchCol.indexOf(
                                                 "created_by"
                                             ) > -1 && (
-                                                   <Col md="3">
+                                                <Col md="3">
                                                     <FormGroup>
                                                         <Label
                                                             className="col-form-label-sm f-12"
@@ -4104,7 +4104,6 @@ const Vendor = (props) => {
                                                                 </td>
                                                             )}
                                                         </tr>
-                                                      
                                                     </Fragment>
                                                 );
                                             })}
