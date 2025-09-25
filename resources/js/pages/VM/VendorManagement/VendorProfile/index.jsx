@@ -1824,7 +1824,7 @@ const Vendor = (props) => {
                                                         <Input
                                                             className="form-control form-control-sm cityInput mb-1"
                                                             type="text"
-                                                            name="City_state"
+                                                            name="city"
                                                             required
                                                         />
                                                     </FormGroup>

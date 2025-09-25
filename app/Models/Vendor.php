@@ -70,7 +70,7 @@ class Vendor extends Authenticatable  implements JWTSubject
     }
     public function timezone()
     {
-        return $this->belongsTo(Timezone::class, 'timezone', 'id');
+        return $this->belongsTo(TimeZone::class, 'timezone', 'id');
     }
  
     public function getTimezoneAttribute($value)
@@ -103,7 +103,7 @@ class Vendor extends Authenticatable  implements JWTSubject
     }
     public function vendor_test()
     {
-        return $this->belongsTo(vendorTest::class, "id", 'vendor_id');
+        return $this->belongsTo(VendorTest::class, "id", 'vendor_id');
     }
     public function vendor_experiences()
     {
