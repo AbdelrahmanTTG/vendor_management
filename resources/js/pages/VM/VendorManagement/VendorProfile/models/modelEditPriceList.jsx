@@ -354,7 +354,7 @@ const EditNewBtn = (props) => {
                                                     }
                                                     handleInputChange(
                                                         newInputValue,
-                                                        "fields",
+                                                        "mainsubject",
                                                         "subject",
                                                         setOptionsMain,
                                                         optionsMain

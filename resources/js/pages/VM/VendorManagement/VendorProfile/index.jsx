@@ -4104,6 +4104,225 @@ const Vendor = (props) => {
                                                                 </td>
                                                             )}
                                                         </tr>
+                                                        {expandedRows.includes(
+                                                            item?.id
+                                                        ) && (
+                                                            <tr>
+                                                                <td colSpan="100%">
+                                                                    <Table
+                                                                        bordered
+                                                                    >
+                                                                        <thead>
+                                                                            <tr>
+                                                                                {Object.keys(
+                                                                                    item
+                                                                                        ?.vendor_sheet?.[0] ||
+                                                                                        {}
+                                                                                )
+                                                                                    .filter(
+                                                                                        (
+                                                                                            key
+                                                                                        ) =>
+                                                                                            key !==
+                                                                                            "vendor"
+                                                                                    )
+                                                                                    .map(
+                                                                                        (
+                                                                                            key
+                                                                                        ) => (
+                                                                                            <th
+                                                                                                key={
+                                                                                                    key
+                                                                                                }
+                                                                                            >
+                                                                                                {" "}
+                                                                                                {formatString(
+                                                                                                    key
+                                                                                                )}
+                                                                                            </th>
+                                                                                        )
+                                                                                    )}
+                                                                                <th cope="col">
+                                                                                    {
+                                                                                        "Edit"
+                                                                                    }
+                                                                                </th>
+                                                                                <th cope="col">
+                                                                                    {
+                                                                                        "Delete"
+                                                                                    }
+                                                                                </th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {item
+                                                                                ?.vendor_sheet
+                                                                                ?.length >
+                                                                                0 &&
+                                                                                item.vendor_sheet
+                                                                                    .slice(
+                                                                                        0,
+                                                                                        visibleItems[
+                                                                                            item
+                                                                                                .id
+                                                                                        ] ||
+                                                                                            5
+                                                                                    )
+                                                                                    .map(
+                                                                                        (
+                                                                                            detail,
+                                                                                            index
+                                                                                        ) => (
+                                                                                            <tr
+                                                                                                key={
+                                                                                                    index
+                                                                                                }
+                                                                                            >
+                                                                                                {Object.keys(
+                                                                                                    detail ||
+                                                                                                        {}
+                                                                                                )
+                                                                                                    .filter(
+                                                                                                        (
+                                                                                                            key
+                                                                                                        ) =>
+                                                                                                            key !==
+                                                                                                            "vendor"
+                                                                                                    )
+                                                                                                    .map(
+                                                                                                        (
+                                                                                                            key,
+                                                                                                            i
+                                                                                                        ) => (
+                                                                                                            <td
+                                                                                                                key={
+                                                                                                                    i
+                                                                                                                }
+                                                                                                            >
+                                                                                                                {key ===
+                                                                                                                "Status"
+                                                                                                                    ? detail[
+                                                                                                                          key
+                                                                                                                      ] ==
+                                                                                                                      "0"
+                                                                                                                        ? "Active"
+                                                                                                                        : detail[
+                                                                                                                              key
+                                                                                                                          ] ==
+                                                                                                                          "1"
+                                                                                                                        ? "Not Active"
+                                                                                                                        : detail[
+                                                                                                                              key
+                                                                                                                          ] ==
+                                                                                                                          "2"
+                                                                                                                        ? "Pending by PM"
+                                                                                                                        : ""
+                                                                                                                    : typeof detail[
+                                                                                                                          key
+                                                                                                                      ] ===
+                                                                                                                          "object" &&
+                                                                                                                      detail[
+                                                                                                                          key
+                                                                                                                      ] !==
+                                                                                                                          null
+                                                                                                                    ? detail[
+                                                                                                                          key
+                                                                                                                      ]
+                                                                                                                          ?.name ||
+                                                                                                                      detail[
+                                                                                                                          key
+                                                                                                                      ]
+                                                                                                                          ?.dialect ||
+                                                                                                                      "N/A"
+                                                                                                                    : detail[
+                                                                                                                          key
+                                                                                                                      ] ||
+                                                                                                                      "N/A"}
+                                                                                                            </td>
+                                                                                                        )
+                                                                                                    )}
+
+                                                                                                <td>
+                                                                                                    {props
+                                                                                                        .permissions
+                                                                                                        ?.edit ==
+                                                                                                        1 && (
+                                                                                                        <LazyWrapper>
+                                                                                                            <ModelEdit
+                                                                                                                id={
+                                                                                                                    detail.id
+                                                                                                                }
+                                                                                                                getData={
+                                                                                                                    getData
+                                                                                                                }
+                                                                                                            />
+                                                                                                        </LazyWrapper>
+                                                                                                    )}
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    {props
+                                                                                                        .permissions
+                                                                                                        ?.delete ==
+                                                                                                        1 && (
+                                                                                                        <Btn
+                                                                                                            attrBtn={{
+                                                                                                                color: "btn btn-danger-gradien",
+                                                                                                                onClick:
+                                                                                                                    () =>
+                                                                                                                        deleteRow(
+                                                                                                                            detail?.id
+                                                                                                                        ),
+                                                                                                            }}
+                                                                                                            className="me-2"
+                                                                                                        >
+                                                                                                            <i className="icofont icofont-ui-delete"></i>
+                                                                                                        </Btn>
+                                                                                                    )}
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        )
+                                                                                    )}
+                                                                        </tbody>
+                                                                        <tfoot>
+                                                                            <tr>
+                                                                                <td
+                                                                                    colSpan="100%"
+                                                                                    style={{
+                                                                                        textAlign:
+                                                                                            "center",
+                                                                                    }}
+                                                                                >
+                                                                                    {visibleItems[
+                                                                                        item
+                                                                                            .id
+                                                                                    ] <
+                                                                                        (item
+                                                                                            ?.vendor_sheet
+                                                                                            ?.length ||
+                                                                                            0) && (
+                                                                                        <Btn
+                                                                                            attrBtn={{
+                                                                                                color: "btn btn-primary-light",
+                                                                                                onClick:
+                                                                                                    () =>
+                                                                                                        handleShowMore(
+                                                                                                            item.id
+                                                                                                        ),
+                                                                                            }}
+                                                                                            className="me-2 w-100"
+                                                                                        >
+                                                                                            Show
+                                                                                            More
+                                                                                            ...
+                                                                                        </Btn>
+                                                                                    )}
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tfoot>
+                                                                    </Table>
+                                                                </td>
+                                                            </tr>
+                                                        )}
                                                     </Fragment>
                                                 );
                                             })}

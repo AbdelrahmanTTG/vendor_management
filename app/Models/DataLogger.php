@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class DataLogger extends Model
 {
     protected $table = 'data_logger';
+    public $timestamps = false;
 
     protected $fillable = [
         'created_by',

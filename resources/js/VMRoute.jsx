@@ -438,7 +438,7 @@ export const VM = (allowedPermissions) => [
                             name: "parent",
                             type: "text",
                             field: "selec",
-                            tableData: "MainSubjectMatter",
+                            tableData: "mainsubject",
                             label: "Main Subject Matter",
                         },
                         {

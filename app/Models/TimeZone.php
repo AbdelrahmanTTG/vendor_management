@@ -63,4 +63,8 @@ class TimeZone extends Model
         }
         return $query->get();
     }
+    public function vendors()
+    {
+        return $this->hasMany(Vendor::class, 'timezone', 'id');
+    }
 }

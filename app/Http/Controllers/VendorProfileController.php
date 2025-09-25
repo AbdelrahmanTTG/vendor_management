@@ -130,7 +130,8 @@ class VendorProfileController extends Controller
 
         $intersectColumns = array_intersect($formatArray, $vendorColumns);
         $intersectColumnsVendorSheet = array_intersect($formatArray, $vendorSheet);
-
+        $mandatoryColumns = ['timezone', 'created_by'];
+        $intersectColumns = array_unique(array_merge($intersectColumns, $mandatoryColumns));
         // Ensure created_by is included in intersectColumns if needed
         if ($includeCreatedBy && !in_array('created_by', $intersectColumns)) {
             $intersectColumns[] = 'created_by';
@@ -303,7 +304,7 @@ class VendorProfileController extends Controller
                                 $formatArray[] = 'priceList';
                                 $diffFormatArray[] = 'priceList';
                             }
-                            $selectedColumns = (array_merge(['id', "vendor"], $selectedColumnsRow));
+                            $selectedColumns = array_merge(['id', "vendor"], $selectedColumnsRow);
                             foreach ($filter['columns'] as $columnFilter) {
                                 if (!empty($columnFilter['column']) && $columnFilter['column'] !== 'created_by') {
                                     $selectedColumns[] = $columnFilter['column'];
@@ -320,20 +321,21 @@ class VendorProfileController extends Controller
                                             if (count($values) > 1) {
                                                 $query->where(function ($query) use ($column, $values) {
                                                     foreach ($values as $value) {
-                                                        $query->orWhere($column, '=', $value)->with([$column]);
+                                                        $query->orWhere($column, '=', $value);
                                                     }
                                                 });
                                             } else {
-                                                $query->where($column, '=', $values[0])->with([$column]);
+                                                $query->where($column, '=', $values[0]);
                                             }
                                         }
                                     }
                                 });
                                 $relatedColumns = array_column($filter['columns'], 'column');
-                                // Remove created_by from related columns for vendor_sheet
-                                $relatedColumns = array_diff($relatedColumns, ['created_by']);
+                                // Remove created_by and direct columns like rate from related columns
+                                $directVendorSheetColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target", "sheet_brand"];
+                                $relatedColumns = array_diff($relatedColumns, ['created_by'], $directVendorSheetColumns);
                                 $mergedColumns = array_unique(array_merge($relatedColumns, $selectedColumnsRow));
-                                $query->with($relatedColumns);
+                                // Only include actual relationships in with()
                                 foreach ($mergedColumns as $relation) {
                                     if (method_exists($query->getModel(), $relation)) {
                                         $query->with([$relation]);
@@ -341,6 +343,7 @@ class VendorProfileController extends Controller
                                 }
                             }]);
                         } else {
+                            // Existing logic for other tables
                             $vendorsQuery->whereHas($table, function ($query) use ($filter) {
                                 $query->where(function ($query) use ($filter) {
                                     foreach ($filter['columns'] as $columnFilter) {
@@ -364,7 +367,6 @@ class VendorProfileController extends Controller
                                 $columns = array_column($filter['columns'], 'column');
                                 if (!empty($columns)) {
                                     $query->select(array_merge(["vendor_id"], $columns));
-
                                     foreach ($columns as $relation) {
                                         if (method_exists($query->getModel(), $relation)) {
                                             $query->with([$relation]);
@@ -374,7 +376,6 @@ class VendorProfileController extends Controller
                             }]);
                             foreach ($filter['columns'] as $columnFilter) {
                                 if (!empty($columnFilter['column'])) {
-                                    // For created_by, don't add it again if it's already from vendor table
                                     if ($columnFilter['column'] === 'created_by' && $includeCreatedBy) {
                                         // Skip, already handled
                                     } else {
