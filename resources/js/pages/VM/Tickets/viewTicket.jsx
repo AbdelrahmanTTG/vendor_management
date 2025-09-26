@@ -12,6 +12,7 @@ import Select from 'react-select';
 import SweetAlert from 'sweetalert2';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { set } from 'react-hook-form';
 
 const ViewTicket = (props) => {
     const [redirect, setRedirect] = useState(false);
@@ -34,7 +35,7 @@ const ViewTicket = (props) => {
     const [loading, setLoading] = useState(true);
     const [optionsB, setOptionsB] = useState([]);
     const [Brand, setBrand] = useState([]);
-    
+    const [sub, setSub] = useState(false);
     const assignPermission = props.permissions?.assign;
     const res = {
         ticket_id: ticket.id,
@@ -49,6 +50,7 @@ const ViewTicket = (props) => {
 
             const fetchData = async () => {
                 try {
+                    setSub(true);
                     const data = await axiosClient.post("getTicketData", res);
                     setTicketData(data.data?.ticket);
                     setResourceVendors(data.data?.resourceVendors);
@@ -56,6 +58,8 @@ const ViewTicket = (props) => {
                     setLoading(false);
                 } catch (error) {
                     console.error('Error fetching Data:', error);
+                }finally {
+                    setSub(false);
                 }
             };
             fetchData();
@@ -146,6 +150,7 @@ const ViewTicket = (props) => {
         if (statusInput == '0' && commentInput.trim() == '') {
             toast.error("Please Enter Rejection Reason!");
         } else {
+            setSub(true);
             axiosClient.post("changeTicketStatus", TicketRes, {
                 headers: {
                     "Content-Type": "multipart/form-data",
@@ -167,10 +172,14 @@ const ViewTicket = (props) => {
                         break;
                 }
             });
+            setSub(false);
         }
     };
     const AssignTicket = (event) => {
+        
         event.preventDefault();
+        setSub(true);
+
         const formData = new FormData(event.currentTarget);
         const res = {
             ...Object.fromEntries(formData),
@@ -189,6 +198,7 @@ const ViewTicket = (props) => {
                     break;
             }
         });
+        setSub(false);
     };
     const deleteRes = (id) => {
         if (id) {
@@ -347,7 +357,14 @@ const ViewTicket = (props) => {
                                                     options={vmUsers} className="js-example-basic-single" />
                                             </Col>
                                             <Col sm="2">
-                                                <Btn attrBtn={{ color: 'primary', type: 'submit' }}><i className="fa fa-send-o"></i> {'Send'}</Btn>
+                                                <Btn attrBtn={{ color: 'primary', type: 'submit',disabled: sub,  }}><i className="fa fa-send-o"></i> {sub ? (
+                                                                                                                                      <>
+                                                                                                                                          <Spinner size="sm" />{" "}
+                                                                                                                                          Sending...
+                                                                                                                                      </>
+                                                                                                                                  ) : (
+                                                                                                                                      "Send"
+                                                                                                                                  )}</Btn>
                                             </Col>
                                         </FormGroup>
                                     </form>
@@ -537,7 +554,16 @@ const ViewTicket = (props) => {
                                 {ticketData.statusVal <= 3 && ticketData.statusVal != 0 && (
                                     <Row className='mt-2'>
                                         <Col className='text-end'>
-                                            <Btn attrBtn={{ color: 'primary', type: 'submit' }}><i className="fa fa-check-square-o"></i> {'Save Changes'}</Btn>
+                                            <Btn attrBtn={{ color: 'primary', type: 'submit', disabled: sub, }}><i className="fa fa-check-square-o"></i>
+                                            {sub ? (
+                                                                                                                                  <>
+                                                                                                                                      <Spinner size="sm" />{" "}
+                                                                                                                                      Submitting...
+                                                                                                                                  </>
+                                                                                                                              ) : (
+                                                                                                                                  "Save Changes"
+                                                                                                                              )}
+                                            </Btn>
                                         </Col>
                                     </Row>
                                 )}
