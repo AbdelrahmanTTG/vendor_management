@@ -135,46 +135,53 @@ const ViewTicket = (props) => {
         }
     };
 
-    const changeTicketStatus = (event) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const TicketRes = {
-            ...Object.fromEntries(formData),
-            'ticket': ticket.id,
-            'user': user.id,
-            'file': fileInput,
-            'vendor': formData.getAll('vendor'),
-            'comment': commentInput,
+ const changeTicketStatus = (event) => {
+     event.preventDefault();
+     const formData = new FormData(event.currentTarget);
+     const TicketRes = {
+         ...Object.fromEntries(formData),
+         ticket: ticket.id,
+         user: user.id,
+         file: fileInput,
+         vendor: formData.getAll("vendor"),
+         comment: commentInput,
+     };
 
-        };
-        if (statusInput == '0' && commentInput.trim() == '') {
-            toast.error("Please Enter Rejection Reason!");
-        } else {
-            setSub(true);
-            axiosClient.post("changeTicketStatus", TicketRes, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            }).then(({ data }) => {
-                switch (data.type) {
-                    case 'success':
-                        data.message.map((msg, i) => {
-                            if (msg.trim() != "")
-                                toast.success(msg)
-                        });
-                        setTemp(!temp)
-                        setStatusInput('');
-                        setFileInput('');
-                        setCommentInput();
-                        break;
-                    case 'error':
-                        toast.error(data.message);
-                        break;
-                }
-            });
-            setSub(false);
-        }
-    };
+     if (statusInput == "0" && commentInput.trim() == "") {
+         toast.error("Please Enter Rejection Reason!");
+     } else {
+        //  setSub(true);
+         axiosClient
+             .post("changeTicketStatus", TicketRes, {
+                 headers: {
+                     "Content-Type": "multipart/form-data",
+                 },
+             })
+             .then(({ data }) => {
+                 switch (data.type) {
+                     case "success":
+                       
+                         setTemp(!temp);
+                         setStatusInput("");
+                         setFileInput("");
+                         setCommentInput();
+                           toast.success(
+                               "The Vendor has been successfully selected."
+                           );
+                         break;
+                     case "error":
+                         toast.error(data.message);
+                         break;
+                 }
+                //  setSub(false);
+             })
+             .catch(() => {
+                 toast.error("Something went wrong!");
+                //  setSub(false); 
+             });
+     }
+ };
+
     const AssignTicket = (event) => {
         
         event.preventDefault();
