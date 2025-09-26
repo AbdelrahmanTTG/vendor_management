@@ -923,7 +923,7 @@ class TicketsController extends Controller
                 Mail::to($toEmail)
                     ->cc($this->vmEmail)
                     ->send(
-                        (new TicketMail($this->vmEmail))->from($from, 'Support Team')
+                        (new TicketMail($mailData))->from($from, 'Support Team')
                     );
                 // Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
 
@@ -954,7 +954,7 @@ class TicketsController extends Controller
                 Mail::to($toEmail)
                     ->cc($this->vmEmail)
                     ->send(
-                        (new TicketMail($this->vmEmail))->from($from, 'Support Team')
+                        (new TicketMail($mailData))->from($from, 'Support Team')
                     );
                 // Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
 
