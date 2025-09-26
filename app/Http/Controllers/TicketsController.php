@@ -248,14 +248,21 @@ class TicketsController extends Controller
         if ($ticket->request_type == 1 || $ticket->request_type == 3) {
             if (count($ticket->TicketResource) > 0) {
                 foreach ($ticket->TicketResource as $res) {
+                    $hasSheet = VendorSheet::where('i', $res->id)
+                        ->where('ticket_id', $ticket->id)
+                        ->where('vendor', $res->vendor)
+                        ->exists();
                     $vendors[] = VmTicketResource::with([
                         'vendor' => function ($query) {
                             $query->select('id', 'name', 'email', 'profile', 'cv', 'country', 'contact', 'mother_tongue', 'created_by');
                         },
-                        'vendor.vendor_sheet' => function ($query) use ($res, $ticket) {
-                            $query->select('id', 'vendor', 'source_lang', 'target_lang', 'service', 'task_type', 'dialect', 'rate', 'currency', 'unit', 'i', 'subject')->limit(1)
-                                ->where('i', $res->id)
-                                ->where('ticket_id', $ticket->id);
+                        'vendor.vendor_sheet' => function ($query) use ($res, $ticket, $hasSheet) {
+                            $query->select('id', 'vendor', 'source_lang', 'target_lang', 'service', 'task_type', 'dialect', 'rate', 'currency', 'unit', 'i', 'subject')->limit(1);
+
+                            if ($hasSheet) {
+                                $query->where('i', $res->id)
+                                    ->where('ticket_id', $ticket->id);
+                            }
                         },
                         'vendor.vendor_sheet.source_lang' => function ($query) {
                             $query->select('id', 'name');
