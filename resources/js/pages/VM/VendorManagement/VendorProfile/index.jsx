@@ -2506,7 +2506,7 @@ const Vendor = (props) => {
                                                             ) =>
                                                                 handleInputChange(
                                                                     inputValue,
-                                                                    "MainSubjectMatter",
+                                                                    "mainsubject",
                                                                     "subject",
                                                                     setOptionsMain,
                                                                     optionsMain
@@ -2900,7 +2900,7 @@ const Vendor = (props) => {
                                                             ) =>
                                                                 handleInputChange(
                                                                     inputValue,
-                                                                    "MainSubjectMatter",
+                                                                    "mainsubject",
                                                                     "main_subject",
                                                                     setOptionsMain,
                                                                     optionsMain

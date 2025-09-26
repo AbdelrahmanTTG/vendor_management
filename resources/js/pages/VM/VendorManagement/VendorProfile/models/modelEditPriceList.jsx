@@ -1047,7 +1047,7 @@ const EditNewBtn = (props) => {
                                     className="col-sm-4 col-form-label"
                                     for="validationCustom01"
                                 >
-                                    Rush Rate
+                                    Special Rate
                                 </Label>
                                 <Col sm="8">
                                     {/* <Input className="form-control" pattern="[789][0-9]{9}" type="number" placeholder="" /> */}
