@@ -152,10 +152,10 @@ class TicketsController extends Controller
                         } else {
                             if ($key == 'start_date') {
                                 $start_date = $request->queryParams['start_date'];
-                                $tickets->where('created_at', '>=', $start_date);
+                                $tickets->where('vm_ticket.created_at', '>=', $start_date);
                             } elseif ($key == 'end_date') {
                                 $end_date = $request->queryParams['end_date'];
-                                $tickets->where('created_at', '<=', $end_date);
+                                $tickets->where('vm_ticket.created_at', '<=', $end_date);
                             } else {
                                 $tickets = $tickets->where($key, "like", "%" . $val . "%");
                             }
