@@ -33,6 +33,7 @@ const PriceList = (props) => {
     const [loading2, setLoading2] = useState(false);
     const [rows, setRows] = useState(false);
     const [Sub, setSub] = useState(false);
+    const [curr, setCurr] = useState(false);
 const [openId, setOpenId] = useState(null);
 
      const basictoaster = (toastname, status) => {
@@ -69,6 +70,15 @@ const [openId, setOpenId] = useState(null);
     useEffect(() => {
         if (props.priceList?.priceList && props.priceList?.priceList.length > 0) {
             setdataPrice(props.priceList.priceList[0]);
+            const currency = props?.priceList?.priceList[0][0]?.currency;
+            if (currency) {
+                setCurr(true)
+                setSelectedOptionC({
+                    label: currency.name,
+                    value: currency.id,
+                });
+            }
+
             const transformedArray = props.priceList.priceList[1]?.map(item => ({
                 value: item.id,
                 label: item.name
@@ -334,7 +344,7 @@ const [openId, setOpenId] = useState(null);
                                 </Col>
                             )}
                         </Row>
-                        {/* <Col md="6" className="mb-3">
+                        <Col md="6" className="mb-3">
                             <Label
                                 className="col-sm-4 col-form-label"
                                 for="validationCustom01"
@@ -371,7 +381,9 @@ const [openId, setOpenId] = useState(null);
                                                     optionsC
                                                 )
                                             }
-                                            isDisabled={props?.Currency || rows}
+                                            isDisabled={
+                                                props?.Currency || rows || curr
+                                            }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
                                             noOptionsMessage={() =>
@@ -396,14 +408,13 @@ const [openId, setOpenId] = useState(null);
                                     )}
                                 />
                             </Col>
-                        </Col> */}
+                        </Col>
                         <Col
                             md="12"
                             className="d-flex justify-content-end mb-3"
                         >
                             {props.backPermissions?.add == 1 &&
-                                // selectedOptionC &&
-                                (
+                                selectedOptionC && (
                                     <LazyWrapper>
                                         <Model
                                             currency={selectedOptionC}

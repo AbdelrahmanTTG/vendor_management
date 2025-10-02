@@ -855,16 +855,14 @@ class TicketsController extends Controller
                                     ->count();
                                 $data['type'] = $vendorSheetCount > 0 ? 3 : 2;
                             }
-
                             $newVmTicketResource = VmTicketResource::create($data);
-
                             VendorSheet::where('vendor', $vendor)
                                 ->where('source_lang', $ticket->source_lang)
                                 ->where('target_lang', $ticket->target_lang)
                                 ->where('task_type', $ticket->task_type)
                                 ->where('service', $ticket->service)
                                 ->update(['i' => $newVmTicketResource->id, 'ticket_id' => $ticket_id]);
-
+                            $this->addTicketTimeStatus($ticket_id, $user, 7, $vendor);
                             $mailData = [
                                 'user_name' => $user_name,
                                 'subject'   => "New Resource : # " . $ticket_id,
@@ -1020,8 +1018,19 @@ class TicketsController extends Controller
 
     public function deleteTicketResource(Request $request)
     {
-        VmTicketResource::find($request->id)->delete();
+        $resource = VmTicketResource::find($request->id);
+
+        if ($resource) {
+            $vendor = $resource->vendor;
+            $resource->delete();
+            $user = Crypt::decrypt($request->user);
+            $ticket_id = $request->ticket;
+            $this->addTicketTimeStatus($ticket_id, $user, 8, $vendor);
+        } else {
+            return response()->json(['error' => 'Resource not found'], 404);
+        }
     }
+
     public function assignTicket(Request $request)
     {
         $user = Crypt::decrypt($request->user);
@@ -1029,7 +1038,7 @@ class TicketsController extends Controller
         $vm_id = $request->vmUser;
         $ticket = VmTicket::find($ticket_id);
         if ($request->assignPermission == 1) {
-            if (empty($ticket->assigned_to)) {
+            // if (empty($ticket->assigned_to)) {
                 $data['assigned_to'] = $vm_id;
                 if ($ticket->update($data)) {
                     $this->addTicketTimeStatus($ticket_id, $user, 6 , $ticket->assigned_to);
@@ -1068,9 +1077,9 @@ class TicketsController extends Controller
 
                     return response()->json(['message' => 'Ticket Assigned Successfully', 'type' => 'success']);
                 }
-            } else {
-                return response()->json(['message' => 'Ticket Already Assigned, please Check', 'type' => 'error']);
-            }
+            // } else {
+            //     return response()->json(['message' => 'Ticket Already Assigned, please Check', 'type' => 'error']);
+            // }
         } else {
             return response()->json(['message' => 'You Have No Permission', 'type' => 'error']);
         }

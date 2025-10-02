@@ -2857,7 +2857,84 @@ class VendorProfileController extends Controller
 
         return response()->json($vendorSheet, 200);
     }
+    // public function UpdatePriceList(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'id' => 'required|integer',
+    //         'subject' => 'required|integer',
+    //         'sub_subject' => 'nullable|integer',
+    //         'service' => 'required|integer',
+    //         'task_type' => 'required|integer',
+    //         'source_lang' => 'required|integer',
+    //         'target_lang' => 'required|integer',
+    //         'dialect' => 'nullable|integer',
+    //         'dialect_target' => 'nullable|integer',
+    //         'unit' => 'required|integer',
+    //         'rate' => 'required|numeric',
+    //         'special_rate' => 'nullable|numeric',
+    //         'Status' => 'required|string',
+    //         'currency' => 'required|integer',
+    //         'sheet_brand' => 'required|integer',
+    //     ]);
 
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+
+    //     $user = JWTAuth::parseToken()->authenticate();
+    //     $userId = $user->id;
+
+    //     $vendorSheet = VendorSheet::findOrFail($request->input("id"));
+
+    //     $data = $request->except(['vendor']);
+    //     $data['dialect'] = $data['dialect'] ?? null;
+    //     $data['dialect_target'] = $data['dialect_target'] ?? null;
+    //     $data['currency'] = $data['currency'] ?? null;
+    //     $data['sub_subject'] = $data['sub_subject'] ?? null;
+
+    //     $vendorSheet->update($data);
+
+    //     VendorSheet::where('vendor', $vendorSheet->vendor)
+    //         ->where('id', '!=', $vendorSheet->id)
+    //         ->update(['currency' => $data['currency']]);
+
+    //     DataLogger::addToLogger(
+    //         $userId,
+    //         'update_price_list',
+    //         $request->fullUrl(),
+    //         'vendor_sheet',
+    //         $request->all(),
+    //         $vendorSheet->id
+    //     );
+
+    //     $vendorSheet->load([
+    //         'source_lang:id,name',
+    //         'target_lang:id,name',
+    //         'dialect:id,dialect',
+    //         'dialect_target:id,dialect',
+    //         'service:id,name',
+    //         'task_type:id,name',
+    //         'unit:id,name',
+    //         'currency:id,name',
+    //         'subject:id,name',
+    //         'sub_subject:id,name',
+    //         'sheet_brand:id,name'
+    //     ]);
+
+    //     $vendorSheet->makeHidden([
+    //         'created_at',
+    //         'created_by',
+    //         'sheet_fields',
+    //         'sheet_tools',
+    //         'comment',
+    //         'copied',
+    //         'tools',
+    //         'ticket_id',
+    //         'i',
+    //     ]);
+
+    //     return response()->json($vendorSheet, 200);
+    // }
     public function AddVendorstools(Request $request)
     {
         $vendorId = $request->input('vendor_id');

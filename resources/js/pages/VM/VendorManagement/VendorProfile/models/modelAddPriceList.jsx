@@ -64,7 +64,7 @@ const AddNewBtn = (props) => {
                 })
             );
             formDate['vendor'] = props.id;
-            // formDate['currency'] = props.currency?.value
+            formDate['currency'] = props.currency?.value
             try {
                 const response = await axiosClient.post("AddPriceList", formDate);
                 props.getData(response.data)
@@ -902,7 +902,7 @@ const AddNewBtn = (props) => {
                             </Col>
                         </FormGroup>
                     </Col>
-                    <Col md="6" className="mb-3">
+                    {/* <Col md="6" className="mb-3">
                         <FormGroup className="row">
                             <Label
                                 className="col-sm-4 col-form-label"
@@ -911,23 +911,7 @@ const AddNewBtn = (props) => {
                                 Currency
                             </Label>
                             <Col sm="8">
-                                {/* <Controller
-                                    name="currency"
-                                    control={control}
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            isDisabled
-                                            value={optionsC}
-                                            className="js-example-basic-single col-sm-12"
-                                            onChange={(option) => {
-                                                field.onChange(option);
-                                            }}
-
-                                        />
-                                    )}
-                                /> */}
+                               
                                 <Controller
                                     name="currency"
                                     control={control}
@@ -974,7 +958,7 @@ const AddNewBtn = (props) => {
                                 />
                             </Col>
                         </FormGroup>
-                    </Col>
+                    </Col> */}
                 </Row>
                 {/* <Row className="g-0">
                     <Col  >

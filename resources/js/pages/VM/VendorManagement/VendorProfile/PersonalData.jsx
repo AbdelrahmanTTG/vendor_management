@@ -236,7 +236,10 @@ const PersonalData = React.memo((props) => {
     formData.profile_status = vendorprofileValue;
 
     delete formData.contacts;
-    formData.vendor_brands = formData.vendor_brands.join(',');
+    formData.vendor_brands = Array.isArray(formData.vendor_brands)
+        ? formData.vendor_brands.join(",")
+        : formData.vendor_brands;
+
     // console.log(formData);
     try {
       const response = await axiosClient.post("PersonalInformation", formData);
@@ -282,7 +285,10 @@ const PersonalData = React.memo((props) => {
     delete formData.contacts;
     idVendor ? formData.id = idVendor : false;
     formData.VendorSide = props?.VendorSide ? true : false;
-    formData.vendor_brands = formData.vendor_brands.join(',');
+    formData.vendor_brands = Array.isArray(formData.vendor_brands)
+        ? formData.vendor_brands.join(",")
+        : formData.vendor_brands;
+
     try {
       const response = await axiosClient.post("updatePersonalInformation", formData);
       basictoaster("successToast", response.data.message);
@@ -1444,56 +1450,71 @@ const PersonalData = React.memo((props) => {
                                                   name="vendor_brands"
                                                   control={control}
                                                   rules={{ required: true }}
-                                                  render={({ field }) => (
-                                                      <Select
-                                                          {...field}
-                                                          value={selectedBrands}
-                                                          options={optionsB}
-                                                          isMulti
-                                                          className="js-example-basic-single col-sm-12"
-                                                          isSearchable
-                                                          onInputChange={(
-                                                              inputValue
-                                                          ) =>
-                                                              handleInputChange(
-                                                                  inputValue,
-                                                                  "brand",
-                                                                  "vendor_brands",
-                                                                  setOptionsB,
-                                                                  optionsB
-                                                              )
-                                                          }
-                                                          noOptionsMessage={() =>
-                                                              loading ? (
-                                                                  <div className="loader-box">
-                                                                      <Spinner
-                                                                          attrSpinner={{
-                                                                              className:
-                                                                                  "loader-6",
-                                                                          }}
-                                                                      />
-                                                                  </div>
-                                                              ) : (
-                                                                  "No options found"
-                                                              )
-                                                          }
-                                                          onChange={(
-                                                              selectedOptions
-                                                          ) => {
-                                                              setSelectedBrands(
-                                                                  selectedOptions
-                                                              );
-                                                              field.onChange(
-                                                                  selectedOptions?.map(
-                                                                      (
-                                                                          option
-                                                                      ) =>
-                                                                          option.value
+                                                  render={({ field }) => {
+                                                      const isMulti =
+                                                          props?.backPermissions
+                                                              ?.assign == 1;
+
+                                                      return (
+                                                          <Select
+                                                              {...field}
+                                                              value={
+                                                                  selectedBrands
+                                                              }
+                                                              options={optionsB}
+                                                              isMulti={isMulti}
+                                                              className="js-example-basic-single col-sm-12"
+                                                              isSearchable
+                                                              onInputChange={(
+                                                                  inputValue
+                                                              ) =>
+                                                                  handleInputChange(
+                                                                      inputValue,
+                                                                      "brand",
+                                                                      "vendor_brands",
+                                                                      setOptionsB,
+                                                                      optionsB
                                                                   )
-                                                              );
-                                                          }}
-                                                      />
-                                                  )}
+                                                              }
+                                                              noOptionsMessage={() =>
+                                                                  loading ? (
+                                                                      <div className="loader-box">
+                                                                          <Spinner
+                                                                              attrSpinner={{
+                                                                                  className:
+                                                                                      "loader-6",
+                                                                              }}
+                                                                          />
+                                                                      </div>
+                                                                  ) : (
+                                                                      "No options found"
+                                                                  )
+                                                              }
+                                                              onChange={(
+                                                                  selectedOptions
+                                                              ) => {
+                                                                  setSelectedBrands(
+                                                                      selectedOptions
+                                                                  );
+
+                                                                  if (isMulti) {
+                                                                      field.onChange(
+                                                                          selectedOptions?.map(
+                                                                              (
+                                                                                  option
+                                                                              ) =>
+                                                                                  option.value
+                                                                          )
+                                                                      );
+                                                                  } else {
+                                                                      field.onChange(
+                                                                          selectedOptions?.value
+                                                                      );
+                                                                  }
+                                                              }}
+                                                          />
+                                                      );
+                                                  }}
                                               />
                                           </Col>
                                       </FormGroup>
@@ -1741,7 +1762,7 @@ const PersonalData = React.memo((props) => {
                                   <Btn
                                       attrBtn={{
                                           color: "primary",
-                                          disabled: Sub, 
+                                          disabled: Sub,
                                           onClick: handleSubmit(
                                               handleClick,
                                               onError

@@ -220,7 +220,9 @@ const ViewTicket = (props) => {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     const payload = {
-                        'id': id,
+                        id: id,
+                        ticket: ticket.id,
+                        user: user.id,
                     };
                     axiosClient.delete("deleteTicketResource", { data: payload }).then((response) => {
                         if (response.status == 200) {
@@ -705,7 +707,7 @@ const ViewTicket = (props) => {
                                         <tr>
                                             <th>Username</th>
                                             <th>Ticket Status</th>
-                                            <th>Assigned To</th>
+                                            <th>Assigned To & Vendor resource</th>
                                             <th>Created At</th>
                                         </tr>
                                     </thead>

@@ -395,6 +395,8 @@ const Report = (props) => {
                                         { value: 'existing', label: 'Existing Vendors' },
                                         { value: 'existing_pair', label: 'Existing Vendors with New Pairs' },
                                         { value: 'status', label: 'Status' },
+                                        { value: 'assignedUser', label: 'Assigned To' },
+
 
                                     ]} table="vm_activity"
                                     formats={formats} FormatsChanged={handleFormatsChanged}

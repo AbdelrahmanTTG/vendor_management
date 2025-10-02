@@ -166,6 +166,7 @@ class ReportsController extends Controller
             'opened_by',
             'closed_by',
             'created_by',
+            'assignedUser', 
             'number_of_resource',
             'request_type',
             'service',
@@ -207,6 +208,7 @@ class ReportsController extends Controller
         $renameArrayForDisplay = [
             'id' => 'Ticket Number',
             'created_by' => 'Requester Name',
+            'assignedUser' => 'Assigned To', 
             'source_lang' => 'Source Language',
             'target_lang' => 'Target Language',
             'created_at' => 'Request Time',
@@ -239,6 +241,7 @@ class ReportsController extends Controller
             $perPage = $request->input('per_page', 10);
 
             $tickets = VmTicket::leftJoin('users', 'users.id', '=', 'vm_ticket.created_by')
+                ->leftJoin('users as u2', 'u2.id', '=', 'vm_ticket.assigned_to') 
                 ->leftJoin('vm_ticket_time as t', function (JoinClause $join) {
                     $join->on('t.ticket', '=', 'vm_ticket.id')->where('t.status', 2);
                 })
@@ -257,7 +260,8 @@ class ReportsController extends Controller
                     't.created_by AS opened_by',
                     't.created_at AS open_time',
                     't2.created_by AS closed_by',
-                    't3.created_at AS closed_time'
+                    't3.created_at AS closed_time',
+                'u2.user_name AS assignedUser' 
                 )
                 ->groupBy('vm_ticket.id');
 
@@ -300,6 +304,8 @@ class ReportsController extends Controller
             "formats" => $formats,
         ]);
     }
+
+
 
 
 

@@ -1411,7 +1411,7 @@ const Vendor = (props) => {
                                                         </Label>
                                                         <Input
                                                             className="form-control form-control-sm emailInput mb-1"
-                                                            type="email"
+                                                            type="text"
                                                             name="email"
                                                             required
                                                         />
