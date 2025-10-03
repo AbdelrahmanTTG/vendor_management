@@ -16,6 +16,8 @@ const Test = React.lazy(() => import('./Test'));
 const Billing = React.lazy(() => import('./Billing'));
 const History = React.lazy(() => import('./History'));
 const Portal_User = React.lazy(() => import('./Portal_User'));
+const VendorLog = React.lazy(() => import('./Log'));
+
 import NavBar from './NavBar';
 import { Navigate } from 'react-router-dom';
 import axiosClient from "../../../../pages/AxiosClint";
@@ -213,6 +215,15 @@ const EditProfile = (props) => {
 
                         <div id='Price_List'>
                             <Price_List Currency={BillingData?.BillingData?.billingData?.billing_currency || Cur} backPermissions={props.permissions?.Price_List} id={vendor?.id} priceList={priceList} />
+                        </div>
+                    </LazyWrapper>
+                )}
+                {props.permissions?.VendorLog?.view == 1 && (
+                    <LazyWrapper>
+                        <div id="VendorLog" className="row mb-3">
+                            <div className="col-12">
+                                <VendorLog backPermissions={props.permissions?.VendorLog} id={vendor?.id}/>
+                            </div>
                         </div>
                     </LazyWrapper>
                 )}

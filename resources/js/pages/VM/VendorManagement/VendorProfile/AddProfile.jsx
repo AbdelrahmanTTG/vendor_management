@@ -8,6 +8,7 @@ const Education = React.lazy(() => import('./Education'));
 const Experience = React.lazy(() => import('./Experience'));
 const Price_List = React.lazy(() => import('./Price_List'));
 const Evaluation = React.lazy(() => import('./Evaluation'));
+const VendorLog = React.lazy(() => import('./Log'));
 const Feedback = React.lazy(() => import('./Feedback'));
 const Vacation = React.lazy(() => import('./Vacation'));
 const Test = React.lazy(() => import('./Test'));
@@ -182,6 +183,15 @@ const AddProfile = (props) => {
                         </div>
                     </LazyWrapper>
                 )}
+                  {props.permissions?.VendorLog?.view == 1 && (
+                    <LazyWrapper>
+                        <div id="VendorLog" className="row mb-3">
+                            <div className="col-12">
+                                <VendorLog backPermissions={props.permissions?.VendorLog} id={data?.id} />
+                            </div>
+                        </div>
+                    </LazyWrapper>
+                )}
                 {props.permissions?.Evaluation?.view == 1 && (
                     <LazyWrapper>
 
@@ -192,6 +202,7 @@ const AddProfile = (props) => {
                         </div>
                     </LazyWrapper>
                 )}
+               
                 {props.permissions?.Feedback?.view == 1 && (
                     <LazyWrapper>
 

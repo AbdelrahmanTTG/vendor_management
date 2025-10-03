@@ -217,7 +217,8 @@ const Simple = (props) => {
               { key: 'Evaluation', permission: props.permissions?.Evaluation?.view, icon: 'icofont-star-shape', label: 'Evaluation', scrollTo: 'Evaluation' },
               { key: 'Feedback', permission: props.permissions?.Feedback?.view, icon: 'icofont-read-book', label: 'Feedback', scrollTo: 'Feedback' },
               { key: 'Vacation', permission: props.permissions?.Vacation?.view, icon: 'icofont-travelling', label: 'Vacation', scrollTo: 'Vacation' },
-              { key: 'History', permission: props.permissions?.History?.view, icon: 'icofont-time', label: 'History', scrollTo: 'History' }
+              { key: 'History', permission: props.permissions?.History?.view, icon: 'icofont-time', label: 'History', scrollTo: 'History' },
+              { key: 'VendorLog', permission: props.permissions?.History?.view, icon: 'icofont-time', label: 'Vendor Log', scrollTo: 'VendorLog' }
             ]
               .sort((a, b) => (b.permission ? 1 : 0) - (a.permission ? 1 : 0))
               .map((item, index) => (

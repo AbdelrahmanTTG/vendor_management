@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class DataLogger extends Model
 {
@@ -28,5 +29,27 @@ class DataLogger extends Model
             'data'       => is_array($data) ? json_encode($data) : $data,
             'id_row'     => $id_row,
         ]);
+    }
+    public static function queryVendorLogs($vendorId, $billingDataIds = [])
+    {
+        return self::query()
+            ->select('data_logger.*', 'master_user.user_name as created_by')
+            ->leftJoin('master_user', 'master_user.id', '=', 'data_logger.created_by')
+            ->where(function ($q) use ($vendorId, $billingDataIds) {
+                $q->where(function ($sub) use ($vendorId) {
+                    $sub->where('table_name', 'vendor')
+                        ->whereRaw("JSON_EXTRACT(data, '$.id') = ?", [$vendorId]);
+                });
+                $q->orWhere(function ($sub) use ($vendorId, $billingDataIds) {
+                    $sub->whereRaw("JSON_EXTRACT(data, '$.vendor_id') = ?", [$vendorId])
+                        ->orWhereRaw("JSON_EXTRACT(data, '$.vendor') = ?", [$vendorId]);
+
+                    if (!empty($billingDataIds)) {
+                        foreach ($billingDataIds as $id) {
+                            $sub->orWhereRaw("JSON_EXTRACT(data, '$.billing_data_id') = ?", [$id]);
+                        }
+                    }
+                });
+            });
     }
 }

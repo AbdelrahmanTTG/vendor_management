@@ -69,6 +69,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/updateTask', [VendorProfileController::class, 'updateTask']);
     Route::delete('deleteTask/{id}', [VendorProfileController::class, 'deleteTask']);
     Route::get('/getAllTask', [VendorProfileController::class, 'getAllUserTasks']);
+    Route::post('/logs', [VendorProfileController::class, 'vendorLogs']);
 
 
     Route::post('/getTickets', [TicketsController::class, 'index']);

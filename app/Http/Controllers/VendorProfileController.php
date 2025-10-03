@@ -620,9 +620,10 @@ class VendorProfileController extends Controller
             'create_vendor',
             $request->fullUrl(),
             'vendor',
-            $request->all(),
+            $vendor->toArray(),   
             $vendor->id
         );
+
 
         return response()->json([
             'message' => 'Vendor created successfully!',
@@ -721,7 +722,7 @@ class VendorProfileController extends Controller
             'update_vendor',
             $request->fullUrl(),
             'vendor',
-            $request->all(),
+            $vendor->toArray(),
             $vendor->id
         );
 
@@ -969,6 +970,18 @@ class VendorProfileController extends Controller
             }
         }
 
+        $logData = $billingData->toArray();
+
+        $bank = BankDetails::where('billing_data_id', $billingData->id)->first();
+        if ($bank) {
+            $logData['bank_details'] = $bank->toArray();
+        }
+
+        $wallets = WalletsPaymentMethods::where('billing_data_id', $billingData->id)->get()->toArray();
+        if (!empty($wallets)) {
+            $logData['wallets'] = $wallets;
+        }
+
         $user = JWTAuth::parseToken()->authenticate();
         $userId = $user->id;
 
@@ -977,7 +990,7 @@ class VendorProfileController extends Controller
             'create_billing',
             $request->fullUrl(),
             'billing_data',
-            $request->all(),
+            $logData, 
             $billingData->id
         );
 
@@ -987,6 +1000,7 @@ class VendorProfileController extends Controller
 
         return response()->json($BillingData, 200);
     }
+
 
 
     public function ModificationComplex(Request $request)
@@ -1262,9 +1276,12 @@ class VendorProfileController extends Controller
                 'send_message_vm_to_vendor',
                 $request->fullUrl(),
                 'messages',
-                $request->all(),
+                array_merge($data->toArray(), [
+                    'vendor_id' => $vendor->id, 
+                ]),
                 $data->id
             );
+
 
             return response()->json([
                 'Message' => "The message has been sent.",
@@ -1313,7 +1330,7 @@ class VendorProfileController extends Controller
             'update_vendor_PM',
             $request->fullUrl(),
             'vendor',
-            ['PM' => $pm],
+            $vendor->toArray(),
             $vendor->id
         );
 
@@ -1358,22 +1375,27 @@ class VendorProfileController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $userId = $user->id;
+        $row = VendorSkill::find($request->id);
 
+        if (!$row) {
+            return response()->json(['error' => 'Record not found'], 404);
+        }
+        $rowData = $row->toArray();
         $response = $this->deleteItem($request, VendorSkill::class);
-
         if ($response->getStatusCode() === 200) {
             DataLogger::addToLogger(
                 $userId,
                 'delete_skill',
                 $request->fullUrl(),
                 'vendor_skills',
-                $request->all(),
-                $request->id ?? null
+                $rowData,   
+                $request->id
             );
         }
 
         return $response;
     }
+
 
     public function updateBillingData(Request $request)
     {
@@ -1810,7 +1832,7 @@ class VendorProfileController extends Controller
                     $vm_email  = env('MAIL_FROM_ADDRESS');
             }
 
-            $htmlTemplate = $this->getVendorEmailTemplate($vendor, $vendor->brand, $nexusLink);
+            $htmlTemplate = $this->getVendorEmailTemplate($vendor, $vendor->vendor_brands, $nexusLink);
 
             if (!$htmlTemplate) {
                 return response()->json(['message' => 'Brand template not found'], 404);
@@ -1828,7 +1850,7 @@ class VendorProfileController extends Controller
                 'set_password',
                 $request->fullUrl(),
                 'vendor',
-                ['vendor_id' => $vendor->id, 'email' => $vendor->email],
+                $vendor->toArray(),
                 $vendor->id
             );
 
@@ -2331,7 +2353,7 @@ class VendorProfileController extends Controller
                 'upload_nda',
                 $request->fullUrl(),
                 'vendor',
-                ['nda_file' => $originalFileNameN, 'nda_path' => $ndaFilePath, 'approval_date' => $request->input('date')],
+                ['vendor_id' => $vendor->id, 'nda_file' => $originalFileNameN, 'nda_path' => $ndaFilePath, 'approval_date' => $request->input('date')],
                 $vendor->id
             );
 
@@ -2401,10 +2423,11 @@ class VendorProfileController extends Controller
 
         $id = $request->input('id');
         $file = VendorFile::find($id);
+
         if (!$file) {
             return response()->json(['message' => 'File not found in database'], 404);
         }
-
+        $fileData = $file->toArray();
         $filePath = $file->file_path;
         if (Storage::disk('external')->exists($filePath)) {
             Storage::disk('external')->delete($filePath);
@@ -2419,12 +2442,13 @@ class VendorProfileController extends Controller
             'delete_file',
             $request->fullUrl(),
             'vendor_files',
-            ['file_id' => $id, 'file_path' => $filePath],
+            $fileData,
             $id
         );
 
         return response()->json(['message' => 'File deleted successfully.'], 200);
     }
+
 
     public function updateFiles(Request $request)
     {
@@ -2668,6 +2692,14 @@ class VendorProfileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $userId = $user->id;
 
+        $message = InstantMessaging::find($request->id);
+
+        if (!$message) {
+            return response()->json(['error' => 'Message not found'], 404);
+        }
+
+        $messageData = $message->toArray();
+
         $response = $this->deleteItem($request, InstantMessaging::class);
 
         DataLogger::addToLogger(
@@ -2675,12 +2707,13 @@ class VendorProfileController extends Controller
             'delete_message',
             $request->fullUrl(),
             'instant_messaging',
-            $request->all(),
-            $request->id ?? null
+            $messageData,
+            $request->id
         );
 
         return $response;
     }
+
     public function AddPriceList(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -2734,7 +2767,7 @@ class VendorProfileController extends Controller
             $userId,
             'add_price_list',
             $request->fullUrl(),
-            'vendor_sheets',
+            'vendor_sheet',
             $request->all(),
             $vendorSheet->id
         );
@@ -2770,6 +2803,14 @@ class VendorProfileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $userId = $user->id;
 
+        $row = VendorSheet::find($request->id);
+
+        if (!$row) {
+            return response()->json(['error' => 'Record not found'], 404);
+        }
+
+        $rowData = $row->toArray();
+
         $result = $this->deleteItem($request, VendorSheet::class);
 
         DataLogger::addToLogger(
@@ -2777,13 +2818,14 @@ class VendorProfileController extends Controller
             'delete_pricelist',
             $request->fullUrl(),
             'vendor_sheet',
-            $request->all(),
-            $request->id ?? null
+            $rowData,  
+            $request->id
         );
 
         return $result;
     }
-  
+
+
     public function UpdatePriceList(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -3693,5 +3735,21 @@ class VendorProfileController extends Controller
             'last_page' => $tasks->lastPage(),
             'per_page' => $tasks->perPage(),
         ], 200);
+    }
+    public function vendorLogs(Request $request)
+    {
+        $vendorId = $request->input('vendor_id');
+        if (!$vendorId) {
+            return response()->json(['error' => 'vendor_id is required'], 400);
+        }
+        $billingDataIds = DB::table('billing_data')
+            ->where('vendor_id', $vendorId)
+            ->pluck('id')
+            ->toArray();
+        $logsQuery = DataLogger::queryVendorLogs($vendorId, $billingDataIds);
+        $logs = $logsQuery
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        return response()->json($logs);
     }
 }
