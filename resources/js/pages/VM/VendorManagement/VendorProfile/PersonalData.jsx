@@ -1464,15 +1464,15 @@ const PersonalData = React.memo((props) => {
                                                                   selectedBrands
                                                               }
                                                               options={optionsB}
-                                                              isDisabled={false} // لا تستخدم disabled
+                                                              isDisabled={false}
                                                               menuIsOpen={
                                                                   modal2
                                                                       ? false
                                                                       : undefined
-                                                              } // تمنع القائمة من الظهور إذا القراءة فقط
+                                                              }
                                                               isSearchable={
                                                                   !modal2
-                                                              } // تمنع البحث
+                                                              }
                                                               className="js-example-basic-single col-sm-12"
                                                               onInputChange={(
                                                                   inputValue
@@ -1504,7 +1504,6 @@ const PersonalData = React.memo((props) => {
                                                                   selectedOptions
                                                               ) => {
                                                                   if (!modal2) {
-                                                                      // تمنع التغيير إذا قراءة فقط
                                                                       setSelectedBrands(
                                                                           selectedOptions
                                                                       );
