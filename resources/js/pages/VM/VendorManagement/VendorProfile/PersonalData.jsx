@@ -1466,9 +1466,17 @@ const PersonalData = React.memo((props) => {
                                                       return (
                                                           <Select
                                                               {...field}
-                                                              value={
-                                                                  selectedBrands
-                                                              }
+                                                              value={optionsB.filter(
+                                                                  (opt) =>
+                                                                      Array.isArray(
+                                                                          field.value
+                                                                      )
+                                                                          ? field.value.includes(
+                                                                                opt.value
+                                                                            )
+                                                                          : opt.value ===
+                                                                            field.value
+                                                              )}
                                                               options={optionsB}
                                                               isMulti={isMulti}
                                                               isSearchable={
@@ -1476,7 +1484,7 @@ const PersonalData = React.memo((props) => {
                                                               }
                                                               isDisabled={
                                                                   isReadOnlyBrands
-                                                              } 
+                                                              }
                                                               className="js-example-basic-single col-sm-12"
                                                               onInputChange={(
                                                                   inputValue
@@ -1509,7 +1517,6 @@ const PersonalData = React.memo((props) => {
                                                                   setSelectedBrands(
                                                                       selectedOptions
                                                                   );
-
                                                                   if (isMulti) {
                                                                       field.onChange(
                                                                           selectedOptions?.map(
