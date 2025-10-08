@@ -64,6 +64,7 @@ const PersonalData = React.memo((props) => {
 
     const [idVendor, setidVendor] = useState(false);
     const [Sub, setSub] = useState(false);
+    const [modal2, setModal2] = useState(false);
 
   const toggle = () => setModal(!modal);
 
@@ -536,7 +537,8 @@ const PersonalData = React.memo((props) => {
             }));
             setSelectedBrands(selected);
             setOptionsB(selected);
-            setValue("vendor_brands", selected.map(opt => opt.value));
+              setValue("vendor_brands", selected.map(opt => opt.value));
+              setModal2(true);
           }
              if (
                  data?.mother_tongue_languages &&
@@ -1462,7 +1464,7 @@ const PersonalData = React.memo((props) => {
                                                                   selectedBrands
                                                               }
                                                               options={optionsB}
-                                                              isMulti={isMulti}
+                                                              disabled={modal2}
                                                               className="js-example-basic-single col-sm-12"
                                                               isSearchable
                                                               onInputChange={(

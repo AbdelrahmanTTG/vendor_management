@@ -38,15 +38,16 @@ class DataLogger extends Model
             ->where(function ($q) use ($vendorId, $billingDataIds) {
                 $q->where(function ($sub) use ($vendorId) {
                     $sub->where('table_name', 'vendor')
-                        ->whereRaw("JSON_EXTRACT(data, '$.id') = ?", [$vendorId]);
+                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(data, '$.id')) = ?", [$vendorId]);
                 });
+
                 $q->orWhere(function ($sub) use ($vendorId, $billingDataIds) {
-                    $sub->whereRaw("JSON_EXTRACT(data, '$.vendor_id') = ?", [$vendorId])
-                        ->orWhereRaw("JSON_EXTRACT(data, '$.vendor') = ?", [$vendorId]);
+                    $sub->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(data, '$.vendor_id')) = ?", [$vendorId])
+                        ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(data, '$.vendor')) = ?", [$vendorId]);
 
                     if (!empty($billingDataIds)) {
                         foreach ($billingDataIds as $id) {
-                            $sub->orWhereRaw("JSON_EXTRACT(data, '$.billing_data_id') = ?", [$id]);
+                            $sub->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(data, '$.billing_data_id')) = ?", [$id]);
                         }
                     }
                 });
