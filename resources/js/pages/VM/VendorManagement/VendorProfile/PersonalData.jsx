@@ -1464,12 +1464,20 @@ const PersonalData = React.memo((props) => {
                                                                   selectedBrands
                                                               }
                                                               options={optionsB}
-                                                              disabled={modal2}
+                                                              isDisabled={false} // لا تستخدم disabled
+                                                              menuIsOpen={
+                                                                  modal2
+                                                                      ? false
+                                                                      : undefined
+                                                              } // تمنع القائمة من الظهور إذا القراءة فقط
+                                                              isSearchable={
+                                                                  !modal2
+                                                              } // تمنع البحث
                                                               className="js-example-basic-single col-sm-12"
-                                                              isSearchable
                                                               onInputChange={(
                                                                   inputValue
                                                               ) =>
+                                                                  !modal2 &&
                                                                   handleInputChange(
                                                                       inputValue,
                                                                       "brand",
@@ -1495,23 +1503,27 @@ const PersonalData = React.memo((props) => {
                                                               onChange={(
                                                                   selectedOptions
                                                               ) => {
-                                                                  setSelectedBrands(
-                                                                      selectedOptions
-                                                                  );
-
-                                                                  if (isMulti) {
-                                                                      field.onChange(
-                                                                          selectedOptions?.map(
-                                                                              (
-                                                                                  option
-                                                                              ) =>
-                                                                                  option.value
-                                                                          )
+                                                                  if (!modal2) {
+                                                                      // تمنع التغيير إذا قراءة فقط
+                                                                      setSelectedBrands(
+                                                                          selectedOptions
                                                                       );
-                                                                  } else {
-                                                                      field.onChange(
-                                                                          selectedOptions?.value
-                                                                      );
+                                                                      if (
+                                                                          isMulti
+                                                                      ) {
+                                                                          field.onChange(
+                                                                              selectedOptions?.map(
+                                                                                  (
+                                                                                      option
+                                                                                  ) =>
+                                                                                      option.value
+                                                                              )
+                                                                          );
+                                                                      } else {
+                                                                          field.onChange(
+                                                                              selectedOptions?.value
+                                                                          );
+                                                                      }
                                                                   }
                                                               }}
                                                           />
