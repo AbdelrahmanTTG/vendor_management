@@ -1466,19 +1466,11 @@ const PersonalData = React.memo((props) => {
                                                       return (
                                                           <Select
                                                               {...field}
-                                                              value={optionsB.filter(
-                                                                  (opt) =>
-                                                                      Array.isArray(
-                                                                          field.value
-                                                                      )
-                                                                          ? field.value.includes(
-                                                                                opt.value
-                                                                            )
-                                                                          : opt.value ===
-                                                                            field.value
-                                                              )}
+                                                            //   isMulti={isMulti}
+                                                              value={
+                                                                  selectedBrands
+                                                              }
                                                               options={optionsB}
-                                                              isMulti={isMulti}
                                                               isSearchable={
                                                                   !isReadOnlyBrands
                                                               }
@@ -1512,23 +1504,27 @@ const PersonalData = React.memo((props) => {
                                                                   )
                                                               }
                                                               onChange={(
-                                                                  selectedOptions
+                                                                  selected
                                                               ) => {
                                                                   setSelectedBrands(
-                                                                      selectedOptions
+                                                                      selected
                                                                   );
                                                                   if (isMulti) {
                                                                       field.onChange(
-                                                                          selectedOptions?.map(
-                                                                              (
-                                                                                  opt
-                                                                              ) =>
-                                                                                  opt.value
-                                                                          )
+                                                                          selected
+                                                                              ? selected.map(
+                                                                                    (
+                                                                                        opt
+                                                                                    ) =>
+                                                                                        opt.value
+                                                                                )
+                                                                              : []
                                                                       );
                                                                   } else {
                                                                       field.onChange(
-                                                                          selectedOptions?.value
+                                                                          selected
+                                                                              ? selected.value
+                                                                              : null
                                                                       );
                                                                   }
                                                               }}
