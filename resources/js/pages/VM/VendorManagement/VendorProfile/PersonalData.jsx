@@ -64,7 +64,6 @@ const PersonalData = React.memo((props) => {
 
     const [idVendor, setidVendor] = useState(false);
     const [Sub, setSub] = useState(false);
-    const [modal2, setModal2] = useState(false);
 
   const toggle = () => setModal(!modal);
 
@@ -422,7 +421,9 @@ const PersonalData = React.memo((props) => {
     }
 
   }, [props.permission]);
-  const [loading2, setLoading2] = useState(false);
+    const [loading2, setLoading2] = useState(false);
+    const [isReadOnlyBrands, setIsReadOnlyBrands] = useState(false);
+
   useEffect(() => {
     if (props.personal) {
       setIsSubmitting(true)
@@ -530,15 +531,20 @@ const PersonalData = React.memo((props) => {
           setValue('reject_reason', data.reject_reason);
           setValue('note', data.note);
           setValue('vendor_source', data.vendor_source);
-          if (data?.brands) {
-            const selected = data.brands.map(brand => ({
-              value: brand.id.toString(),
-              label: brand.name
-            }));
-            setSelectedBrands(selected);
-            setOptionsB(selected);
-              setValue("vendor_brands", selected.map(opt => opt.value));
-              setModal2(true);
+          if (data?.brands && data.brands.length > 0) {
+              const selected = data.brands.map((brand) => ({
+                  value: brand.id.toString(),
+                  label: brand.name,
+              }));
+              setSelectedBrands(selected);
+              setOptionsB(selected);
+              setValue(
+                  "vendor_brands",
+                  selected.map((opt) => opt.value)
+              );
+
+              // هنا نحدد أن الحقل سيكون للقراءة فقط لأنه جاء من البيانات
+              setIsReadOnlyBrands(true);
           }
              if (
                  data?.mother_tongue_languages &&
@@ -1464,20 +1470,17 @@ const PersonalData = React.memo((props) => {
                                                                   selectedBrands
                                                               }
                                                               options={optionsB}
-                                                              isDisabled={false}
-                                                              menuIsOpen={
-                                                                  modal2
-                                                                      ? false
-                                                                      : undefined
-                                                              }
+                                                              isMulti={isMulti}
                                                               isSearchable={
-                                                                  !modal2
+                                                                  !isReadOnlyBrands
                                                               }
+                                                              isDisabled={
+                                                                  isReadOnlyBrands
+                                                              } 
                                                               className="js-example-basic-single col-sm-12"
                                                               onInputChange={(
                                                                   inputValue
                                                               ) =>
-                                                                  !modal2 &&
                                                                   handleInputChange(
                                                                       inputValue,
                                                                       "brand",
@@ -1503,26 +1506,23 @@ const PersonalData = React.memo((props) => {
                                                               onChange={(
                                                                   selectedOptions
                                                               ) => {
-                                                                  if (!modal2) {
-                                                                      setSelectedBrands(
-                                                                          selectedOptions
+                                                                  setSelectedBrands(
+                                                                      selectedOptions
+                                                                  );
+
+                                                                  if (isMulti) {
+                                                                      field.onChange(
+                                                                          selectedOptions?.map(
+                                                                              (
+                                                                                  opt
+                                                                              ) =>
+                                                                                  opt.value
+                                                                          )
                                                                       );
-                                                                      if (
-                                                                          isMulti
-                                                                      ) {
-                                                                          field.onChange(
-                                                                              selectedOptions?.map(
-                                                                                  (
-                                                                                      option
-                                                                                  ) =>
-                                                                                      option.value
-                                                                              )
-                                                                          );
-                                                                      } else {
-                                                                          field.onChange(
-                                                                              selectedOptions?.value
-                                                                          );
-                                                                      }
+                                                                  } else {
+                                                                      field.onChange(
+                                                                          selectedOptions?.value
+                                                                      );
                                                                   }
                                                               }}
                                                           />
