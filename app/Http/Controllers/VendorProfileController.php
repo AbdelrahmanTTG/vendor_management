@@ -581,7 +581,7 @@ class VendorProfileController extends Controller
             'city' => 'nullable|string',
             'address' => 'nullable|string',
             'reject_reason' => 'nullable|string',
-            'vendor_brands' => 'required|string',
+            'vendor_brands' => 'required',
             'profile_status' => 'nullable|string',
             'mother_tongue_language' => 'nullable|array',
             'mother_tongue_language.*.value' => 'required|int'
@@ -680,7 +680,7 @@ class VendorProfileController extends Controller
             'city' => 'sometimes|nullable|string',
             'address' => 'sometimes|nullable|string',
             'reject_reason' => 'sometimes|nullable|string',
-            'vendor_brands' => 'required|string',
+            'vendor_brands' => 'required',
             'profile_status' => 'sometimes|required|integer',
             'mother_tongue_language' => 'nullable|array',
             'mother_tongue_language.*.value' => 'required_with:mother_tongue_language|integer'

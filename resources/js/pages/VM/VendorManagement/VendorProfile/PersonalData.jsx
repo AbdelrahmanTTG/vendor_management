@@ -235,10 +235,11 @@ const PersonalData = React.memo((props) => {
     formData.status = vendorstatusValue
     formData.profile_status = vendorprofileValue;
 
-    delete formData.contacts;
-    formData.vendor_brands = Array.isArray(formData.vendor_brands)
-        ? formData.vendor_brands.join(",")
-        : formData.vendor_brands;
+      delete formData.contacts;
+      formData.vendor_brands = formData.vendor_brands?.value
+    // formData.vendor_brands = Array.isArray(formData.vendor_brands)
+    //     ? formData.vendor_brands.join(",")
+    //     : formData.vendor_brands;
 
     // console.log(formData);
     try {
@@ -284,10 +285,12 @@ const PersonalData = React.memo((props) => {
 
     delete formData.contacts;
     idVendor ? formData.id = idVendor : false;
-    formData.VendorSide = props?.VendorSide ? true : false;
-    formData.vendor_brands = Array.isArray(formData.vendor_brands)
-        ? formData.vendor_brands.join(",")
-        : formData.vendor_brands;
+      formData.VendorSide = props?.VendorSide ? true : false;
+      formData.vendor_brands = formData.vendor_brands?.value;
+      
+    // formData.vendor_brands = Array.isArray(formData.vendor_brands)
+    //     ? formData.vendor_brands.join(",")
+    //     : formData.vendor_brands;
 
     try {
       const response = await axiosClient.post("updatePersonalInformation", formData);
@@ -543,7 +546,6 @@ const PersonalData = React.memo((props) => {
                   selected.map((opt) => opt.value)
               );
 
-              // هنا نحدد أن الحقل سيكون للقراءة فقط لأنه جاء من البيانات
               setIsReadOnlyBrands(true);
           }
              if (
@@ -1454,83 +1456,109 @@ const PersonalData = React.memo((props) => {
                                               Brands
                                           </Label>
                                           <Col sm="9">
+                                              {/* <Controller
+                                                  name="vendor_brands"
+                                                  control={control}
+                                                  rules={{ required: true }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          {...field}
+                                                          value={selectedBrands}
+                                                          options={optionsB}
+                                                          isSearchable={
+                                                              !isReadOnlyBrands
+                                                          }
+                                                          className="js-example-basic-single col-sm-12"
+                                                          onInputChange={(
+                                                              inputValue
+                                                          ) =>
+                                                              handleInputChange(
+                                                                  inputValue,
+                                                                  "brand",
+                                                                  "vendor_brands",
+                                                                  setOptionsB,
+                                                                  optionsB
+                                                              )
+                                                          }
+                                                          noOptionsMessage={() =>
+                                                              loading ? (
+                                                                  <div className="loader-box">
+                                                                      <Spinner
+                                                                          attrSpinner={{
+                                                                              className:
+                                                                                  "loader-6",
+                                                                          }}
+                                                                      />
+                                                                  </div>
+                                                              ) : (
+                                                                  "No options found"
+                                                              )
+                                                          }
+                                                          onChange={(
+                                                              selected
+                                                          ) => {
+                                                              setSelectedBrands(
+                                                                  selected
+                                                              );
+                                                              field.onChange(
+                                                                  selected
+                                                                      ? selected.value
+                                                                      : null
+                                                              );
+                                                          }}
+                                                      />
+                                                  )}
+                                              /> */}
                                               <Controller
                                                   name="vendor_brands"
                                                   control={control}
                                                   rules={{ required: true }}
-                                                  render={({ field }) => {
-                                                      const isMulti =
-                                                          props?.backPermissions
-                                                              ?.assign == 1;
-
-                                                      return (
-                                                          <Select
-                                                              {...field}
-                                                            //   isMulti={isMulti}
-                                                              value={
-                                                                  selectedBrands
-                                                              }
-                                                              options={optionsB}
-                                                              isSearchable={
-                                                                  !isReadOnlyBrands
-                                                              }
-                                                              isDisabled={
-                                                                  isReadOnlyBrands
-                                                              }
-                                                              className="js-example-basic-single col-sm-12"
-                                                              onInputChange={(
-                                                                  inputValue
-                                                              ) =>
-                                                                  handleInputChange(
-                                                                      inputValue,
-                                                                      "brand",
-                                                                      "vendor_brands",
-                                                                      setOptionsB,
-                                                                      optionsB
-                                                                  )
-                                                              }
-                                                              noOptionsMessage={() =>
-                                                                  loading ? (
-                                                                      <div className="loader-box">
-                                                                          <Spinner
-                                                                              attrSpinner={{
-                                                                                  className:
-                                                                                      "loader-6",
-                                                                              }}
-                                                                          />
-                                                                      </div>
-                                                                  ) : (
-                                                                      "No options found"
-                                                                  )
-                                                              }
-                                                              onChange={(
-                                                                  selected
-                                                              ) => {
-                                                                  setSelectedBrands(
-                                                                      selected
-                                                                  );
-                                                                  if (isMulti) {
-                                                                      field.onChange(
-                                                                          selected
-                                                                              ? selected.map(
-                                                                                    (
-                                                                                        opt
-                                                                                    ) =>
-                                                                                        opt.value
-                                                                                )
-                                                                              : []
-                                                                      );
-                                                                  } else {
-                                                                      field.onChange(
-                                                                          selected
-                                                                              ? selected.value
-                                                                              : null
-                                                                      );
-                                                                  }
-                                                              }}
-                                                          />
-                                                      );
-                                                  }}
+                                                  render={({ field }) => (
+                                                      <Select
+                                                          {...field}
+                                                          value={selectedBrands}
+                                                          options={optionsB}
+                                                          isSearchable={
+                                                              !isReadOnlyBrands
+                                                          }
+                                                          onInputChange={(
+                                                              inputValue
+                                                          ) =>
+                                                              handleInputChange(
+                                                                  inputValue,
+                                                                  "brand",
+                                                                  "vendor_brands",
+                                                                  setOptionsB,
+                                                                  optionsB
+                                                              )
+                                                          }
+                                                          className="js-example-basic-single col-sm-12"
+                                                          noOptionsMessage={() =>
+                                                              loading ? (
+                                                                  <div className="loader-box">
+                                                                      <Spinner
+                                                                          attrSpinner={{
+                                                                              className:
+                                                                                  "loader-6",
+                                                                          }}
+                                                                      />
+                                                                  </div>
+                                                              ) : (
+                                                                  "No options found"
+                                                              )
+                                                          }
+                                                          onChange={(
+                                                              option
+                                                          ) => {
+                                                              setSelectedBrands(
+                                                                  option
+                                                              );
+                                                              field.onChange(
+                                                                  option
+                                                              );
+                                                          }}
+                                                      />
+                                                  )}
                                               />
                                           </Col>
                                       </FormGroup>
