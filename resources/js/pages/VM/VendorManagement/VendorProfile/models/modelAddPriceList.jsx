@@ -44,6 +44,7 @@ const AddNewBtn = (props) => {
     const [optionsTL, setOptionsTL] = useState([]);
 
     const [optionsD, setOptionsD] = useState([]);
+    const [optionsTD, setOptionsTD] = useState([]);
        
     const [optionsB, setOptionsB] = useState([]);
     const [selectedOptionC, setSelectedOptionC] = useState(null);
@@ -208,6 +209,41 @@ const AddNewBtn = (props) => {
             }));
 
             setOptionsSub(formattedOptions);
+
+        } catch (err) {
+            const response = err.response;
+            if (response && response.status === 422) {
+                setErrorMessage(response.data.errors);
+            } else if (response && response.status === 401) {
+                setErrorMessage(response.data.message);
+            } else {
+                setErrorMessage("An unexpected error occurred.");
+            }
+        } finally {
+            setLoading(false);
+        }
+
+    };
+    const handelingSourceDilect = async (id ,type) => {
+        if (!id) return
+        try {
+            setLoading(true);
+            const { data } = await axiosClient.get("findSourLangDil", {
+                params: {
+                    id: id,
+                },
+            });
+
+            const formattedOptions = data.map(item => ({
+                value: item.id,
+                label: item.name,
+            }));
+            if(type === 'source'){
+                    setOptionsD(formattedOptions);
+            } else {
+                    setOptionsTD(formattedOptions);
+            }
+        
 
         } catch (err) {
             const response = err.response;
@@ -519,6 +555,10 @@ const AddNewBtn = (props) => {
                                                 )
                                             }
                                             onChange={(option) => {
+                                                handelingSourceDilect(
+                                                    option.value,
+                                                    "source"
+                                                );
                                                 field.onChange(option);
                                             }}
                                         />
@@ -577,6 +617,10 @@ const AddNewBtn = (props) => {
                                                 )
                                             }
                                             onChange={(option) => {
+                                                handelingSourceDilect(
+                                                    option.value,
+                                                    "target"
+                                                );
                                                 field.onChange(option);
                                             }}
                                         />
@@ -604,15 +648,6 @@ const AddNewBtn = (props) => {
                                             {...field}
                                             value={field.value}
                                             options={optionsD}
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(
-                                                    inputValue,
-                                                    "languages_dialect",
-                                                    "dialect",
-                                                    setOptionsD,
-                                                    optionsD
-                                                )
-                                            }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
                                             noOptionsMessage={() =>
@@ -657,15 +692,6 @@ const AddNewBtn = (props) => {
                                             {...field}
                                             value={field.value}
                                             options={optionsD}
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(
-                                                    inputValue,
-                                                    "languages_dialect",
-                                                    "dialect_target",
-                                                    setOptionsD,
-                                                    optionsD
-                                                )
-                                            }
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
                                             noOptionsMessage={() =>
@@ -845,7 +871,7 @@ const AddNewBtn = (props) => {
                             </Col>
                         </FormGroup>
                     </Col>
-                    <Col md="6">
+                    {/* <Col md="6">
                         <FormGroup className="row">
                             <Label
                                 className="col-sm-4 col-form-label"
@@ -901,7 +927,7 @@ const AddNewBtn = (props) => {
                                 />
                             </Col>
                         </FormGroup>
-                    </Col>
+                    </Col> */}
                     {/* <Col md="6" className="mb-3">
                         <FormGroup className="row">
                             <Label

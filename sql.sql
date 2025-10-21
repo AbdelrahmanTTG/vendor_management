@@ -628,19 +628,32 @@ CREATE TABLE IF NOT EXISTS `pm_setup` (
             PRIMARY KEY (`id`)
             ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 CREATE TABLE IF NOT EXISTS messages ( id INT AUTO_INCREMENT PRIMARY KEY, sender_email VARCHAR(255) NOT NULL, receiver_email VARCHAR(255) NOT NULL, content TEXT NOT NULL, is_read BOOLEAN DEFAULT FALSE, status BOOLEAN DEFAULT FALSE, created_at TIMESTAMP NULL DEFAULT NULL, updated_at TIMESTAMP NULL DEFAULT NULL );
-INSERT INTO screen (`groups`, name, url, menu, use_system) VALUES ('289','5', 'Vendor Personal Data', 'PersonalData', '0', 'VM'), ('5', 'Vendor Messaging', 'Messaging', '0', 'VM'), ('5', 'Vendor VM note', 'VMnote', '0', 'VM'), ('5', 'Vendor Files Certificate', 'FilesCertificate', '0', 'VM'), ('5', 'Vendor Education', 'Education', '0', 'VM'), ('5', 'Vendor Experience', 'Experience', '0', 'VM'), ('5', 'Vendor Test', 'Test', '0', 'VM'), ('5', 'Vendor Billing', 'Billing', '0', 'VM'), ('5', 'Vendor Portal User', 'Portal_User', '0', 'VM'), ('5', 'Vendor Price List', 'Price_List', '0', 'VM'), ('5', 'Vendor Evaluation', 'Evaluation', '0', 'VM'), ('5', 'Vendor Feedback', 'Feedback', '0', 'VM'), ('5', 'Vendor Vacation', 'Vacation', '0', 'VM'), ('5', 'Vendor History', 'History', '0', 'VM');
+INSERT INTO `screen` (`groups`, name, url, menu, use_system) VALUES 
+('289','5', 'Vendor Personal Data', 'PersonalData', '0', 'VM'),
+ ('5', 'Vendor Messaging', 'Messaging', '0', 'VM'), ('5', 'Vendor VM note', 'VMnote', '0', 'VM'),
+  ('5', 'Vendor Files Certificate', 'FilesCertificate', '0', 'VM'),
+   ('5', 'Vendor Education', 'Education', '0', 'VM'), 
+   ('5', 'Vendor Experience', 'Experience', '0', 'VM'), 
+   ('5', 'Vendor Test', 'Test', '0', 'VM'),
+    ('5', 'Vendor Billing', 'Billing', '0', 'VM'),
+     ('5', 'Vendor Portal User', 'Portal_User', '0', 'VM'),
+      ('5', 'Vendor Price List', 'Price_List', '0', 'VM'),
+       ('5', 'Vendor Evaluation', 'Evaluation', '0', 'VM'), 
+       ('5', 'Vendor Feedback', 'Feedback', '0', 'VM'),
+        ('5', 'Vendor Vacation', 'Vacation', '0', 'VM'),
+         ('5', 'Vendor History', 'History', '0', 'VM');
 INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES ("290", '7', 'VM Activity Sheet', 'reports/vmActivity', '1', 'VM');
-INSERT INTO screen ( `groups`, name, url, menu, use_system) VALUES ("291", 5, 'Add vendor profile', 'vendors/Profiletest', 0, 'VM'), ( 5, 'edit vendor profile', 'vendors/editprofiletest', 0, 'VM');
+INSERT INTO screen ( `id`,`groups`, name, url, menu, use_system) VALUES ("291", 5, 'Add vendor profile', 'vendors/Profiletest', 0, 'VM'), ( 5, 'edit vendor profile', 'vendors/editprofiletest', 0, 'VM');
 ALTER TABLE logger ADD COLUMN master_id BIGINT UNSIGNED NULL;
 ALTER TABLE `vendor` ADD `Approval_nda_date` DATE NULL AFTER `PM`;
 UPDATE vendor SET first_login = 0;
 ALTER TABLE `vm_setup` ADD `amount` DECIMAL(11,2) NULL AFTER `erp_uploads_folder_path`;
 ALTER TABLE `billing_data` ADD `bank_required` TINYINT NULL DEFAULT '1' AFTER `billing_currency`;
 ALTER TABLE `billing_data` ADD `wallet_required` TINYINT NULL DEFAULT '1' AFTER `bank_required`;
-INSERT INTO screen ( `groups`, name, url, menu, use_system) VALUES ("292", 5, 'Vendor profile', 'vendors/Profile', 1, 'VM');
-INSERT INTO screen ( `groups`, name, url, menu, use_system) VALUES ( "293",5, 'Tickets', 'Tickets', 1, 'VM');
-INSERT INTO screen ( `groups`, name, url, menu, use_system) VALUES ( "294",5, 'View Ticket', 'ViewTicket', 0, 'VM');
-INSERT INTO screen ( `groups`, name, url, menu, use_system) VALUES ( "295",7, 'Vendors Tasks', 'reports/allTasks', 1, 'VM');
+INSERT INTO screen ( id,`groups`, name, url, menu, use_system) VALUES ("292", 5, 'Vendor profile', 'vendors/Profile', 1, 'VM');
+INSERT INTO screen ( id,`groups`, name, url, menu, use_system) VALUES ( "293",5, 'Tickets', 'Tickets', 1, 'VM');
+INSERT INTO screen ( id,`groups`, name, url, menu, use_system) VALUES ( "294",5, 'View Ticket', 'ViewTicket', 0, 'VM');
+INSERT INTO screen ( id,`groups`, name, url, menu, use_system) VALUES ( "295",7, 'Vendors Tasks', 'reports/allTasks', 1, 'VM');
 UPDATE `screen` SET `use_system` = 'ERP,VM' WHERE `screen`.`id` = 106;
 UPDATE `screen` SET `name` = 'Region' WHERE `screen`.`id` = 267;
 UPDATE `screen` SET `url` = 'Region' WHERE `screen`.`id` = 267;
@@ -666,3 +679,54 @@ INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`,`use_system`) VALUES
  CREATE TABLE `vendors_mother_tongue` ( `id` int UNSIGNED NOT NULL AUTO_INCREMENT, `vendor_id` int NOT NULL, `language_id` int NOT NULL, `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   ALTER TABLE `vm_ticket` ADD `requester_function` TINYINT(1) NULL COMMENT '1:sales/2:pm' AFTER `brand_id`;
   ALTER TABLE `vm_ticket_time` ADD `assign_to` INT NULL AFTER `status`;
+  ALTER TABLE `vendor` ADD `profile_status` TINYINT(1) NOT NULL DEFAULT '0' AFTER `Approval_nda_date`;
+ALTER TABLE `vendor_invoices` CHANGE `wallet_method` `wallet_method` INT(11) NULL DEFAULT NULL;
+ALTER TABLE `vendor` ADD COLUMN `vendor_brands` VARCHAR(255) NULL AFTER `brand`;
+UPDATE `vendor` SET `vendor_brands` = `brand`;
+ALTER TABLE `vendor_sheet` ADD COLUMN `sheet_brand` INT NULL ;
+UPDATE `vendor_sheet` vs
+JOIN `vendor` v ON vs.vendor = v.id
+SET vs.sheet_brand = v.brand;
+
+ALTER TABLE `fields` ADD `Active` INT NOT NULL AFTER `parent`;
+
+
+INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '7', 'Vendors Tasks', 'reports/allTasks', '1', 'VM'); 
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '299', '21', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '299', '1', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '299', '32', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '5', 'Tickets', 'tickets', '1', 'VM'); 
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '300', '21', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '300', '1', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '300', '32', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '5', 'View Ticket', 'viewTicket', '0', 'VM'); 
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '301', '21', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '301', '1', '1', '1', '1', '1', '1', '0') ;
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES (NULL, '5', '301', '32', '1', '1', '1', '1', '1', '0') ;
+
+INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `edit`, `delete`, `view`, `menu_order`) VALUES
+(NULL, '5', '289', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '7', '290', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '291', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '292', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '293', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '294', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '7', '295', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '334', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '335', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '336', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '337', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '338', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '339', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '340', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '341', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '342', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '343', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '344', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '345', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '346', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '7', '347', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '348', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '349', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '1', '351', '21', '1', '1', '1', '1', '1', '0'),
+(NULL, '5', '350', '21', '1', '1', '1', '1', '1', '0');

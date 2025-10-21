@@ -641,3 +641,42 @@ SET first_login = 0;",
 } catch (PDOException $e) {
     echo " Database connection failed: " . $e->getMessage();
 }
+INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES
+
+ (289, '5', 'Vendor Personal Data', 'PersonalData', '0', 'VM');
+ (290, '7', 'VM Activity Sheet', 'reports/vmActivity', '1', 'VM'); 
+ (291, '5', 'Add vendor profile', 'vendors/Profiletest', '0', 'VM'); 
+ (292, '5', 'edit vendor profile', 'vendors/editprofiletest', '0', 'VM'); 
+ (294, '5', 'View Ticket', 'ViewTicket', '0', 'VM'); 
+ (295, '7', 'Vendors Tasks', 'reports/allTasks', '1', 'VM'); 
+ (334, '5', 'Vendor Messaging', 'Messaging', '0', 'VM'); 
+ (335, '5', 'Vendor VM note', 'VMnote', '0', 'VM'); 
+ (336, '5', 'Vendor Files Certificate', 'FilesCertificate', '0', 'VM'); 
+ (337, '5', 'Vendor Education', 'Education', '0', 'VM'); 
+ (338, '5', 'Vendor Experience', 'Experience', '0', 'VM'); 
+ (339, '5', 'Vendor Test', 'Test', '0', 'VM'); 
+ (340, '5', 'Vendor Billing', 'Billing', '0', 'VM'); 
+ (341, '5', 'Vendor Portal User', 'Portal_User', '0', 'VM'); 
+ 
+ (342, '5', 'Vendor Price List', 'Price_List', '0', 'VM'); 
+ (343, '5', 'Vendor Evaluation', 'Evaluation', '0', 'VM'); 
+ (344, '5', 'Vendor Feedback', 'Feedback', '0', 'VM');
+ (345, '5', 'Vendor Vacation', 'Vacation', '0', 'VM');
+ (346, '5', 'Vendor History', 'History', '0', 'VM');
+ (347, '7', 'Vendor Tasks', 'reports/allTasks', '1', 'VM');
+ (348, '5', 'Tickets', 'tickets', '1', 'VM'); 
+ (349, '5', 'View Ticket', 'viewTicket', '0', 'VM'); 
+ (350, '5', 'Vendor profile', 'vendors/Profile', '1', 'VM'); 
+ (351, 1, 'Alias mail', 'AliasEmail', '1', 'VM');
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

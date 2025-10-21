@@ -50,6 +50,7 @@ Route::middleware(['auth:api'])->group(function () {
     // Route::post('/updateinstantMessaging', [VendorProfileController::class, 'updateMessagesByVendorId']);
     Route::delete('/deleteMessage', [VendorProfileController::class, 'deleteMessagesByVendorId']);
     Route::get('/TaskType', [VendorProfileController::class, 'findTask']);
+    Route::get('/findSourLangDil', [VendorProfileController::class, 'findSourLangDil']);
     Route::post('/AddPriceList', [VendorProfileController::class, 'AddPriceList']);
     Route::delete('/deletePricelist', [VendorProfileController::class, 'deletePricelist']);
     Route::post('/UpdatePriceList', [VendorProfileController::class, 'UpdatePriceList']);

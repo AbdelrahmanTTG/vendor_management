@@ -554,6 +554,15 @@ class VendorProfileController extends Controller
         $Regions = Regions::getColumnValue($id);
         return response()->json($Regions, 201);
     }
+    public function findSourLangDil(Request $request)
+    {
+        $id = $request->input('id');
+        $Dil = DB::table('languages_dialect')
+            ->where('language', $id)
+            ->where('Active', 1)
+            ->get();
+        return response()->json($Dil, 201);
+    }
 
     public function store(Request $request)
     {
@@ -1864,146 +1873,66 @@ class VendorProfileController extends Controller
     private function getVendorEmailTemplate($vendor, $brand, $nexusLink)
     {
         $password = base64_decode($vendor->password);
+        $vendorName = htmlspecialchars($vendor->name);
+        $vendorEmail = htmlspecialchars($vendor->email);
 
         switch ($brand) {
             case 1:
-                return "
-            <!DOCTYPE html>
-            <html lang='en'>
-            <head>
-                <meta charset='utf-8'>
-                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                <title>Nexus | Site Manager</title>
-                <style>
-                    body {font-family: Helvetica, Arial, sans-serif; font-size:14px; color:#333;}
-                </style>
-            </head>
-            <body>
-                <p>Hello {$vendor->name},</p>
-                <p>Hope you’re doing well. </p>
-                <p>1<sup>st</sup>: We’d like to update you with our system process from now on :- </p>
-                <p>2<sup>nd</sup>: We will create a new profile for you on <b>Nexus</b></p>
-                <p>3<sup>rd</sup>: Initial username and password, and you can update your password later on</p>
-                <p>4<sup>th</sup>: Your profile will include all of your data (to receive and accept jobs, Pos, create the invoice)</p>
-                <p>5<sup>th</sup>: We will NOT consider any offline work, ONLY through the system as per the explained process above</p>
-                <p>Below is your account information on Nexus:-</p>
-                <p>Link: <a href='{$nexusLink}'>{$nexusLink}</a></p>
-                <p>Email: {$vendor->email}</p>
-                <p>Password: {$password}</p>
-                <p><b>KINDLY UPDATE YOUR PASSWORD ONCE YOU LOGGED IN!</b></p>
-                <p>For more instructions about Nexus: <a href='{$nexusLink}/home/instructions'>Click Here</a></p>
-                <p>If you have any questions or feedback, contact us via 
-                <a href='mailto:vendor.support@aixnexus.com'>vendor.support@aixnexus.com</a></p>
-                <p>Thank you</p>
-            </body>
-            </html>";
-
-            case 3:
-                return "
-            <!DOCTYPE html>
-            <html lang='en'>
-            <head>
-                <meta charset='utf-8'>
-                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                <title>Europe Localize | Site Manager</title>
-                <style>
-                    body {font-family: Helvetica, Arial, sans-serif; font-size:14px; color:#333;}
-                </style>
-            </head>
-            <body>
-                <p>Hello {$vendor->name},</p>
-                <p>We hope this finds you safe and sound. </p>
-                <p>We would like to announce our upcoming system processes, as we are going to use a new portal called “Nexus” </p>
-                <p>In order to get our work process done through “Nexus” please follow the below steps</p>
-                <p>1<sup>st</sup> step: You need to create a new profile on Nexus</p>
-                <p>2<sup>nd</sup>: You will create your Initial username and password. Afterwards, you can definitely change your password.</p>
-                <p>3<sup>rd</sup>: Profile contains all your data (job acquisition and acceptance, POS, created invoices)</p>
-                <p><b>Note :</b> Any offline work is not taken into consideration. We only consider online work through the system, following the process explained up above.</p>
-                <p>Your Nexus account information is as follows:</p>
-                <p>Link: <a href='{$nexusLink}'>{$nexusLink}</a></p>
-                <p>Email: {$vendor->email}</p>
-                <p>Password: {$password}</p>
-                <p><b>After logging in, please change your password.</b></p>
-                <p>For more information on using the system, kindly check: 
-                <a href='{$nexusLink}/home/instructions'>Click Here</a></p>
-                <p>For any questions, feedbacks, or comments, we are always happy to hear from you. 
-                Please contact us at <a href='mailto:vendor.support@aixnexus.com'>vendor.support@aixnexus.com</a></p>
-                <p>Thanks for your hard work on this. Please accept our deepest gratitude.</p>
-            </body>
-            </html>";
-
-            case 11:
-                return "
-            <!DOCTYPE html>
-            <html lang='en'>
-            <head>
-                <meta charset='utf-8'>
-                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                <title>Columbuslang | Site Manager</title>
-                <style>
-                    body {font-family: Helvetica, Arial, sans-serif; font-size:14px; color:#333;}
-                </style>
-            </head>
-            <body>
-                <p>Dear {$vendor->name},</p>
-                <p>We hope this finds you well and in good health. </p>
-                <p>Columbus Lang would like to announce the launch of our new system and the related processes; our new portal is now called “Nexus”. </p>
-                <p>The following steps will introduce the process and how to get our work done through “Nexus”:</p>
-                <p><b>Step 1:</b> You need to create a new profile on Nexus.</p>
-                <p><b>Step 2:</b> You need to create your initial username and password. Your password can be changed later on.</p>
-                <p><b>Step 3:</b> The profile includes all your data: Job Acquisition, Job Acceptance, Purchase Orders, and the Created Invoices.</p>
-                <p><b>N.B:</b> Any offline work is not allowed. We only take into consideration the work completed online through Nexus.</p>
-                <p><b>Please find below your login credentials for your Nexus account:</b></p>
-                <p><b>Link:</b> <a href='{$nexusLink}'>{$nexusLink}</a></p>
-                <p><b>Email:</b> {$vendor->email}</p>
-                <p><b>Password:</b> {$password}</p>
-                <p><b>Please make sure to change your password after signing in.</b></p>
-                <p>For more information on using the system, kindly 
-                <a href='{$nexusLink}/home/instructions'>Click Here</a></p>
-                <p>For any questions, feedbacks or comments, please contact us at 
-                <a href='mailto:vendor.support@aixnexus.com'>vendor.support@aixnexus.com</a></p>
-                <p>We sincerely appreciate your time and efforts.</p>
-            </body>
-            </html>";
-
+                $title = "Nexus | Site Manager";
+                break;
             case 2:
-                return "
-            <!DOCTYPE html>
-            <html lang='en'>
-            <head>
-                <meta charset='utf-8'>
-                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                <title>Localizera | Site Manager</title>
-                <style>
-                    body {font-family: Helvetica, Arial, sans-serif; font-size:14px; color:#333;}
-                </style>
-            </head>
-            <body>
-                <p>Hello {$vendor->name},</p>
-                <p>We hope this email finds you well and safe. </p>
-                <p>We would like to announce the launch of Localizera’s new system “Nexus” and the respected processes. </p>
-                <p>We will pave the way for you and share the required steps to complete our work on “Nexus”:</p>
-                <p><b>• First Step:</b> You must create a new profile on Nexus.</p>
-                <p><b>• Second Step:</b> You must create the initial username and password. You can update or change your password in the future.</p>
-                <p><b>• Third Step:</b> The profile contains your data like Job Acquisition, Job Acceptance, Purchase Orders, and the Created Invoices.</p>
-                <p><b>Note:</b> It is not permitted to perform any offline work. We take into account only the work completed online via Nexus.</p>
-                <p><b>You may find below your login details for your Nexus account:</b></p>
-                <p><b>Link:</b> <a href='{$nexusLink}'>{$nexusLink}</a></p>
-                <p><b>Email:</b> {$vendor->email}</p>
-                <p><b>Password:</b> {$password}</p>
-                <p><b>Kindly update your password after signing in.</b></p>
-                <p>For more information on how to navigate Nexus, please check out this link 
-                <a href='{$nexusLink}/home/instructions'>Click Here</a></p>
-                <p>For any questions, feedbacks or comments, please contact us at 
-                <a href='mailto:vendor.support@aixnexus.com'>vendor.support@aixnexus.com</a></p>
-                <p>Thank you so much for your time and attention.</p>
-            </body>
-            </html>";
-
+                $title = "Localizera | Site Manager";
+                break;
+            case 3:
+                $title = "Europe Localize | Site Manager";
+                break;
+            case 11:
+                $title = "Columbuslang | Site Manager";
+                break;
             default:
                 return null;
         }
+
+        return "
+    <!DOCTYPE html>
+    <html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>{$title}</title>
+        <style>
+            body {font-family: Helvetica, Arial, sans-serif; font-size:14px; color:#333; line-height:1.6;}
+            p {margin: 8px 0;}
+        </style>
+    </head>
+    <body>
+        <p>Hello {$vendorName},</p>
+        <p>Hope you’re doing well.</p>
+
+        <p>1<sup>st</sup>: We’d like to update you with our system process from now on:-</p>
+        <p>2<sup>nd</sup>: We will create a new profile for you on <b>Nexus</b></p>
+        <p>3<sup>rd</sup>: Initial username and password, and you can update your password later on</p>
+        <p>4<sup>th</sup>: Your profile will include all of your data (to receive and accept jobs, POs, create the invoice)</p>
+        <p>5<sup>th</sup>: We will NOT consider any offline work, ONLY through the system as per the explained process above</p>
+
+        <p>Below is your account information on Nexus:-</p>
+        <p><b>Link:</b> <a href='{$nexusLink}'>{$nexusLink}</a></p>
+        <p><b>Email:</b> {$vendorEmail}</p>
+        <p><b>Password:</b> {$password}</p>
+
+        <p><b>KINDLY UPDATE YOUR PASSWORD ONCE YOU LOGGED IN!</b></p>
+
+        <p>For more instructions about Nexus: 
+        <a href='{$nexusLink}/home/instructions'>Click Here</a></p>
+
+        <p>If you have any questions or feedback, we're always keen to hear from you and help you out via 
+        <a href='mailto:vendor.support@aixnexus.com'>vendor.support@aixnexus.com</a></p>
+
+        <p>Thank you</p>
+    </body>
+    </html>";
     }
+
 
     public function AddExperience(Request $request)
     {
@@ -2714,6 +2643,66 @@ class VendorProfileController extends Controller
         return $response;
     }
 
+    // public function AddPriceList(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'vendor' => 'required|integer',
+    //         'subject' => 'required|integer',
+    //         'sub_subject' => 'nullable|integer',
+    //         'service' => 'required|integer',
+    //         'task_type' => 'required|integer',
+    //         'source_lang' => 'required|integer',
+    //         'target_lang' => 'required|integer',
+    //         'dialect' => 'nullable|integer',
+    //         'dialect_target' => 'nullable|integer',
+    //         'unit' => 'required|integer',
+    //         'rate' => 'required|numeric',
+    //         'special_rate' => 'nullable|numeric',
+    //         'Status' => 'required|string',
+    //         'currency' => 'required|integer',
+    //         // 'sheet_brand' => 'required|integer',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+
+    //     $user = JWTAuth::parseToken()->authenticate();
+    //     $userId = $user->id;
+
+    //     $data = $request->all();
+    //     $data['dialect'] = $data['dialect'] ?? null;
+    //     $data['dialect_target'] = $data['dialect_target'] ?? null;
+    //     $data['currency'] = $data['currency'] ?? null;
+    //     $data['sub_subject'] = $data['sub_subject'] ?? null;
+
+    //     $vendorSheet = VendorSheet::create($data);
+
+    //     $vendorSheet->load([
+    //         'source_lang:id,name',
+    //         'target_lang:id,name',
+    //         'dialect:id,dialect',
+    //         'dialect_target:id,dialect',
+    //         'service:id,name',
+    //         'task_type:id,name',
+    //         'unit:id,name',
+    //         'currency:id,name',
+    //         'subject:id,name',
+    //         'sub_subject:id,name',
+    //         'sheet_brand:id,name',
+    //     ]);
+
+    //     DataLogger::addToLogger(
+    //         $userId,
+    //         'add_price_list',
+    //         $request->fullUrl(),
+    //         'vendor_sheet',
+    //         $request->all(),
+    //         $vendorSheet->id
+    //     );
+
+    //     return response()->json($vendorSheet, 201);
+    // }
     public function AddPriceList(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -2731,7 +2720,6 @@ class VendorProfileController extends Controller
             'special_rate' => 'nullable|numeric',
             'Status' => 'required|string',
             'currency' => 'required|integer',
-            'sheet_brand' => 'required|integer',
         ]);
 
         if ($validator->fails()) {
@@ -2746,6 +2734,13 @@ class VendorProfileController extends Controller
         $data['dialect_target'] = $data['dialect_target'] ?? null;
         $data['currency'] = $data['currency'] ?? null;
         $data['sub_subject'] = $data['sub_subject'] ?? null;
+
+        $vendor = Vendor::find($data['vendor']);
+        if (!$vendor) {
+            return response()->json(['error' => 'Vendor not found'], 404);
+        }
+
+        $data['sheet_brand'] = $vendor->vendor_brands ?? null;
 
         $vendorSheet = VendorSheet::create($data);
 
@@ -2825,7 +2820,6 @@ class VendorProfileController extends Controller
         return $result;
     }
 
-
     public function UpdatePriceList(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -2843,7 +2837,6 @@ class VendorProfileController extends Controller
             'special_rate' => 'nullable|numeric',
             'Status' => 'required|string',
             'currency' => 'required|integer',
-            'sheet_brand' => 'required|integer',
         ]);
 
         if ($validator->fails()) {
@@ -2854,11 +2847,17 @@ class VendorProfileController extends Controller
         $userId = $user->id;
 
         $vendorSheet = VendorSheet::findOrFail($request->input("id"));
+
         $data = $request->except(['vendor']);
         $data['dialect'] = $data['dialect'] ?? null;
         $data['dialect_target'] = $data['dialect_target'] ?? null;
         $data['currency'] = $data['currency'] ?? null;
         $data['sub_subject'] = $data['sub_subject'] ?? null;
+
+        $vendor = Vendor::find($vendorSheet->vendor);
+        if ($vendor) {
+            $data['sheet_brand'] = $vendor->vendor_brands ?? null;
+        }
 
         $vendorSheet->update($data);
 
@@ -2882,7 +2881,7 @@ class VendorProfileController extends Controller
             'currency:id,name',
             'subject:id,name',
             'sub_subject:id,name',
-            'sheet_brand:id,name'
+            'sheet_brand:id,name',
         ]);
 
         $vendorSheet->makeHidden([
@@ -2899,6 +2898,80 @@ class VendorProfileController extends Controller
 
         return response()->json($vendorSheet, 200);
     }
+
+    // public function UpdatePriceList(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'id' => 'required|integer',
+    //         'subject' => 'required|integer',
+    //         'sub_subject' => 'nullable|integer',
+    //         'service' => 'required|integer',
+    //         'task_type' => 'required|integer',
+    //         'source_lang' => 'required|integer',
+    //         'target_lang' => 'required|integer',
+    //         'dialect' => 'nullable|integer',
+    //         'dialect_target' => 'nullable|integer',
+    //         'unit' => 'required|integer',
+    //         'rate' => 'required|numeric',
+    //         'special_rate' => 'nullable|numeric',
+    //         'Status' => 'required|string',
+    //         'currency' => 'required|integer',
+    //         // 'sheet_brand' => 'required|integer',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+
+    //     $user = JWTAuth::parseToken()->authenticate();
+    //     $userId = $user->id;
+
+    //     $vendorSheet = VendorSheet::findOrFail($request->input("id"));
+    //     $data = $request->except(['vendor']);
+    //     $data['dialect'] = $data['dialect'] ?? null;
+    //     $data['dialect_target'] = $data['dialect_target'] ?? null;
+    //     $data['currency'] = $data['currency'] ?? null;
+    //     $data['sub_subject'] = $data['sub_subject'] ?? null;
+
+    //     $vendorSheet->update($data);
+
+    //     DataLogger::addToLogger(
+    //         $userId,
+    //         'update_price_list',
+    //         $request->fullUrl(),
+    //         'vendor_sheet',
+    //         $request->all(),
+    //         $vendorSheet->id
+    //     );
+
+    //     $vendorSheet->load([
+    //         'source_lang:id,name',
+    //         'target_lang:id,name',
+    //         'dialect:id,dialect',
+    //         'dialect_target:id,dialect',
+    //         'service:id,name',
+    //         'task_type:id,name',
+    //         'unit:id,name',
+    //         'currency:id,name',
+    //         'subject:id,name',
+    //         'sub_subject:id,name',
+    //         'sheet_brand:id,name'
+    //     ]);
+
+    //     $vendorSheet->makeHidden([
+    //         'created_at',
+    //         'created_by',
+    //         'sheet_fields',
+    //         'sheet_tools',
+    //         'comment',
+    //         'copied',
+    //         'tools',
+    //         'ticket_id',
+    //         'i',
+    //     ]);
+
+    //     return response()->json($vendorSheet, 200);
+    // }
     // public function UpdatePriceList(Request $request)
     // {
     //     $validator = Validator::make($request->all(), [

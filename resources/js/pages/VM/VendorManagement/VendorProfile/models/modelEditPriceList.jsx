@@ -1113,7 +1113,7 @@ const EditNewBtn = (props) => {
                                 </Col>
                             </FormGroup>
                         </Col>
-                        <Col md="6">
+                        {/* <Col md="6">
                             <FormGroup className="row">
                                 <Label
                                     className="col-sm-4 col-form-label"
@@ -1191,7 +1191,7 @@ const EditNewBtn = (props) => {
                                     />
                                 </Col>
                             </FormGroup>
-                        </Col>
+                        </Col> */}
                         <Col md="6" className="mb-3">
                             <FormGroup className="row">
                                 <Label
