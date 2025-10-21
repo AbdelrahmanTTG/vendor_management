@@ -445,6 +445,11 @@ const [openId, setOpenId] = useState(null);
                                         <th cope="col">{"Currency"}</th>
                                         <th cope="col">{"brand"} </th>
                                         <th cope="col">{"Status"} </th>
+                                        <th cope="col">{"Created by"} </th>
+                                        <th cope="col">{"Created At"} </th>
+                                        <th cope="col">{"Updated by"} </th>
+                                        <th cope="col">{"Updated At"} </th>
+
                                         {props.backPermissions?.edit == 1 && (
                                             <th cope="col">{"Edit"}</th>
                                         )}
@@ -483,6 +488,21 @@ const [openId, setOpenId] = useState(null);
                                                         ? "Pending by PM"
                                                         : ""}
                                                 </td>
+                                                <td>
+                                                    {
+                                                        item?.user_created
+                                                            ?.user_name
+                                                    }
+                                                </td>
+                                                <td>{item?.created_at}</td>
+                                                <td>
+                                                    {
+                                                        item?.user_updated
+                                                            ?.user_name
+                                                    }
+                                                </td>
+                                                <td>{item?.updated_at}</td>
+
                                                 {props.backPermissions?.edit ==
                                                     1 && (
                                                     <td>

@@ -27,13 +27,24 @@ class VendorSheet extends Model
         'dialect_target',
         'i',
         'ticket_id',
-        'sheet_brand'
+        'sheet_brand',
+        'created_by',
+        'created_at',
+        'updated_at',
+        'updated_by'
     ];
     public function source_lang()
     {
         return $this->belongsTo(Language::class, 'source_lang')->select('id', 'name');
     }
-
+    public function userCreated()
+    {
+        return $this->belongsTo(User::class, 'created_by')->select('id', 'user_name');
+    }
+    public function userUpdated()
+    {
+        return $this->belongsTo(User::class, 'updated_by')->select('id', 'user_name');
+    }
     public function target_lang()
     {
         return $this->belongsTo(Language::class, 'target_lang')->select('id', 'name');

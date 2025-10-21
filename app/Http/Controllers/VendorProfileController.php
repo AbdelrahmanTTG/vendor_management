@@ -2742,6 +2742,9 @@ class VendorProfileController extends Controller
 
         $data['sheet_brand'] = $vendor->vendor_brands ?? null;
 
+        $data['created_by'] = $userId;
+        $data['created_at'] = now();
+
         $vendorSheet = VendorSheet::create($data);
 
         $vendorSheet->load([
@@ -2756,6 +2759,9 @@ class VendorProfileController extends Controller
             'subject:id,name',
             'sub_subject:id,name',
             'sheet_brand:id,name',
+            'userCreated:id,user_name',
+            'userUpdated:id,user_name',
+
         ]);
 
         DataLogger::addToLogger(
@@ -2770,6 +2776,7 @@ class VendorProfileController extends Controller
         return response()->json($vendorSheet, 201);
     }
 
+
     public function getpriceListByVendorId($vendorId)
     {
         $vendorData = VendorSheet::with([
@@ -2783,8 +2790,10 @@ class VendorProfileController extends Controller
             'currency:id,name',
             'subject:id,name',
             'sub_subject:id,name',
-            'sheet_brand:id,name'
-        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency', 'sheet_brand']);
+            'sheet_brand:id,name',
+            'userCreated:id,user_name',
+            'userUpdated:id,user_name',
+        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency', 'sheet_brand', 'created_at', 'updated_at' , 'created_by', 'updated_by']);
 
         if ($vendorData->isEmpty()) {
             return response()->json([
@@ -2858,6 +2867,8 @@ class VendorProfileController extends Controller
         if ($vendor) {
             $data['sheet_brand'] = $vendor->vendor_brands ?? null;
         }
+        $data['updated_by'] = $userId;
+        $data['updated_at'] = now();
 
         $vendorSheet->update($data);
 
@@ -2882,11 +2893,12 @@ class VendorProfileController extends Controller
             'subject:id,name',
             'sub_subject:id,name',
             'sheet_brand:id,name',
+            'userCreated:id,user_name',
+            'userUpdated:id,user_name',
+
         ]);
 
         $vendorSheet->makeHidden([
-            'created_at',
-            'created_by',
             'sheet_fields',
             'sheet_tools',
             'comment',
@@ -2898,6 +2910,7 @@ class VendorProfileController extends Controller
 
         return response()->json($vendorSheet, 200);
     }
+
 
     // public function UpdatePriceList(Request $request)
     // {

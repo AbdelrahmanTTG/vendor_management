@@ -689,6 +689,8 @@ JOIN `vendor` v ON vs.vendor = v.id
 SET vs.sheet_brand = v.brand;
 
 ALTER TABLE `fields` ADD `Active` INT NOT NULL AFTER `parent`;
+ALTER TABLE `vendor_sheet` ADD `updated_at` DATETIME NULL AFTER `sheet_brand`;
+ALTER TABLE `vendor_sheet` ADD `updated_by` INT NOT NULL AFTER `updated_at`;
 
 
 INSERT INTO `screen` (`id`, `groups`, `name`, `url`, `menu`, `use_system`) VALUES (NULL, '7', 'Vendors Tasks', 'reports/allTasks', '1', 'VM'); 
