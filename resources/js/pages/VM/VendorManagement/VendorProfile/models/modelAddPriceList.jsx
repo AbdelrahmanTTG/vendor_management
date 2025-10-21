@@ -234,9 +234,9 @@ const AddNewBtn = (props) => {
                 },
             });
 
-            const formattedOptions = data.map(item => ({
+            const formattedOptions = data.map((item) => ({
                 value: item.id,
-                label: item.name,
+                label: item.dialect,
             }));
             if(type === 'source'){
                     setOptionsD(formattedOptions);
@@ -691,7 +691,7 @@ const AddNewBtn = (props) => {
                                         <Select
                                             {...field}
                                             value={field.value}
-                                            options={optionsD}
+                                            options={optionsTD}
                                             className="js-example-basic-single col-sm-12"
                                             isSearchable
                                             noOptionsMessage={() =>

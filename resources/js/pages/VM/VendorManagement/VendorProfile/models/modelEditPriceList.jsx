@@ -43,6 +43,7 @@ const EditNewBtn = (props) => {
     const [optionsTL, setOptionsTL] = useState([]);
 
     const [optionsD, setOptionsD] = useState([]);
+    const [optionsTD, setOptionsTD] = useState([]);
 
     const [optionsB, setOptionsB] = useState([]);
 
@@ -262,6 +263,41 @@ const EditNewBtn = (props) => {
         }
 
     };
+      const handelingSourceDilect = async (id ,type) => {
+            if (!id) return
+            try {
+                setLoading(true);
+                const { data } = await axiosClient.get("findSourLangDil", {
+                    params: {
+                        id: id,
+                    },
+                });
+    
+                const formattedOptions = data.map((item) => ({
+                    value: item.id,
+                    label: item.dialect,
+                }));
+                if(type === 'source'){
+                        setOptionsD(formattedOptions);
+                } else {
+                        setOptionsTD(formattedOptions);
+                }
+            
+    
+            } catch (err) {
+                const response = err.response;
+                if (response && response.status === 422) {
+                    setErrorMessage(response.data.errors);
+                } else if (response && response.status === 401) {
+                    setErrorMessage(response.data.message);
+                } else {
+                    setErrorMessage("An unexpected error occurred.");
+                }
+            } finally {
+                setLoading(false);
+            }
+    
+        };
     const [inputVal, setInputVal] = useState('');
     const [inputValMain, setInputValMain] = useState('');
     const [inputValSub, setInputValSub] = useState('');
@@ -687,6 +723,10 @@ const EditNewBtn = (props) => {
                                                     )
                                                 }
                                                 onChange={(option) => {
+                                                     handelingSourceDilect(
+                                                         option.value,
+                                                         "source"
+                                                     );
                                                     field.onChange(option);
                                                 }}
                                                 onFocus={() => {
@@ -769,6 +809,10 @@ const EditNewBtn = (props) => {
                                                     )
                                                 }
                                                 onChange={(option) => {
+                                                     handelingSourceDilect(
+                                                         option.value,
+                                                         "target"
+                                                     );
                                                     field.onChange(option);
                                                 }}
                                                 onFocus={() => {
@@ -817,13 +861,13 @@ const EditNewBtn = (props) => {
                                                             newInputValue
                                                         );
                                                     }
-                                                    handleInputChange(
-                                                        newInputValue,
-                                                        "languages_dialect",
-                                                        "dialect",
-                                                        setOptionsD,
-                                                        optionsD
-                                                    );
+                                                    // handleInputChange(
+                                                    //     newInputValue,
+                                                    //     "languages_dialect",
+                                                    //     "dialect",
+                                                    //     setOptionsD,
+                                                    //     optionsD
+                                                    // );
                                                 }}
                                                 className="js-example-basic-single col-sm-12"
                                                 isSearchable
@@ -875,7 +919,7 @@ const EditNewBtn = (props) => {
                                             <Select
                                                 {...field}
                                                 value={field.value}
-                                                options={optionsD}
+                                                options={optionsTD}
                                                 inputValue={inputValD2}
                                                 onInputChange={(
                                                     newInputValue,
@@ -890,13 +934,13 @@ const EditNewBtn = (props) => {
                                                             newInputValue
                                                         );
                                                     }
-                                                    handleInputChange(
-                                                        newInputValue,
-                                                        "languages_dialect",
-                                                        "dialect_target",
-                                                        setOptionsD,
-                                                        optionsD
-                                                    );
+                                                    // handleInputChange(
+                                                    //     newInputValue,
+                                                    //     "languages_dialect",
+                                                    //     "dialect_target",
+                                                    //     setOptionsD,
+                                                    //     optionsD
+                                                    // );
                                                 }}
                                                 className="js-example-basic-single col-sm-12"
                                                 isSearchable
