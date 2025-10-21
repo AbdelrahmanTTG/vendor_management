@@ -130,7 +130,16 @@ const EditNewBtn = (props) => {
             setValue("task_type", renameKeys(data?.task_type, { id: "value", name: "label" }))
             setValue("source_lang", renameKeys(data?.source_lang, { id: "value", name: "label" }))
             setValue("target_lang", renameKeys(data?.target_lang, { id: "value", name: "label" }))
-            setValue("dialect", renameKeys(data?.dialect, { id: "value", dialect: "label" }))
+            if (data?.source_lang.id) {
+                handelingSourceDilect(data?.source_lang.id, 'source')
+            }
+            if(data?.target_lang.id){
+                handelingSourceDilect(data?.target_lang.id, 'target')
+            }
+                setValue(
+                    "dialect",
+                    renameKeys(data?.dialect, { id: "value", dialect: "label" })
+                );
             setValue("dialect_target", renameKeys(data?.dialect_target, { id: "value", dialect: "label" }))
             setValue("unit", renameKeys(data?.unit, { id: "value", name: "label" }))
             setValue("rate", data?.rate)
