@@ -736,3 +736,10 @@ UPDATE vendor_sheet AS vs
 JOIN fields AS f ON vs.subject = f.id
 SET vs.sub_subject = f.parent
 WHERE vs.subject IS NOT NULL;
+UPDATE vendor v
+JOIN countries c ON v.country = c.id
+SET v.region = c.region;
+UPDATE vendor v
+JOIN vendortimezone tz ON v.country = tz.parent
+SET v.timezone = tz.id
+WHERE tz.active = 1;
