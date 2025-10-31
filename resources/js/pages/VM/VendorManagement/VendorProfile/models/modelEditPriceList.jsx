@@ -63,7 +63,7 @@ const EditNewBtn = (props) => {
             })
         );
         formDate['id'] = props?.data?.id || props?.id;
-        // formDate['currency'] = props?.currency?.value;
+        formDate['currency'] = props?.currency?.value;
 
         try {
             const response = await axiosClient.post("UpdatePriceList", formDate);
@@ -1245,7 +1245,7 @@ const EditNewBtn = (props) => {
                                 </Col>
                             </FormGroup>
                         </Col> */}
-                        <Col md="6" className="mb-3">
+                        {/* <Col md="6" className="mb-3">
                             <FormGroup className="row">
                                 <Label
                                     className="col-sm-4 col-form-label"
@@ -1315,7 +1315,7 @@ const EditNewBtn = (props) => {
                                     />
                                 </Col>
                             </FormGroup>
-                        </Col>
+                        </Col> */}
                     </Row>
                 )}
             </CommonModal>

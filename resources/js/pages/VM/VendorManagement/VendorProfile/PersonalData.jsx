@@ -534,17 +534,15 @@ const PersonalData = React.memo((props) => {
           setValue('reject_reason', data.reject_reason);
           setValue('note', data.note);
           setValue('vendor_source', data.vendor_source);
-          if (data?.brands && data.brands.length > 0) {
+            if (data?.brands && data.brands.length > 0) {
               const selected = data.brands.map((brand) => ({
-                  value: brand.id.toString(),
+                  value: brand.id,
                   label: brand.name,
               }));
+
               setSelectedBrands(selected);
               setOptionsB(selected);
-              setValue(
-                  "vendor_brands",
-                  selected.map((opt) => opt.value)
-              );
+              setValue("vendor_brands",selected[0]);
 
               setIsReadOnlyBrands(true);
           }
