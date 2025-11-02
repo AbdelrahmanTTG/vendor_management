@@ -12,14 +12,14 @@ const AddNewBtn = (props) => {
     // toast.configure();
     const basictoaster = (toastname, status) => {
         switch (toastname) {
-            case 'successToast':
+            case "successToast":
                 toast.success(status, {
-                    position: "top-right"
+                    position: "top-right",
                 });
                 break;
-            case 'dangerToast':
+            case "dangerToast":
                 toast.error(status, {
-                    position: "top-right"
+                    position: "top-right",
                 });
                 break;
             default:
@@ -27,7 +27,14 @@ const AddNewBtn = (props) => {
     };
     const [modal, setModal] = useState(false);
     const toggle = () => setModal(!modal);
-    const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
+    const {
+        control,
+        register,
+        handleSubmit,
+        reset,
+        setValue,
+        formState: { errors },
+    } = useForm();
 
     const [optionsMain, setOptionsMain] = useState([]);
 
@@ -45,7 +52,7 @@ const AddNewBtn = (props) => {
 
     const [optionsD, setOptionsD] = useState([]);
     const [optionsTD, setOptionsTD] = useState([]);
-       
+
     const [optionsB, setOptionsB] = useState([]);
     const [selectedOptionC, setSelectedOptionC] = useState(null);
 
@@ -54,47 +61,65 @@ const AddNewBtn = (props) => {
     const [optionsC, setOptionsC] = useState([]);
     const [loading2, setLoading2] = useState(false);
 
-    const onSubmit = async (data) => {
+    const onSubmit = async (data, keepOpen = false) => {
         if (props.id) {
             const formDate = Object.fromEntries(
                 Object.entries(data).map(([key, value]) => {
-                    if (typeof value === 'object' && value !== null) {
+                    if (typeof value === "object" && value !== null) {
                         return [key, value.value];
                     }
                     return [key, value];
                 })
             );
-            formDate['vendor'] = props.id;
-            formDate['currency'] = props.currency?.value
-            try {
-                const response = await axiosClient.post("AddPriceList", formDate);
-                props.getData(response.data)
-                toggle()
-                reset()
-                setValue("rate", '')
-                setValue("special_rate", '')
 
-                basictoaster("successToast", "Added successfully !");
+            formDate["vendor"] = props.id;
+            formDate["currency"] = props.currency?.value;
+
+            try {
+                const response = await axiosClient.post(
+                    "AddPriceList",
+                    formDate
+                );
+
+                props.getData(response.data, formDate, keepOpen);
+
+                // props.getData(response.data, '', keepOpen);
+                reset();
+                setValue("rate", "");
+                setValue("special_rate", "");
+
+                basictoaster("successToast", "Added successfully!");
             } catch (err) {
                 const response = err.response;
-                if (response && response.data) {
-                    const errors = response.data;
-                    Object.keys(errors).forEach(key => {
-                        const messages = errors[key];
-                        if (messages.length > 0) {
-                            messages.forEach(message => {
-                                basictoaster("dangerToast", message);
-                            });
-                        }
-                    });
+
+                if (response) {
+                    if (response.status === 409) {
+                        basictoaster("dangerToast", "This price list already exists");
+                        return;
+                    }
+
+                    if (response.data) {
+                        const errors = response.data;
+                        Object.keys(errors).forEach((key) => {
+                            const messages = errors[key];
+                            if (messages.length > 0) {
+                                messages.forEach((message) => {
+                                    basictoaster("dangerToast", message);
+                                });
+                            }
+                        });
+                    }
                 }
             }
+
         } else {
-            basictoaster("dangerToast", "Make sure to send your personal information first and send Billing data ");
-
+            basictoaster(
+                "dangerToast",
+                "Make sure to send your personal information first and send Billing data"
+            );
         }
-
     };
+
     const renameKeys = (obj, keysMap) => {
         return Object.keys(obj).reduce((acc, key) => {
             const newKey = keysMap[key] || key;
@@ -102,12 +127,14 @@ const AddNewBtn = (props) => {
             return acc;
         }, {});
     };
-      useEffect(() => {
-            if (props.Currency) {
-                setSelectedOptionC({ value: props?.Currency?.id, label: props?.Currency?.name })
-            }
-    
-        }, [props.Currency]);
+    useEffect(() => {
+        if (props.Currency) {
+            setSelectedOptionC({
+                value: props?.Currency?.id,
+                label: props?.Currency?.name,
+            });
+        }
+    }, [props.Currency]);
     // useEffect(() => {
     //     if (props.currency) {
     //         const updatedData = renameKeys(props.currency, { id: "value", name: "label" });
@@ -115,12 +142,120 @@ const AddNewBtn = (props) => {
     //         setValue("currency", updatedData)
     //     }
     // }, [props.currency])
-    const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
+    // أضف هذا useEffect بعد useEffect الموجود حالياً
+    useEffect(() => {
+        if (props.c && typeof props.c === "object") {
+            setModal(true);
+            // console.log(props.c);
+            if (props.c.subject) {
+                setValue("subject", {
+                    value: props.c.subject.id,
+                    label: props.c.subject.name,
+                });
+                if (props.c.subject) {
+                    handelingSelectSub(props.c.subject.id);
+                }
+            }
+            if (props.c.sub_subject) {
+                setValue("sub_subject", {
+                    value: props.c.sub_subject.id,
+                    label: props.c.sub_subject.name,
+                });
+            }
+            if (props.c.service) {
+                setValue("service", {
+                    value: props.c.service.id,
+                    label: props.c.service.name,
+                });
+                if (props.c.service) {
+                    handelingSelectTasks(props.c.service.id);
+                }
+            }
 
+            if (props.c.task_type) {
+                setValue("task_type", {
+                    value: props.c.task_type.id,
+                    label: props.c.task_type.name,
+                });
+            }
+
+            if (props.c.source_lang) {
+                setValue("source_lang", {
+                    value: props.c.source_lang.id,
+                    label: props.c.source_lang.name,
+                });
+                if (props.c.source_lang) {
+                    handelingSourceDilect(props.c.source_lang.id, "source");
+                }
+            }
+
+            if (props.c.target_lang) {
+                setValue("target_lang", {
+                    value: props.c.target_lang.id,
+                    label: props.c.target_lang.name,
+                });
+                if (props.c.target_lang) {
+                    handelingSourceDilect(props.c.target_lang.id, "target");
+                }
+            }
+
+            if (props.c.dialect) {
+                setValue("dialect", {
+                    value: props.c.dialect.id,
+                    label: props.c.dialect.dialect,
+                });
+            }
+
+            if (props.c.dialect_target) {
+                setValue("dialect_target", {
+                    value: props.c.dialect_target.id,
+                    label: props.c.dialect_target.name,
+                });
+            }
+
+            
+            if (props.c.unit) {
+                setValue("unit", {
+                    value: props.c.unit.id,
+                    label: props.c.unit.name,
+                });
+            }
+
+            if (props.c.rate) {
+                setValue("rate", props.c.rate);
+            }
+
+            if (props.c.special_rate) {
+                setValue("special_rate", props.c.special_rate);
+            }
+
+            if (props.c.Status !== undefined) {
+                const statusLabel =
+                    props.c.Status == 0
+                        ? "Active"
+                        : props.c.Status == 1
+                        ? "Not Active"
+                        : props.c.Status == 2
+                        ? "Pending by PM"
+                        : "";
+                setValue("Status", {
+                    value: props.c.Status,
+                    label: statusLabel,
+                });
+            }
+        }
+    }, [props.c, setValue]);
+    const handleInputChange = (
+        inputValue,
+        tableName,
+        fieldName,
+        setOptions,
+        options
+    ) => {
         if (inputValue.length === 0) {
             setOptions(initialOptions[fieldName] || []);
         } else if (inputValue.length >= 1) {
-            const existingOption = options.some(option =>
+            const existingOption = options.some((option) =>
                 option.label.toLowerCase().includes(inputValue.toLowerCase())
             );
             if (!existingOption) {
@@ -129,24 +264,32 @@ const AddNewBtn = (props) => {
             }
         }
     };
-    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
-        if (!tablename) return
+    const handelingSelect = async (
+        tablename,
+        setOptions,
+        fieldName,
+        searchTerm = ""
+    ) => {
+        if (!tablename) return;
         try {
             setLoading(true);
             const { data } = await axiosClient.get("SelectDatat", {
                 params: {
                     search: searchTerm,
-                    table: tablename
-                }
+                    table: tablename,
+                },
             });
-            const formattedOptions = data.map(item => ({
+            const formattedOptions = data.map((item) => ({
                 value: item.id,
                 label: item.name || item.gmt || item.dialect,
             }));
 
             setOptions(formattedOptions);
             if (!searchTerm) {
-                setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
+                setInitialOptions((prev) => ({
+                    ...prev,
+                    [fieldName]: formattedOptions,
+                }));
             }
         } catch (err) {
             const response = err.response;
@@ -160,25 +303,23 @@ const AddNewBtn = (props) => {
         } finally {
             setLoading(false);
         }
-
     };
     const handelingSelectTasks = async (id) => {
-        if (!id) return
+        if (!id) return;
         try {
             setLoading(true);
             const { data } = await axiosClient.get("TaskType", {
                 params: {
-                    id: id
-                }
+                    id: id,
+                },
             });
 
-            const formattedOptions = data.map(item => ({
+            const formattedOptions = data.map((item) => ({
                 value: item.id,
                 label: item.name,
             }));
 
             setOptionsT(formattedOptions);
-
         } catch (err) {
             const response = err.response;
             if (response && response.status === 422) {
@@ -191,25 +332,23 @@ const AddNewBtn = (props) => {
         } finally {
             setLoading(false);
         }
-
     };
     const handelingSelectSub = async (id) => {
-        if (!id) return
+        if (!id) return;
         try {
             setLoading(true);
             const { data } = await axiosClient.get("GetSubSubject", {
                 params: {
-                    id: id
-                }
+                    id: id,
+                },
             });
 
-            const formattedOptions = data.map(item => ({
+            const formattedOptions = data.map((item) => ({
                 value: item.id,
                 label: item.name,
             }));
 
             setOptionsSub(formattedOptions);
-
         } catch (err) {
             const response = err.response;
             if (response && response.status === 422) {
@@ -222,10 +361,9 @@ const AddNewBtn = (props) => {
         } finally {
             setLoading(false);
         }
-
     };
-    const handelingSourceDilect = async (id ,type) => {
-        if (!id) return
+    const handelingSourceDilect = async (id, type) => {
+        if (!id) return;
         try {
             setLoading(true);
             const { data } = await axiosClient.get("findSourLangDil", {
@@ -238,13 +376,11 @@ const AddNewBtn = (props) => {
                 value: item.id,
                 label: item.dialect,
             }));
-            if(type === 'source'){
-                    setOptionsD(formattedOptions);
+            if (type === "source") {
+                setOptionsD(formattedOptions);
             } else {
-                    setOptionsTD(formattedOptions);
+                setOptionsTD(formattedOptions);
             }
-        
-
         } catch (err) {
             const response = err.response;
             if (response && response.status === 422) {
@@ -257,7 +393,6 @@ const AddNewBtn = (props) => {
         } finally {
             setLoading(false);
         }
-
     };
     return (
         <Fragment>
@@ -270,26 +405,24 @@ const AddNewBtn = (props) => {
             <CommonModal
                 isOpen={modal}
                 title="Add new price list"
-                icon={
-                    <>
-                        <i
-                            className="fa fa-info-circle"
-                            style={{
-                                fontSize: "18px",
-                                color: "darkred",
-                                marginRight: "1%",
-                            }}
-                        ></i>
-                        <span style={{ fontSize: "14px", color: "darkred" }}>
-                            {" "}
-                            Type in the fields to search.
-                        </span>
-                    </>
-                }
+                icon={<>...</>}
                 toggler={toggle}
                 size="xl"
                 marginTop="-1%"
-                onSave={handleSubmit(onSubmit)}
+                onSave={handleSubmit((data) => onSubmit(data, false))}
+                extraButton={
+                    <Btn
+                        attrBtn={{
+                            color: "info",
+                            type: "button",
+                            onClick: handleSubmit((data) =>
+                                onSubmit(data, true)
+                            ),
+                        }}
+                    >
+                        Save & Continue
+                    </Btn>
+                }
             >
                 <Row className="g-3 mb-3">
                     <Col md="6">

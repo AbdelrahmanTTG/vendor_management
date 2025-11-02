@@ -2740,8 +2740,26 @@ class VendorProfileController extends Controller
             return response()->json(['error' => 'Vendor not found'], 404);
         }
 
-        $data['sheet_brand'] = $vendor->vendor_brands ?? null;
+        $exists = VendorSheet::where([
+            'vendor' => $data['vendor'],
+            'subject' => $data['subject'],
+            'sub_subject' => $data['sub_subject'],
+            'service' => $data['service'],
+            'task_type' => $data['task_type'],
+            'source_lang' => $data['source_lang'],
+            'target_lang' => $data['target_lang'],
+            'dialect' => $data['dialect'],
+            'dialect_target' => $data['dialect_target'],
+            'unit' => $data['unit'],
+            'currency' => $data['currency'],
+            'rate' => $data['rate'],
+        ])->exists();
 
+        if ($exists) {
+            return response()->json(['error' => 'This price list already exists for this vendor'], 409);
+        }
+
+        $data['sheet_brand'] = $vendor->vendor_brands ?? null;
         $data['created_by'] = $userId;
         $data['created_at'] = now();
 
@@ -2761,7 +2779,6 @@ class VendorProfileController extends Controller
             'sheet_brand:id,name',
             'userCreated:id,user_name',
             'userUpdated:id,user_name',
-
         ]);
 
         DataLogger::addToLogger(
@@ -2775,6 +2792,7 @@ class VendorProfileController extends Controller
 
         return response()->json($vendorSheet, 201);
     }
+
 
 
     public function getpriceListByVendorId($vendorId)

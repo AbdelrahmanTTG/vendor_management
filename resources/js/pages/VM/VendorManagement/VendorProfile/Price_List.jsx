@@ -12,11 +12,11 @@ import ErrorBoundary from "../../../../ErrorBoundary";
 
 const PriceList = (props) => {
     const LazyWrapper = ({ children }) => (
-          <ErrorBoundary>
-        <Suspense fallback={<div>Loading...</div>}>
-            {children}
+        <ErrorBoundary>
+            <Suspense fallback={<div>Loading...</div>}>
+                {children}
             </Suspense>
-            </ErrorBoundary>
+        </ErrorBoundary>
     );
     const [isOpen, setIsOpen] = useState(true);
     const toggleCollapse = () => {
@@ -34,7 +34,8 @@ const PriceList = (props) => {
     const [rows, setRows] = useState(false);
     const [Sub, setSub] = useState(false);
     const [curr, setCurr] = useState(false);
-const [openId, setOpenId] = useState(null);
+    const [openId, setOpenId] = useState(null);
+    const [C, setC] = useState(false);
 
      const basictoaster = (toastname, status) => {
         switch (toastname) {
@@ -51,7 +52,7 @@ const [openId, setOpenId] = useState(null);
           default:
         }
       };
-    const getData = (newData) => {
+    const getData = (newData , form , status) => {
         setdataPrice((prevData) => {
             const validData = Array.isArray(prevData) ? prevData : [];
             const index = validData.findIndex((item) => item.id === newData.id);
@@ -62,6 +63,10 @@ const [openId, setOpenId] = useState(null);
             }
         });
         setRows(true)
+        if (status) {
+         
+            setC(newData);
+        }
     };
 
     const removeDataById = (id) => {
@@ -419,7 +424,8 @@ const [openId, setOpenId] = useState(null);
                                         <Model
                                             currency={selectedOptionC}
                                             id={props.id}
-                                            getData={getData}
+                                        getData={getData}
+                                        c={C}
                                         />
                                     </LazyWrapper>
                                 )}
