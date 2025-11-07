@@ -13,7 +13,7 @@ class VendorSheet extends Model
     protected $fillable = [
         'vendor',
         'subject',
-        'sub_subject',
+        'subject_main',
         'service',
         'task_type',
         'source_lang',
@@ -78,14 +78,14 @@ class VendorSheet extends Model
         return $this->belongsTo(Currency::class, 'currency')->select('id', 'name');
     }
 
-    public function subject()
+    public function subject_main()
     {
-        return $this->belongsTo(MainSubjectMatter::class, 'subject')->select('id', 'name');
+        return $this->belongsTo(MainSubjectMatter::class, 'subject_main')->select('id', 'name');
     }
 
-    public function sub_subject()
+    public function subject()
     {
-        return $this->belongsTo(SubSubjectMatter::class, 'sub_subject')->select('id', 'name');
+        return $this->belongsTo(SubSubjectMatter::class, 'subject')->select('id', 'name');
     }
 
     public function sheet_brand()

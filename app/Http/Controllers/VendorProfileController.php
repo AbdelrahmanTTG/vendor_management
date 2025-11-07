@@ -84,7 +84,7 @@ class VendorProfileController extends Controller
         });
 
         if ($filteredFormats->isEmpty()) {
-            $formatArray = ['name', 'email', 'status', "priceList", 'type', 'country', "source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target", "brands"];
+            $formatArray = ['name', 'email', 'status', "priceList", 'type', 'country', "source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "subject_main", "dialect_target", "brands"];
         } else {
             $formatArray = $filteredFormats->pluck('format')->toArray();
             $formatArray = array_merge(...array_map(function ($item) {
@@ -161,7 +161,7 @@ class VendorProfileController extends Controller
                         $selectedColumns = array_diff($selectedColumns, ['created_by']);
 
                         if (empty($selectedColumns)) {
-                            $selectedColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target", "sheet_brand"];
+                            $selectedColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "subject_main", "dialect_target", "sheet_brand"];
                         }
                         $query->select(array_merge(['id', "vendor"], $selectedColumns));
                         foreach ($selectedColumns as $relation) {
@@ -298,7 +298,7 @@ class VendorProfileController extends Controller
                             $selectedColumnsRow = array_diff($selectedColumnsRow, ['created_by']);
 
                             if (empty($selectedColumnsRow)) {
-                                $selectedColumnsRow = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target", "sheet_brand"];
+                                $selectedColumnsRow = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "subject_main", "dialect_target", "sheet_brand"];
                             }
                             if (!in_array('priceList', $formatArray)) {
                                 $formatArray[] = 'priceList';
@@ -332,7 +332,7 @@ class VendorProfileController extends Controller
                                 });
                                 $relatedColumns = array_column($filter['columns'], 'column');
                                 // Remove created_by and direct columns like rate from related columns
-                                $directVendorSheetColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target", "sheet_brand"];
+                                $directVendorSheetColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "subject_main", "dialect_target", "sheet_brand"];
                                 $relatedColumns = array_diff($relatedColumns, ['created_by'], $directVendorSheetColumns);
                                 $mergedColumns = array_unique(array_merge($relatedColumns, $selectedColumnsRow));
                                 // Only include actual relationships in with()
@@ -423,7 +423,7 @@ class VendorProfileController extends Controller
             $diffFormatArrayEx = [];
             $diffFormatArrayEx = array_merge($diffFormatArrayEx, $diffFormatArray);
             if (empty(array_intersect($diffFormatArray, $vendorSheet)) && in_array('priceList', $diffFormatArray)) {
-                $diffFormatArrayEx = array_merge($diffFormatArrayEx, ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "sub_subject", "dialect_target", "sheet_brand"]);
+                $diffFormatArrayEx = array_merge($diffFormatArrayEx, ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "subject_main", "dialect_target", "sheet_brand"]);
             }
             $diffFormatArrayEx = array_map(function ($column) use ($diffFormatArrayEx) {
                 if (strpos($column, '.') !== false) {
@@ -2708,7 +2708,7 @@ class VendorProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'vendor' => 'required|integer',
             'subject' => 'required|integer',
-            'sub_subject' => 'nullable|integer',
+            'subject_main' => 'nullable|integer',
             'service' => 'required|integer',
             'task_type' => 'required|integer',
             'source_lang' => 'required|integer',
@@ -2733,7 +2733,7 @@ class VendorProfileController extends Controller
         $data['dialect'] = $data['dialect'] ?? null;
         $data['dialect_target'] = $data['dialect_target'] ?? null;
         $data['currency'] = $data['currency'] ?? null;
-        $data['sub_subject'] = $data['sub_subject'] ?? null;
+        $data['subject_main'] = $data['subject_main'] ?? null;
 
         $vendor = Vendor::find($data['vendor']);
         if (!$vendor) {
@@ -2743,7 +2743,7 @@ class VendorProfileController extends Controller
         $exists = VendorSheet::where([
             'vendor' => $data['vendor'],
             'subject' => $data['subject'],
-            'sub_subject' => $data['sub_subject'],
+            'subject_main' => $data['subject_main'],
             'service' => $data['service'],
             'task_type' => $data['task_type'],
             'source_lang' => $data['source_lang'],
@@ -2775,7 +2775,7 @@ class VendorProfileController extends Controller
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'sub_subject:id,name',
+            'subject_main:id,name',
             'sheet_brand:id,name',
             'userCreated:id,user_name',
             'userUpdated:id,user_name',
@@ -2807,11 +2807,11 @@ class VendorProfileController extends Controller
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'sub_subject:id,name',
+            'subject_main:id,name',
             'sheet_brand:id,name',
             'userCreated:id,user_name',
             'userUpdated:id,user_name',
-        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency', 'sheet_brand', 'created_at', 'updated_at' , 'created_by', 'updated_by']);
+        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'subject_main', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency', 'sheet_brand', 'created_at', 'updated_at' , 'created_by', 'updated_by']);
 
         if ($vendorData->isEmpty()) {
             return response()->json([
@@ -2852,7 +2852,7 @@ class VendorProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer',
             'subject' => 'required|integer',
-            'sub_subject' => 'nullable|integer',
+            'subject_main' => 'nullable|integer',
             'service' => 'required|integer',
             'task_type' => 'required|integer',
             'source_lang' => 'required|integer',
@@ -2879,7 +2879,7 @@ class VendorProfileController extends Controller
         $data['dialect'] = $data['dialect'] ?? null;
         $data['dialect_target'] = $data['dialect_target'] ?? null;
         $data['currency'] = $data['currency'] ?? null;
-        $data['sub_subject'] = $data['sub_subject'] ?? null;
+        $data['subject_main'] = $data['subject_main'] ?? null;
 
         $vendor = Vendor::find($vendorSheet->vendor);
         if ($vendor) {
@@ -2909,7 +2909,7 @@ class VendorProfileController extends Controller
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'sub_subject:id,name',
+            'subject_main:id,name',
             'sheet_brand:id,name',
             'userCreated:id,user_name',
             'userUpdated:id,user_name',
@@ -3455,9 +3455,9 @@ class VendorProfileController extends Controller
             'unit:id,name',
             'currency:id,name',
             'subject:id,name',
-            'sub_subject:id,name',
+            'subject_main:id,name',
             'sheet_brand:id,name'
-        ])->where('id', $id)->get(['id',  'subject', 'sub_subject', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency', 'sheet_brand']);
+        ])->where('id', $id)->get(['id',  'subject', 'subject_main', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency', 'sheet_brand']);
 
         if ($vendorData->isEmpty()) {
             return response()->json([

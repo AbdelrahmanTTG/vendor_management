@@ -124,8 +124,11 @@ const EditNewBtn = (props) => {
                 1: "Not Active",
                 2: "Pending by PM"
             };
+            setValue(
+                "subject_main",
+                renameKeys(data?.subject_main, { id: "value", name: "label" })
+            );
             setValue("subject", renameKeys(data?.subject, { id: "value", name: "label" }))
-            setValue("sub_subject", renameKeys(data?.sub_subject, { id: "value", name: "label" }))
             setValue("service", renameKeys(data?.service, { id: "value", name: "label" }))
             setValue("task_type", renameKeys(data?.task_type, { id: "value", name: "label" }))
             setValue("source_lang", renameKeys(data?.source_lang, { id: "value", name: "label" }))
@@ -375,7 +378,7 @@ const EditNewBtn = (props) => {
                                 </Label>
                                 <Col sm="8">
                                     <Controller
-                                        name="subject"
+                                        name="subject_main"
                                         control={control}
                                         rules={{ required: true }}
                                         render={({ field }) => (
@@ -400,7 +403,7 @@ const EditNewBtn = (props) => {
                                                     handleInputChange(
                                                         newInputValue,
                                                         "mainsubject",
-                                                        "subject",
+                                                        "subject_main",
                                                         setOptionsMain,
                                                         optionsMain
                                                     );
@@ -450,7 +453,7 @@ const EditNewBtn = (props) => {
                                 </Label>
                                 <Col sm="8">
                                     <Controller
-                                        name="sub_subject"
+                                        name="subject"
                                         control={control}
                                         rules={{ required: false }}
                                         render={({ field }) => (
@@ -732,10 +735,10 @@ const EditNewBtn = (props) => {
                                                     )
                                                 }
                                                 onChange={(option) => {
-                                                     handelingSourceDilect(
-                                                         option.value,
-                                                         "source"
-                                                     );
+                                                    handelingSourceDilect(
+                                                        option.value,
+                                                        "source"
+                                                    );
                                                     field.onChange(option);
                                                 }}
                                                 onFocus={() => {
@@ -818,10 +821,10 @@ const EditNewBtn = (props) => {
                                                     )
                                                 }
                                                 onChange={(option) => {
-                                                     handelingSourceDilect(
-                                                         option.value,
-                                                         "target"
-                                                     );
+                                                    handelingSourceDilect(
+                                                        option.value,
+                                                        "target"
+                                                    );
                                                     field.onChange(option);
                                                 }}
                                                 onFocus={() => {

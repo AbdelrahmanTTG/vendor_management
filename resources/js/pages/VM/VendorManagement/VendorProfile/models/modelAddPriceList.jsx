@@ -147,19 +147,19 @@ const AddNewBtn = (props) => {
         if (props.c && typeof props.c === "object") {
             setModal(true);
             // console.log(props.c);
+            if (props.c.subject_main) {
+                setValue("subject_main", {
+                    value: props.c.subject_main.id,
+                    label: props.c.subject_main.name,
+                });
+                if (props.c.subject_main) {
+                    handelingSelectSub(props.c.subject_main.id);
+                }
+            }
             if (props.c.subject) {
                 setValue("subject", {
                     value: props.c.subject.id,
                     label: props.c.subject.name,
-                });
-                if (props.c.subject) {
-                    handelingSelectSub(props.c.subject.id);
-                }
-            }
-            if (props.c.sub_subject) {
-                setValue("sub_subject", {
-                    value: props.c.sub_subject.id,
-                    label: props.c.sub_subject.name,
                 });
             }
             if (props.c.service) {
@@ -440,7 +440,7 @@ const AddNewBtn = (props) => {
                             </Label>
                             <Col sm="8">
                                 <Controller
-                                    name="subject"
+                                    name="subject_main"
                                     control={control}
                                     rules={{ required: true }}
                                     render={({ field }) => (
@@ -452,7 +452,7 @@ const AddNewBtn = (props) => {
                                                 handleInputChange(
                                                     inputValue,
                                                     "mainsubject",
-                                                    "subject",
+                                                    "subject_main",
                                                     setOptionsMain,
                                                     optionsMain
                                                 )
@@ -495,7 +495,7 @@ const AddNewBtn = (props) => {
                             </Label>
                             <Col sm="8">
                                 <Controller
-                                    name="sub_subject"
+                                    name="subject"
                                     control={control}
                                     rules={{ required: false }}
                                     render={({ field }) => (

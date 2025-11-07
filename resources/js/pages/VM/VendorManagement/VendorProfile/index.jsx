@@ -248,8 +248,8 @@ const Vendor = (props) => {
                 { value: "target_lang", label: "Target language" },
                 { value: "rate", label: "rate" },
                 { value: "special_rate", label: "Special rate" },
-                { value: "subject", label: "Main-Subject Matter" },
-                { value: "sub_subject", label: "Sub–Subject Matter" },
+                { value: "subject_main", label: "Main-Subject Matter" },
+                { value: "subject", label: "Sub–Subject Matter" },
                 { value: "currency", label: "Currency" },
                 { value: "task_type", label: " Task type" },
                 { value: "unit", label: "Unit" },
@@ -317,8 +317,8 @@ const Vendor = (props) => {
             "rate",
             "special_rate",
             "currency",
+            "subject_main",
             "subject",
-            "sub_subject",
             "sheet_brand",
         ];
         const EducationArr = [
@@ -675,8 +675,8 @@ const Vendor = (props) => {
             task_type: "Task type",
             unit: "Unit",
             currency: "Currency",
-            subject: "Main-Subject Matter",
-            sub_subject: "Sub–Subject Matter",
+            subject_main: "Main-Subject Matter",
+            subject: "Sub–Subject Matter",
             rate: "Rate",
             special_rate: "Special rate",
             "vendor_education.university_name": "Institute Name",
@@ -934,8 +934,8 @@ const Vendor = (props) => {
             address: "Address",
             source_lang: "Source language",
             target_lang: "Target language",
-            main_subject: "Main-Subject Matter",
-            sub_subject: "Sub–Subject Matter",
+            subject_main: "Main-Subject Matter",
+            subject: "Sub–Subject Matter",
             test_type: "Test Type",
             test_result: "Test result",
             university_name: "Institute Name",
@@ -953,7 +953,7 @@ const Vendor = (props) => {
             task_type: "Task type",
             unit: "Unit",
             currency: "Currency",
-            subject: "Main-Subject Matter",
+            // subject: "Main-Subject Matter",
             rate: "Rate",
             special_rate: "Special rate",
             "vendorTest.source_lang": "Source language",
@@ -2481,7 +2481,7 @@ const Vendor = (props) => {
                                                 </Col>
                                             )}
                                             {selectedSearchCol.indexOf(
-                                                "subject"
+                                                "subject_main"
                                             ) > -1 && (
                                                 <Col md="3">
                                                     <FormGroup>
@@ -2494,8 +2494,8 @@ const Vendor = (props) => {
                                                             }
                                                         </Label>
                                                         <Select
-                                                            name="subject"
-                                                            id="subject"
+                                                            name="subject_main"
+                                                            id="subject_main"
                                                             required
                                                             options={
                                                                 optionsMain
@@ -2507,7 +2507,7 @@ const Vendor = (props) => {
                                                                 handleInputChange(
                                                                     inputValue,
                                                                     "mainsubject",
-                                                                    "subject",
+                                                                    "subject_main",
                                                                     setOptionsMain,
                                                                     optionsMain
                                                                 )
@@ -2518,7 +2518,7 @@ const Vendor = (props) => {
                                                 </Col>
                                             )}
                                             {selectedSearchCol.indexOf(
-                                                "sub_subject"
+                                                "subject"
                                             ) > -1 && (
                                                 <Col md="3">
                                                     <FormGroup>
@@ -2531,8 +2531,8 @@ const Vendor = (props) => {
                                                             }
                                                         </Label>
                                                         <Select
-                                                            name="sub_subject"
-                                                            id="sub_subject"
+                                                            name="subject"
+                                                            id="subject"
                                                             required
                                                             options={optionsSub}
                                                             className="js-example-basic-single"
@@ -2542,7 +2542,7 @@ const Vendor = (props) => {
                                                                 handleInputChange(
                                                                     inputValue,
                                                                     "subSubject",
-                                                                    "sub_subject",
+                                                                    "subject",
                                                                     setOptionsSub,
                                                                     optionsSub
                                                                 )
@@ -3424,11 +3424,11 @@ const Vendor = (props) => {
                                                     label: "Currency",
                                                 },
                                                 {
-                                                    value: "subject",
+                                                    value: "subject_main",
                                                     label: "Main-Subject Matter",
                                                 },
                                                 {
-                                                    value: "sub_subject",
+                                                    value: "subject",
                                                     label: "Sub–Subject Matter",
                                                 },
                                                 {

@@ -743,3 +743,4 @@ UPDATE vendor v
 JOIN vendortimezone tz ON v.country = tz.parent
 SET v.timezone = tz.id
 WHERE tz.active = 1;
+ALTER TABLE `vendor_sheet` CHANGE `sub_subject` `subject_main` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;

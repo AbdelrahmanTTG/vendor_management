@@ -471,7 +471,7 @@ const PriceList = (props) => {
                                                 <td>{index + 1}</td>
                                                 <td>{item?.subject?.name}</td>
                                                 <td>
-                                                    {item?.sub_subject?.name}
+                                                    {item?.subject?.name}
                                                 </td>
                                                 <td>{item?.service?.name}</td>
                                                 <td>{item?.task_type?.name}</td>
