@@ -45,7 +45,7 @@ jobs:
           SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}
           SSH_PORT: ${{ secrets.SSH_PORT }}  
         run: |
-          sshpass -p "$SSH_PASSWORD" ssh -p "$SSH_PORT" -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS "ls -la /var/www/html/lingotalents.com"
+          sshpass -p "$SSH_PASSWORD" ssh -p "$SSH_PORT" -o StrictHostKeyChecking=no $SSH_USERNAME@$SERVER_ADDRESS "ls -la /var/www/html/vm"
 
       - name: Deploy using SSH
         env:
