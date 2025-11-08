@@ -733,7 +733,7 @@ INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `ed
 (NULL, '1', '351', '21', '1', '1', '1', '1', '1', '0'),
 (NULL, '5', '350', '21', '1', '1', '1', '1', '1', '0');
 UPDATE vendor_sheet AS vs
-JOIN fields AS f ON vs.subject = f.id
+JOIN fields AS f ON vs.subject = f.id 
 SET vs.sub_subject = f.parent
 WHERE vs.subject IS NOT NULL;
 UPDATE vendor v
