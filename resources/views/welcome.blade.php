@@ -5,9 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- <link rel="icon" sizes="192x192" href="{{ asset('android-icon-192x192.png') }}"> -->
-  <title>lingo talents</title>
+  <title>Nexus Vendor Management</title>
   <!-- <title>{{ env('APP_NAME', 'Laravel') }}</title> -->
-  <link rel="icon" href="{{ asset('Lingotalents_icon.png') }}" type="image/png"> 
+  <link rel="icon" href="{{ asset('Lingotalents-logo.png') }}" type="image/png"> 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.bunny.net">
   <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />

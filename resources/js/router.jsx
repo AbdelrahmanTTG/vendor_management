@@ -72,171 +72,166 @@ const AppRouter = () => {
             </div>
         </div>;
     }
-    const router = createBrowserRouter(
-        [
-            {
-                path: "/",
-                element: <Login />,
-            },
-            {
-                path: "login",
-                element: <Login />,
-            },
-            {
-                path: "/VM",
-                element: <Dashboard />,
-                children: routes,
-            },
-            {
-                path: "/Vendor",
-                element: <Dashboard_p />,
-                children: [
-                    {
-                        path: "",
-                        element: (
-                            <LazyWrapper>
-                                <Portal_Dashboard />
-                            </LazyWrapper>
-                        ),
-                    },
-                    {
-                        path: "Notes",
-                        element: (
-                            <LazyWrapper>
-                                <Portal_Notes />
-                            </LazyWrapper>
-                        ),
-                    },
-                    {
-                        path: "Jobs",
-                        children: [
-                            {
-                                path: "",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_Jobs_All />
-                                    </LazyWrapper>
-                                ),
-                            },
-                            {
-                                path: "Offers",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_Jobs_Offers />
-                                    </LazyWrapper>
-                                ),
-                            },
-                            {
-                                path: "Closed",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_Jobs_Closed />
-                                    </LazyWrapper>
-                                ),
-                            },
-                            {
-                                path: "Notifications",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_Jobs_Notifications />
-                                    </LazyWrapper>
-                                ),
-                            },
-                            {
-                                path: "ViewOffer",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_ViewOffer />
-                                    </LazyWrapper>
-                                ),
-                            },
-                            {
-                                path: "ViewJob",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_ViewJob />
-                                    </LazyWrapper>
-                                ),
-                            },
-                        ],
-                    },
-                    {
-                        path: "Invoices",
-                        children: [
-                            {
-                                path: "",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_Invoices_All />
-                                    </LazyWrapper>
-                                ),
-                            },
-                            {
-                                path: "Verified",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_Invoices_Verified />
-                                    </LazyWrapper>
-                                ),
-                            },
-                            {
-                                path: "addInvoice",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_Add_Invoice />
-                                    </LazyWrapper>
-                                ),
-                            },
-                        ],
-                    },
-                    {
-                        path: "Admin",
-                        element: (
-                            <LazyWrapper>
-                                <Portal_Admin />
-                            </LazyWrapper>
-                        ),
-                    },
-                    {
-                        path: "Profile",
-                        element: (
-                            <LazyWrapper>
-                                <Portal_Profile />
-                            </LazyWrapper>
-                        ),
-                    },
-                    {
-                        path: "Availability",
-                        children: [
-                            {
-                                path: "",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_Availability />
-                                    </LazyWrapper>
-                                ),
-                            },
-                            {
-                                path: "ViewDetails",
-                                element: (
-                                    <LazyWrapper>
-                                        <Portal_Availability_Details />
-                                    </LazyWrapper>
-                                ),
-                            },
-                        ],
-                    },
-                ],
-            },
-            {
-                path: "*",
-                element: <NotFound />,
-            },
-        ],
+    const router = createBrowserRouter([
         {
-            basename: "/vm",
+            path: '/',
+            element: <Login />,
+        },
+        {
+            path: 'login',
+            element: <Login />,
+        },
+        {
+            path: '/VM',
+            element: <Dashboard />,
+            children: routes,
+
+        },
+        {
+            path: '/Vendor',
+            element: <Dashboard_p />,
+            children: [
+                {
+                    path: '',
+                    element: (
+                        <LazyWrapper>
+                            <Portal_Dashboard />
+                        </LazyWrapper>
+                    )
+                },
+                {
+                    path: 'Notes',
+                    element: (
+                        <LazyWrapper>
+                            <Portal_Notes />
+                        </LazyWrapper>
+                    ),
+                },
+                {
+                    path: 'Jobs',
+                    children: [
+                        {
+                            path: '',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Jobs_All />
+                                </LazyWrapper>
+                            ),
+                        }
+                        ,
+                        {
+                            path: 'Offers',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Jobs_Offers />
+                                </LazyWrapper>
+                            ),
+                        },
+                        {
+                            path: 'Closed',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Jobs_Closed />
+                                </LazyWrapper>
+                            ),
+                        },
+                        {
+                            path: 'Notifications',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Jobs_Notifications />
+                                </LazyWrapper>
+                            ),
+                        },
+                        {
+                            path: 'ViewOffer',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_ViewOffer />
+                                </LazyWrapper>
+                            ),
+                        },
+                        {
+                            path: 'ViewJob',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_ViewJob />
+                                </LazyWrapper>
+                            ),
+                        },
+                    ],
+                },
+                {
+                    path: 'Invoices',
+                    children: [
+                        {
+                            path: '',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Invoices_All />
+                                </LazyWrapper>
+                            ),
+                        },
+                        {
+                            path: 'Verified',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Invoices_Verified />
+                                </LazyWrapper>
+                            ),
+                        },
+                        {
+                            path: 'addInvoice',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Add_Invoice />
+                                </LazyWrapper>
+                            ),
+                        },
+                    ],
+                },
+                {
+                    path: 'Admin',
+                    element: (
+                        <LazyWrapper>
+                            <Portal_Admin />
+                        </LazyWrapper>
+                    ),
+                }, {
+                    path: 'Profile',
+                    element: (
+                        <LazyWrapper>
+                            <Portal_Profile />
+                        </LazyWrapper>
+                    ),
+                }, {
+                    path: 'Availability',
+                    children: [
+                        {
+                            path: '',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Availability />
+                                </LazyWrapper>
+                            ),
+                        },
+                        {
+                            path: 'ViewDetails',
+                            element: (
+                                <LazyWrapper>
+                                    <Portal_Availability_Details />
+                                </LazyWrapper>
+                            ),
+                        }],
+                },
+
+            ]
+        },
+        {
+            path: '*',
+            element: <NotFound />,
         }
-    );
+    ])
 
     return <RouterProvider router={router} />;
 };
