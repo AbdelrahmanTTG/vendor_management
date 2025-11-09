@@ -211,6 +211,7 @@ const Vendor = (props) => {
         handelingSelect("countries", setOptionsN, "nationality");
         handelingSelect("regions", setOptionsR, "region");
         handelingSelect("vendortimezone", setOptionsT, "timeZone");
+        console.log(props.permissions);
     }, []);
 
     const options = [
@@ -4242,7 +4243,7 @@ const Vendor = (props) => {
                                                                                                         )
                                                                                                     )}
 
-                                                                                                <td>
+                                                                                                {/* <td>
                                                                                                     {props
                                                                                                         .permissions
                                                                                                         ?.edit ==
@@ -4258,7 +4259,48 @@ const Vendor = (props) => {
                                                                                                             />
                                                                                                         </LazyWrapper>
                                                                                                     )}
-                                                                                                </td>
+                                                                                                </td> */}
+                                                                                                {props
+                                                                                                    .permissions
+                                                                                                    ?.edit ==
+                                                                                                    1 && (
+                                                                                                    <td>
+                                                                                                        <Btn
+                                                                                                            attrBtn={{
+                                                                                                                color: "btn btn-primary",
+                                                                                                                onClick:
+                                                                                                                    () =>
+                                                                                                                        setOpenId(
+                                                                                                                            detail.id
+                                                                                                                        ),
+                                                                                                            }}
+                                                                                                        >
+                                                                                                            Edit
+                                                                                                        </Btn>
+
+                                                                                                        {openId ===
+                                                                                                            detail.id && (
+                                                                                                            <LazyWrapper>
+                                                                                                                <ModelEdit
+                                                                                                                    id={
+                                                                                                                        detail.id
+                                                                                                                    }
+                                                                                                                    getData={
+                                                                                                                        getData
+                                                                                                                    }
+                                                                                                                    isOpen={
+                                                                                                                        true
+                                                                                                                    }
+                                                                                                                    onClose={() =>
+                                                                                                                        setOpenId(
+                                                                                                                            null
+                                                                                                                        )
+                                                                                                                    }
+                                                                                                                />
+                                                                                                            </LazyWrapper>
+                                                                                                        )}
+                                                                                                    </td>
+                                                                                                )}
                                                                                                 <td>
                                                                                                     {props
                                                                                                         .permissions
