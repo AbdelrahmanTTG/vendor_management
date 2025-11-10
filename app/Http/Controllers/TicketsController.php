@@ -552,37 +552,7 @@ class TicketsController extends Controller
         $data['ticket'] = $ticket_id;
         $data['created_at'] = date("Y-m-d H:i:s");
         if ($ticket) {
-            if (VmTicketTeamResponse::create($data)) {
-                // send reply to requster   
-                // setup mail data              
-                $to = BrandUsers::select('email', 'user_name')->where('id', $ticket->created_by)->first();
-                $toEmail = $to->email;
-                $user_name = $to->user_name;
-                //end setup mail                 
-                $mailData = [
-                    'user_name' =>  $user_name,
-                    'subject' => "New Reply : # " . $ticket->id,
-                    'body' =>  "A new reply has already sent to your ticket, please check ..",
-                    'comment' =>  $request->comment,
-                ];
-                if ($ticket->brand_id == 1) {
-                    $from = 'vm.support@thetranslationgate.com';
-                } elseif ($ticket->brand_id == 2) {
-                    $from = 'vm.support@localizera.com';
-                } elseif ($ticket->brand_id == 3) {
-                    $from = 'vm.support@europelocalize.com';
-                } elseif ($ticket->brand_id == 4) {
-                    $from = 'vm.support@afaq.com';
-                } elseif ($ticket->brand_id == 11) {
-                    $from = 'vm.support@columbuslang.com';
-                } else {
-                    $from = 'vm.support@aixnexus.com';
-                }
-                Mail::to($toEmail)
-                    ->cc($from)
-                    ->send(
-                        (new TicketMail($mailData))->from($this->vmEmail, 'Support Team')
-                    );
+            if (VmTicketTeamResponse::create($data)) {              
                 $msg['type'] = "success";
                 $message = "Ticket Reply Added Successfully";
             } else {
