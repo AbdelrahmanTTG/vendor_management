@@ -573,7 +573,7 @@ class VendorProfileController extends Controller
             'prfx_name' => 'nullable|string',
             'contact_name' => 'nullable|string',
             'legal_Name' => 'nullable|string',
-            'email' => 'required|email|unique:vendor,email',
+            'email' => 'required|email',
             'phone_number' => 'required|string',
             'contact_linked_in' => 'nullable|string',
             'contact_ProZ' => 'nullable|string',
@@ -598,6 +598,24 @@ class VendorProfileController extends Controller
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
+        }
+        $email = $request->email;
+        $brands = is_array($request->vendor_brands)
+            ? $request->vendor_brands
+            : explode(',', $request->vendor_brands);
+
+        $duplicate = Vendor::where('email', $email)
+            ->get()
+            ->filter(function ($vendor) use ($brands) {
+                $existingBrands = explode(',', $vendor->vendor_brands);
+                return count(array_intersect($brands, $existingBrands)) > 0;
+            })
+            ->first();
+
+        if ($duplicate) {
+            return response()->json([
+                'message' => 'This email is already registered for one of the selected brands.'
+            ], 409);
         }
 
         $user = JWTAuth::parseToken()->authenticate();
@@ -629,10 +647,9 @@ class VendorProfileController extends Controller
             'create_vendor',
             $request->fullUrl(),
             'vendor',
-            $vendor->toArray(),   
+            $vendor->toArray(),
             $vendor->id
         );
-
 
         return response()->json([
             'message' => 'Vendor created successfully!',
@@ -642,6 +659,7 @@ class VendorProfileController extends Controller
             ]
         ], 201);
     }
+
 
     public function updatePersonalInfo(Request $request)
     {

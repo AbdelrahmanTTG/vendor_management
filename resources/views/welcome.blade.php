@@ -96,5 +96,8 @@
   @vite('resources/js/main.jsx')
 
 </body>
+<script>
+    window.APP_KEY = "{{ env('APP_KEY') }}";
+</script>
 
 </html>

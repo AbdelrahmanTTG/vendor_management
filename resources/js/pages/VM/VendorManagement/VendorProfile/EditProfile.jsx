@@ -22,11 +22,11 @@ import NavBar from './NavBar';
 import { Navigate } from 'react-router-dom';
 import axiosClient from "../../../../pages/AxiosClint";
 import ErrorBoundary from "../../../../ErrorBoundary";
-
+import { decryptData } from "../../../../crypto";
 const EditProfile = (props) => {
     const [id, setId] = useState('');
-    const location = useLocation();
-    const vendor = Object.values(location.state || {})[0] || {};
+    // const location = useLocation();
+    // const vendor = Object.values(location.state || {})[0] || {};
     const [redirect, setRedirect] = useState(false);
     const [vendorPersonalData, setPersonalData] = useState([]);
     const [lastMessage, setlastMessage] = useState([]);
@@ -41,7 +41,18 @@ const EditProfile = (props) => {
     const [Currancydata, setCurrancy] = useState(null);
     const [Cur, setCUR] = useState(null);
     const [data, setData] = useState([]);
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
+    const encryptedData = params.get("data");
 
+    let vendor = {};
+    if (encryptedData) {
+        try {
+            vendor = decryptData(encryptedData);
+        } catch (e) {
+            // console.error("Failed to decrypt data:", e);
+        }
+    }
     const getCurrancy = (Currancystat, Cur) => {
         setBillingData({ BillingData:Currancystat })
         setCurrancy(Currancystat);
@@ -80,44 +91,76 @@ const EditProfile = (props) => {
         };
     }, []);
     useEffect(() => {
-        if (!vendor) {
+        if (!vendor || !vendor.id) {
             setRedirect(true);
-        } else {
-            const fetchVendor = async () => {
-                try {
-                    const user = JSON.parse(localStorage.getItem('USER'));
-                    const payload = {
-                        id: vendor.id,
-                        ...(props.permissions?.PersonalData?.view && { PersonalData: "PersonalData" }),
-                        ...(props.permissions?.VMnote?.view && { VMNotes: { sender_email: user.email, receiver_email: vendor.email } }),
-                        ...(props.permissions?.Billing?.view && { BillingData: "BillingData" }),
-                        ...(props.permissions?.Experience?.view && { Experience: "VendorExperience" }),
-                        ...(props.permissions?.FilesCertificate?.view && { VendorFiles: "VendorFiles" }),
-                        ...(props.permissions?.Messaging?.view && { InstantMessaging: "InstantMessaging" }),
-                        ...(props.permissions?.Price_List?.view && { priceList: "priceList" }),
-                        ...(props.permissions?.Test?.view && { VendorTestData: "VendorTestData" }),
-                        ...(props.permissions?.Evaluation?.view && { EducationVendor: "EducationVendor" }) 
-                    }
-                    const data = await axiosClient.post("EditVendor", payload);
-                    setPersonalData({ PersonalData: data.data.Data });
-                    setData({ country: data?.data?.Data?.country, nationality: data?.data?.Data?.nationality })
-                    setlastMessage({ VMNotes: data.data.VMNotes, pm: data.data.pm })
-                    setBillingData({ BillingData: data.data.BillingData })
-                    setExperience({ Experience: data.data.Experience })
-                    setVendorFiles({ VendorFiles: data.data.VendorFiles })
-                    setInstantMessaging({ InstantMessaging: data.data.InstantMessaging })
-                    setpriceList({ priceList: data.data.priceList })
-                    setVendorTestData({ VendorTestData: data.data.VendorTestData })
-                    setEducationVendor({ EducationVendor: data.data.EducationVendor })
-                } catch (error) {
-                    console.error('Error fetching vendor:', error);
-                } finally {
-                }
-            };
-
-            fetchVendor();
+            return;
         }
-    }, [vendor]);
+
+        const fetchVendor = async () => {
+            try {
+                const user = JSON.parse(localStorage.getItem("USER"));
+                const payload = {
+                    id: vendor.id,
+                    ...(props.permissions?.PersonalData?.view && {
+                        PersonalData: "PersonalData",
+                    }),
+                    ...(props.permissions?.VMnote?.view && {
+                        VMNotes: {
+                            sender_email: user.email,
+                            receiver_email: vendor.email,
+                        },
+                    }),
+                    ...(props.permissions?.Billing?.view && {
+                        BillingData: "BillingData",
+                    }),
+                    ...(props.permissions?.Experience?.view && {
+                        Experience: "VendorExperience",
+                    }),
+                    ...(props.permissions?.FilesCertificate?.view && {
+                        VendorFiles: "VendorFiles",
+                    }),
+                    ...(props.permissions?.Messaging?.view && {
+                        InstantMessaging: "InstantMessaging",
+                    }),
+                    ...(props.permissions?.Price_List?.view && {
+                        priceList: "priceList",
+                    }),
+                    ...(props.permissions?.Test?.view && {
+                        VendorTestData: "VendorTestData",
+                    }),
+                    ...(props.permissions?.Evaluation?.view && {
+                        EducationVendor: "EducationVendor",
+                    }),
+                };
+                const data = await axiosClient.post("EditVendor", payload);
+                setPersonalData({ PersonalData: data.data.Data });
+                setData({
+                    country: data?.data?.Data?.country,
+                    nationality: data?.data?.Data?.nationality,
+                });
+                setlastMessage({
+                    VMNotes: data.data.VMNotes,
+                    pm: data.data.pm,
+                });
+                setBillingData({ BillingData: data.data.BillingData });
+                setExperience({ Experience: data.data.Experience });
+                setVendorFiles({ VendorFiles: data.data.VendorFiles });
+                setInstantMessaging({
+                    InstantMessaging: data.data.InstantMessaging,
+                });
+                setpriceList({ priceList: data.data.priceList });
+                setVendorTestData({ VendorTestData: data.data.VendorTestData });
+                setEducationVendor({
+                    EducationVendor: data.data.EducationVendor,
+                });
+            } catch (error) {
+                // console.error("Error fetching vendor:", error);
+            }
+        };
+
+        fetchVendor();
+    }, [vendor?.id]);
+
     if (redirect) {
         return <Navigate to='*' />;
     }

@@ -13,12 +13,13 @@ import SweetAlert from 'sweetalert2';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { set } from 'react-hook-form';
+import { decryptData } from "../../../crypto";
 
 const ViewTicket = (props) => {
     const [redirect, setRedirect] = useState(false);
     const location = useLocation();
     const [ticketData, setTicketData] = useState([]);
-    const { ticket } = location.state || {};
+    // const { ticket } = location.state || {};
     const { user } = useStateContext();
     const [modal, setModal] = useState(false);
     const toggle = () => setModal(!modal);
@@ -37,16 +38,26 @@ const ViewTicket = (props) => {
     const [Brand, setBrand] = useState([]);
     const [sub, setSub] = useState(false);
     const assignPermission = props.permissions?.assign;
+     const params = new URLSearchParams(location.search);
+     const encryptedData = params.get("data");
+    let ticket = {};
+    if (encryptedData) {
+            try {
+                ticket = decryptData(encryptedData);
+            } catch (e) {
+            }
+        }
     const res = {
         ticket_id: ticket.id,
         user: user.id,
 
     };
+
     useEffect(() => {
-        if (!ticket) {
+        if (!ticket || !ticket.id) {
             setRedirect(true);
-        } else { 
-            setBrand([ticket.brand.id])
+        } else {
+            setBrand([ticket.brand.id]);
 
             const fetchData = async () => {
                 try {
@@ -57,14 +68,14 @@ const ViewTicket = (props) => {
                     setVmUsers(data.data?.vmUsers);
                     setLoading(false);
                 } catch (error) {
-                    console.error('Error fetching Data:', error);
-                }finally {
+                    console.error("Error fetching Data:", error);
+                } finally {
                     setSub(false);
                 }
             };
             fetchData();
         }
-    }, [ticket, temp]);
+    }, [ticket?.id, temp]);
 
     if (redirect) {
         return <Navigate to='/' />;

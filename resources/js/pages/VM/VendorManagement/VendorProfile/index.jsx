@@ -36,6 +36,7 @@ import FormatTable from "../../Format";
 import SweetAlert from "sweetalert2";
 const ModelEdit = React.lazy(() => import("./models/modelEditPriceList"));
 import ErrorBoundary from "../../../../ErrorBoundary";
+import { encryptData } from "../../../../crypto";
 const Vendor = (props) => {
     const LazyWrapper = ({ children }) => (
         <ErrorBoundary>
@@ -211,7 +212,7 @@ const Vendor = (props) => {
         handelingSelect("countries", setOptionsN, "nationality");
         handelingSelect("regions", setOptionsR, "region");
         handelingSelect("vendortimezone", setOptionsT, "timeZone");
-        console.log(props.permissions);
+        // console.log(props.permissions);
     }, []);
 
     const options = [
@@ -528,7 +529,7 @@ const Vendor = (props) => {
                 setProgress(50);
             }
         } catch (err) {
-            console.error(err);
+            // console.error(err);
         } finally {
             setLoading2(false);
         }
@@ -996,7 +997,7 @@ const Vendor = (props) => {
             window.URL.revokeObjectURL(url);
         } catch (err) {
             const response = err.response;
-            console.error(response);
+            // console.error(response);
             alert(
                 "Error downloading the file: " +
                     (response?.data?.message || "Unknown error")
@@ -3622,43 +3623,86 @@ const Vendor = (props) => {
                                                                         {fields[
                                                                             index
                                                                         ] ===
-                                                                            "status" ||
-                                                                        fields[
-                                                                            index
-                                                                        ] ===
-                                                                            "profile_status" ||
-                                                                        fields[
-                                                                            index
-                                                                        ] ===
-                                                                            "method" ||
-                                                                        fields[
-                                                                            index
-                                                                        ] ===
-                                                                            "billing_status" ||
-                                                                        fields[
-                                                                            index
-                                                                        ] ===
-                                                                            "test_result" ||
-                                                                        fields[
-                                                                            index
-                                                                        ] ===
-                                                                            "test_type" ||
-                                                                        fields[
-                                                                            index
-                                                                        ] ===
-                                                                            "type" ||
-                                                                        fields[
-                                                                            index
-                                                                        ] ===
-                                                                            "cv" ||
-                                                                        fields[
-                                                                            index
-                                                                        ] ===
-                                                                            "NDA" ||
-                                                                        fields[
-                                                                            index
-                                                                        ] ===
-                                                                            "priceList" ? (
+                                                                        "id" ? (
+                                                                            <a
+                                                                                href={`/vm/vendors/editprofiletest?data=${encodeURIComponent(
+                                                                                    encryptData(
+                                                                                        item
+                                                                                    )
+                                                                                )}`}
+                                                                                onClick={(
+                                                                                    e
+                                                                                ) => {
+                                                                                    if (
+                                                                                        e.button ===
+                                                                                            1 ||
+                                                                                        e.ctrlKey ||
+                                                                                        e.metaKey
+                                                                                    ) {
+                                                                                        return;
+                                                                                    }
+
+                                                                                    e.preventDefault();
+                                                                                    const url = `/vm/vendors/editprofiletest?data=${encodeURIComponent(
+                                                                                        encryptData(
+                                                                                            item
+                                                                                        )
+                                                                                    )}`;
+                                                                                    navigate(
+                                                                                        url
+                                                                                    );
+                                                                                }}
+                                                                                style={{
+                                                                                    textDecoration:
+                                                                                        "none",
+                                                                                    color: "inherit",
+                                                                                    cursor: "pointer",
+                                                                                }}
+                                                                            >
+                                                                                {
+                                                                                    value
+                                                                                }
+                                                                            </a>
+                                                                        ) : fields[
+                                                                              index
+                                                                          ] ===
+                                                                              "status" ||
+                                                                          fields[
+                                                                              index
+                                                                          ] ===
+                                                                              "profile_status" ||
+                                                                          fields[
+                                                                              index
+                                                                          ] ===
+                                                                              "method" ||
+                                                                          fields[
+                                                                              index
+                                                                          ] ===
+                                                                              "billing_status" ||
+                                                                          fields[
+                                                                              index
+                                                                          ] ===
+                                                                              "test_result" ||
+                                                                          fields[
+                                                                              index
+                                                                          ] ===
+                                                                              "test_type" ||
+                                                                          fields[
+                                                                              index
+                                                                          ] ===
+                                                                              "type" ||
+                                                                          fields[
+                                                                              index
+                                                                          ] ===
+                                                                              "cv" ||
+                                                                          fields[
+                                                                              index
+                                                                          ] ===
+                                                                              "NDA" ||
+                                                                          fields[
+                                                                              index
+                                                                          ] ===
+                                                                              "priceList" ? (
                                                                             <div>
                                                                                 {fields[
                                                                                     index
@@ -4080,23 +4124,46 @@ const Vendor = (props) => {
                                                             {props.permissions
                                                                 ?.edit == 1 && (
                                                                 <td>
-                                                                    <button
-                                                                        onClick={() =>
-                                                                            handleEdit(
+                                                                    <a
+                                                                        href={`/vm/vendors/editprofiletest?data=${encodeURIComponent(
+                                                                            encryptData(
                                                                                 item
                                                                             )
-                                                                        }
+                                                                        )}`}
+                                                                        onClick={(
+                                                                            e
+                                                                        ) => {
+                                                                            if (
+                                                                                e.button ===
+                                                                                    1 ||
+                                                                                e.ctrlKey ||
+                                                                                e.metaKey
+                                                                            ) {
+                                                                                return;
+                                                                            }
+
+                                                                            e.preventDefault();
+                                                                            const url = `/vm/vendors/editprofiletest?data=${encodeURIComponent(
+                                                                                encryptData(
+                                                                                    item
+                                                                                )
+                                                                            )}`;
+                                                                            navigate(
+                                                                                url
+                                                                            );
+                                                                        }}
                                                                         style={{
-                                                                            border: "none",
-                                                                            backgroundColor:
-                                                                                "transparent",
-                                                                            padding: 0,
+                                                                            textDecoration:
+                                                                                "none",
+                                                                            color: "inherit",
+                                                                            cursor: "pointer",
                                                                         }}
                                                                     >
                                                                         <i className="icofont icofont-ui-edit"></i>
-                                                                    </button>
+                                                                    </a>
                                                                 </td>
                                                             )}
+
                                                             {props.permissions
                                                                 ?.delete ==
                                                                 1 && (
@@ -4244,22 +4311,22 @@ const Vendor = (props) => {
                                                                                                     )}
 
                                                                                                 {/* <td>
-                                                                                                    {props
-                                                                                                        .permissions
-                                                                                                        ?.edit ==
-                                                                                                        1 && (
-                                                                                                        <LazyWrapper>
-                                                                                                            <ModelEdit
-                                                                                                                id={
-                                                                                                                    detail.id
-                                                                                                                }
-                                                                                                                getData={
-                                                                                                                    getData
-                                                                                                                }
-                                                                                                            />
-                                                                                                        </LazyWrapper>
-                                                                                                    )}
-                                                                                                </td> */}
+                                                            {props
+                                                                .permissions
+                                                                ?.edit ==
+                                                                1 && (
+                                                                <LazyWrapper>
+                                                                    <ModelEdit
+                                                                        id={
+                                                                            detail.id
+                                                                        }
+                                                                        getData={
+                                                                            getData
+                                                                        }
+                                                                    />
+                                                                </LazyWrapper>
+                                                            )}
+                                                        </td> */}
                                                                                                 {props
                                                                                                     .permissions
                                                                                                     ?.edit ==

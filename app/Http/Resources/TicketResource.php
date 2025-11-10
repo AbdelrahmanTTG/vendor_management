@@ -60,8 +60,10 @@ class TicketResource extends JsonResource
             'time_of_opening'=> $this->open_time??null, 
             'opened_by'=> $this->opened_by?$this->getUser($this->opened_by):null, 
             'time_of_closing'=> $this->closed_time??null, 
-            'closed_by'=> $this->closed_by?$this->getUser($this->closed_by):null, 
-
+            'closed_by'=> $this->closed_by?$this->getUser($this->closed_by):null,
+            'region' => $this->region ?? null,
+            'region_id' => $this->region_id ?? null,
+            'division' => $this->division ?? null,
             'new'=> $this->open_time?$this->getResourcesCount(1):null,
             'existing'=> $this->open_time?$this->getResourcesCount(2):null, 
             'existing_pair'=> $this->open_time?$this->getResourcesCount(3):null,

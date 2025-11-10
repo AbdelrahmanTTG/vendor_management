@@ -135,12 +135,17 @@ class TicketsController extends Controller
                     if (!empty($val)) {
                         if (is_array($val)) {
                             $tickets->where(function ($query) use ($key, $val) {
-                                if ($key != 'brand'){
-                                    $key = 'vm_ticket.' . $key;
-                                }else{
+                                if ($key == 'brand') {
                                     $key = 'users.' . $key;
+                                } elseif ($key == 'region') {
+                                    $key = 'regions.id'; 
+                                } elseif ($key == 'division') {
+                                    $key = 'division.id';
+                                } else {
+                                    $key = 'vm_ticket.' . $key;
                                 }
-                                    
+
+
                                 foreach ($val as $k => $v) {
                                     if ($k == 0) {
                                         $query->where($key,  $v);

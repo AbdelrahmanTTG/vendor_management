@@ -242,28 +242,39 @@ const PersonalData = React.memo((props) => {
     //     : formData.vendor_brands;
 
     // console.log(formData);
-    try {
-      const response = await axiosClient.post("PersonalInformation", formData);
-      setIsSubmitting(true)
-      setidVendor(response.data.vendor.id)
-      props.onDataSend(response.data.vendor.data)
-      basictoaster("successToast", response.data.message);
+   try {
+       const response = await axiosClient.post("PersonalInformation", formData);
+       setIsSubmitting(true);
+       setidVendor(response.data.vendor.id);
+       props.onDataSend(response.data.vendor.data);
+       basictoaster("successToast", response.data.message);
+   } catch (err) {
+       const response = err.response;
 
-    } catch (err) {
-      const response = err.response;
-      if (response && response.data) {
-        const errors = response.data;
-        Object.keys(errors).forEach(key => {
-          const messages = errors[key];
-          messages.forEach(message => {
-            basictoaster("dangerToast", message);
-          });
-        });
-      }
-      setIsSubmitting(false)
-    }finally {
-      setSub(false)
-    }
+       if (response) {
+           if (response.status === 409) {
+               basictoaster("dangerToast", response.data.message);
+           }
+           else if (response.data && typeof response.data === "object") {
+               const errors = response.data;
+               Object.keys(errors).forEach((key) => {
+                   const messages = errors[key];
+                   if (Array.isArray(messages)) {
+                       messages.forEach((message) => {
+                           basictoaster("dangerToast", message);
+                       });
+                   } else {
+                       basictoaster("dangerToast", messages);
+                   }
+               });
+           }
+       }
+
+       setIsSubmitting(false);
+   } finally {
+       setSub(false);
+   }
+
   }
   const Update = async (formData) => {
     if (!props.backPermissions?.edit) {
