@@ -126,7 +126,7 @@ const TicketsList = (props) => {
         handelingSelect("brand", setOptionsB, "brand");
         handelingSelect("task_type", setOptionsTY, "task_type");
         handelingSelect("regions", setOptionsR, "region");
-        handelingSelect("division", setOptionsR, "division");
+        handelingSelect("division", setOptionsD, "division");
         handelingSelectUsers();
         try {
             axiosClient.post("getTicketsTotal").then(({ data }) => {
