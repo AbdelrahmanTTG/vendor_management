@@ -339,7 +339,7 @@ class TicketsController extends Controller
         $created_by_master = BrandUsers::select('master_user_id')->where('id', $created_by)->first();
         $ticket = VmTicket::find($ticket_id);
         $created_by_ticket_brand = BrandUsers::select('id')->where('master_user_id', $created_by_master->master_user_id)
-            ->where('brand', $ticket->brand)->first();
+            ->where('brand', $ticket->brand_id)->first();
         $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
         $data['response'] = $request->comment;
         $data['ticket'] = $ticket_id;
@@ -380,15 +380,15 @@ class TicketsController extends Controller
                     'body' =>  "A new reply has already sent to your ticket, please check ..",
                     'comment' =>  $request->comment,
                 ];
-                if ($ticket->brand_id== 1) {
+                if ($ticket->brand_id == 1) {
                     $from = 'vm.support@thetranslationgate.com';
-                } elseif ($ticket->brand_id== 2) {
+                } elseif ($ticket->brand_id == 2) {
                     $from = 'vm.support@localizera.com';
-                } elseif ($ticket->brand_id== 3) {
+                } elseif ($ticket->brand_id == 3) {
                     $from = 'vm.support@europelocalize.com';
-                } elseif ($ticket->brand_id== 4) {
+                } elseif ($ticket->brand_id == 4) {
                     $from = 'vm.support@afaq.com';
-                } elseif ($ticket->brand_id== 11) {
+                } elseif ($ticket->brand_id == 11) {
                     $from = 'vm.support@columbuslang.com';
                 } else {
                     $from = 'vm.support@aixnexus.com';
@@ -546,7 +546,7 @@ class TicketsController extends Controller
         $created_by_master = BrandUsers::select('master_user_id')->where('id', $created_by)->first();
         $ticket = VmTicket::find($ticket_id);
         $created_by_ticket_brand = BrandUsers::select('id')->where('master_user_id', $created_by_master->master_user_id)
-            ->where('brand', $ticket->brand)->first();
+            ->where('brand', $ticket->brand_id)->first();
         $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
         $data['response'] = $request->comment;
         $data['ticket'] = $ticket_id;
@@ -565,15 +565,15 @@ class TicketsController extends Controller
                     'body' =>  "A new reply has already sent to your ticket, please check ..",
                     'comment' =>  $request->comment,
                 ];
-                if ($ticket->brand_id== 1) {
+                if ($ticket->brand_id == 1) {
                     $from = 'vm.support@thetranslationgate.com';
-                } elseif ($ticket->brand_id== 2) {
+                } elseif ($ticket->brand_id == 2) {
                     $from = 'vm.support@localizera.com';
-                } elseif ($ticket->brand_id== 3) {
+                } elseif ($ticket->brand_id == 3) {
                     $from = 'vm.support@europelocalize.com';
-                } elseif ($ticket->brand_id== 4) {
+                } elseif ($ticket->brand_id == 4) {
                     $from = 'vm.support@afaq.com';
-                } elseif ($ticket->brand_id== 11) {
+                } elseif ($ticket->brand_id == 11) {
                     $from = 'vm.support@columbuslang.com';
                 } else {
                     $from = 'vm.support@aixnexus.com';
@@ -786,11 +786,19 @@ class TicketsController extends Controller
 
     public function changeTicketStatus(Request $request)
     {
-        $user = $data['created_by'] = Crypt::decrypt($request->user);
+        $created_by = Crypt::decrypt($request->user);
+        $created_by_master = BrandUsers::select('master_user_id')->where('id', $created_by)->first();
+        $created_by_master = BrandUsers::select('master_user_id')->where('id', $created_by)->first();
+
+        $created_by = Crypt::decrypt($request->user);
         $ticket_id = $data['ticket'] = $request->ticket;
         $status = $request->status;
 
         $ticket = VmTicket::find($data['ticket']);
+        $created_by_ticket_brand = BrandUsers::select('id')->where('master_user_id', $created_by_master->master_user_id)
+            ->where('brand', $ticket->brand_id)->first();
+        $user = $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
+
         $message = '';
 
         if (!$ticket) {
@@ -814,15 +822,15 @@ class TicketsController extends Controller
                         'body'      => 'VM Team rejected your ticket.',
                         'comment'   => "Reason: " . $comment,
                     ];
-                    if ($ticket->brand_id== 1) {
+                    if ($ticket->brand_id == 1) {
                         $from = 'vm.support@thetranslationgate.com';
-                    } elseif ($ticket->brand_id== 2) {
+                    } elseif ($ticket->brand_id == 2) {
                         $from = 'vm.support@localizera.com';
-                    } elseif ($ticket->brand_id== 3) {
+                    } elseif ($ticket->brand_id == 3) {
                         $from = 'vm.support@europelocalize.com';
-                    } elseif ($ticket->brand_id== 4) {
+                    } elseif ($ticket->brand_id == 4) {
                         $from = 'vm.support@afaq.com';
-                    } elseif ($ticket->brand_id== 11) {
+                    } elseif ($ticket->brand_id == 11) {
                         $from = 'vm.support@columbuslang.com';
                     } else {
                         $from = 'vm.support@aixnexus.com';
@@ -910,15 +918,15 @@ class TicketsController extends Controller
                                 'body'      => "Your Ticket has been updated with a new resource, please check. Date : " . date("Y-m-d H:i:s"),
                             ];
 
-                            if ($ticket->brand_id== 1) {
+                            if ($ticket->brand_id == 1) {
                                 $from = 'vm.support@thetranslationgate.com';
-                            } elseif ($ticket->brand_id== 2) {
+                            } elseif ($ticket->brand_id == 2) {
                                 $from = 'vm.support@localizera.com';
-                            } elseif ($ticket->brand_id== 3) {
+                            } elseif ($ticket->brand_id == 3) {
                                 $from = 'vm.support@europelocalize.com';
-                            } elseif ($ticket->brand_id== 4) {
+                            } elseif ($ticket->brand_id == 4) {
                                 $from = 'vm.support@afaq.com';
-                            } elseif ($ticket->brand_id== 11) {
+                            } elseif ($ticket->brand_id == 11) {
                                 $from = 'vm.support@columbuslang.com';
                             } else {
                                 $from = 'vm.support@aixnexus.com';
@@ -946,15 +954,15 @@ class TicketsController extends Controller
                     'body'      => 'VM Team send a request to close your ticket please send your action.',
                 ];
 
-                if ($ticket->brand_id== 1) {
+                if ($ticket->brand_id == 1) {
                     $from = 'vm.support@thetranslationgate.com';
-                } elseif ($ticket->brand_id== 2) {
+                } elseif ($ticket->brand_id == 2) {
                     $from = 'vm.support@localizera.com';
-                } elseif ($ticket->brand_id== 3) {
+                } elseif ($ticket->brand_id == 3) {
                     $from = 'vm.support@europelocalize.com';
-                } elseif ($ticket->brand_id== 4) {
+                } elseif ($ticket->brand_id == 4) {
                     $from = 'vm.support@afaq.com';
-                } elseif ($ticket->brand_id== 11) {
+                } elseif ($ticket->brand_id == 11) {
                     $from = 'vm.support@columbuslang.com';
                 } else {
                     $from = 'vm.support@aixnexus.com';
@@ -981,11 +989,11 @@ class TicketsController extends Controller
                     $from = 'vm.support@thetranslationgate.com';
                 } elseif ($ticket->brand_id == 2) {
                     $from = 'vm.support@localizera.com';
-                } elseif ($ticket->brand_id== 3) {
+                } elseif ($ticket->brand_id == 3) {
                     $from = 'vm.support@europelocalize.com';
                 } elseif ($ticket->brand_id == 4) {
                     $from = 'vm.support@afaq.com';
-                } elseif ($ticket->brand_id== 11) {
+                } elseif ($ticket->brand_id == 11) {
                     $from = 'vm.support@columbuslang.com';
                 } else {
                     $from = 'vm.support@aixnexus.com';
@@ -1094,15 +1102,15 @@ class TicketsController extends Controller
                         'subject' => "New Ticket Assigned : # " . $ticket_id,
                         'body' =>  "New Ticket Assigned to you at " . date("Y-m-d H:i:s") . ", please Check ...",
                     ];
-                    if ($ticket->brand_id== 1) {
+                    if ($ticket->brand_id == 1) {
                         $from = 'vm.support@thetranslationgate.com';
-                    } elseif ($ticket->brand_id== 2) {
+                    } elseif ($ticket->brand_id == 2) {
                         $from = 'vm.support@localizera.com';
-                    } elseif ($ticket->brand_id== 3) {
+                    } elseif ($ticket->brand_id == 3) {
                         $from = 'vm.support@europelocalize.com';
-                    } elseif ($ticket->brand_id== 4) {
+                    } elseif ($ticket->brand_id == 4) {
                         $from = 'vm.support@afaq.com';
-                    } elseif ($ticket->brand_id== 11) {
+                    } elseif ($ticket->brand_id == 11) {
                         $from = 'vm.support@columbuslang.com';
                     } else {
                         $from = 'vm.support@aixnexus.com';
