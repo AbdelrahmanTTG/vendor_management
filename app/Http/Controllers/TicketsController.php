@@ -380,15 +380,15 @@ class TicketsController extends Controller
                     'body' =>  "A new reply has already sent to your ticket, please check ..",
                     'comment' =>  $request->comment,
                 ];
-                if ($ticket->brand == 1) {
+                if ($ticket->brand_id== 1) {
                     $from = 'vm.support@thetranslationgate.com';
-                } elseif ($ticket->brand == 2) {
+                } elseif ($ticket->brand_id== 2) {
                     $from = 'vm.support@localizera.com';
-                } elseif ($ticket->brand == 3) {
+                } elseif ($ticket->brand_id== 3) {
                     $from = 'vm.support@europelocalize.com';
-                } elseif ($ticket->brand == 4) {
+                } elseif ($ticket->brand_id== 4) {
                     $from = 'vm.support@afaq.com';
-                } elseif ($ticket->brand == 11) {
+                } elseif ($ticket->brand_id== 11) {
                     $from = 'vm.support@columbuslang.com';
                 } else {
                     $from = 'vm.support@aixnexus.com';
@@ -565,15 +565,15 @@ class TicketsController extends Controller
                     'body' =>  "A new reply has already sent to your ticket, please check ..",
                     'comment' =>  $request->comment,
                 ];
-                if ($ticket->brand == 1) {
+                if ($ticket->brand_id== 1) {
                     $from = 'vm.support@thetranslationgate.com';
-                } elseif ($ticket->brand == 2) {
+                } elseif ($ticket->brand_id== 2) {
                     $from = 'vm.support@localizera.com';
-                } elseif ($ticket->brand == 3) {
+                } elseif ($ticket->brand_id== 3) {
                     $from = 'vm.support@europelocalize.com';
-                } elseif ($ticket->brand == 4) {
+                } elseif ($ticket->brand_id== 4) {
                     $from = 'vm.support@afaq.com';
-                } elseif ($ticket->brand == 11) {
+                } elseif ($ticket->brand_id== 11) {
                     $from = 'vm.support@columbuslang.com';
                 } else {
                     $from = 'vm.support@aixnexus.com';
@@ -814,15 +814,15 @@ class TicketsController extends Controller
                         'body'      => 'VM Team rejected your ticket.',
                         'comment'   => "Reason: " . $comment,
                     ];
-                    if ($ticket->brand == 1) {
+                    if ($ticket->brand_id== 1) {
                         $from = 'vm.support@thetranslationgate.com';
-                    } elseif ($ticket->brand == 2) {
+                    } elseif ($ticket->brand_id== 2) {
                         $from = 'vm.support@localizera.com';
-                    } elseif ($ticket->brand == 3) {
+                    } elseif ($ticket->brand_id== 3) {
                         $from = 'vm.support@europelocalize.com';
-                    } elseif ($ticket->brand == 4) {
+                    } elseif ($ticket->brand_id== 4) {
                         $from = 'vm.support@afaq.com';
-                    } elseif ($ticket->brand == 11) {
+                    } elseif ($ticket->brand_id== 11) {
                         $from = 'vm.support@columbuslang.com';
                     } else {
                         $from = 'vm.support@aixnexus.com';
@@ -910,15 +910,15 @@ class TicketsController extends Controller
                                 'body'      => "Your Ticket has been updated with a new resource, please check. Date : " . date("Y-m-d H:i:s"),
                             ];
 
-                            if ($ticket->brand == 1) {
+                            if ($ticket->brand_id== 1) {
                                 $from = 'vm.support@thetranslationgate.com';
-                            } elseif ($ticket->brand == 2) {
+                            } elseif ($ticket->brand_id== 2) {
                                 $from = 'vm.support@localizera.com';
-                            } elseif ($ticket->brand == 3) {
+                            } elseif ($ticket->brand_id== 3) {
                                 $from = 'vm.support@europelocalize.com';
-                            } elseif ($ticket->brand == 4) {
+                            } elseif ($ticket->brand_id== 4) {
                                 $from = 'vm.support@afaq.com';
-                            } elseif ($ticket->brand == 11) {
+                            } elseif ($ticket->brand_id== 11) {
                                 $from = 'vm.support@columbuslang.com';
                             } else {
                                 $from = 'vm.support@aixnexus.com';
@@ -946,15 +946,15 @@ class TicketsController extends Controller
                     'body'      => 'VM Team send a request to close your ticket please send your action.',
                 ];
 
-                if ($ticket->brand == 1) {
+                if ($ticket->brand_id== 1) {
                     $from = 'vm.support@thetranslationgate.com';
-                } elseif ($ticket->brand == 2) {
+                } elseif ($ticket->brand_id== 2) {
                     $from = 'vm.support@localizera.com';
-                } elseif ($ticket->brand == 3) {
+                } elseif ($ticket->brand_id== 3) {
                     $from = 'vm.support@europelocalize.com';
-                } elseif ($ticket->brand == 4) {
+                } elseif ($ticket->brand_id== 4) {
                     $from = 'vm.support@afaq.com';
-                } elseif ($ticket->brand == 11) {
+                } elseif ($ticket->brand_id== 11) {
                     $from = 'vm.support@columbuslang.com';
                 } else {
                     $from = 'vm.support@aixnexus.com';
@@ -977,15 +977,15 @@ class TicketsController extends Controller
                     'body'      => "Your Ticket Closed at " . date("Y-m-d H:i:s") . " - " . $ticket->ticket_subject,
                 ];
 
-                if ($ticket->brand == 1) {
+                if ($ticket->brand_id == 1) {
                     $from = 'vm.support@thetranslationgate.com';
-                } elseif ($ticket->brand == 2) {
+                } elseif ($ticket->brand_id == 2) {
                     $from = 'vm.support@localizera.com';
-                } elseif ($ticket->brand == 3) {
+                } elseif ($ticket->brand_id== 3) {
                     $from = 'vm.support@europelocalize.com';
-                } elseif ($ticket->brand == 4) {
+                } elseif ($ticket->brand_id == 4) {
                     $from = 'vm.support@afaq.com';
-                } elseif ($ticket->brand == 11) {
+                } elseif ($ticket->brand_id== 11) {
                     $from = 'vm.support@columbuslang.com';
                 } else {
                     $from = 'vm.support@aixnexus.com';
@@ -1094,15 +1094,15 @@ class TicketsController extends Controller
                         'subject' => "New Ticket Assigned : # " . $ticket_id,
                         'body' =>  "New Ticket Assigned to you at " . date("Y-m-d H:i:s") . ", please Check ...",
                     ];
-                    if ($ticket->brand == 1) {
+                    if ($ticket->brand_id== 1) {
                         $from = 'vm.support@thetranslationgate.com';
-                    } elseif ($ticket->brand == 2) {
+                    } elseif ($ticket->brand_id== 2) {
                         $from = 'vm.support@localizera.com';
-                    } elseif ($ticket->brand == 3) {
+                    } elseif ($ticket->brand_id== 3) {
                         $from = 'vm.support@europelocalize.com';
-                    } elseif ($ticket->brand == 4) {
+                    } elseif ($ticket->brand_id== 4) {
                         $from = 'vm.support@afaq.com';
-                    } elseif ($ticket->brand == 11) {
+                    } elseif ($ticket->brand_id== 11) {
                         $from = 'vm.support@columbuslang.com';
                     } else {
                         $from = 'vm.support@aixnexus.com';
