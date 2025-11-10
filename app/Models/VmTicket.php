@@ -17,7 +17,7 @@ class VmTicket extends Model
     }
     public function brand()
     {
-        return  $this->belongsTo(Brand::class, 'brand');
+        return  $this->belongsTo(Brand::class, 'brand_id');
     }
     public function service()
     {
@@ -145,7 +145,7 @@ class VmTicket extends Model
 
     public function BrandName()
     {
-        return  $this->belongsTo(Brand::class, 'brand');
+        return  $this->belongsTo(Brand::class, 'brand_id');
     }
 
     public function getUser($id)
