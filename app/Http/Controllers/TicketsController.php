@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TicketMail;
 use App\Models\Permission;
+use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -135,12 +136,12 @@ class TicketsController extends Controller
                     if (!empty($val)) {
                         if (is_array($val)) {
                             $tickets->where(function ($query) use ($key, $val) {
-                                if ($key != 'brand'){
+                                if ($key != 'brand') {
                                     $key = 'vm_ticket.' . $key;
-                                }else{
+                                } else {
                                     $key = 'users.' . $key;
                                 }
-                                    
+
                                 foreach ($val as $k => $v) {
                                     if ($k == 0) {
                                         $query->where($key,  $v);
@@ -322,7 +323,7 @@ class TicketsController extends Controller
             }
         }
     }
-    public function addTicketTimeStatus($ticket, $user, $status , $assign_to)
+    public function addTicketTimeStatus($ticket, $user, $status, $assign_to)
     {
         $time['status'] = $status;
         $time['ticket'] = $ticket;
@@ -333,11 +334,16 @@ class TicketsController extends Controller
     }
     public function sendTicketResponse(Request $request)
     {
-        $data['created_by'] = Crypt::decrypt($request->user);
+       $ticket_id = $request->id;
+        $created_by = Crypt::decrypt($request->user);
+        $created_by_master = BrandUsers::select('master_user_id')->where('id', $created_by)->first();
+        $ticket = VmTicket::find($ticket_id);
+        $created_by_ticket_brand = BrandUsers::select('id')->where('master_user_id', $created_by_master->master_user_id)
+            ->where('brand', $ticket->brand_id)->first();
+        $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
         $data['response'] = $request->comment;
-        $data['ticket'] = $request->id;
+        $data['ticket'] = $ticket_id;
         $data['created_at'] = date("Y-m-d H:i:s");
-        $ticket = VmTicket::find($data['ticket']);
         if ($ticket) {
             if ($request->file('file') != null) {
                 $file = $request->file('file');
@@ -535,13 +541,48 @@ class TicketsController extends Controller
 
     public function sendTicketVmResponse(Request $request)
     {
-        $data['created_by'] = Crypt::decrypt($request->user);
+        $ticket_id = $request->id;
+        $created_by = Crypt::decrypt($request->user);
+        $created_by_master = BrandUsers::select('master_user_id')->where('id', $created_by)->first();
+        $ticket = VmTicket::find($ticket_id);
+        $created_by_ticket_brand = BrandUsers::select('id')->where('master_user_id', $created_by_master->master_user_id)
+            ->where('brand', $ticket->brand_id)->first();
+        $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
         $data['response'] = $request->comment;
-        $data['ticket'] = $request->id;
+        $data['ticket'] = $ticket_id;
         $data['created_at'] = date("Y-m-d H:i:s");
-        $ticket = VmTicket::find($data['ticket']);
         if ($ticket) {
             if (VmTicketTeamResponse::create($data)) {
+                // send reply to requster   
+                // setup mail data              
+                $to = BrandUsers::select('email', 'user_name')->where('id', $ticket->created_by)->first();
+                $toEmail = $to->email;
+                $user_name = $to->user_name;
+                //end setup mail                 
+                $mailData = [
+                    'user_name' =>  $user_name,
+                    'subject' => "New Reply : # " . $ticket->id,
+                    'body' =>  "A new reply has already sent to your ticket, please check ..",
+                    'comment' =>  $request->comment,
+                ];
+                if ($ticket->brand_id == 1) {
+                    $from = 'vm.support@thetranslationgate.com';
+                } elseif ($ticket->brand_id == 2) {
+                    $from = 'vm.support@localizera.com';
+                } elseif ($ticket->brand_id == 3) {
+                    $from = 'vm.support@europelocalize.com';
+                } elseif ($ticket->brand_id == 4) {
+                    $from = 'vm.support@afaq.com';
+                } elseif ($ticket->brand_id == 11) {
+                    $from = 'vm.support@columbuslang.com';
+                } else {
+                    $from = 'vm.support@aixnexus.com';
+                }
+                Mail::to($toEmail)
+                    ->cc($this->vmEmail)
+                    ->send(
+                        (new TicketMail($mailData))->from($from, 'Support Team')
+                    );
                 $msg['type'] = "success";
                 $message = "Ticket Reply Added Successfully";
             } else {
@@ -897,7 +938,7 @@ class TicketsController extends Controller
 
             if ($status == 3) {
                 $ticket->update(['status' => 5]);
-                $this->addTicketTimeStatus($ticket_id, $user, 5 , '');
+                $this->addTicketTimeStatus($ticket_id, $user, 5, '');
 
                 $mailData = [
                     'user_name' => $user_name,
@@ -928,7 +969,7 @@ class TicketsController extends Controller
                 $message .= "Ticket Status Changed Successfully ...<br/>";
             } elseif ($status == 4) {
                 $ticket->update(['status' => $status]);
-                $this->addTicketTimeStatus($ticket_id, $user, $status , '');
+                $this->addTicketTimeStatus($ticket_id, $user, $status, '');
 
                 $mailData = [
                     'user_name' => $user_name,
@@ -1039,44 +1080,44 @@ class TicketsController extends Controller
         $ticket = VmTicket::find($ticket_id);
         if ($request->assignPermission == 1) {
             // if (empty($ticket->assigned_to)) {
-                $data['assigned_to'] = $vm_id;
-                if ($ticket->update($data)) {
-                    $this->addTicketTimeStatus($ticket_id, $user, 6 , $ticket->assigned_to);
-                    try {
-                        $to = BrandUsers::select('email', 'user_name')->where('id', $vm_id)->first();
-                        $ccEmail = BrandUsers::select('email')->where('id', $user)->first()->email;
-                        $toEmail = $to->email;
-                        $user_name = $to->user_name;
+            $data['assigned_to'] = $vm_id;
+            if ($ticket->update($data)) {
+                $this->addTicketTimeStatus($ticket_id, $user, 6, $ticket->assigned_to);
+                try {
+                    $to = BrandUsers::select('email', 'user_name')->where('id', $vm_id)->first();
+                    $ccEmail = BrandUsers::select('email')->where('id', $user)->first()->email;
+                    $toEmail = $to->email;
+                    $user_name = $to->user_name;
 
-                        $mailData = [
-                            'user_name' =>  $user_name,
-                            'subject' => "New Ticket Assigned : # " . $ticket_id,
-                            'body' =>  "New Ticket Assigned to you at " . date("Y-m-d H:i:s") . ", please Check ...",
-                        ];
-                        if($ticket->brand_id == 1) {
-                            $from = 'vm.support@thetranslationgate.com';
-                        } elseif($ticket->brand_id == 2) {
-                            $from = 'vm.support@localizera.com';
-                        }elseif($ticket->brand_id == 3) {
-                            $from = 'vm.support@europelocalize.com';    
-                        }elseif($ticket->brand_id == 4) {
-                            $from = 'vm.support@afaq.com';
-                        }elseif($ticket->brand_id == 11) {
-                            $from = 'vm.support@columbuslang.com';
-                        }else{
-                            $from = 'vm.support@aixnexus.com';
-                        }
-                        Mail::to($toEmail)
-                            ->cc($ccEmail)
-                            ->send(
-                                (new TicketMail($mailData))->from($from, 'Support Team')
-                            );
-                    } catch (\Exception $e) {
-                        // \Log::error("Mail sending failed: " . $e->getMessage());
+                    $mailData = [
+                        'user_name' =>  $user_name,
+                        'subject' => "New Ticket Assigned : # " . $ticket_id,
+                        'body' =>  "New Ticket Assigned to you at " . date("Y-m-d H:i:s") . ", please Check ...",
+                    ];
+                    if ($ticket->brand_id == 1) {
+                        $from = 'vm.support@thetranslationgate.com';
+                    } elseif ($ticket->brand_id == 2) {
+                        $from = 'vm.support@localizera.com';
+                    } elseif ($ticket->brand_id == 3) {
+                        $from = 'vm.support@europelocalize.com';
+                    } elseif ($ticket->brand_id == 4) {
+                        $from = 'vm.support@afaq.com';
+                    } elseif ($ticket->brand_id == 11) {
+                        $from = 'vm.support@columbuslang.com';
+                    } else {
+                        $from = 'vm.support@aixnexus.com';
                     }
-
-                    return response()->json(['message' => 'Ticket Assigned Successfully', 'type' => 'success']);
+                    Mail::to($toEmail)
+                        ->cc($ccEmail)
+                        ->send(
+                            (new TicketMail($mailData))->from($from, 'Support Team')
+                        );
+                } catch (\Exception $e) {
+                    // \Log::error("Mail sending failed: " . $e->getMessage());
                 }
+
+                return response()->json(['message' => 'Ticket Assigned Successfully', 'type' => 'success']);
+            }
             // } else {
             //     return response()->json(['message' => 'Ticket Already Assigned, please Check', 'type' => 'error']);
             // }
