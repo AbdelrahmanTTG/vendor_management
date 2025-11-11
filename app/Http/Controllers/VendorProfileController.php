@@ -717,6 +717,26 @@ class VendorProfileController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        $email = $request->email ?? $vendor->email;
+        $brands = is_array($request->vendor_brands)
+            ? $request->vendor_brands
+            : explode(',', $request->vendor_brands);
+
+        $duplicate = Vendor::where('email', $email)
+            ->where('id', '!=', $vendor->id)
+            ->get()
+            ->filter(function ($v) use ($brands) {
+                $existingBrands = explode(',', $v->vendor_brands);
+                return count(array_intersect($brands, $existingBrands)) > 0;
+            })
+            ->first();
+
+        if ($duplicate) {
+            return response()->json([
+                'message' => 'This email is already registered for one of the selected brands.'
+            ], 409);
+        }
+
         $vendor->update($validator->validated());
 
         if ($request->has('mother_tongue_language') && is_array($request->mother_tongue_language)) {
@@ -794,6 +814,7 @@ class VendorProfileController extends Controller
             ]
         ], 200);
     }
+
     // public function updatePersonalInfo(Request $request)
     // {
     //     if (!$request->has('id')) {
@@ -2725,8 +2746,8 @@ class VendorProfileController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'vendor' => 'required|integer',
-            'subject' => 'required|integer',
-            'subject_main' => 'nullable|integer',
+            'subject' => 'nullable|integer',
+            'subject_main' => 'required|integer',
             'service' => 'required|integer',
             'task_type' => 'required|integer',
             'source_lang' => 'required|integer',
@@ -2869,8 +2890,8 @@ class VendorProfileController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer',
-            'subject' => 'required|integer',
-            'subject_main' => 'nullable|integer',
+            'subject' => 'nullable|integer',
+            'subject_main' => 'required|integer',
             'service' => 'required|integer',
             'task_type' => 'required|integer',
             'source_lang' => 'required|integer',
