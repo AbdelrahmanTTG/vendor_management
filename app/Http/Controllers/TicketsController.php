@@ -382,13 +382,14 @@ class TicketsController extends Controller
                 // send reply to requster   
                 // setup mail data              
                 $to = BrandUsers::select('email', 'user_name')->where('id', $ticket->created_by)->first();
+                $created_by_user_name = BrandUsers::select('user_name')->where('id', $data['created_by'])->first()->user_name;
                 $toEmail = $to->email;
                 $user_name = $to->user_name;
                 //end setup mail                 
                 $mailData = [
                     'user_name' =>  $user_name,
                     'subject' => "New Reply : # " . $ticket->id,
-                    'body' =>  "A new reply has already sent to your ticket, please check ..",
+                    'body' => "A new reply has been added to your ticket by $created_by_user_name. Please check it.",
                     'comment' =>  $request->comment,
                 ];
                 if ($ticket->brand_id == 1) {
@@ -565,7 +566,7 @@ class TicketsController extends Controller
         if ($ticket) {
             if (VmTicketTeamResponse::create($data)) {
                 $msg['type'] = "success";
-                $message = "Ticket Reply Added Successfully";
+               $message = "Current time (" . config('app.timezone') . "): " . Carbon::now();
             } else {
                 $msg['type'] = "error";
                 $message = "Error, Please Try Again!";
