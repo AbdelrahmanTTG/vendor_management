@@ -98,6 +98,10 @@ class VendorProfileController extends Controller
             'region' => ['id', 'name'],
             "timezone" => ['id', 'gmt'],
             'created_by' => ['id', 'user_name'],
+            'source_lang' => ['id', 'name'],
+            'target_lang' => ['id', 'name'],
+            'main_subject' => ['id', 'name'],
+            'sub_subject' => ['id', 'name'],
         ];
 
         $vendorColumns = Schema::getColumnListing('vendor');
@@ -106,7 +110,7 @@ class VendorProfileController extends Controller
         $relatedColumns = array_diff($formatArray, $vendorColumns);
         $relatedColumns = array_diff($relatedColumns, $vendorSheet);
 
-        // Handle created_by specifically - if it's in formatArray or queryParams, include it from vendor table
+        // Handle created_by specifically
         $includeCreatedBy = false;
         if (in_array('created_by', $formatArray)) {
             $includeCreatedBy = true;
@@ -116,15 +120,25 @@ class VendorProfileController extends Controller
         if ($request->has('queryParams') && is_array($request->queryParams)) {
             if (array_key_exists('created_by', $request->queryParams) && !empty($request->queryParams['created_by'])) {
                 $includeCreatedBy = true;
-                // Add to formatArray if not already there
                 if (!in_array('created_by', $formatArray)) {
                     $formatArray[] = 'created_by';
                 }
             }
         }
 
+        // Handle vendors_mother_tongue specifically
+        $includeMotherTongue = false;
+        $motherTongueColumn = null;
+        foreach ($formatArray as $column) {
+            if (strpos($column, 'vendors_mother_tongue') !== false) {
+                $includeMotherTongue = true;
+                $motherTongueColumn = $column;
+                break;
+            }
+        }
+
         $relatedColumns = array_filter($relatedColumns, function ($column) {
-            return $column !== 'priceList';
+            return $column !== 'priceList' && strpos($column, 'vendors_mother_tongue') === false;
         });
         $relatedColumns = array_values($relatedColumns);
 
@@ -132,7 +146,7 @@ class VendorProfileController extends Controller
         $intersectColumnsVendorSheet = array_intersect($formatArray, $vendorSheet);
         $mandatoryColumns = ['timezone', 'created_by'];
         $intersectColumns = array_unique(array_merge($intersectColumns, $mandatoryColumns));
-        // Ensure created_by is included in intersectColumns if needed
+
         if ($includeCreatedBy && !in_array('created_by', $intersectColumns)) {
             $intersectColumns[] = 'created_by';
         }
@@ -142,6 +156,13 @@ class VendorProfileController extends Controller
                 ->addSelect(DB::raw(implode(',', $intersectColumns)));
         } else {
             $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands');
+        }
+
+        // Add mother tongue relation if needed
+        if ($includeMotherTongue) {
+            $vendorsQuery->with(['motherTongues' => function ($query) {
+                $query->with('language:id,name');
+            }]);
         }
 
         if (in_array('priceList', $formatArray) || !empty($intersectColumnsVendorSheet)) {
@@ -157,7 +178,6 @@ class VendorProfileController extends Controller
                 ->with([
                     'vendor_sheet' => function ($query) use ($formatArray, $vendorSheet) {
                         $selectedColumns = array_intersect($formatArray, $vendorSheet);
-                        // Remove created_by from vendor_sheet selection to avoid conflict
                         $selectedColumns = array_diff($selectedColumns, ['created_by']);
 
                         if (empty($selectedColumns)) {
@@ -197,11 +217,26 @@ class VendorProfileController extends Controller
 
         $diffFormatArray = $formatArray;
         $formatArray = array_diff($formatArray, $vendorSheet);
-        // Don't remove created_by from formatArray if it should come from vendor table
+
         if ($includeCreatedBy && !in_array('created_by', $formatArray)) {
             $formatArray[] = 'created_by';
         }
+
         $formatArray = array_values($formatArray);
+        $formatArray = array_map(function ($column) {
+            if (strpos($column, '.') !== false) {
+                return explode('.', $column)[1];
+            }
+            return $column;
+        }, $formatArray);
+
+        foreach ($relationships as $relation => $columns) {
+            if (in_array($relation, $formatArray)) {
+                $vendorsQuery->with([$relation => function ($query) use ($columns) {
+                    $query->select($columns);
+                }]);
+            }
+        }
 
         if ($request->has('queryParams') && is_array($request->queryParams)) {
             $queryParams = $request->queryParams;
@@ -225,8 +260,36 @@ class VendorProfileController extends Controller
 
             foreach ($queryParams as $key => $val) {
                 if ($key !== 'filters' && !empty($val)) {
-                    // check vendor brands
                     if ($key === 'timezone_from' || $key === 'timezone_to') {
+                        continue;
+                    }
+
+                    // Handle vendors_mother_tongue.language_id filter
+                    if (strpos($key, 'vendors_mother_tongue') !== false) {
+                        $includeMotherTongue = true;
+                        if (!in_array('vendors_mother_tongue.language_id', $formatArray)) {
+                            $formatArray[] = 'vendors_mother_tongue.language_id';
+                        }
+
+                        $vendorsQuery->whereHas('motherTongues', function ($query) use ($val) {
+                            if (is_array($val)) {
+                                $query->where(function ($q) use ($val) {
+                                    foreach ($val as $k => $v) {
+                                        if ($k == 0) {
+                                            $q->where('language_id', '=', $v);
+                                        } else {
+                                            $q->orWhere('language_id', '=', $v);
+                                        }
+                                    }
+                                });
+                            } else {
+                                $query->where('language_id', '=', $val);
+                            }
+                        });
+
+                        $vendorsQuery->with(['motherTongues' => function ($query) {
+                            $query->with('language:id,name');
+                        }]);
                         continue;
                     }
 
@@ -236,9 +299,8 @@ class VendorProfileController extends Controller
                         }
                     } else {
                         if (!in_array($key, $formatArray)) {
-                            // For created_by, don't add it again if it's already selected from vendor table
                             if ($key === 'created_by' && $includeCreatedBy) {
-                                // It's already included in intersectColumns
+                                // Already included
                             } else {
                                 $vendorsQuery->addSelect($key);
                             }
@@ -246,18 +308,20 @@ class VendorProfileController extends Controller
                         }
                     }
 
-                    if (is_array($val)) {
-                        $vendorsQuery->where(function ($query) use ($key, $val) {
-                            foreach ($val as $k => $v) {
-                                if ($k == 0) {
-                                    $query->where($key, "like", "%" . $v . "%");
-                                } else {
-                                    $query->orWhere($key, "like", "%" . $v . "%");
+                    if (strpos($key, 'vendors_mother_tongue') === false) {
+                        if (is_array($val)) {
+                            $vendorsQuery->where(function ($query) use ($key, $val) {
+                                foreach ($val as $k => $v) {
+                                    if ($k == 0) {
+                                        $query->where($key, "like", "%" . $v . "%");
+                                    } else {
+                                        $query->orWhere($key, "like", "%" . $v . "%");
+                                    }
                                 }
-                            }
-                        });
-                    } else {
-                        $vendorsQuery->where($key, "like", "%" . $val . "%");
+                            });
+                        } else {
+                            $vendorsQuery->where($key, "like", "%" . $val . "%");
+                        }
                     }
 
                     if (array_key_exists($key, $relationships)) {
@@ -272,7 +336,39 @@ class VendorProfileController extends Controller
                 foreach ($queryParams['filters'] as $filter) {
                     if (method_exists(Vendor::class, $filter['table'])) {
                         $table = $filter['table'];
-                        if ($table === 'vendor_sheet') {
+
+                        // Handle vendors_mother_tongue filter
+                        if ($table === 'motherTongues' || $table === 'vendors_mother_tongue') {
+                            $includeMotherTongue = true;
+                            $vendorsQuery->whereHas('motherTongues', function ($query) use ($filter) {
+                                $query->where(function ($query) use ($filter) {
+                                    foreach ($filter['columns'] as $columnFilter) {
+                                        if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
+                                            $column = $columnFilter['column'];
+                                            $values = $columnFilter['value'];
+
+                                            if (count($values) > 1) {
+                                                $query->where(function ($query) use ($column, $values) {
+                                                    foreach ($values as $value) {
+                                                        $query->orWhere($column, '=', $value);
+                                                    }
+                                                });
+                                            } else {
+                                                $query->where($column, '=', $values[0]);
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+
+                            $vendorsQuery->with(['motherTongues' => function ($query) {
+                                $query->with('language:id,name');
+                            }]);
+
+                            if (!in_array('vendors_mother_tongue.language_id', $formatArray)) {
+                                $formatArray[] = 'vendors_mother_tongue.language_id';
+                            }
+                        } elseif ($table === 'vendor_sheet') {
                             $vendorsQuery->whereHas('vendor_sheet', function ($query) use ($filter) {
                                 $query->where(function ($query) use ($filter) {
                                     foreach ($filter['columns'] as $columnFilter) {
@@ -294,7 +390,6 @@ class VendorProfileController extends Controller
                                 });
                             });
                             $selectedColumnsRow = array_intersect($diffFormatArray, $vendorSheet);
-                            // Remove created_by from vendor_sheet columns
                             $selectedColumnsRow = array_diff($selectedColumnsRow, ['created_by']);
 
                             if (empty($selectedColumnsRow)) {
@@ -331,11 +426,9 @@ class VendorProfileController extends Controller
                                     }
                                 });
                                 $relatedColumns = array_column($filter['columns'], 'column');
-                                // Remove created_by and direct columns like rate from related columns
                                 $directVendorSheetColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "subject_main", "dialect_target", "sheet_brand"];
                                 $relatedColumns = array_diff($relatedColumns, ['created_by'], $directVendorSheetColumns);
                                 $mergedColumns = array_unique(array_merge($relatedColumns, $selectedColumnsRow));
-                                // Only include actual relationships in with()
                                 foreach ($mergedColumns as $relation) {
                                     if (method_exists($query->getModel(), $relation)) {
                                         $query->with([$relation]);
@@ -343,7 +436,6 @@ class VendorProfileController extends Controller
                                 }
                             }]);
                         } else {
-                            // Existing logic for other tables
                             $vendorsQuery->whereHas($table, function ($query) use ($filter) {
                                 $query->where(function ($query) use ($filter) {
                                     foreach ($filter['columns'] as $columnFilter) {
@@ -377,7 +469,7 @@ class VendorProfileController extends Controller
                             foreach ($filter['columns'] as $columnFilter) {
                                 if (!empty($columnFilter['column'])) {
                                     if ($columnFilter['column'] === 'created_by' && $includeCreatedBy) {
-                                        // Skip, already handled
+                                        // Skip
                                     } else {
                                         $formatArray[] = $columnFilter['column'];
                                     }
@@ -398,20 +490,6 @@ class VendorProfileController extends Controller
             }
         }
 
-        $formatArray = array_map(function ($column) {
-            if (strpos($column, '.') !== false) {
-                return explode('.', $column)[1];
-            }
-            return $column;
-        }, $formatArray);
-
-        foreach ($relationships as $relation => $columns) {
-            if (in_array($relation, $formatArray)) {
-                $vendorsQuery->with([$relation => function ($query) use ($columns) {
-                    $query->select($columns);
-                }]);
-            }
-        }
         $totalVendors = $vendorsQuery->count();
 
         if ($request->has('export') && $request->input('export') === true) {
@@ -444,17 +522,32 @@ class VendorProfileController extends Controller
         $vendors = $vendorsQuery->paginate($perPage);
         $tableKeys = array_column($queryParams['filters'] ?? [], 'table');
         $vendorsData = $vendors->toArray();
-        $flattenedVendors = array_map(function ($vendor) use ($tableKeys) {
+
+        $flattenedVendors = array_map(function ($vendor) use ($tableKeys, $includeMotherTongue) {
             foreach ($tableKeys as $table) {
                 if (isset($vendor[$table])) {
                     unset($vendor[$table]['vendor']);
                     unset($vendor[$table]['vendor_id']);
                 }
             }
+
+            // Handle mother tongue transformation with unified key name
+            if ($includeMotherTongue && isset($vendor['mother_tongues'])) {
+                $languageNames = array_map(function ($mt) {
+                    return $mt['language']['name'] ?? '';
+                }, $vendor['mother_tongues']);
+
+                $vendor['vendors_mother_tongue.language_id'] = implode(', ', $languageNames);
+                unset($vendor['mother_tongues']);
+            }
+
             return $this->flattenObject($vendor, $tableKeys);
         }, $vendorsData['data']);
-        $vendors->setCollection(collect($flattenedVendors));
 
+        $vendors->setCollection(collect($flattenedVendors));
+        $formatArray = array_values(array_filter($formatArray, function ($field) {
+            return $field !== 'language_id';
+        }));
         return response()->json([
             "vendors" => $vendors,
             "fields" => $formatArray,
@@ -686,12 +779,7 @@ class VendorProfileController extends Controller
             'contact_name' => 'sometimes|nullable|string',
             'legal_Name' => 'sometimes|nullable|string',
             'phone_number' => 'sometimes|required|string',
-            'email' => [
-                'sometimes',
-                'required',
-                'email',
-                Rule::unique('vendor', 'email')->ignore($vendor->id)
-            ],
+            'email' => 'sometimes|required|email', 
             'contact_linked_in' => 'sometimes|nullable|string',
             'contact_ProZ' => 'sometimes|nullable|string',
             'contact_other1' => 'sometimes|nullable|string',
@@ -717,24 +805,30 @@ class VendorProfileController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $email = $request->email ?? $vendor->email;
-        $brands = is_array($request->vendor_brands)
+        $newEmail = $request->email ?? $vendor->email;
+        $newBrands = is_array($request->vendor_brands)
             ? $request->vendor_brands
             : explode(',', $request->vendor_brands);
 
-        $duplicate = Vendor::where('email', $email)
-            ->where('id', '!=', $vendor->id)
-            ->get()
-            ->filter(function ($v) use ($brands) {
-                $existingBrands = explode(',', $v->vendor_brands);
-                return count(array_intersect($brands, $existingBrands)) > 0;
-            })
-            ->first();
+        $emailChanged = $request->has('email') && $newEmail !== $vendor->email;
+        $brandsChanged = $request->has('vendor_brands') &&
+            json_encode($newBrands) !== json_encode(explode(',', $vendor->vendor_brands));
 
-        if ($duplicate) {
-            return response()->json([
-                'message' => 'This email is already registered for one of the selected brands.'
-            ], 409);
+        if ($emailChanged || $brandsChanged) {
+            $duplicate = Vendor::where('email', $newEmail)
+                ->where('id', '!=', $vendor->id)
+                ->get()
+                ->filter(function ($v) use ($newBrands) {
+                    $existingBrands = explode(',', $v->vendor_brands);
+                    return count(array_intersect($newBrands, $existingBrands)) > 0;
+                })
+                ->first();
+
+            if ($duplicate) {
+                return response()->json([
+                    'message' => 'This email is already registered for one of the selected brands.'
+                ], 409);
+            }
         }
 
         $vendor->update($validator->validated());
@@ -814,6 +908,8 @@ class VendorProfileController extends Controller
             ]
         ], 200);
     }
+
+
 
     // public function updatePersonalInfo(Request $request)
     // {
@@ -2773,6 +2869,7 @@ class VendorProfileController extends Controller
         $data['dialect_target'] = $data['dialect_target'] ?? null;
         $data['currency'] = $data['currency'] ?? null;
         $data['subject_main'] = $data['subject_main'] ?? null;
+        $data['subject'] = $data['subject'] ?? null;
 
         $vendor = Vendor::find($data['vendor']);
         if (!$vendor) {
@@ -2919,7 +3016,7 @@ class VendorProfileController extends Controller
         $data['dialect_target'] = $data['dialect_target'] ?? null;
         $data['currency'] = $data['currency'] ?? null;
         $data['subject_main'] = $data['subject_main'] ?? null;
-
+        $data['subject'] = $data['subject'] ?? null;
         $vendor = Vendor::find($vendorSheet->vendor);
         if ($vendor) {
             $data['sheet_brand'] = $vendor->vendor_brands ?? null;

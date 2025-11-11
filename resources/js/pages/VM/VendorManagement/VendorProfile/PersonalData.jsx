@@ -304,24 +304,35 @@ const PersonalData = React.memo((props) => {
     //     : formData.vendor_brands;
 
     try {
-      const response = await axiosClient.post("updatePersonalInformation", formData);
-      basictoaster("successToast", response.data.message);
-      props.onDataSend(response.data.vendor.vendor)
-    } catch (err) {
-      const response = err.response;
-      if (response && response.data) {
-        const errors = response.data;
-        Object.keys(errors).forEach(key => {
-          const messages = errors[key];
+  const response = await axiosClient.post("updatePersonalInformation", formData);
+  basictoaster("successToast", response.data.message);
+  props.onDataSend(response.data.vendor.vendor)
+} catch (err) {
+  const response = err.response;
+  if (response && response.data) {
+    if (response.data.message) {
+      basictoaster("dangerToast", response.data.message);
+    } 
+    else {
+      const errors = response.data;
+      Object.keys(errors).forEach(key => {
+        const messages = errors[key];
+        if (Array.isArray(messages)) {
           messages.forEach(message => {
             basictoaster("dangerToast", message);
           });
-        });
-      }
-      setIsSubmitting(false)
-    } finally {
-      setSub(false);
+        } else {
+          basictoaster("dangerToast", messages);
+        }
+      });
     }
+  } else {
+    basictoaster("dangerToast", "An error occurred. Please try again.");
+  }
+  setIsSubmitting(false)
+} finally {
+  setSub(false);
+}
   };
 
   const onError = (errors) => {

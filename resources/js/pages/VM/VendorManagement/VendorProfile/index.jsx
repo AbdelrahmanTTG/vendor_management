@@ -96,6 +96,7 @@ const Vendor = (props) => {
     const [optionsUnit, setOptionsUnit] = useState([]);
     const [optionsMain, setOptionsMain] = useState([]);
     const [optionsSub, setOptionsSub] = useState([]);
+    const [optionsMo, setoptionsMo] = useState([]);
     const [optionsLD, setoptionsLD] = useState([]);
     const [optionsMaj, setoptionsMaj] = useState([]);
     const [queryParams, setQueryParams] = useState(null);
@@ -241,6 +242,7 @@ const Vendor = (props) => {
                 { value: "vendor_brands", label: "Brands" },
                 { value: "profile_status", label: "Profile Status" },
                 { value: "created_by", label: "Created by" },
+                { value: "mother_tongue", label: "Mother Tongue" },
             ],
         },
         {
@@ -341,6 +343,7 @@ const Vendor = (props) => {
         const BankArr = ["bank_name"];
         const BillingArr = ["billing_status"];
         const WalletArr = ["method"];
+        const motherTongueArr = ["language_id"];
 
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
@@ -351,6 +354,7 @@ const Vendor = (props) => {
         const Bank = [];
         const Billing = [];
         const Wallet = [];
+        const MotherTongue = [];
 
         const data = {};
         const keysToDelete = [];
@@ -435,6 +439,17 @@ const Vendor = (props) => {
                 }
                 keysToDelete.push(key);
             }
+            if (motherTongueArr.includes(key)) {
+                const existingFilter = MotherTongue.find(
+                    (filter) => filter.column === key
+                );
+                if (existingFilter) {
+                    existingFilter.value.push(value);
+                } else {
+                    MotherTongue.push({ column: key, value: [value] });
+                }
+                keysToDelete.push(key);
+            }
         }
         keysToDelete.forEach((key) => {
             formData.delete(key);
@@ -465,6 +480,9 @@ const Vendor = (props) => {
                     : undefined,
                 Wallet.length > 0
                     ? { table: "wallets_payment_methods", columns: Wallet }
+                    : undefined,
+                MotherTongue.length > 0 
+                    ? { table: "vendors_mother_tongue", columns: MotherTongue }
                     : undefined,
             ].filter(Boolean),
         };
@@ -693,6 +711,7 @@ const Vendor = (props) => {
             sheet_brand: "Sheet Brand",
             profile_status: "Profile status",
             created_by: "Created by",
+            "vendors_mother_tongue.language_id": "Mother tongue",
         };
         format?.flatMap(
             (element) =>
@@ -962,6 +981,7 @@ const Vendor = (props) => {
             "vendorTest.target_lang": "Target language",
             "vendorTest.main_subject": "Main-Subject Matter",
             "vendorTest.sub_subject": "Sub–Subject Matter",
+            "vendors_mother_tongue.language_id": "Mother tongue",
             sheet_brand: "Sheet Brand",
             profile_status: "Profile status",
             created_by: "Created by",
@@ -2949,6 +2969,39 @@ const Vendor = (props) => {
                                                 </Col>
                                             )}
                                             {selectedSearchCol.indexOf(
+                                                "mother_tongue"
+                                            ) > -1 && (
+                                                <Col md="3">
+                                                    <FormGroup>
+                                                        <Label
+                                                            className="col-form-label-sm f-12"
+                                                            htmlFor="name"
+                                                        >
+                                                            {"Mother Tongue "}
+                                                        </Label>
+                                                        <Select
+                                                            name="vendors_mother_tongue.language_id"
+                                                            id="vendors_mother_tongue.language_id"
+                                                            required
+                                                            options={optionsMo}
+                                                            className="js-example-basic-single"
+                                                            onInputChange={(
+                                                                inputValue
+                                                            ) =>
+                                                                handleInputChange(
+                                                                    inputValue,
+                                                                    "languages",
+                                                                    "mother_tongue",
+                                                                    setoptionsMo,
+                                                                    optionsMo
+                                                                )
+                                                            }
+                                                            isMulti
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                            )}
+                                            {selectedSearchCol.indexOf(
                                                 "test_type"
                                             ) > -1 && (
                                                 <Col md="3">
@@ -3297,6 +3350,10 @@ const Vendor = (props) => {
                                                 {
                                                     value: "email",
                                                     label: "Email",
+                                                },
+                                                {
+                                                    value: "vendors_mother_tongue.language_id",
+                                                    label: "Mother tongue",
                                                 },
                                                 {
                                                     value: "phone_number",
