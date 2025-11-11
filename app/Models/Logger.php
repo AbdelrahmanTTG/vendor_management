@@ -49,7 +49,7 @@ class Logger extends Model
              $logger['transaction_id'] = $transaction_id;
              $logger['type'] = 1;
              $logger['created_by'] = $created_by;
-             $logger['created_at'] = date("Y-m-d H:i:s");
+             $logger['created_at'] = now();
              $inserted_logger = LoggerMaster::create($logger);             
              $logger['master_id'] =  $inserted_logger->id;
               self::create($logger);
