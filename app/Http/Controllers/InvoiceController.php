@@ -129,8 +129,8 @@ class InvoiceController extends Controller
                 $msg['type'] = "error";
                 $message = "Please enter either full Bank Account details or full Wallet details!";
             } else {
-                $data['invoice_created_at'] =date("Y-m-d H:i:s");
-                $data['invoice_date'] =date("Y-m-d H:i:s");
+                $data['invoice_created_at'] =now();
+                $data['invoice_date'] =now();
                 $data['verified'] = 3;
                 $jobs = $request->jobs;
 
@@ -162,7 +162,7 @@ class InvoiceController extends Controller
                 $inv['vendor_id'] = $request->vendor;
                 $inv['payment_method'] = $request->payment_method;
                 $inv['total'] = $request->total;
-                $inv['invoice_date'] =date("Y-m-d H:i:s");
+                $inv['invoice_date'] =now();
                 $inv['billing_legal_name'] = $billingData->billing_legal_name ?? '';
                 $inv['billing_address'] = $billingData->billing_address ?? '';
                 $inv['billing_currency'] = $billingData->billing_currency ?? '';

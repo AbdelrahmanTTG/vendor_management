@@ -340,7 +340,7 @@ class TicketsController extends Controller
         $time['ticket'] = $ticket;
         $time['assign_to'] = $assign_to;
         // $time['created_by'] = $user;
-        $time['created_at'] = date("Y-m-d H:i:s");
+        $time['created_at'] = now();
         VmTicketTime::create($time);
     }
     public function sendTicketResponse(Request $request)
@@ -354,7 +354,7 @@ class TicketsController extends Controller
         $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
         $data['response'] = $request->comment;
         $data['ticket'] = $ticket_id;
-        $data['created_at'] = date("Y-m-d H:i:s");
+        $data['created_at'] = now();
         if ($ticket) {
             if ($request->file('file') != null) {
                 $file = $request->file('file');
@@ -430,7 +430,7 @@ class TicketsController extends Controller
     //     $data['created_by'] = Crypt::decrypt($request->user);
     //     $data['response'] = $request->comment;
     //     $data['ticket'] = $request->id;
-    //     $data['created_at'] =date("Y-m-d H:i:s");
+    //     $data['created_at'] =now();
     //     $ticket = VmTicket::find($data['ticket']);
 
     //     if ($ticket) {
@@ -561,7 +561,7 @@ class TicketsController extends Controller
         $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
         $data['response'] = $request->comment;
         $data['ticket'] = $ticket_id;
-        $data['created_at'] = date("Y-m-d H:i:s");
+        $data['created_at'] = now();
         if ($ticket) {
             if (VmTicketTeamResponse::create($data)) {
                 $msg['type'] = "success";
@@ -580,7 +580,7 @@ class TicketsController extends Controller
     //     $user = $data['created_by'] = Crypt::decrypt($request->user);
     //     $ticket_id = $data['ticket'] = $request->ticket;
     //     $status = $request->status;
-    //     // $data['created_at'] =date("Y-m-d H:i:s");
+    //     // $data['created_at'] =now();
     //     $ticket = VmTicket::find($data['ticket']);
     //     $message = '';
     //     if ($ticket) {
