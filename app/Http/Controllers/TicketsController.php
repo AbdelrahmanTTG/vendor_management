@@ -566,7 +566,7 @@ class TicketsController extends Controller
         if ($ticket) {
             if (VmTicketTeamResponse::create($data)) {
                 $msg['type'] = "success";
-               $message = "Current time (" . config('app.timezone') . "): " . Carbon::now();
+                $message = "Ticket Reply Added Successfully";
             } else {
                 $msg['type'] = "error";
                 $message = "Error, Please Try Again!";
