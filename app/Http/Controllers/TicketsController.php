@@ -330,10 +330,10 @@ class TicketsController extends Controller
     }
     public function addTicketTimeStatus($ticket, $user, $status, $assign_to)
     {
-        $ticket = VmTicket::find($ticket);
+        $ticketRow = VmTicket::find($ticket);
         $created_by_master = BrandUsers::select('master_user_id')->where('id', $user)->first();
         $created_by_ticket_brand = BrandUsers::select('id')->where('master_user_id', $created_by_master->master_user_id)
-            ->where('brand', $ticket->brand_id)->first();
+            ->where('brand', $ticketRow->brand_id)->first();
         $data['created_by'] = $created_by_ticket_brand->id ?? $user;
 
         $time['status'] = $status;
