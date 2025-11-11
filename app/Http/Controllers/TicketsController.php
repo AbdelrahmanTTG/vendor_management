@@ -334,7 +334,7 @@ class TicketsController extends Controller
         $created_by_master = BrandUsers::select('master_user_id')->where('id', $user)->first();
         $created_by_ticket_brand = BrandUsers::select('id')->where('master_user_id', $created_by_master->master_user_id)
             ->where('brand', $ticketRow->brand_id)->first();
-        $data['created_by'] = $created_by_ticket_brand->id ?? $user;
+        $time['created_by'] = $created_by_ticket_brand->id ?? $user;
 
         $time['status'] = $status;
         $time['ticket'] = $ticket;
