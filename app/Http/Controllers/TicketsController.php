@@ -330,11 +330,17 @@ class TicketsController extends Controller
     }
     public function addTicketTimeStatus($ticket, $user, $status, $assign_to)
     {
+        $ticket = VmTicket::find($ticket);
+        $created_by_master = BrandUsers::select('master_user_id')->where('id', $user)->first();
+        $created_by_ticket_brand = BrandUsers::select('id')->where('master_user_id', $created_by_master->master_user_id)
+            ->where('brand', $ticket->brand_id)->first();
+        $data['created_by'] = $created_by_ticket_brand->id ?? $user;
+
         $time['status'] = $status;
         $time['ticket'] = $ticket;
         $time['assign_to'] = $assign_to;
-        $time['created_by'] = $user;
-        $time['created_at'] =date("Y-m-d H:i:s");
+        // $time['created_by'] = $user;
+        $time['created_at'] = date("Y-m-d H:i:s");
         VmTicketTime::create($time);
     }
     public function sendTicketResponse(Request $request)
@@ -348,7 +354,7 @@ class TicketsController extends Controller
         $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
         $data['response'] = $request->comment;
         $data['ticket'] = $ticket_id;
-        $data['created_at'] =date("Y-m-d H:i:s");
+        $data['created_at'] = date("Y-m-d H:i:s");
         if ($ticket) {
             if ($request->file('file') != null) {
                 $file = $request->file('file');
@@ -555,9 +561,9 @@ class TicketsController extends Controller
         $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
         $data['response'] = $request->comment;
         $data['ticket'] = $ticket_id;
-        $data['created_at'] =date("Y-m-d H:i:s");
+        $data['created_at'] = date("Y-m-d H:i:s");
         if ($ticket) {
-            if (VmTicketTeamResponse::create($data)) {              
+            if (VmTicketTeamResponse::create($data)) {
                 $msg['type'] = "success";
                 $message = "Ticket Reply Added Successfully";
             } else {
