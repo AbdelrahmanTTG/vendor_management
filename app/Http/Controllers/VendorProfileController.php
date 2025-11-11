@@ -2800,7 +2800,7 @@ class VendorProfileController extends Controller
 
         $data['sheet_brand'] = $vendor->vendor_brands ?? null;
         $data['created_by'] = $userId;
-        $data['created_at'] = now();
+        $data['created_at'] =date("Y-m-d H:i:s");
 
         $vendorSheet = VendorSheet::create($data);
 
@@ -2925,7 +2925,7 @@ class VendorProfileController extends Controller
             $data['sheet_brand'] = $vendor->vendor_brands ?? null;
         }
         $data['updated_by'] = $userId;
-        $data['updated_at'] = now();
+        $data['updated_at'] =date("Y-m-d H:i:s");
 
         $vendorSheet->update($data);
 

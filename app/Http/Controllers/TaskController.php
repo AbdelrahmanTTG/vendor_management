@@ -260,7 +260,7 @@ class TaskController extends Controller
         $data['task'] =  $request->task_id;
         $data['from'] = 2;
         $data['created_by'] = $request->vendor;
-        $data['created_at'] = now();
+        $data['created_at'] =date("Y-m-d H:i:s");
         $task = Task::find($request->task_id);
         // echo $message;
         if (TaskConversation::create($data)) {
@@ -495,12 +495,12 @@ class TaskController extends Controller
                         $dataEV['project_id'] = $offer->job->project_id;
                         $dataEV['job_id'] = $offer->job_id;
                         $dataEV['vendor_id'] = $request->vendor;
-                        $dataEV['vendor_ev_created_at'] = now();
+                        $dataEV['vendor_ev_created_at'] =date("Y-m-d H:i:s");
                         DB::table('task_evaluation')->insert($dataEV);
                     } else {
                         // do edit 
                         if ($task_ev->vendor_ev_type == null)
-                            $dataEV['vendor_ev_created_at'] = now();
+                            $dataEV['vendor_ev_created_at'] =date("Y-m-d H:i:s");
                         Logger::addToLoggerUpdate('task_evaluation', 'task_id', $request->task_id, $request->vendor);
 
                         DB::table('task_evaluation')->where('task_id', $request->task_id)
@@ -599,7 +599,7 @@ class TaskController extends Controller
         $log_data['task'] = $id;
         $log_data['status'] = $status;
         $log_data['created_by'] = $user;
-        $log_data['created_at'] = now();
+        $log_data['created_at'] =date("Y-m-d H:i:s");
         TaskLog::create($log_data);
     }
 }
