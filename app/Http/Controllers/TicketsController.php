@@ -241,12 +241,19 @@ class TicketsController extends Controller
         return response()->json(["Total" => $total]);
     }
 
-    public function getPMSalesData()
+    // public function getPMSalesData()
+    // {
+    //     $users = BrandUsers::SelectPMSalesData();
+    //     return response()->json($users);
+    // }
+    public function getPMSalesData(Request $request)
     {
-        $users = BrandUsers::SelectPMSalesData();
+        $search = $request->input('search');  
+        $perPage = 5;                        
+        $users = BrandUsers::SelectPMSalesData($search, $perPage);
+
         return response()->json($users);
     }
-
     public function getTicketData(Request $request)
     {
         $user = Crypt::decrypt($request->user);

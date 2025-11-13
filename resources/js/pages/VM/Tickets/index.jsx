@@ -93,31 +93,41 @@ const TicketsList = (props) => {
         }
 
     };
-    const handelingSelectUsers = async () => {
-        try {
-            setLoading(true);
-            const { data } = await axiosClient.post("getPMSalesData");
-            const formattedOptions = data.map(item => ({
-                value: item.id,
-                label: item.user_name,
-            }));
+   const handelingSelectUsers = async (search = "", page = 1) => {
+       try {
+           setLoading(true);
 
-            setOptionsU(formattedOptions);
+           const { data } = await axiosClient.get("getPMSalesData", {
+               params: { search, page },
+           });
 
-        } catch (err) {
-            const response = err.response;
-            if (response && response.status === 422) {
-                setErrorMessage(response.data.errors);
-            } else if (response && response.status === 401) {
-                setErrorMessage(response.data.message);
-            } else {
-                setErrorMessage("An unexpected error occurred.");
-            }
-        } finally {
-            setLoading(false);
-        }
+           const formattedOptions = (data.data || [])
+               .filter(
+                   (item) =>
+                       typeof item.user_name === "string" &&
+                       item.user_name.trim() !== ""
+               )
+               .map((item) => ({
+                   value: item.id,
+                   label: item.user_name,
+               }));
 
-    };
+           setOptionsU(formattedOptions);
+       } catch (err) {
+           const response = err.response;
+           if (response && response.status === 422) {
+               setErrorMessage(response.data.errors);
+           } else if (response && response.status === 401) {
+               setErrorMessage(response.data.message);
+           } else {
+               setErrorMessage("An unexpected error occurred.");
+           }
+       } finally {
+           setLoading(false);
+       }
+   };
+
+
     useEffect(() => {
         handelingSelect("services", setOptionsS, "service");
         handelingSelect("languages", setOptionsSL, "source_lang");
@@ -127,7 +137,7 @@ const TicketsList = (props) => {
         handelingSelect("task_type", setOptionsTY, "task_type");
         handelingSelect("regions", setOptionsR, "region");
         handelingSelect("division", setOptionsD, "division");
-        handelingSelectUsers();
+        handelingSelectUsers("", 1);
         try {
             axiosClient.post("getTicketsTotal").then(({ data }) => {
                 setTotalCount(data?.Total);
@@ -977,8 +987,28 @@ const TicketsList = (props) => {
                                                             id="created_by"
                                                             required
                                                             options={optionsU}
-                                                            className="js-example-basic-single "
+                                                            className="js-example-basic-single"
                                                             isMulti
+                                                            isLoading={loading}
+                                                            placeholder="Search requester..."
+                                                            noOptionsMessage={() =>
+                                                                "No users found"
+                                                            }
+                                                            onInputChange={(
+                                                                inputValue,
+                                                                { action }
+                                                            ) => {
+                                                                if (
+                                                                    action ===
+                                                                        "input-change" &&
+                                                                    typeof inputValue ===
+                                                                        "string"
+                                                                ) {
+                                                                    handelingSelectUsers(
+                                                                        inputValue
+                                                                    );
+                                                                }
+                                                            }}
                                                         />
                                                     </FormGroup>
                                                 </Col>
