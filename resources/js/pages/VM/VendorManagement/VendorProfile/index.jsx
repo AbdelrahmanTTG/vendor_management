@@ -844,15 +844,12 @@ const Vendor = (props) => {
         const headersArray = ["id", ...exportEx[0]];
         worksheet.columns = headersArray.map((key) => {
             return {
-                header: key
-                    .replace(/_/g, " ")
-                    .split(" ")
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(" "),
+                header: formatString(key),  
                 key: key,
                 width: 20,
             };
         });
+
         worksheet.mergeCells(
             "A1:" + String.fromCharCode(65 + headersArray.length - 1) + "1"
         );
@@ -865,8 +862,9 @@ const Vendor = (props) => {
 
         const headerRow = worksheet.getRow(2);
         headersArray.forEach((header, index) => {
-            headerRow.getCell(index + 1).value = header;
+            headerRow.getCell(index + 1).value = formatString(header);
         });
+
         headerRow.eachCell((cell) => {
             cell.fill = {
                 type: "pattern",
