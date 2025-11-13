@@ -25,7 +25,7 @@ class AdminController extends Controller
     {
         $departments = Department::select('id', 'name')->get();
         return response()->json($departments);
-    }
+    } 
     public function getEmployees(Request $request)
     {
         $request->validate([
