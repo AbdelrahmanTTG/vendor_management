@@ -340,7 +340,7 @@ class TicketsController extends Controller
         $time['ticket'] = $ticket;
         $time['assign_to'] = $assign_to;
         // $time['created_by'] = $user;
-        $time['created_at'] = date("Y-m-d H:i:s");
+        $time['created_at'] = now();
         VmTicketTime::create($time);
     }
     public function sendTicketResponse(Request $request)
@@ -354,7 +354,7 @@ class TicketsController extends Controller
         $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
         $data['response'] = $request->comment;
         $data['ticket'] = $ticket_id;
-        $data['created_at'] = date("Y-m-d H:i:s");
+        $data['created_at'] = now();
         if ($ticket) {
             if ($request->file('file') != null) {
                 $file = $request->file('file');
@@ -382,13 +382,14 @@ class TicketsController extends Controller
                 // send reply to requster   
                 // setup mail data              
                 $to = BrandUsers::select('email', 'user_name')->where('id', $ticket->created_by)->first();
+                $created_by_user_name = BrandUsers::select('user_name')->where('id', $data['created_by'])->first()->user_name;
                 $toEmail = $to->email;
                 $user_name = $to->user_name;
                 //end setup mail                 
                 $mailData = [
                     'user_name' =>  $user_name,
                     'subject' => "New Reply : # " . $ticket->id,
-                    'body' =>  "A new reply has already sent to your ticket, please check ..",
+                    'body' => "A new reply has been added to your ticket by $created_by_user_name. Please check it.",
                     'comment' =>  $request->comment,
                 ];
                 if ($ticket->brand_id == 1) {
@@ -430,7 +431,7 @@ class TicketsController extends Controller
     //     $data['created_by'] = Crypt::decrypt($request->user);
     //     $data['response'] = $request->comment;
     //     $data['ticket'] = $request->id;
-    //     $data['created_at'] =date("Y-m-d H:i:s");
+    //     $data['created_at'] =now();
     //     $ticket = VmTicket::find($data['ticket']);
 
     //     if ($ticket) {
@@ -561,7 +562,7 @@ class TicketsController extends Controller
         $data['created_by'] = $created_by_ticket_brand->id ?? $created_by;
         $data['response'] = $request->comment;
         $data['ticket'] = $ticket_id;
-        $data['created_at'] = date("Y-m-d H:i:s");
+        $data['created_at'] = now();
         if ($ticket) {
             if (VmTicketTeamResponse::create($data)) {
                 $msg['type'] = "success";
@@ -580,7 +581,7 @@ class TicketsController extends Controller
     //     $user = $data['created_by'] = Crypt::decrypt($request->user);
     //     $ticket_id = $data['ticket'] = $request->ticket;
     //     $status = $request->status;
-    //     // $data['created_at'] =date("Y-m-d H:i:s");
+    //     // $data['created_at'] =now();
     //     $ticket = VmTicket::find($data['ticket']);
     //     $message = '';
     //     if ($ticket) {
