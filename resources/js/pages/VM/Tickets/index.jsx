@@ -1216,44 +1216,62 @@ const TicketsList = (props) => {
                                             tickets.map((item, index) => (
                                                 <tr key={index}>
                                                     {fields.map(
-                                                        (field, fieldIndex) => (
-                                                            <td
-                                                                key={fieldIndex}
-                                                            >
-                                                                {field ===
+                                                        (field, fieldIndex) => {
+                                                            let cellContent =
+                                                                item[field];
+
+                                                            const getStatusColor =
+                                                                (status) => {
+                                                                    switch (
+                                                                        status
+                                                                    ) {
+                                                                        case "New":
+                                                                            return {
+                                                                                backgroundColor:
+                                                                                    "#f5f5f5",
+                                                                                color: "#333",
+                                                                            }; 
+                                                                        case "Opened":
+                                                                            return {
+                                                                                backgroundColor:
+                                                                                    "#d4edda",
+                                                                                color: "#155724",
+                                                                            }; 
+                                                                        case "Rejected":
+                                                                            return {
+                                                                                backgroundColor:
+                                                                                    "#fff3cd",
+                                                                                color: "#856404",
+                                                                            }; 
+                                                                        default:
+                                                                            return {
+                                                                                backgroundColor:
+                                                                                    "#e2e3e5",
+                                                                                color: "#383d41",
+                                                                            }; 
+                                                                    }
+                                                                };
+
+                                                            if (
+                                                                field ===
+                                                                    "status" ||
+                                                                field ===
                                                                     "id" ||
                                                                 field ===
-                                                                    "ticket_id" ? (
-                                                                    <a
-                                                                        href={`/vm/ViewTicket?data=${encodeURIComponent(
-                                                                            encryptData(
-                                                                                item
-                                                                            )
-                                                                        )}`}
-                                                                        onClick={(
-                                                                            e
-                                                                        ) => {
-                                                                            if (
-                                                                                e.button ===
-                                                                                    1 ||
-                                                                                e.ctrlKey ||
-                                                                                e.metaKey
-                                                                            )
-                                                                                return;
-                                                                            e.preventDefault();
-                                                                            navigate(
-                                                                                `/vm/ViewTicket?data=${encodeURIComponent(
-                                                                                    encryptData(
-                                                                                        item
-                                                                                    )
-                                                                                )}`
-                                                                            );
-                                                                        }}
+                                                                    "ticket_id"
+                                                            ) {
+                                                                cellContent = (
+                                                                    <span
                                                                         style={{
-                                                                            textDecoration:
-                                                                                "underline",
-                                                                            color: "#007bff",
-                                                                            cursor: "pointer",
+                                                                            ...getStatusColor(
+                                                                                item.status
+                                                                            ),
+                                                                            padding:
+                                                                                "4px 8px",
+                                                                            borderRadius:
+                                                                                "4px",
+                                                                            display:
+                                                                                "inline-block",
                                                                         }}
                                                                     >
                                                                         {typeof item[
@@ -1276,24 +1294,36 @@ const TicketsList = (props) => {
                                                                             : item[
                                                                                   field
                                                                               ]}
-                                                                    </a>
-                                                                ) : typeof item[
-                                                                      field
-                                                                  ] ===
-                                                                      "object" &&
-                                                                  item[
-                                                                      field
-                                                                  ] !== null ? (
+                                                                    </span>
+                                                                );
+                                                            } else if (
+                                                                typeof item[
+                                                                    field
+                                                                ] ===
+                                                                    "object" &&
+                                                                item[field] !==
+                                                                    null
+                                                            ) {
+                                                                cellContent =
                                                                     item[field]
                                                                         .name ||
                                                                     item[field]
                                                                         .user_name ||
-                                                                    "No Name"
-                                                                ) : (
-                                                                    item[field]
-                                                                )}
-                                                            </td>
-                                                        )
+                                                                    "No Name";
+                                                            }
+
+                                                            return (
+                                                                <td
+                                                                    key={
+                                                                        fieldIndex
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        cellContent
+                                                                    }
+                                                                </td>
+                                                            );
+                                                        }
                                                     )}
                                                     <td>
                                                         <a

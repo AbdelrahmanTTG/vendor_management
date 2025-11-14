@@ -14,6 +14,7 @@ class VmCodeTableController extends Controller
             'table' => 'required|string',
             'per_page' => 'sometimes|integer|min:1',
             'columns' => 'required|array|min:1',
+            'export' => 'sometimes|boolean', 
         ]);
 
         if ($validator->fails()) {
@@ -24,6 +25,7 @@ class VmCodeTableController extends Controller
         }
 
         $table = $request->input('table');
+        $isExport = $request->input('export', false);
 
         if (!Schema::hasTable($table)) {
             return response()->json([
@@ -35,7 +37,6 @@ class VmCodeTableController extends Controller
         $related = $request->input('related');
         $columns = $request->input('columns');
 
-        // Apply query parameters filter (if provided)
         if ($related) {
             $relatedList = isset($related[0]) ? $related : [$related];
 
@@ -51,7 +52,6 @@ class VmCodeTableController extends Controller
                 $foreignKey = $rel['foreign_key'];
                 $primaryKey = $rel['primary_key'];
 
-                // LEFT JOIN
                 $data->leftJoin(
                     $relatedTable,
                     $table . '.' . $foreignKey,
@@ -97,6 +97,17 @@ class VmCodeTableController extends Controller
                 }
             }
 
+            if ($isExport) {
+                $exportData = $data->get();
+                $exportData = $exportData->map(function ($item) use ($relatedList) {
+                    foreach ($relatedList as $rel) {
+                        $key = $rel['foreign_key'];
+                        $item->$key = json_decode($item->$key);
+                    }
+                    return $item;
+                });
+            }
+
             $data = $data->paginate($perPage);
 
             $data->map(function ($item) use ($relatedList) {
@@ -107,7 +118,6 @@ class VmCodeTableController extends Controller
                 return $item;
             });
         } else {
-         
             $data = DB::table($table);
 
             if ($request->has('queryParams') && is_array($request->queryParams)) {
@@ -141,10 +151,14 @@ class VmCodeTableController extends Controller
                 }
             }
 
+            if ($isExport) {
+                $exportData = $data->select($columns)->get();
+            }
+
             $data = $data->select($columns)->paginate($perPage);
         }
 
-        return response()->json([
+        $response = [
             'data' => $data->items(),
             'current_page' => $data->currentPage(),
             'last_page' => $data->lastPage(),
@@ -152,7 +166,13 @@ class VmCodeTableController extends Controller
             'total' => $data->total(),
             'next_page_url' => $data->nextPageUrl(),
             'prev_page_url' => $data->previousPageUrl(),
-        ], 200);
+        ];
+
+        if ($isExport) {
+            $response['export_data'] = $exportData;
+        }
+
+        return response()->json($response, 200);
     }
 
 }

@@ -88,11 +88,19 @@ const ResponseModal = (props) => {
                                 name="comment"
                                 editor={ClassicEditor}
                                 data={commentInput}
-                                onChange={(e, editor) => {
-                                    const data = editor.getData();
-                                    setCommentInput(data);
+                                onChange={(e, editor) =>
+                                    setCommentInput(editor.getData())
+                                }
+                                onReady={(editor) => {
+                                    editor.ui.view.editable.element.style.minHeight =
+                                        "200px";
                                 }}
                             />
+                          <style>{`
+                        .ck-editor__editable_inline {
+                        min-height: 200px;
+                        }
+                    `}</style>
                         </FormGroup>
                     </Col>
                 </Row>
@@ -100,7 +108,7 @@ const ResponseModal = (props) => {
                     <Col>
                         <FormGroup className="row">
                             <Label className="col-sm-3 col-form-label">
-                                {"UploadFile"}
+                                {"Upload File"}
                             </Label>
                             <Col sm="9">
                                 <Input

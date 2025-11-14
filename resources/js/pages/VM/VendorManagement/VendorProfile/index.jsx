@@ -107,7 +107,7 @@ const Vendor = (props) => {
     const [progress, setProgress] = useState(0);
     const [optionsVB, setOptionsVB] = useState([]);
     const [openId, setOpenId] = useState(null);
-
+    const [perPage, setPerPage] = useState(50);
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     };
@@ -481,7 +481,7 @@ const Vendor = (props) => {
                 Wallet.length > 0
                     ? { table: "wallets_payment_methods", columns: Wallet }
                     : undefined,
-                MotherTongue.length > 0 
+                MotherTongue.length > 0
                     ? { table: "vendors_mother_tongue", columns: MotherTongue }
                     : undefined,
             ].filter(Boolean),
@@ -520,42 +520,45 @@ const Vendor = (props) => {
         key: "id",
         direction: "asc",
     });
-    const fetchData = useCallback(async (ex) => {
-        // console.log(props.permissions?.view)
-        const payload = {
-            per_page: 10,
-            page: currentPage,
-            queryParams: queryParams,
-            sortBy: sortConfig.key,
-            sortDirection: sortConfig.direction,
-            table: "vendors",
-            export: ex,
-            view: props.permissions?.view,
-        };
-        try {
-            setLoading2(true);
-            const { data } = await axiosClient.post("Vendors", payload);
-
-            setVendors(data.vendors.data);
-            setFields(data.fields);
-            setFormats(data.formats);
-            setTotalPages(data.vendors.last_page);
-            setTotalVendors(data.totalVendors);
-
-            if (data.AllVendors) {
-                exportToExcel(data.AllVendors);
-                setProgress(50);
+    const fetchData = useCallback(
+        async (ex) => {
+            const payload = {
+                per_page: perPage, 
+                page: currentPage,
+                queryParams: queryParams,
+                sortBy: sortConfig.key,
+                sortDirection: sortConfig.direction,
+                table: "vendors",
+                export: ex,
+                view: props.permissions?.view,
+            };
+            try {
+                setLoading2(true);
+                const { data } = await axiosClient.post("Vendors", payload);
+                setVendors(data.vendors.data);
+                setFields(data.fields);
+                setFormats(data.formats);
+                setTotalPages(data.vendors.last_page);
+                setTotalVendors(data.totalVendors);
+                if (data.AllVendors) {
+                    exportToExcel(data.AllVendors);
+                    setProgress(50);
+                }
+            } catch (err) {
+                // console.error(err);
+            } finally {
+                setLoading2(false);
             }
-        } catch (err) {
-            // console.error(err);
-        } finally {
-            setLoading2(false);
-        }
-    });
-
-    useEffect(() => {
-        fetchData();
-    }, [currentPage, queryParams, sortConfig, formatsChanged]);
+        },
+        [perPage, currentPage, queryParams, sortConfig, formatsChanged]
+    ); 
+const handlePerPageChange = (e) => {
+    setPerPage(Number(e.target.value));
+    setCurrentPage(1);
+};
+   useEffect(() => {
+       fetchData();
+   }, [currentPage, queryParams, sortConfig, formatsChanged, perPage]);
     useEffect(() => {
         formatData(formats);
     }, [formats]);
@@ -844,7 +847,7 @@ const Vendor = (props) => {
         const headersArray = ["id", ...exportEx[0]];
         worksheet.columns = headersArray.map((key) => {
             return {
-                header: formatString(key),  
+                header: formatString(key),
                 key: key,
                 width: 20,
             };
@@ -3306,7 +3309,26 @@ const Vendor = (props) => {
                         )}
                     </div>
                     <CardHeader className="px-3 d-flex justify-content-between align-items-center">
-                        <H5>Vendors | {totalVendors}</H5>
+                    
+                        <div className="d-flex align-items-center gap-2">
+                            <h5 className="mb-0">Vendors | {totalVendors}</h5>
+                            <label htmlFor="perPageSelect" className="mb-0">
+                                Show:
+                            </label>
+                            <select
+                                id="perPageSelect"
+                                className="form-select form-select-sm"
+                                style={{ width: "80px" }}
+                                value={perPage}
+                                onChange={handlePerPageChange}
+                            >
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
+                            </select>
+                        </div>
+
                         <div className="ml-auto">
                             <ButtonGroup>
                                 {props.permissions?.add == 1 && (

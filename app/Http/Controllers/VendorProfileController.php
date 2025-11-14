@@ -548,7 +548,7 @@ class VendorProfileController extends Controller
         }
 
         $formatArray = array_unique(array_merge(['id'], $formatArray));
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 50);
         $vendors = $vendorsQuery->paginate($perPage);
         $tableKeys = array_column($queryParams['filters'] ?? [], 'table');
         $vendorsData = $vendors->toArray();
@@ -2331,7 +2331,7 @@ class VendorProfileController extends Controller
             $originalFileNameCV = $cvFile->getClientOriginalName();
             $encryptedFileNameCV = Crypt::encryptString($originalFileNameCV);
             $cvFilePath = $cvFile->storeAs(
-                'cv_files',
+                'cv_upload',
                 $encryptedFileNameCV . '.' . $cvFile->getClientOriginalExtension(),
                 'external'
             );
@@ -2339,7 +2339,7 @@ class VendorProfileController extends Controller
             $originalFileNameNDA = $ndaFile->getClientOriginalName();
             $encryptedFileNameNDA = Crypt::encryptString($originalFileNameNDA);
             $ndaFilePath = $ndaFile->storeAs(
-                'nda_files',
+                'nda_upload',
                 $encryptedFileNameNDA . '.' . $ndaFile->getClientOriginalExtension(),
                 'external'
             );
@@ -2445,14 +2445,14 @@ class VendorProfileController extends Controller
                 return response()->json(['error' => 'Vendor not found.'], 404);
             }
 
-            $path = storage_path('app/external/nda_files');
+            $path = storage_path('app/external/nda_upload');
             if (!file_exists($path)) {
                 mkdir($path, 0777, true);
             }
 
             $originalFileNameN = $ndaFile->getClientOriginalName();
             $encryptedFileName = Crypt::encryptString($originalFileNameN);
-            $ndaFilePath = $ndaFile->storeAs('nda_files', $encryptedFileName . '.' . $ndaFile->getClientOriginalExtension(), 'external');
+            $ndaFilePath = $ndaFile->storeAs('nda_upload', $encryptedFileName . '.' . $ndaFile->getClientOriginalExtension(), 'external');
 
             $vendor->NDA = $ndaFilePath;
             $vendor->first_login = 1;
@@ -2510,6 +2510,18 @@ class VendorProfileController extends Controller
     public function download(Request $request)
     {
         $file = $request->input("filename");
+        $isOnlyFileName = !str_contains($file, "/") && !str_contains($file, "\\");
+        if ($isOnlyFileName) {
+            $possibleDirs = ['vendors', 'NDA'];
+            foreach ($possibleDirs as $dir) {
+                $path = "{$dir}/{$file}";
+                if (Storage::disk('external')->exists($path)) {
+                    $filePath = Storage::disk('external')->path($path);
+                    return response()->download($filePath, $file);
+                }
+            }
+            return response()->json(['message' => 'File not found in vendors or NDA'], 404);
+        }
         $directory = dirname($file);
         $fileName = basename($file);
         $filePath = Storage::disk('external')->path("{$directory}/{$fileName}");
@@ -2517,14 +2529,15 @@ class VendorProfileController extends Controller
         if (!Storage::disk('external')->exists("{$directory}/{$fileName}")) {
             return response()->json(['message' => 'File not found'], 404);
         }
-        $encryptedFileName = pathinfo($fileName, PATHINFO_FILENAME);
+
+        $encryptedNameOnly = pathinfo($fileName, PATHINFO_FILENAME);
+
         try {
-            $originalFileName = Crypt::decryptString($encryptedFileName);
-            // $originalFileName = trim($originalFileName, '_');
+            $originalFileName = Crypt::decryptString($encryptedNameOnly);
         } catch (\Exception $e) {
             return response()->download($filePath, $fileName);
-            return response()->json(['message' => 'Invalid file encryption'], 400);
         }
+
         return response()->download($filePath, $originalFileName);
     }
     public function deleteFile(Request $request)
@@ -2588,7 +2601,7 @@ class VendorProfileController extends Controller
                 if ($vendor->cv && Storage::disk('external')->exists($vendor->cv)) {
                     Storage::disk('external')->delete($vendor->cv);
                 }
-                $path = storage_path('app/external/cv_files');
+                $path = storage_path('app/external/cv_upload');
                 if (!file_exists($path)) {
                     mkdir(
                         $path,
@@ -2598,7 +2611,7 @@ class VendorProfileController extends Controller
                 }
                 $originalFileName = $cvFile->getClientOriginalName();
                 $encryptedFileName = Crypt::encryptString($originalFileName);
-                $cvFilePath = $cvFile->storeAs('cv_files', $encryptedFileName . '.' . $cvFile->getClientOriginalExtension(), 'external');
+                $cvFilePath = $cvFile->storeAs('cv_upload', $encryptedFileName . '.' . $cvFile->getClientOriginalExtension(), 'external');
                 $vendor->cv = $cvFilePath;
                 $vendor->save();
             }
@@ -2616,7 +2629,7 @@ class VendorProfileController extends Controller
                 if ($vendor->NDA && Storage::disk('external')->exists($vendor->NDA)) {
                     Storage::disk('external')->delete($vendor->NDA);
                 }
-                $path = storage_path('app/external/nda_files');
+                $path = storage_path('app/external/nda_upload');
                 if (!file_exists($path)) {
                     mkdir(
                         $path,
@@ -2626,7 +2639,7 @@ class VendorProfileController extends Controller
                 }
                 $originalFileNameN = $ndaFile->getClientOriginalName();
                 $encryptedFileName = Crypt::encryptString($originalFileNameN);
-                $ndaFilePath = $ndaFile->storeAs('nda_files', $encryptedFileName . '.' . $ndaFile->getClientOriginalExtension(), 'external');
+                $ndaFilePath = $ndaFile->storeAs('nda_upload', $encryptedFileName . '.' . $ndaFile->getClientOriginalExtension(), 'external');
                 $vendor->NDA = $ndaFilePath;
                 $vendor->save();
             }

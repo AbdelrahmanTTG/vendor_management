@@ -187,6 +187,7 @@ class Vendor extends Authenticatable  implements JWTSubject
         "vendor_source",
         "vendor_brands",
         "profile_status",
+        "brand",
     ];
 
     /**
