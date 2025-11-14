@@ -745,7 +745,10 @@ class VendorProfileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $userId = $user->id;
 
-        $vendor = Vendor::create($validator->validated());
+        $data = $validator->validated();
+        $data['brand'] = $data['vendor_brands'];
+        $vendor = Vendor::create($data);
+
 
         if ($request->has('mother_tongue_language') && is_array($request->mother_tongue_language)) {
             $motherTongues = [];
@@ -862,7 +865,9 @@ class VendorProfileController extends Controller
             }
         }
 
-        $vendor->update($validator->validated());
+        $data = $validator->validated();
+        $data['brand'] = $data['vendor_brands'];
+        $vendor->update($data);
 
         if ($request->has('mother_tongue_language') && is_array($request->mother_tongue_language)) {
             DB::table('vendors_mother_tongue')
