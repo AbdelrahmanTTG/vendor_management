@@ -2351,9 +2351,16 @@ class VendorProfileController extends Controller
                 return response()->json(['error' => 'Vendor not found.'], 404);
             }
 
-            $vendor->cv = $cvFilePath;
-            $vendor->NDA = $ndaFilePath;
-            $vendor->save();
+              if ($cvFile) {
+                    $vendor->cv = $cvFilePath;
+                }
+
+                if ($ndaFile) {
+                    $vendor->NDA = $ndaFilePath;
+                }
+
+                $vendor->save();
+
 
             foreach ($request->all() as $key => $value) {
                 if (strpos($key, 'file_') === 0) {
