@@ -26,7 +26,7 @@ const Messaging = (props) => {
                 break;
         }
     };
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [loading2, setLoading2] = useState(false);
     const { control, register, handleSubmit, unregister, reset, setValue, formState: { errors } } = useForm();

@@ -10,7 +10,7 @@ import axios from "../../../../pages/AxiosClint";
 const VMnote = (props) => {
     // toast.configure();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const { control, register, handleSubmit, setValue, formState: { errors } } = useForm();
     const { register: registerPM, handleSubmit: handleSubmitPM, setValue: setValuePM, formState: { errors: errorsPM } } = useForm();
 

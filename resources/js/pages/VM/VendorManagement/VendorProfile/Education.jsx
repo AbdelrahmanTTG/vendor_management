@@ -22,7 +22,7 @@ const Education = (props) => {
             default:
         }
     };
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
     const [optionsMaj, setoptionsMaj] = useState([]);
     const [optionsLD, setoptionsLD] = useState([]);

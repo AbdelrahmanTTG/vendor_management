@@ -2,7 +2,7 @@ import React, { Fragment, useState } from 'react';
 import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table } from 'reactstrap';
 import { Btn, H5 } from '../../../../AbstractElements';
 const Vacation = () => {
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     const toggleCollapse = () => {
         setIsOpen(!isOpen);

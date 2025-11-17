@@ -24,7 +24,7 @@ const Test = (props) => {
                 break;
         }
     };
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
     const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
     const [loading, setLoading] = useState(false);

@@ -13,7 +13,7 @@ import axiosClient from "../../../../pages/AxiosClint";
 import { Pagination, PaginationItem, PaginationLink } from "reactstrap";
 
 const Log = (props) => {
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const [logs, setLogs] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);

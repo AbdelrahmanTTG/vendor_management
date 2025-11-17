@@ -24,7 +24,7 @@ const FilesCertificate = (props) => {
                 break;
         }
     };
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const toggleCollapse = () => setIsOpen(!isOpen);
 
     const [cvFileName, setCvFileName] = useState(null);

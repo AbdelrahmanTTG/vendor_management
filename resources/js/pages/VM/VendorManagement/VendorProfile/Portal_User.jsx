@@ -20,7 +20,7 @@ const Portal_User = (props) => {
                 break;
         }
     };
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const { register, handleSubmit, setValue, formState: { errors } } = useForm();
     const [value, setValueemail] = useState(props.email);
     const [inputType, setInputType] = useState('text'); 

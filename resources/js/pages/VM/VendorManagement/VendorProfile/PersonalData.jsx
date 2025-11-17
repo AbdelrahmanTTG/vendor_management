@@ -33,7 +33,7 @@ const PersonalData = React.memo((props) => {
   const [inputValues, setInputValues] = useState([]);
   const [nameLabel, setNameLabel] = useState('Name');
   const [ContactLabel, setContactLabel] = useState('Contact name');
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [Status, setStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 

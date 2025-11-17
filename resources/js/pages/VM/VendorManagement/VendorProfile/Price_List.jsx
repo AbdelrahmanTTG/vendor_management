@@ -18,7 +18,7 @@ const PriceList = (props) => {
             </Suspense>
         </ErrorBoundary>
     );
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     }
