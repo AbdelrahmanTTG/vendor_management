@@ -2305,29 +2305,39 @@ class VendorProfileController extends Controller
         }
     }
     public function uploadFiles(Request $request)
-    {
-        if (!$request->hasFile('cv') && !$request->hasFile('nda')) {
-            return response()->json(['error' => 'Both CV and NDA files are required.'], 400);
+{
+    if (!$request->hasFile('cv') && !$request->hasFile('nda')) {
+        return response()->json(['error' => 'At least one file (CV or NDA) is required.'], 400);
+    }
+
+    $cvFile = $request->hasFile('cv') ? $request->file('cv') : null;
+    $ndaFile = $request->hasFile('nda') ? $request->file('nda') : null;
+
+    $allowedExtensions = ['zip', 'rar'];
+
+    if ($cvFile && $cvFile->getSize() > 5 * 1024 * 1024 && !in_array($cvFile->getClientOriginalExtension(), $allowedExtensions)) {
+        return response()->json(['error' => 'CV file must be ZIP or RAR if it is larger than 5MB.'], 400);
+    }
+
+    if ($ndaFile && $ndaFile->getSize() > 5 * 1024 * 1024 && !in_array($ndaFile->getClientOriginalExtension(), $allowedExtensions)) {
+        return response()->json(['error' => 'NDA file must be ZIP or RAR if it is larger than 5MB.'], 400);
+    }
+
+    DB::beginTransaction();
+
+    $additionalFiles = [];
+    $cvFilePath = null;
+    $ndaFilePath = null;
+
+    try {
+        $vendorId = $request->input('vendor_id');
+        $vendor = Vendor::find($vendorId);
+        
+        if (!$vendor) {
+            return response()->json(['error' => 'Vendor not found.'], 404);
         }
 
-        $cvFile = $request->file('cv');
-        $ndaFile = $request->file('nda');
-
-        $allowedExtensions = ['zip', 'rar'];
-
-        if ($cvFile->getSize() > 5 * 1024 * 1024 && !in_array($cvFile->getClientOriginalExtension(), $allowedExtensions)) {
-            return response()->json(['error' => 'CV file must be ZIP or RAR if it is larger than 5MB.'], 400);
-        }
-
-        if ($ndaFile->getSize() > 5 * 1024 * 1024 && !in_array($ndaFile->getClientOriginalExtension(), $allowedExtensions)) {
-            return response()->json(['error' => 'NDA file must be ZIP or RAR if it is larger than 5MB.'], 400);
-        }
-
-        DB::beginTransaction();
-
-        $additionalFiles = [];
-
-        try {
+        if ($cvFile) {
             $originalFileNameCV = $cvFile->getClientOriginalName();
             $encryptedFileNameCV = Crypt::encryptString($originalFileNameCV);
             $cvFilePath = $cvFile->storeAs(
@@ -2335,7 +2345,10 @@ class VendorProfileController extends Controller
                 $encryptedFileNameCV . '.' . $cvFile->getClientOriginalExtension(),
                 'external'
             );
+            $vendor->cv = $cvFilePath;
+        }
 
+        if ($ndaFile) {
             $originalFileNameNDA = $ndaFile->getClientOriginalName();
             $encryptedFileNameNDA = Crypt::encryptString($originalFileNameNDA);
             $ndaFilePath = $ndaFile->storeAs(
@@ -2343,96 +2356,121 @@ class VendorProfileController extends Controller
                 $encryptedFileNameNDA . '.' . $ndaFile->getClientOriginalExtension(),
                 'external'
             );
+            $vendor->NDA = $ndaFilePath;
+        }
 
-            $vendorId = $request->input('vendor_id');
-            $vendor = Vendor::find($vendorId);
-            if (!$vendor) {
-                Storage::disk('external')->delete([$cvFilePath, $ndaFilePath]);
-                return response()->json(['error' => 'Vendor not found.'], 404);
-            }
+        $vendor->save();
 
-              if ($cvFile) {
-                    $vendor->cv = $cvFilePath;
-                }
+        foreach ($request->all() as $key => $value) {
+            if (strpos($key, 'file_') === 0 && !strpos($key, 'file_title_') && !strpos($key, 'file_content_') && !strpos($key, 'file_id_')) {
+                $file = $request->file($key);
+                $index = substr($key, 5);
+                $fileId = $request->input("file_id_" . $index);
+                $fileTitle = $request->input("file_title_" . $index);
+                $fileContent = $request->input("file_content_" . $index);
 
-                if ($ndaFile) {
-                    $vendor->NDA = $ndaFilePath;
-                }
+                if ($file) {
+                    if ($file->getSize() > 5 * 1024 * 1024 && !in_array($file->getClientOriginalExtension(), $allowedExtensions)) {
+                        return response()->json(['error' => 'Each additional file must be ZIP or RAR if it is larger than 5MB.'], 400);
+                    }
 
-                $vendor->save();
+                    $originalFileName = $file->getClientOriginalName();
+                    $encryptedFileName = Crypt::encryptString($originalFileName);
+                    $filePath = $file->storeAs(
+                        'other_files',
+                        $encryptedFileName . '.' . $file->getClientOriginalExtension(),
+                        'external'
+                    );
 
-
-            foreach ($request->all() as $key => $value) {
-                if (strpos($key, 'file_') === 0) {
-                    $file = $request->file($key);
-                    $fileTitle = $request->input("file_title_" . substr($key, 5));
-                    $fileContent = $request->input("file_content_" . substr($key, 5));
-
-                    if ($file) {
-                        if ($file->getSize() > 5 * 1024 * 1024 && !in_array($file->getClientOriginalExtension(), $allowedExtensions)) {
-                            return response()->json(['error' => 'Each additional file must be ZIP or RAR if it is larger than 5MB.'], 400);
+                    if ($fileId) {
+                        $vendorFile = VendorFile::find($fileId);
+                        if ($vendorFile) {
+                            if ($vendorFile->file_path) {
+                                Storage::disk('external')->delete($vendorFile->file_path);
+                            }
+                            $vendorFile->file_path = $filePath;
+                            $vendorFile->file_title = $fileTitle;
+                            $vendorFile->file_content = $fileContent;
+                            $vendorFile->save();
                         }
-
-                        $originalFileName = $file->getClientOriginalName();
-                        $encryptedFileName = Crypt::encryptString($originalFileName);
-                        $filePath = $file->storeAs(
-                            'other_files',
-                            $encryptedFileName . '.' . $file->getClientOriginalExtension(),
-                            'external'
-                        );
-
+                    } else {
                         $vendorFile = new VendorFile();
                         $vendorFile->vendor_id = $vendorId;
                         $vendorFile->file_path = $filePath;
                         $vendorFile->file_title = $fileTitle;
                         $vendorFile->file_content = $fileContent;
                         $vendorFile->save();
+                    }
 
-                        $additionalFiles[] = [
-                            'file_path' => $filePath,
-                            'file_title' => $fileTitle,
-                            'file_content' => $fileContent
-                        ];
+                    $additionalFiles[] = [
+                        'file_path' => $filePath,
+                        'file_title' => $fileTitle,
+                        'file_content' => $fileContent
+                    ];
+                } else if ($fileId && ($fileTitle || $fileContent)) {
+                    $vendorFile = VendorFile::find($fileId);
+                    if ($vendorFile) {
+                        $vendorFile->file_title = $fileTitle;
+                        $vendorFile->file_content = $fileContent;
+                        $vendorFile->save();
                     }
                 }
             }
+        }
 
-            $user = JWTAuth::parseToken()->authenticate();
-            $userId = $user->id;
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
 
-            DataLogger::addToLogger(
-                $userId,
-                'upload_files',
-                $request->fullUrl(),
-                'vendor',
-                [
-                    'vendor_id' => $vendorId,
-                    'cv' => $cvFilePath,
-                    'nda' => $ndaFilePath,
-                    'additional_files' => $additionalFiles
+        DataLogger::addToLogger(
+            $userId,
+            'upload_files',
+            $request->fullUrl(),
+            'vendor',
+            [
+                'vendor_id' => $vendorId,
+                'cv' => $cvFilePath,
+                'nda' => $ndaFilePath,
+                'additional_files' => $additionalFiles
+            ],
+            $vendor->id
+        );
+
+        DB::commit();
+
+        $vendor->refresh();
+        $files = VendorFile::where('vendor_id', $vendorId)->get();
+
+        return response()->json([
+            'message' => 'Files uploaded and vendor updated successfully.',
+            'files' => [
+                'vendor' => [
+                    'cv' => $vendor->cv,
+                    'nda' => $vendor->NDA
                 ],
-                $vendor->id
-            );
+                'files' => $files
+            ]
+        ], 200);
+    } catch (\Exception $e) {
+        DB::rollBack();
 
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Files uploaded and vendor updated successfully.'
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Storage::disk('external')->delete([$cvFilePath ?? null, $ndaFilePath ?? null]);
-            foreach ($additionalFiles as $file) {
+        if ($cvFilePath) {
+            Storage::disk('external')->delete($cvFilePath);
+        }
+        if ($ndaFilePath) {
+            Storage::disk('external')->delete($ndaFilePath);
+        }
+        foreach ($additionalFiles as $file) {
+            if (isset($file['file_path'])) {
                 Storage::disk('external')->delete($file['file_path']);
             }
-
-            return response()->json([
-                'error' => 'An error occurred while processing the request.',
-                'details' => $e->getMessage()
-            ], 500);
         }
+
+        return response()->json([
+            'error' => 'An error occurred while processing the request.',
+            'details' => $e->getMessage()
+        ], 500);
     }
+}
 
     public function NDA_vendor(Request $request)
     {

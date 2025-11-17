@@ -129,76 +129,141 @@ const FilesCertificate = (props) => {
             return false
         }
     };
-    const onSubmit = async () => {
-        if (!props.backPermissions?.add) {
-            basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
+const onSubmit = async () => {
+    if (!props.backPermissions?.add) {
+        basictoaster("dangerToast", "Oops! You are not authorized to add this section.");
+        return;
+    }
+    if (!props.id) {
+        basictoaster("dangerToast", "Make sure to send your personal information first.");
+        const section = document.getElementById("personal-data");
+        section.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        if (!cvFileName && !ndaFileName) {
+            basictoaster("dangerToast", "Please upload at least one file (CV or NDA).");
             return;
         }
-        if (!props.id) {
-            basictoaster("dangerToast", "Make sure to send your personal information first.");
-            const section = document.getElementById("personal-data");
-            section.scrollIntoView({ behavior: 'smooth' });
-        } else {
-            
-            if (!cvFileName && !ndaFileName){return}
-            setLoading(true)
 
-            const formData = new FormData();
+        setLoading(true);
+
+        const formData = new FormData();
+        
+        if (cvFileName && cvFileName instanceof File) {
             formData.append('cv', cvFileName);
-            formData.append('nda', ndaFileName);
-
-            formData.append('vendor_id', props.id);
-
-            rows.forEach((row, index) => {
-                if (row.File_Title) formData.append(`file_title_${index}`, row.File_Title);
-                if (row.File_Content) formData.append(`file_content_${index}`, row.File_Content);
-                if (row.File) formData.append(`file_${index}`, row.File);
-            });
-
-
-            rows.forEach((row, index) => {
-                if (row.File) formData.append(`file_${index}`, row.File);
-            });
-            try {
-            
-                const response = await axiosClient.post("updateFiles", formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-                // setCvFileName(response.data.files.vendor.cv);
-                // setNdaFileName(response.data.files.vendor.nda)
-                const data = response.data.files.files
-                setRows([])
-                setRows(data?.map((file, index) => ({
-                    id: index + 1,
-                    idUpdate: file.id,
-                    File_Title: file.file_title,
-                    File_Content: file.file_content,
-                    File_URL: file.file_path
-                })));
-                basictoaster("successToast", "Added successfully !");
-                setIsSubmitting(true)
-                if (response?.data?.files?.vendor?.cv) {
-                    setCvFileName(response?.data?.files?.vendor?.cv);
-                    setCvFileNames(true)
-                }
-                if (response?.data?.files?.vendor?.nda) {
-                    setNdaFileName(response?.data?.files?.vendor?.nda)
-                    setNdaFileNames(true)
-
-                }
-            } catch (err) {
-                basictoaster("dangerToast", err.message);
-                console.error("Error:", err.response ? err.response.data : err.message);
-                setLoading(false)
-
-            } finally {
-                setLoading(false)
-
-            }
         }
-    };
+
+        if (ndaFileName && ndaFileName instanceof File) {
+            formData.append('nda', ndaFileName);
+        }
+
+        formData.append('vendor_id', props.id);
+
+        rows.forEach((row, index) => {
+            if (row.File_Title) formData.append(`file_title_${index}`, row.File_Title);
+            if (row.File_Content) formData.append(`file_content_${index}`, row.File_Content);
+            if (row.File && row.File instanceof File) {
+                formData.append(`file_${index}`, row.File);
+            }
+        });
+
+        try {
+            const response = await axiosClient.post("updateFiles", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            const data = response.data.files.files;
+            setRows([]);
+            setRows(data?.map((file, index) => ({
+                id: index + 1,
+                idUpdate: file.id,
+                File_Title: file.file_title,
+                File_Content: file.file_content,
+                File_URL: file.file_path
+            })));
+
+            basictoaster("successToast", "Added successfully!");
+            setIsSubmitting(true);
+
+            if (response?.data?.files?.vendor?.cv) {
+                setCvFileName(response?.data?.files?.vendor?.cv);
+                setCvFileNames(true);
+            }
+            if (response?.data?.files?.vendor?.nda) {
+                setNdaFileName(response?.data?.files?.vendor?.nda);
+                setNdaFileNames(true);
+            }
+        } catch (err) {
+            basictoaster("dangerToast", err.response?.data?.error || err.message);
+            console.error("Error:", err.response ? err.response.data : err.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+};
+
+const Update = async () => {
+    if (!props.backPermissions?.edit) {
+        basictoaster("dangerToast", "Oops! You are not authorized to edit this section.");
+        return;
+    }
+
+    setLoading(true);
+
+    const formData = new FormData();
+
+    if (cvFileName && cvFileName instanceof File) {
+        formData.append('cv', cvFileName);
+    }
+
+    if (ndaFileName && ndaFileName instanceof File) {
+        formData.append('nda', ndaFileName);
+    }
+
+    formData.append('vendor_id', props.id);
+    rows?.forEach((row, index) => {
+        if (row.idUpdate) formData.append(`file_id_${index}`, row.idUpdate);
+        if (row.File_Title) formData.append(`file_title_${index}`, row.File_Title);
+        if (row.File_Content) formData.append(`file_content_${index}`, row.File_Content);
+        if (row.File && row.File instanceof File) {
+            formData.append(`file_${index}`, row.File);
+        }
+    });
+
+    try {
+        const response = await axiosClient.post("updateFiles", formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (response?.data?.files?.vendor?.cv) {
+            setCvFileName(response?.data?.files?.vendor?.cv);
+            setCvFileNames(true);
+        }
+        if (response?.data?.files?.vendor?.nda) {
+            setNdaFileName(response?.data?.files?.vendor?.nda);
+            setNdaFileNames(true);
+        }
+
+        const data = response.data.files.files;
+        setRows([]);
+        setRows(data?.map((file, index) => ({
+            id: index + 1,
+            idUpdate: file.id,
+            File_Title: file.file_title,
+            File_Content: file.file_content,
+            File_URL: file.file_path
+        })));
+
+        basictoaster("successToast", "Updated successfully!");
+    } catch (err) {
+        basictoaster("dangerToast", err.response?.data?.error || err.message);
+    } finally {
+        setLoading(false);
+    }
+};
     useEffect(() => {
 
         if (props.mode === "edit") {
@@ -251,67 +316,67 @@ const FilesCertificate = (props) => {
             Update(data)
         }
     };
-    const Update = async () => {
-        if (!props.backPermissions?.edit) {
-            basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
-            return;
-        }
-        if (!cvFileName && !ndaFileName) {
-            basictoaster("dangerToast", " One of the fields files must be uploaded.");
-            return
-        }
-        setLoading(true)
-        const formData = new FormData();
-        formData.append('cv', cvFileName);
-        formData.append('nda', ndaFileName);
-        formData.append('vendor_id', props.id);
-        rows?.forEach((row, index) => {
-            if (row.idUpdate) formData.append(`file_id_${index}`, row.idUpdate);
-            if (row.File_Title) formData.append(`file_title_${index}`, row.File_Title);
-            if (row.File_Content) formData.append(`file_content_${index}`, row.File_Content);
-            if (row.File) formData.append(`file_${index}`, row.File);
-        });
-        rows?.forEach((row, index) => {
-            if (row.File) formData.append(`file_${index}`, row.File);
-        });
-        try {
-            const response = await axiosClient.post("updateFiles", formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            if (response?.data?.files?.vendor?.cv) {
-                setCvFileName(response?.data?.files?.vendor?.cv);
-                setCvFileNames(true)
-            }
-            if (response?.data?.files?.vendor?.nda) {
-                setNdaFileName(response?.data?.files?.vendor?.nda)
-                setNdaFileNames(true)
+    // const Update = async () => {
+    //     if (!props.backPermissions?.edit) {
+    //         basictoaster("dangerToast", " Oops! You are not authorized to edit this section .");
+    //         return;
+    //     }
+    //     if (!cvFileName && !ndaFileName) {
+    //         basictoaster("dangerToast", " One of the fields files must be uploaded.");
+    //         return
+    //     }
+    //     setLoading(true)
+    //     const formData = new FormData();
+    //     formData.append('cv', cvFileName);
+    //     formData.append('nda', ndaFileName);
+    //     formData.append('vendor_id', props.id);
+    //     rows?.forEach((row, index) => {
+    //         if (row.idUpdate) formData.append(`file_id_${index}`, row.idUpdate);
+    //         if (row.File_Title) formData.append(`file_title_${index}`, row.File_Title);
+    //         if (row.File_Content) formData.append(`file_content_${index}`, row.File_Content);
+    //         if (row.File) formData.append(`file_${index}`, row.File);
+    //     });
+    //     rows?.forEach((row, index) => {
+    //         if (row.File) formData.append(`file_${index}`, row.File);
+    //     });
+    //     try {
+    //         const response = await axiosClient.post("updateFiles", formData, {
+    //             headers: {
+    //                 'Content-Type': 'multipart/form-data'
+    //             }
+    //         });
+    //         if (response?.data?.files?.vendor?.cv) {
+    //             setCvFileName(response?.data?.files?.vendor?.cv);
+    //             setCvFileNames(true)
+    //         }
+    //         if (response?.data?.files?.vendor?.nda) {
+    //             setNdaFileName(response?.data?.files?.vendor?.nda)
+    //             setNdaFileNames(true)
 
-            }
-            // setCvFileName(response.data.files.vendor.cv);
-            // setNdaFileName(response.data.files.vendor.nda)
+    //         }
+    //         // setCvFileName(response.data.files.vendor.cv);
+    //         // setNdaFileName(response.data.files.vendor.nda)
           
-            const data = response.data.files.files
-            setRows([])
-            setRows(data?.map((file, index) => ({
-                id: index + 1,
-                idUpdate: file.id,
-                File_Title: file.file_title,
-                File_Content: file.file_content,
-                File_URL: file.file_path
-            })));
-            basictoaster("successToast", "Updated successfully !");
+    //         const data = response.data.files.files
+    //         setRows([])
+    //         setRows(data?.map((file, index) => ({
+    //             id: index + 1,
+    //             idUpdate: file.id,
+    //             File_Title: file.file_title,
+    //             File_Content: file.file_content,
+    //             File_URL: file.file_path
+    //         })));
+    //         basictoaster("successToast", "Updated successfully !");
            
-        } catch (err) {
-            // console.error("Error:", err.response ? err.response.data : err.message);
-            basictoaster("dangerToast", err.message);
-            setLoading(false)
+    //     } catch (err) {
+    //         // console.error("Error:", err.response ? err.response.data : err.message);
+    //         basictoaster("dangerToast", err.message);
+    //         setLoading(false)
 
-        } finally {
-            setLoading(false)
-        }
-    };
+    //     } finally {
+    //         setLoading(false)
+    //     }
+    // };
     return (
         <Fragment>
             <Card>

@@ -11,7 +11,7 @@ import SweetAlert from 'sweetalert2';
 
 const Billing = (props) => {
     // toast.configure();
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const [isChecked, setIsChecked] = useState({ billing_legal_name: '', city: '', street: '', billing_address: "" });
     const [selectedOptionC, setSelectedOptionC] = useState(null);
     const [optionsC, setOptionsC] = useState([]);
