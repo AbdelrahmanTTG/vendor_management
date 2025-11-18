@@ -4097,4 +4097,482 @@ class VendorProfileController extends Controller
             ->paginate(10);
         return response()->json($logs);
     }
+
+
+
+    public function SearchVendors(Request $request)
+    {
+        
+        if (!$request->has('queryParams') || empty($request->queryParams)) {
+            return response()->json([
+                "vendors" => [],
+                "fields" => []
+            ], 200);
+        }
+
+        
+        $formatArray = ['name', 'email', "source_lang", "target_lang", "service", "task_type", 'rate', "brands"];
+
+       
+        $relationships = [
+            'country' => ['id', 'name'],
+            'nationality' => ['id', 'name'],
+            'region' => ['id', 'name'],
+            "timezone" => ['id', 'gmt'],
+            'created_by' => ['id', 'user_name'],
+            'source_lang' => ['id', 'name'],
+            'target_lang' => ['id', 'name'],
+            'main_subject' => ['id', 'name'],
+            'sub_subject' => ['id', 'name'],
+        ];
+
+        $vendorColumns = Schema::getColumnListing('vendor');
+        $vendorSheet = Schema::getColumnListing('vendor_sheet');
+
+        $relatedColumns = array_diff($formatArray, $vendorColumns);
+        $relatedColumns = array_diff($relatedColumns, $vendorSheet);
+
+        $includeCreatedBy = false;
+        if (in_array('created_by', $formatArray)) {
+            $includeCreatedBy = true;
+        }
+
+        if ($request->has('queryParams') && is_array($request->queryParams)) {
+            if (array_key_exists('created_by', $request->queryParams) && !empty($request->queryParams['created_by'])) {
+                $includeCreatedBy = true;
+                if (!in_array('created_by', $formatArray)) {
+                    $formatArray[] = 'created_by';
+                }
+            }
+        }
+
+        $includeMotherTongue = false;
+        $motherTongueColumn = null;
+        foreach ($formatArray as $column) {
+            if (strpos($column, 'vendors_mother_tongue') !== false) {
+                $includeMotherTongue = true;
+                $motherTongueColumn = $column;
+                break;
+            }
+        }
+
+       
+        $relatedColumns = array_filter($relatedColumns, function ($column) {
+            return $column !== 'priceList' && strpos($column, 'vendors_mother_tongue') === false;
+        });
+        $relatedColumns = array_values($relatedColumns);
+
+        $intersectColumns = array_intersect($formatArray, $vendorColumns);
+        $intersectColumnsVendorSheet = array_intersect($formatArray, $vendorSheet);
+
+        $mandatoryColumns = ['timezone', 'created_by'];
+        $intersectColumns = array_unique(array_merge($intersectColumns, $mandatoryColumns));
+
+        if ($includeCreatedBy && !in_array('created_by', $intersectColumns)) {
+            $intersectColumns[] = 'created_by';
+        }
+
+        if (!empty($intersectColumns)) {
+            $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands')
+                ->addSelect(DB::raw(implode(',', $intersectColumns)));
+        } else {
+            $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands');
+        }
+
+        if ($includeMotherTongue) {
+            $vendorsQuery->with(['motherTongues' => function ($query) {
+                $query->with('language:id,name');
+            }]);
+        }
+
+      
+        if (in_array('priceList', $formatArray) || !empty($intersectColumnsVendorSheet)) {
+
+            
+            if (in_array('priceList', $formatArray)) {
+                $vendorsQuery->addSelect(DB::raw("'' as `priceList`"));
+            }
+
+            $vendorsQuery->with([
+                'vendor_sheet' => function ($query) use ($formatArray, $vendorSheet) {
+                    $selectedColumns = array_intersect($formatArray, $vendorSheet);
+                    $selectedColumns = array_diff($selectedColumns, ['created_by']);
+
+                    if (empty($selectedColumns)) {
+                        
+                        $selectedColumns = ["source_lang", "target_lang", 'service', "task_type", 'rate'];
+                    }
+
+                    $query->select(array_merge(['id', "vendor"], $selectedColumns));
+
+                    foreach ($selectedColumns as $relation) {
+                        if (method_exists($query->getModel(), $relation)) {
+                            $query->with([$relation]);
+                        }
+                    }
+                }
+            ]);
+        }
+
+        if (!empty($relatedColumns)) {
+            $joinCount = 0;
+            foreach ($relatedColumns as $relation) {
+                if (strpos($relation, '.') !== false) {
+                    list($table, $column) = explode('.', $relation);
+                    if ($table === 'bank_details' || $table === 'wallets_payment_methods') {
+                        $aliasBilling = "billing_data_{$joinCount}";
+                        $aliasTarget = "{$table}_{$joinCount}";
+                        $vendorsQuery->leftJoin("billing_data as {$aliasBilling}", "{$aliasBilling}.vendor_id", '=', 'vendor.id');
+                        $vendorsQuery->leftJoin("{$table} as {$aliasTarget}", "{$aliasTarget}.billing_data_id", '=', "{$aliasBilling}.id");
+                        $vendorsQuery->addSelect("{$aliasTarget}.{$column} as {$column}");
+                    
+                    } else {
+                        $alias = "{$table}_{$joinCount}";
+                        $vendorsQuery->leftJoin("{$table} as {$alias}", "{$alias}.vendor_id", '=', 'vendor.id');
+                        $vendorsQuery->addSelect("{$alias}.{$column} as {$column}");
+                    }
+                    $joinCount++;
+                }
+                // ...
+            }
+        }
+
+        $requestedVendorSheetColumns = array_intersect($formatArray, $vendorSheet);
+
+        $formatArray = array_diff($formatArray, $vendorSheet);
+
+        if ($includeCreatedBy && !in_array('created_by', $formatArray)) {
+            $formatArray[] = 'created_by';
+        }
+
+        $formatArray = array_values($formatArray);
+        $formatArray = array_map(function ($column) {
+            if (strpos($column, '.') !== false) {
+                return explode('.', $column)[1];
+            }
+            return $column;
+        }, $formatArray);
+
+        foreach ($relationships as $relation => $columns) {
+            if (in_array($relation, $formatArray)) {
+                $vendorsQuery->with([$relation => function ($query) use ($columns) {
+                    $query->select($columns);
+                }]);
+            }
+        }
+
+        if ($request->has('queryParams') && is_array($request->queryParams)) {
+            $queryParams = $request->queryParams;
+
+            if (!empty($queryParams['timezone_from']) && !empty($queryParams['timezone_to'])) {
+                $timezoneFrom = $queryParams['timezone_from'][0];
+                $timezoneTo = $queryParams['timezone_to'][0];
+
+                $vendorsQuery->whereHas('timezone', function ($query) use ($timezoneFrom, $timezoneTo) {
+                    $query->where('gmt', '>=', $timezoneFrom)
+                        ->where('gmt', '<=', $timezoneTo);
+                });
+
+                if (!in_array('timezone', $formatArray)) {
+                    $formatArray[] = 'timezone';
+                }
+
+                $vendorsQuery->with(['timezone' => function ($query) {
+                    $query->select(['id', 'gmt']);
+                }]);
+            }
+
+            foreach ($queryParams as $key => $val) {
+                if ($key !== 'filters' && !empty($val)) {
+                    if ($key === 'timezone_from' || $key === 'timezone_to') {
+                        continue;
+                    }
+
+                    if (strpos($key, 'vendors_mother_tongue') !== false) {
+                        $includeMotherTongue = true;
+                        if (!in_array('vendors_mother_tongue.language_id', $formatArray)) {
+                            $formatArray[] = 'vendors_mother_tongue.language_id';
+                        }
+
+                        $vendorsQuery->whereHas('motherTongues', function ($query) use ($val) {
+                            if (is_array($val)) {
+                                $query->where(function ($q) use ($val) {
+                                    foreach ($val as $k => $v) {
+                                        if ($k == 0) {
+                                            $q->where('language_id', '=', $v);
+                                        } else {
+                                            $q->orWhere('language_id', '=', $v);
+                                        }
+                                    }
+                                });
+                            } else {
+                                $query->where('language_id', '=', $val);
+                            }
+                        });
+
+                        $vendorsQuery->with(['motherTongues' => function ($query) {
+                            $query->with('language:id,name');
+                        }]);
+                        continue;
+                    }
+
+                    if ($key === 'vendor_brands') {
+                        if (!in_array('brands', $formatArray)) {
+                            $formatArray[] = 'brands';
+                        }
+                    } else {
+                        if (!in_array($key, $formatArray)) {
+                            if ($key === 'created_by' && $includeCreatedBy) {
+                            } 
+                            $formatArray[] = $key;
+                        }
+                    }
+
+                    if (strpos($key, 'vendors_mother_tongue') === false) {
+                        if (is_array($val)) {
+                            $vendorsQuery->where(function ($query) use ($key, $val) {
+                                foreach ($val as $k => $v) {
+                                    if ($k == 0) {
+                                        $query->where($key, "like", "%" . $v . "%");
+                                    } else {
+                                        $query->orWhere($key, "like", "%" . $v . "%");
+                                    }
+                                }
+                            });
+                        } else {
+                            $vendorsQuery->where($key, "like", "%" . $val . "%");
+                        }
+                    }
+
+                    if (array_key_exists($key, $relationships)) {
+                        $vendorsQuery->with([$key => function ($query) use ($key, $relationships) {
+                            $query->select($relationships[$key]);
+                        }]);
+                    }
+                }
+            }
+
+            if (isset($queryParams['filters']) && is_array($queryParams['filters']) && !empty($queryParams['filters'])) {
+                foreach ($queryParams['filters'] as $filter) {
+                    if (method_exists(Vendor::class, $filter['table'])) {
+                        $table = $filter['table'];
+
+                        // Handle vendors_mother_tongue filter
+                        if ($table === 'motherTongues' || $table === 'vendors_mother_tongue') {
+                            $includeMotherTongue = true;
+                            $vendorsQuery->whereHas('motherTongues', function ($query) use ($filter) {
+                                $query->where(function ($query) use ($filter) {
+                                    foreach ($filter['columns'] as $columnFilter) {
+                                        if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
+                                            $column = $columnFilter['column'];
+                                            $values = $columnFilter['value'];
+
+                                            if (count($values) > 1) {
+                                                $query->where(function ($query) use ($column, $values) {
+                                                    foreach ($values as $value) {
+                                                        $query->orWhere($column, '=', $value);
+                                                    }
+                                                });
+                                            } else {
+                                                $query->where($column, '=', $values[0]);
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+
+                            $vendorsQuery->with(['motherTongues' => function ($query) {
+                                $query->with('language:id,name');
+                            }]);
+
+                            if (!in_array('vendors_mother_tongue.language_id', $formatArray)) {
+                                $formatArray[] = 'vendors_mother_tongue.language_id';
+                            }
+                        } elseif ($table === 'vendor_sheet') {
+                            $vendorsQuery->whereHas('vendor_sheet', function ($query) use ($filter) {
+                                $query->where(function ($query) use ($filter) {
+                                    foreach ($filter['columns'] as $columnFilter) {
+                                        if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
+                                            $column = $columnFilter['column'];
+                                            $values = $columnFilter['value'];
+
+                                            if (count($values) > 1) {
+                                                $query->where(function ($query) use ($column, $values) {
+                                                    foreach ($values as $value) {
+                                                        $query->orWhere($column, '=', $value);
+                                                    }
+                                                });
+                                            } else {
+                                                $query->where($column, '=', $values[0]);
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+
+                            
+
+                            $selectedColumnsRow = array_intersect($requestedVendorSheetColumns, $vendorSheet);
+                            $selectedColumnsRow = array_diff($selectedColumnsRow, ['created_by']);
+
+                            if (empty($selectedColumnsRow)) {
+                                $selectedColumnsRow = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "subject_main", "dialect_target", "sheet_brand"];
+                            }
+
+                            $selectedColumns = array_merge(['id', "vendor"], $selectedColumnsRow);
+
+                            foreach ($filter['columns'] as $columnFilter) {
+                                if (!empty($columnFilter['column']) && $columnFilter['column'] !== 'created_by') {
+                                    $selectedColumns[] = $columnFilter['column'];
+                                }
+                            }
+                            $selectedColumns = array_unique($selectedColumns);
+
+                            $vendorsQuery->with(['vendor_sheet' => function ($query) use ($selectedColumns, $filter, $selectedColumnsRow) {
+                                $query->select($selectedColumns);
+                                $query->where(function ($query) use ($filter) {
+                                    foreach ($filter['columns'] as $columnFilter) {
+                                        if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
+                                            $column = $columnFilter['column'];
+                                            $values = $columnFilter['value'];
+                                            if (count($values) > 1) {
+                                                $query->where(function ($query) use ($column, $values) {
+                                                    foreach ($values as $value) {
+                                                        $query->orWhere($column, '=', $value);
+                                                    }
+                                                });
+                                            } else {
+                                                $query->where($column, '=', $values[0]);
+                                            }
+                                        }
+                                    }
+                                });
+                                $relatedColumns = array_column($filter['columns'], 'column');
+                                $directVendorSheetColumns = ["source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "subject_main", "dialect_target", "sheet_brand"];
+                                $relatedColumns = array_diff($relatedColumns, ['created_by'], $directVendorSheetColumns);
+                                $mergedColumns = array_unique(array_merge($relatedColumns, $selectedColumnsRow));
+                                foreach ($mergedColumns as $relation) {
+                                    if (method_exists($query->getModel(), $relation)) {
+                                        $query->with([$relation]);
+                                    }
+                                }
+                            }]);
+
+                            $formatArray = array_unique(array_merge($formatArray, $selectedColumnsRow));
+                        } else {
+                            $vendorsQuery->whereHas($table, function ($query) use ($filter) {
+                                $query->where(function ($query) use ($filter) {
+                                    foreach ($filter['columns'] as $columnFilter) {
+                                        if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
+                                            $column = $columnFilter['column'];
+                                            $values = $columnFilter['value'];
+
+                                            if (count($values) > 1) {
+                                                $query->where(function ($query) use ($column, $values) {
+                                                    foreach ($values as $value) {
+                                                        $query->orWhere($column, '=', $value);
+                                                    }
+                                                });
+                                            } else {
+                                                $query->where($column, '=', $values[0]);
+                                            }
+                                        }
+                                    }
+                                });
+                            })->with([$table => function ($query) use ($filter, $formatArray) {
+                                $columns = array_column($filter['columns'], 'column');
+                                if (!empty($columns)) {
+                                    $query->select(array_merge(["vendor_id"], $columns));
+                                    foreach ($columns as $relation) {
+                                        if (method_exists($query->getModel(), $relation)) {
+                                            $query->with([$relation]);
+                                        }
+                                    }
+                                }
+                            }]);
+                            foreach ($filter['columns'] as $columnFilter) {
+                                if (!empty($columnFilter['column'])) {
+                                    if ($columnFilter['column'] === 'created_by' && $includeCreatedBy) {
+                                        // Skip
+                                    } else {
+                                        $formatArray[] = $columnFilter['column'];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($request->has('sortBy') && $request->has('sortDirection')) {
+            $sortBy = $request->input('sortBy');
+            $sortDirection = $request->input('sortDirection');
+
+            if (in_array($sortDirection, ['asc', 'desc'])) {
+                $vendorsQuery = $vendorsQuery->orderBy($sortBy, $sortDirection);
+            }
+        }
+
+        $formatArray = array_unique(array_merge(['id'], $formatArray));
+        $perPage = $request->input('per_page', 10);
+        $vendors = $vendorsQuery->paginate($perPage);
+        $tableKeys = array_column($queryParams['filters'] ?? [], 'table');
+        $vendorsData = $vendors->toArray();
+
+        $flattenedVendors = $this->flattenVendorsWithSheets($vendorsData['data']);
+
+        $flattenedVendors = array_map(function ($vendor) use ($tableKeys, $includeMotherTongue) {
+            foreach ($tableKeys as $table) {
+                if (isset($vendor[$table])) {
+                    unset($vendor[$table]['vendor']);
+                    unset($vendor[$table]['vendor_id']);
+                }
+            }
+
+            if ($includeMotherTongue && isset($vendor['mother_tongues'])) {
+                $languageNames = array_map(function ($mt) {
+                    return $mt['language']['name'] ?? '';
+                }, $vendor['mother_tongues']);
+
+                $vendor['vendors_mother_tongue.language_id'] = implode(', ', $languageNames);
+                unset($vendor['mother_tongues']);
+            }
+
+            if (isset($vendor['brands']) && is_array($vendor['brands'])) {
+                $brandNames = array_map(function ($brand) {
+                    return $brand['name'] ?? '';
+                }, $vendor['brands']);
+                $vendor['brands'] = implode(', ', $brandNames);
+            }
+
+            return $this->flattenObject($vendor, $tableKeys);
+        }, $flattenedVendors);
+
+        $vendors->setCollection(collect($flattenedVendors));
+
+        $finalFormatArray = array_unique(
+            array_merge(
+                ['id'],
+                $formatArray,
+                $requestedVendorSheetColumns,
+                in_array('priceList', $formatArray) ? ['priceList'] : []
+            )
+        );
+
+        $finalFormatArray = array_map(function ($field) {
+            if ($field === 'language_id' || $field === 'vendors_mother_tongue') {
+                return 'vendors_mother_tongue.language_id';
+            }
+            return $field;
+        }, $finalFormatArray);
+
+        $finalFormatArray = array_values(array_unique($finalFormatArray));
+
+
+        return response()->json([
+            "vendors" => $vendors,
+            "fields" => $finalFormatArray, 
+        ], 200);
+    }
 }

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState, useCallback } from "react";
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import axiosClient from "../../AxiosClint";
 import { useStateContext } from '../../context/contextAuth';
@@ -14,6 +14,7 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { set } from 'react-hook-form';
 import { decryptData } from "../../../crypto";
+import VendorSearch from "../VendorManagement/VendorProfile/VendorSearch";
 
 const ViewTicket = (props) => {
     const [redirect, setRedirect] = useState(false);
@@ -145,53 +146,85 @@ const ViewTicket = (props) => {
             }
         }
     };
+const [selectedVendors, setSelectedVendors] = useState([]);
+const handleCheckboxChange = (vendor, index) => {
+    setSelectedVendors((prev) => {
+        const exists = prev.find((v) => v.rowKey === index);
+        if (exists) {
+            return prev.filter((v) => v.rowKey !== index);
+        } else {
+            return [...prev, { ...vendor, rowKey: index }];
+        }
+    });
+};
 
- const changeTicketStatus = (event) => {
-     event.preventDefault();
-     const formData = new FormData(event.currentTarget);
-     const TicketRes = {
-         ...Object.fromEntries(formData),
-         ticket: ticket.id,
-         user: user.id,
-         file: fileInput,
-         vendor: formData.getAll("vendor"),
-         comment: commentInput,
-     };
 
-     if (statusInput == "0" && commentInput.trim() == "") {
+ const changeTicketStatus = () => {
+     if (statusInput == "0" && commentInput.trim() === "") {
          toast.error("Please Enter Rejection Reason!");
-     } else {
-        //  setSub(true);
-         axiosClient
-             .post("changeTicketStatus", TicketRes, {
-                 headers: {
-                     "Content-Type": "multipart/form-data",
-                 },
-             })
-             .then(({ data }) => {
-                 switch (data.type) {
-                     case "success":
-                       
-                         setTemp(!temp);
-                         setStatusInput("");
-                         setFileInput("");
-                         setCommentInput();
-                           toast.success(
-                               "The Vendor has been successfully selected."
-                           );
-                         break;
-                     case "error":
-                         toast.error(data.message);
-                         break;
-                 }
-                //  setSub(false);
-             })
-             .catch(() => {
-                 toast.error("Something went wrong!");
-                //  setSub(false); 
-             });
+         return;
      }
+
+     let TicketRes = new FormData();
+
+     const finalStatus = statusInput || ticketData.statusVal;
+     TicketRes.append("status", finalStatus);
+
+     TicketRes.append("ticket", ticket.id);
+     TicketRes.append("user", user.id);
+     TicketRes.append("comment", commentInput);
+
+     if (fileInput) {
+         TicketRes.append("file", fileInput);
+     }
+
+     if (selectedVendors.length > 0) {
+         const uniqueVendorIds = new Set(selectedVendors.map((v) => v.id));
+         uniqueVendorIds.forEach((vendorId) => {
+             TicketRes.append("vendor[]", vendorId);
+         });
+     }
+
+
+     if (ticketData.request_type_val == 4 && ticketData.statusVal > 1) {
+         const numberInput = document.querySelector(
+             "[name='number_of_resource']"
+         );
+         if (numberInput) {
+             TicketRes.append("number_of_resource", numberInput.value);
+         }
+     }
+
+     setSub(true);
+
+     axiosClient
+         .post("changeTicketStatus", TicketRes, {
+             headers: { "Content-Type": "multipart/form-data" },
+         })
+         .then(({ data }) => {
+             switch (data.type) {
+                 case "success":
+                     setTemp(!temp);
+                     setStatusInput("");
+                     setFileInput("");
+                     setCommentInput("");
+                     setSelectedVendors([]); 
+                     toast.success(
+                         "The Vendor has been successfully selected."
+                     );
+                     break;
+                 case "error":
+                     toast.error(data.message);
+                     break;
+             }
+             setSub(false);
+         })
+         .catch(() => {
+             toast.error("Something went wrong!");
+             setSub(false);
+         });
  };
+
 
     const AssignTicket = (event) => {
         
@@ -262,45 +295,95 @@ const ViewTicket = (props) => {
             });
         }
     };
+        const [queryParams, setQueryParams] = useState(null);
+        const [loading2, setLoading2] = useState(false);
+        const [perPage, setPerPage] = useState(10);
+        const [currentPage, setCurrentPage] = useState(1);
+        
+        const handleSearch = (searchParams) => {
+            setQueryParams(searchParams);
+            setCurrentPage(1);
+        };
+      const [vendors, setVendors] = useState([]);
+      const [fields, setFields] = useState([]);
+      const [lastPage, setLastPage] = useState(1);
+
+      const fetchData = useCallback(async () => {
+          const payload = {
+              per_page: perPage,
+              page: currentPage,
+              queryParams: queryParams,
+          };
+
+          try {
+              const { data } = await axiosClient.post("SearchVendors", payload);
+
+              setVendors(data.vendors.data);
+              setFields(data.fields);
+              setLastPage(data.vendors.last_page);
+          } catch (err) {
+              console.error(err);
+          }
+      }, [perPage, currentPage, queryParams]);
+
+
+      useEffect(() => {
+          fetchData();
+      }, [perPage, currentPage, queryParams]);
 
     return (
         <Fragment>
             {loading ? (
-                <div className="loader-box" >
-                    <Spinner attrSpinner={{ className: 'loader-6' }} />
+                <div className="loader-box">
+                    <Spinner attrSpinner={{ className: "loader-6" }} />
                 </div>
-            ) :
+            ) : (
                 <>
                     <Card>
-                        <CardHeader className=' b-l-primary p-b-0'>
+                        <CardHeader className=" b-l-primary p-b-0">
                             <H5>Ticket Details</H5>
                         </CardHeader>
                         <CardBody>
                             <div className="table-responsive">
-                                <Table className='table-bordered mb-10'>
+                                <Table className="table-bordered mb-10">
                                     <thead>
                                         <tr>
-                                            <th scope="col" >{'Ticket Number'}</th>
-                                            <th scope="col" >{'Request Type'}</th>
-                                            <th scope="col" >{'Brand'}</th>
-                                            <th scope="col" >{'Number Of Rescource'}</th>
-                                            <th scope="col">{'Service'}</th>
-                                            <th scope="col">{'Task Type	'}</th>
-                                            <th scope="col">{'Rate'}</th>
-                                            <th scope="col">{'Count'}</th>
-                                            <th scope="col">{'Unit'}</th>
-                                            <th scope="col">{'Currency'}</th>
-                                            <th scope="col">{'Source Language'}</th>
-                                            <th scope="col">{'Target Language'}</th>
-                                            <th scope="col">{'Start Date'}</th>
-                                            <th scope="col">{'Delivery Date'}</th>
-                                            <th scope="col">{'Subject Matter'}</th>
-                                            <th scope="col">{'Software'}</th>
-                                            <th scope="col">{'File Attachment'}</th>
-                                            <th scope="col">{'Status'}</th>
-                                            <th scope="col">{'Created By'}</th>
-                                            <th scope="col">{'Created At'}</th>
-
+                                            <th scope="col">
+                                                {"Ticket Number"}
+                                            </th>
+                                            <th scope="col">
+                                                {"Request Type"}
+                                            </th>
+                                            <th scope="col">{"Brand"}</th>
+                                            <th scope="col">
+                                                {"Number Of Rescource"}
+                                            </th>
+                                            <th scope="col">{"Service"}</th>
+                                            <th scope="col">{"Task Type	"}</th>
+                                            <th scope="col">{"Rate"}</th>
+                                            <th scope="col">{"Count"}</th>
+                                            <th scope="col">{"Unit"}</th>
+                                            <th scope="col">{"Currency"}</th>
+                                            <th scope="col">
+                                                {"Source Language"}
+                                            </th>
+                                            <th scope="col">
+                                                {"Target Language"}
+                                            </th>
+                                            <th scope="col">{"Start Date"}</th>
+                                            <th scope="col">
+                                                {"Delivery Date"}
+                                            </th>
+                                            <th scope="col">
+                                                {"Subject Matter"}
+                                            </th>
+                                            <th scope="col">{"Software"}</th>
+                                            <th scope="col">
+                                                {"File Attachment"}
+                                            </th>
+                                            <th scope="col">{"Status"}</th>
+                                            <th scope="col">{"Created By"}</th>
+                                            <th scope="col">{"Created At"}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -308,7 +391,9 @@ const ViewTicket = (props) => {
                                             <td>{ticketData.id}</td>
                                             <td>{ticketData.request_type}</td>
                                             <td>{ticket.brand.name}</td>
-                                            <td>{ticketData.number_of_resource}</td>
+                                            <td>
+                                                {ticketData.number_of_resource}
+                                            </td>
                                             <td>{ticketData.service}</td>
                                             <td>{ticketData.task_type}</td>
                                             <td>{ticketData.rate}</td>
@@ -323,9 +408,14 @@ const ViewTicket = (props) => {
                                             <td>{ticketData.software}</td>
                                             <td>
                                                 {ticketData.fileLink != null ? (
-                                                    <Link to={ticketData.fileLink} className='txt-dangers'>{'View File'}</Link>
+                                                    <Link
+                                                        to={ticketData.fileLink}
+                                                        className="txt-dangers"
+                                                    >
+                                                        {"View File"}
+                                                    </Link>
                                                 ) : (
-                                                    'No File Found'
+                                                    "No File Found"
                                                 )}
                                             </td>
                                             <td>{ticketData.status}</td>
@@ -333,285 +423,1028 @@ const ViewTicket = (props) => {
                                             <td>{ticketData.created_at}</td>
                                         </tr>
                                         <tr>
-                                            <th colSpan={2}>{'Requester Function'}</th>
-                                            <td colSpan={18} > {ticketData.requester_function} </td>
+                                            <th colSpan={2}>
+                                                {"Requester Function"}
+                                            </th>
+                                            <td colSpan={18}>
+                                                {" "}
+                                                {
+                                                    ticketData.requester_function
+                                                }{" "}
+                                            </td>
                                         </tr>
                                         <tr>
-                                            <th colSpan={2}>{'Comment'}</th>
-                                            <td colSpan={18} dangerouslySetInnerHTML={{ __html: ticketData.comment }} ></td>
+                                            <th colSpan={2}>{"Comment"}</th>
+                                            <td
+                                                colSpan={18}
+                                                dangerouslySetInnerHTML={{
+                                                    __html: ticketData.comment,
+                                                }}
+                                            ></td>
                                         </tr>
-                                        {ticketData.statusVal == 0 &&
+                                        {ticketData.statusVal == 0 && (
                                             <tr>
-                                                <th colSpan={2}>{'Rejection Reason'}</th>
-                                                <td colSpan={18} dangerouslySetInnerHTML={{ __html: ticketData.rejection_reason }} ></td>
+                                                <th colSpan={2}>
+                                                    {"Rejection Reason"}
+                                                </th>
+                                                <td
+                                                    colSpan={18}
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: ticketData.rejection_reason,
+                                                    }}
+                                                ></td>
                                             </tr>
-                                        }
-                                        {ticketData.assignedUser != 0 &&
+                                        )}
+                                        {ticketData.assignedUser != 0 && (
                                             <tr>
-                                                <th colSpan={2}>{'Assigned To'}</th>
-                                                <td colSpan={18}>{ticketData.assignedUser}</td>
+                                                <th colSpan={2}>
+                                                    {"Assigned To"}
+                                                </th>
+                                                <td colSpan={18}>
+                                                    {ticketData.assignedUser}
+                                                </td>
                                             </tr>
-                                        }
+                                        )}
                                     </tbody>
                                 </Table>
                             </div>
                         </CardBody>
                     </Card>
                     {/*  Assign Ticket */}
-                    {assignPermission == 1 && statusInput != '0' && (ticketData.statusVal == 1 || ticketData.statusVal == 2 ) &&  (
-                        <>
-                            <Card>
-                                <CardHeader className='b-t-primary p-b-0'>
-                                    <Row>
-                                        <Col sm="9">
-                                            <H5>  Assign Ticket To Vm Team </H5>
-                                        </Col>
-                                    </Row>
-                                </CardHeader>
-                                <CardBody>
-                                    <form onSubmit={AssignTicket}>
-                                        <FormGroup className="row">
-                                            <Label className="col-sm-3 col-form-label">{'Assign Ticket To'}</Label>
-                                            <Col sm="7">
-                                                <Select name='vmUser' id='vmUser' required
-                                                    options={vmUsers} className="js-example-basic-single" />
+                    {assignPermission == 1 &&
+                        statusInput != "0" &&
+                        (ticketData.statusVal == 1 ||
+                            ticketData.statusVal == 2) && (
+                            <>
+                                <Card>
+                                    <CardHeader className="b-t-primary p-b-0">
+                                        <Row>
+                                            <Col sm="9">
+                                                <H5>
+                                                    {" "}
+                                                    Assign Ticket To Vm Team{" "}
+                                                </H5>
                                             </Col>
-                                            <Col sm="2">
-                                                <Btn attrBtn={{ color: 'primary', type: 'submit',disabled: sub,  }}><i className="fa fa-send-o"></i> {sub ? (
-                                                                                                                                      <>
-                                                                                                                                          <Spinner size="sm" />{" "}
-                                                                                                                                          Sending...
-                                                                                                                                      </>
-                                                                                                                                  ) : (
-                                                                                                                                      "Send"
-                                                                                                                                  )}</Btn>
-                                            </Col>
-                                        </FormGroup>
-                                    </form>
-
-                                </CardBody>
-                            </Card>
-                        </>)}
+                                        </Row>
+                                    </CardHeader>
+                                    <CardBody>
+                                        <form onSubmit={AssignTicket}>
+                                            <FormGroup className="row">
+                                                <Label className="col-sm-3 col-form-label">
+                                                    {"Assign Ticket To"}
+                                                </Label>
+                                                <Col sm="7">
+                                                    <Select
+                                                        name="vmUser"
+                                                        id="vmUser"
+                                                        required
+                                                        options={vmUsers}
+                                                        className="js-example-basic-single"
+                                                    />
+                                                </Col>
+                                                <Col sm="2">
+                                                    <Btn
+                                                        attrBtn={{
+                                                            color: "primary",
+                                                            type: "submit",
+                                                            disabled: sub,
+                                                        }}
+                                                    >
+                                                        <i className="fa fa-send-o"></i>{" "}
+                                                        {sub ? (
+                                                            <>
+                                                                <Spinner size="sm" />{" "}
+                                                                Sending...
+                                                            </>
+                                                        ) : (
+                                                            "Send"
+                                                        )}
+                                                    </Btn>
+                                                </Col>
+                                            </FormGroup>
+                                        </form>
+                                    </CardBody>
+                                </Card>
+                            </>
+                        )}
                     {/*  action */}
                     <Card>
-                        <CardHeader className='b-t-primary p-b-0'>
+                        <CardHeader className="b-t-primary p-b-0">
                             <Row>
                                 <Col sm="9">
-                                    <H5>  Ticket Action   </H5>
+                                    <H5> Ticket Action </H5>
                                 </Col>
                             </Row>
                         </CardHeader>
                         <CardBody>
-                            <form id="changeStatusForm" onSubmit={changeTicketStatus}>
+                            <div id="changeStatusForm">
                                 {ticketData.statusVal <= 5 && (
                                     <>
                                         <FormGroup className="row mt-2">
-                                            <Label className="col-sm-3 col-form-label">{'Ticket Status'}</Label>
+                                            <Label className="col-sm-3 col-form-label">
+                                                {"Ticket Status"}
+                                            </Label>
                                             <Col sm="9">
-                                                <Input type="select" name="status" className="custom-select form-control" defaultValue={ticketData.statusVal} onChange={e => setStatusInput(e.target.value)}
-                                                    disabled={ticketData.statusVal == 5 || ticketData.statusVal == 0 || ticketData.statusVal == 4 ? true : false}>
-                                                    {ticketData.statusVal == 1 &&
-                                                        <>
-                                                            <option value="1" disabled>{'New'}</option>
-                                                            <option value="2">{'Opened'}</option>
-                                                            <option value="0">{'Reject'}</option>
-                                                        </>
-                                                    }{ticketData.statusVal == 2 &&
-                                                        <>
-                                                            <option value="2">{'Opened'}</option>
-                                                            <option value="3">{'Partly Closed'}</option>
-                                                        </>
-                                                    }{ticketData.statusVal == 3 &&
-                                                        <>
-                                                            <option value="3">{'Partly Closed'}</option>
-                                                            <option value="4">{'Closed'}</option>
-                                                        </>
-                                                    }{ticketData.statusVal == 5 &&
-                                                        <option value="5" >{'Waiting Requester Acceptance'}</option>
-                                                    }{ticketData.statusVal == 4 &&
-                                                        <option value="4" >{'Closed'}</option>
-                                                    }{ticketData.statusVal == 0 &&
-                                                        <option value="0" >{'Rejected'}</option>
+                                                <Input
+                                                    type="select"
+                                                    name="status"
+                                                    className="custom-select form-control"
+                                                    defaultValue={
+                                                        ticketData.statusVal
                                                     }
+                                                    onChange={(e) =>
+                                                        setStatusInput(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        ticketData.statusVal ==
+                                                            5 ||
+                                                        ticketData.statusVal ==
+                                                            0 ||
+                                                        ticketData.statusVal ==
+                                                            4
+                                                            ? true
+                                                            : false
+                                                    }
+                                                >
+                                                    {ticketData.statusVal ==
+                                                        1 && (
+                                                        <>
+                                                            <option
+                                                                value="1"
+                                                                disabled
+                                                            >
+                                                                {"New"}
+                                                            </option>
+                                                            <option value="2">
+                                                                {"Opened"}
+                                                            </option>
+                                                            <option value="0">
+                                                                {"Reject"}
+                                                            </option>
+                                                        </>
+                                                    )}
+                                                    {ticketData.statusVal ==
+                                                        2 && (
+                                                        <>
+                                                            <option value="2">
+                                                                {"Opened"}
+                                                            </option>
+                                                            <option value="3">
+                                                                {
+                                                                    "Partly Closed"
+                                                                }
+                                                            </option>
+                                                        </>
+                                                    )}
+                                                    {ticketData.statusVal ==
+                                                        3 && (
+                                                        <>
+                                                            <option value="3">
+                                                                {
+                                                                    "Partly Closed"
+                                                                }
+                                                            </option>
+                                                            <option value="4">
+                                                                {"Closed"}
+                                                            </option>
+                                                        </>
+                                                    )}
+                                                    {ticketData.statusVal ==
+                                                        5 && (
+                                                        <option value="5">
+                                                            {
+                                                                "Waiting Requester Acceptance"
+                                                            }
+                                                        </option>
+                                                    )}
+                                                    {ticketData.statusVal ==
+                                                        4 && (
+                                                        <option value="4">
+                                                            {"Closed"}
+                                                        </option>
+                                                    )}
+                                                    {ticketData.statusVal ==
+                                                        0 && (
+                                                        <option value="0">
+                                                            {"Rejected"}
+                                                        </option>
+                                                    )}
                                                 </Input>
                                             </Col>
                                         </FormGroup>
-                                        {statusInput == '0' &&
+                                        {statusInput == "0" && (
                                             <FormGroup className="row mt-2">
-                                                <Label className="col-sm-3 col-form-label">{'Rejection Reason '}</Label>
+                                                <Label className="col-sm-3 col-form-label">
+                                                    {"Rejection Reason "}
+                                                </Label>
                                                 <Col sm="9">
-                                                    <CKEditor name="comment" required
+                                                    <CKEditor
+                                                        name="comment"
+                                                        required
                                                         editor={ClassicEditor}
-                                                        onChange={(e, editor) => {
-                                                            const data = editor.getData();
-                                                            setCommentInput(data);
+                                                        onChange={(
+                                                            e,
+                                                            editor
+                                                        ) => {
+                                                            const data =
+                                                                editor.getData();
+                                                            setCommentInput(
+                                                                data
+                                                            );
                                                         }}
                                                     />
                                                 </Col>
                                             </FormGroup>
-                                        }
+                                        )}
                                         <hr />
                                     </>
                                 )}
                                 {/*  CV Request */}
-                                {statusInput != '0' && ticketData.request_type_val == 5 && ticketData.statusVal > 1 && (
-                                    ticketData.statusVal == 2 ?
+                                {statusInput != "0" &&
+                                    ticketData.request_type_val == 5 &&
+                                    ticketData.statusVal > 1 &&
+                                    (ticketData.statusVal == 2 ? (
                                         <FormGroup className="row mt-2">
-                                            <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
-                                            <Col sm="9">
-                                                <Input className="form-control" type="file" onChange={e => setFileInput(e.target.files[0])} required={ticketData.statusVal == 1 ? false : true} />
-                                            </Col>
-                                        </FormGroup>
-                                        :
-                                        ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 &&
-                                        ticketData['TicketResource'].map((item, i) => (
-                                            <Row key={i} className="row mt-2">
-                                                <Col>
-                                                    <Label className="col-sm-3 col-form-label">{'Attachment'}</Label>
-                                                    <button type='reset' onClick={() => handleDownload("tickets/" + item.file)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2 '> <i className="fa fa-download"></i> {'Click Here'}</button>
-                                                </Col>
-                                            </Row>
-                                        ))
-                                )}
-                                {/*  Resource Availabilty */}
-                                {statusInput != '0' && ticketData.request_type_val == 4 && ticketData.statusVal > 1 && (
-                                    ticketData.statusVal == 2 ?
-                                        <FormGroup className="row mt-2">
-                                            <Label className="col-sm-3 col-form-label">{'Number Of Resources'}</Label>
-                                            <Col sm="9">
-                                                <Input className="form-control" type="number" name='number_of_resource' defaultValue={ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ? ticketData['TicketResource'][0]['number_of_resource'] : ''} required={ticketData.statusVal == 1 ? false : true} />
-                                            </Col>
-                                        </FormGroup>
-                                        :
-                                        <FormGroup className="row mt-2">
-                                            <Label className="col-sm-3 col-form-label">{'Number Of Resources'}</Label>
-                                            <Col sm="9">
-                                                <Input className="form-control" defaultValue={ticketData['TicketResource'] != null && (ticketData['TicketResource']).length > 0 ? ticketData['TicketResource'][0]['number_of_resource'] : ''} disabled />
-                                            </Col>
-                                        </FormGroup>
-                                )}
-                                {/*  new Resource  */}
-                                {statusInput != '0' && (ticketData.request_type_val == 1 || ticketData.request_type_val == 3) && ticketData.statusVal > 1 &&
-                                    <>
-                                        {ticketData.statusVal == 2 &&
-                                       <FormGroup className="row mt-3">
-                                        {/* Vendor */}
-                                        <Col md="12">
-                                            <Label className="col-form-label-sm f-12 mb-1" htmlFor="vendor">
-                                            Select Vendor
+                                            <Label className="col-sm-3 col-form-label">
+                                                {"Attachment"}
                                             </Label>
-                                            <Select
-                                            id="vendor"
-                                            name="vendor"
-                                            options={optionsV}
-                                            className="js-example-basic-single"
-                                            isMulti
-                                            required={resourceVendors != null || ticketData.statusVal == 1 ? false : true}
-                                            onInputChange={(inputValue) =>
-                                                handleInputChange(inputValue, "vendors", "vendor", setOptionsV, optionsV)
-                                            }
-                                            />
-                                        </Col>
+                                            <Col sm="9">
+                                                <Input
+                                                    className="form-control"
+                                                    type="file"
+                                                    onChange={(e) =>
+                                                        setFileInput(
+                                                            e.target.files[0]
+                                                        )
+                                                    }
+                                                    required={
+                                                        ticketData.statusVal ==
+                                                        1
+                                                            ? false
+                                                            : true
+                                                    }
+                                                />
+                                            </Col>
                                         </FormGroup>
-
-
-                                        }
-                                        {resourceVendors != null && (resourceVendors).length > 0 &&
-                                            <div className="table-responsive mt-5">
-                                                <Table className='table-bordered mb-10'>
-                                                    <thead>
-                                                        <tr>
-                                                            <th scope="col" >{'Name'}</th>
-                                                            <th scope="col" >{'Email'}</th>
-                                                            <th scope="col" >{'Contact'}</th>
-                                                            <th scope="col" >{'Country of Residence'}</th>
-                                                            <th scope="col">{'Mother Tongue'}</th>
-                                                            <th scope="col">{'Profile'}</th>
-                                                            <th scope="col">{'Source Language'}</th>
-                                                            <th scope="col">{'Target Language'}</th>
-                                                            <th scope="col">{'Dialect'}</th>
-                                                            <th scope="col">{'Service'}</th>
-                                                            <th scope="col">{'Task Type'}</th>
-                                                            <th scope="col">{'Unit'}</th>
-                                                            <th scope="col">{'Rate'}</th>
-                                                            <th scope="col">{'Currency'}</th>
-                                                            <th scope="col">{'Created By'}</th>
-                                                            {ticketData.statusVal != 4 &&
-                                                                <th scope="col">{'Delete'}</th>
+                                    ) : (
+                                        ticketData["TicketResource"] != null &&
+                                        ticketData["TicketResource"].length >
+                                            0 &&
+                                        ticketData["TicketResource"].map(
+                                            (item, i) => (
+                                                <Row
+                                                    key={i}
+                                                    className="row mt-2"
+                                                >
+                                                    <Col>
+                                                        <Label className="col-sm-3 col-form-label">
+                                                            {"Attachment"}
+                                                        </Label>
+                                                        <button
+                                                            type="reset"
+                                                            onClick={() =>
+                                                                handleDownload(
+                                                                    "tickets/" +
+                                                                        item.file
+                                                                )
                                                             }
+                                                            className="btn btn-sm btn-trasparent txt-danger p-0 mt-2 "
+                                                        >
+                                                            {" "}
+                                                            <i className="fa fa-download"></i>{" "}
+                                                            {"Click Here"}
+                                                        </button>
+                                                    </Col>
+                                                </Row>
+                                            )
+                                        )
+                                    ))}
+                                {/*  Resource Availabilty */}
+                                {statusInput != "0" &&
+                                    ticketData.request_type_val == 4 &&
+                                    ticketData.statusVal > 1 &&
+                                    (ticketData.statusVal == 2 ? (
+                                        <FormGroup className="row mt-2">
+                                            <Label className="col-sm-3 col-form-label">
+                                                {"Number Of Resources"}
+                                            </Label>
+                                            <Col sm="9">
+                                                <Input
+                                                    className="form-control"
+                                                    type="number"
+                                                    name="number_of_resource"
+                                                    defaultValue={
+                                                        ticketData[
+                                                            "TicketResource"
+                                                        ] != null &&
+                                                        ticketData[
+                                                            "TicketResource"
+                                                        ].length > 0
+                                                            ? ticketData[
+                                                                  "TicketResource"
+                                                              ][0][
+                                                                  "number_of_resource"
+                                                              ]
+                                                            : ""
+                                                    }
+                                                    required={
+                                                        ticketData.statusVal ==
+                                                        1
+                                                            ? false
+                                                            : true
+                                                    }
+                                                />
+                                            </Col>
+                                        </FormGroup>
+                                    ) : (
+                                        <FormGroup className="row mt-2">
+                                            <Label className="col-sm-3 col-form-label">
+                                                {"Number Of Resources"}
+                                            </Label>
+                                            <Col sm="9">
+                                                <Input
+                                                    className="form-control"
+                                                    defaultValue={
+                                                        ticketData[
+                                                            "TicketResource"
+                                                        ] != null &&
+                                                        ticketData[
+                                                            "TicketResource"
+                                                        ].length > 0
+                                                            ? ticketData[
+                                                                  "TicketResource"
+                                                              ][0][
+                                                                  "number_of_resource"
+                                                              ]
+                                                            : ""
+                                                    }
+                                                    disabled
+                                                />
+                                            </Col>
+                                        </FormGroup>
+                                    ))}
+                                {/*  new Resource  */}
+                                {statusInput != "0" &&
+                                    (ticketData.request_type_val == 1 ||
+                                        ticketData.request_type_val == 3) &&
+                                    ticketData.statusVal > 1 && (
+                                        <>
+                                            {ticketData.statusVal == 2 && (
+                                                <>
+                                                    <VendorSearch
+                                                        onSearch={handleSearch}
+                                                        loading2={loading2}
+                                                    />
 
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {resourceVendors.map((item, i) => (
-                                                            <tr key={i}>
-                                                                <td>{item['vendor'].name}</td>
-                                                                <td>{item['vendor'].email}</td>
-                                                                <td>{item['vendor'].contact}</td>
-                                                                <td>{item['vendor']['country']?.name}</td>
-                                                                <td>{item['vendor'].mother_tongue}</td>
-                                                                <td>{item['vendor'].profile}</td>
-                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['source_lang']?.name}</td>
-                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['target_lang']?.name}</td>
-                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.dialect}</td>
-                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['service']?.name}</td>
-                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['task_type']?.name}</td>
-                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['unit']?.name}</td>
-                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.rate}</td>
-                                                                <td>{item['vendor']['vendor_sheet']?.[0]?.['currency']?.name}</td>
-                                                                <td>{item['vendor']?.['created_by']?.user_name}</td>
-                                                                {ticketData.statusVal != 4 &&
-                                                                    <td>  <button type='reset' onClick={() => deleteRes(item.id)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'> <i className="icofont icofont-ui-delete"></i></button></td>
-                                                                }
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </Table>
-                                            </div>
-                                        }
-                                    </>
-                                }
-                                {ticketData.statusVal <= 3 && ticketData.statusVal != 0 && (
-                                    <Row className='mt-2'>
-                                        <Col className='text-end'>
-                                            <Btn attrBtn={{ color: 'primary', type: 'submit', disabled: sub, }}><i className="fa fa-check-square-o"></i>
-                                            {sub ? (
-                                                                                                                                  <>
-                                                                                                                                      <Spinner size="sm" />{" "}
-                                                                                                                                      Submitting...
-                                                                                                                                  </>
-                                                                                                                              ) : (
-                                                                                                                                  "Save Changes"
-                                                                                                                              )}
-                                            </Btn>
-                                        </Col>
-                                    </Row>
-                                )}
-                            </form>
+                                                    {vendors?.length > 0 && (
+                                                        <>
+                                                            <div
+                                                                className="mt-4"
+                                                                style={{
+                                                                    maxHeight:
+                                                                        "400px",
+                                                                    overflow:
+                                                                        "auto",
+                                                                }}
+                                                            >
+                                                                <table className="table table-bordered">
+                                                                    <thead
+                                                                        style={{
+                                                                            position:
+                                                                                "sticky",
+                                                                            top: 0,
+                                                                            backgroundColor:
+                                                                                "#fff",
+                                                                            zIndex: 1,
+                                                                        }}
+                                                                    >
+                                                                        <tr>
+                                                                            <th>
+                                                                                <input type="checkbox" />
+                                                                            </th>
+                                                                            {fields.map(
+                                                                                (
+                                                                                    field
+                                                                                ) => (
+                                                                                    <th
+                                                                                        key={
+                                                                                            field
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            field
+                                                                                        }
+                                                                                    </th>
+                                                                                )
+                                                                            )}
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {vendors.map(
+                                                                            (
+                                                                                vendor,
+                                                                                index
+                                                                            ) => (
+                                                                                <tr
+                                                                                    key={
+                                                                                        vendor.id +
+                                                                                        "-" +
+                                                                                        index
+                                                                                    }
+                                                                                >
+                                                                                    <td>
+                                                                                        <input
+                                                                                            type="checkbox"
+                                                                                            checked={selectedVendors.some(
+                                                                                                (
+                                                                                                    v
+                                                                                                ) =>
+                                                                                                    v.rowKey ===
+                                                                                                    index
+                                                                                            )}
+                                                                                            onChange={() =>
+                                                                                                handleCheckboxChange(
+                                                                                                    vendor,
+                                                                                                    index
+                                                                                                )
+                                                                                            }
+                                                                                        />
+                                                                                    </td>
+                                                                                    {fields.map(
+                                                                                        (
+                                                                                            field
+                                                                                        ) => {
+                                                                                            const value =
+                                                                                                vendor[
+                                                                                                    field
+                                                                                                ];
+                                                                                            return (
+                                                                                                <td
+                                                                                                    key={
+                                                                                                        vendor.id +
+                                                                                                        "-" +
+                                                                                                        field +
+                                                                                                        "-" +
+                                                                                                        index
+                                                                                                    }
+                                                                                                >
+                                                                                                    {value &&
+                                                                                                    typeof value ===
+                                                                                                        "object" &&
+                                                                                                    !Array.isArray(
+                                                                                                        value
+                                                                                                    )
+                                                                                                        ? Object.values(
+                                                                                                              value
+                                                                                                          )[1] ??
+                                                                                                          ""
+                                                                                                        : value ??
+                                                                                                          ""}
+                                                                                                </td>
+                                                                                            );
+                                                                                        }
+                                                                                    )}
+                                                                                </tr>
+                                                                            )
+                                                                        )}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <div className="mt-4">
+                                                                <h5>
+                                                                    Selected
+                                                                    Vendors
+                                                                </h5>
+                                                                {selectedVendors.length ===
+                                                                0 ? (
+                                                                    <p>
+                                                                        No
+                                                                        vendors
+                                                                        selected
+                                                                    </p>
+                                                                ) : (
+                                                                    <div
+                                                                        style={{
+                                                                            maxHeight:
+                                                                                "300px",
+                                                                            overflowY:
+                                                                                "auto",
+                                                                        }}
+                                                                    >
+                                                                        <table className="table table-bordered table-sm">
+                                                                            <thead
+                                                                                className="table-light"
+                                                                                style={{
+                                                                                    position:
+                                                                                        "sticky",
+                                                                                    top: 0,
+                                                                                    zIndex: 1,
+                                                                                }}
+                                                                            >
+                                                                                <tr>
+                                                                                    <th>
+                                                                                        Name
+                                                                                    </th>
+                                                                                    {fields.map(
+                                                                                        (
+                                                                                            field
+                                                                                        ) => (
+                                                                                            <th
+                                                                                                key={
+                                                                                                    field
+                                                                                                }
+                                                                                            >
+                                                                                                {
+                                                                                                    field
+                                                                                                }
+                                                                                            </th>
+                                                                                        )
+                                                                                    )}
+                                                                                    <th>
+                                                                                        Action
+                                                                                    </th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {selectedVendors.map(
+                                                                                    (
+                                                                                        vendor
+                                                                                    ) => (
+                                                                                        <tr
+                                                                                            key={
+                                                                                                vendor.id
+                                                                                            }
+                                                                                        >
+                                                                                            <td>
+                                                                                                {
+                                                                                                    vendor.name
+                                                                                                }
+                                                                                            </td>
+                                                                                            {fields.map(
+                                                                                                (
+                                                                                                    field
+                                                                                                ) => {
+                                                                                                    const value =
+                                                                                                        vendor[
+                                                                                                            field
+                                                                                                        ];
+                                                                                                    return (
+                                                                                                        <td
+                                                                                                            key={
+                                                                                                                vendor.id +
+                                                                                                                "-" +
+                                                                                                                field
+                                                                                                            }
+                                                                                                        >
+                                                                                                            {value &&
+                                                                                                            typeof value ===
+                                                                                                                "object" &&
+                                                                                                            !Array.isArray(
+                                                                                                                value
+                                                                                                            )
+                                                                                                                ? Object.values(
+                                                                                                                      value
+                                                                                                                  )[1] ??
+                                                                                                                  ""
+                                                                                                                : value ??
+                                                                                                                  ""}
+                                                                                                        </td>
+                                                                                                    );
+                                                                                                }
+                                                                                            )}
+                                                                                            <td>
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    className="btn btn-sm btn-danger"
+                                                                                                    onClick={() =>
+                                                                                                        setSelectedVendors(
+                                                                                                            (
+                                                                                                                prev
+                                                                                                            ) =>
+                                                                                                                prev.filter(
+                                                                                                                    (
+                                                                                                                        v
+                                                                                                                    ) =>
+                                                                                                                        v.id !==
+                                                                                                                        vendor.id
+                                                                                                                )
+                                                                                                        )
+                                                                                                    }
+                                                                                                >
+                                                                                                    Remove
+                                                                                                </button>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    )
+                                                                                )}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {/* Pagination */}
+                                                            <div className="d-flex justify-content-between align-items-center mt-3">
+                                                                <button
+                                                                    className="btn btn-secondary"
+                                                                    disabled={
+                                                                        currentPage ===
+                                                                        1
+                                                                    }
+                                                                    onClick={() =>
+                                                                        setCurrentPage(
+                                                                            (
+                                                                                prev
+                                                                            ) =>
+                                                                                prev -
+                                                                                1
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Previous
+                                                                </button>
+
+                                                                <span>
+                                                                    Page{" "}
+                                                                    {
+                                                                        currentPage
+                                                                    }{" "}
+                                                                    of{" "}
+                                                                    {lastPage}
+                                                                </span>
+
+                                                                <button
+                                                                    className="btn btn-secondary"
+                                                                    disabled={
+                                                                        currentPage ===
+                                                                        lastPage
+                                                                    }
+                                                                    onClick={() =>
+                                                                        setCurrentPage(
+                                                                            (
+                                                                                prev
+                                                                            ) =>
+                                                                                prev +
+                                                                                1
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Next
+                                                                </button>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </>
+                                            )}
+
+                                            {resourceVendors != null &&
+                                                resourceVendors.length > 0 && (
+                                                    <div className="table-responsive mt-5">
+                                                        <Table className="table-bordered mb-10">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col">
+                                                                        {"Name"}
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Email"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Contact"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Country of Residence"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Mother Tongue"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Profile"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Source Language"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Target Language"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Dialect"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Service"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Task Type"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {"Unit"}
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {"Rate"}
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Currency"
+                                                                        }
+                                                                    </th>
+                                                                    <th scope="col">
+                                                                        {
+                                                                            "Created By"
+                                                                        }
+                                                                    </th>
+                                                                    {ticketData.statusVal !=
+                                                                        4 && (
+                                                                        <th scope="col">
+                                                                            {
+                                                                                "Delete"
+                                                                            }
+                                                                        </th>
+                                                                    )}
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {resourceVendors.map(
+                                                                    (
+                                                                        item,
+                                                                        i
+                                                                    ) => (
+                                                                        <tr
+                                                                            key={
+                                                                                i
+                                                                            }
+                                                                        >
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ]
+                                                                                        .name
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ]
+                                                                                        .email
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ]
+                                                                                        .contact
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ][
+                                                                                        "country"
+                                                                                    ]
+                                                                                        ?.name
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ]
+                                                                                        .mother_tongue
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ]
+                                                                                        .profile
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ][
+                                                                                        "vendor_sheet"
+                                                                                    ]?.[0]?.[
+                                                                                        "source_lang"
+                                                                                    ]
+                                                                                        ?.name
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ][
+                                                                                        "vendor_sheet"
+                                                                                    ]?.[0]?.[
+                                                                                        "target_lang"
+                                                                                    ]
+                                                                                        ?.name
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ][
+                                                                                        "vendor_sheet"
+                                                                                    ]?.[0]
+                                                                                        ?.dialect
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ][
+                                                                                        "vendor_sheet"
+                                                                                    ]?.[0]?.[
+                                                                                        "service"
+                                                                                    ]
+                                                                                        ?.name
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ][
+                                                                                        "vendor_sheet"
+                                                                                    ]?.[0]?.[
+                                                                                        "task_type"
+                                                                                    ]
+                                                                                        ?.name
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ][
+                                                                                        "vendor_sheet"
+                                                                                    ]?.[0]?.[
+                                                                                        "unit"
+                                                                                    ]
+                                                                                        ?.name
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ][
+                                                                                        "vendor_sheet"
+                                                                                    ]?.[0]
+                                                                                        ?.rate
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ][
+                                                                                        "vendor_sheet"
+                                                                                    ]?.[0]?.[
+                                                                                        "currency"
+                                                                                    ]
+                                                                                        ?.name
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                {
+                                                                                    item[
+                                                                                        "vendor"
+                                                                                    ]?.[
+                                                                                        "created_by"
+                                                                                    ]
+                                                                                        ?.user_name
+                                                                                }
+                                                                            </td>
+                                                                            {ticketData.statusVal !=
+                                                                                4 && (
+                                                                                <td>
+                                                                                    {" "}
+                                                                                    <button
+                                                                                        type="reset"
+                                                                                        onClick={() =>
+                                                                                            deleteRes(
+                                                                                                item.id
+                                                                                            )
+                                                                                        }
+                                                                                        className="btn btn-sm btn-trasparent txt-danger p-0 mt-2"
+                                                                                    >
+                                                                                        {" "}
+                                                                                        <i className="icofont icofont-ui-delete"></i>
+                                                                                    </button>
+                                                                                </td>
+                                                                            )}
+                                                                        </tr>
+                                                                    )
+                                                                )}
+                                                            </tbody>
+                                                        </Table>
+                                                    </div>
+                                                )}
+                                        </>
+                                    )}
+                                {ticketData.statusVal <= 3 &&
+                                    ticketData.statusVal != 0 && (
+                                        <Row className="mt-2">
+                                            <Col className="text-end">
+                                                <Btn
+                                                    attrBtn={{
+                                                        color: "primary",
+                                                        type: "button",
+                                                        disabled: sub,
+                                                        onClick:
+                                                            changeTicketStatus,
+                                                    }}
+                                                >
+                                                    <i className="fa fa-check-square-o"></i>
+                                                    {sub ? (
+                                                        <>
+                                                            <Spinner size="sm" />{" "}
+                                                            Submitting...
+                                                        </>
+                                                    ) : (
+                                                        "Save Changes"
+                                                    )}
+                                                </Btn>
+                                            </Col>
+                                        </Row>
+                                    )}
+                            </div>
                         </CardBody>
                     </Card>
                     {/*  response */}
                     <Card>
-                        <CardHeader className='b-t-primary p-b-0'>
+                        <CardHeader className="b-t-primary p-b-0">
                             <Row>
                                 <Col sm="9">
-                                    <H5>  Ticket Response   </H5>
+                                    <H5> Ticket Response </H5>
                                 </Col>
                                 <Col sm="3">
-                                    {ticketData.statusVal == 2 && statusInput != '0' && (
-                                        <>
-                                            <ResponseModal isOpen={modal} title={'Add Response'} toggler={toggle} fromInuts={res} sendDataToParent={toggle} changeTicketData={changeData} size="xl" ></ResponseModal>
-                                            <div className="pro-shop text-end">
-                                                <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle }}><i className="icofont icofont-ui-messaging me-2"></i> {'Add Response'}</Btn>
-                                            </div>
-                                        </>
-                                    )}
+                                    {ticketData.statusVal == 2 &&
+                                        statusInput != "0" && (
+                                            <>
+                                                <ResponseModal
+                                                    isOpen={modal}
+                                                    title={"Add Response"}
+                                                    toggler={toggle}
+                                                    fromInuts={res}
+                                                    sendDataToParent={toggle}
+                                                    changeTicketData={
+                                                        changeData
+                                                    }
+                                                    size="xl"
+                                                ></ResponseModal>
+                                                <div className="pro-shop text-end">
+                                                    <Btn
+                                                        attrBtn={{
+                                                            color: "primary",
+                                                            className:
+                                                                "btn btn-primary me-2",
+                                                            onClick: toggle,
+                                                        }}
+                                                    >
+                                                        <i className="icofont icofont-ui-messaging me-2"></i>{" "}
+                                                        {"Add Response"}
+                                                    </Btn>
+                                                </div>
+                                            </>
+                                        )}
                                 </Col>
                             </Row>
                         </CardHeader>
                         <CardBody>
                             <div className="table-responsive">
-                                <Table className='table-bordered mb-10'>
+                                <Table className="table-bordered mb-10">
                                     <thead>
                                         <tr>
                                             <th>Username</th>
@@ -620,29 +1453,67 @@ const ViewTicket = (props) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {ticketData['Response'] ? (
+                                        {ticketData["Response"] ? (
                                             <>
-                                                {ticketData['Response'].map((item, index) => (
-                                                    <tr key={index}>
-                                                        <td scope="row">{item.created_by}</td>
-                                                        <td scope="row">
-                                                            <p className='mb-0' dangerouslySetInnerHTML={{ __html: item.response }} />
-                                                            <div className="clearfix"></div>
-                                                            {item.fileLink != null && item.fileLink.trim() != '' && (
-                                                                <button onClick={() => handleDownload("tickets/" + item.fileLink)} className='btn btn-sm btn-trasparent txt-danger p-0 mt-2'>Attachment : <i className="fa fa-download"></i> {'View File'}</button>
-                                                            )}
-                                                        </td>
-                                                        <td scope="row">{item.created_at}</td>
-                                                    </tr>
-                                                ))}
+                                                {ticketData["Response"].map(
+                                                    (item, index) => (
+                                                        <tr key={index}>
+                                                            <td scope="row">
+                                                                {
+                                                                    item.created_by
+                                                                }
+                                                            </td>
+                                                            <td scope="row">
+                                                                <p
+                                                                    className="mb-0"
+                                                                    dangerouslySetInnerHTML={{
+                                                                        __html: item.response,
+                                                                    }}
+                                                                />
+                                                                <div className="clearfix"></div>
+                                                                {item.fileLink !=
+                                                                    null &&
+                                                                    item.fileLink.trim() !=
+                                                                        "" && (
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                handleDownload(
+                                                                                    "tickets/" +
+                                                                                        item.fileLink
+                                                                                )
+                                                                            }
+                                                                            className="btn btn-sm btn-trasparent txt-danger p-0 mt-2"
+                                                                        >
+                                                                            Attachment
+                                                                            :{" "}
+                                                                            <i className="fa fa-download"></i>{" "}
+                                                                            {
+                                                                                "View File"
+                                                                            }
+                                                                        </button>
+                                                                    )}
+                                                            </td>
+                                                            <td scope="row">
+                                                                {
+                                                                    item.created_at
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )}
                                             </>
-                                        ) :
+                                        ) : (
                                             <>
                                                 <tr>
-                                                    <td colSpan="3" className='text-center'>NO Data Found</td>
+                                                    <td
+                                                        colSpan="3"
+                                                        className="text-center"
+                                                    >
+                                                        NO Data Found
+                                                    </td>
                                                 </tr>
                                             </>
-                                        }
+                                        )}
                                     </tbody>
                                 </Table>
                             </div>
@@ -650,26 +1521,47 @@ const ViewTicket = (props) => {
                     </Card>
                     {/*  vm response */}
                     <Card>
-                        <CardHeader className='b-t-primary p-b-0'>
+                        <CardHeader className="b-t-primary p-b-0">
                             <Row>
                                 <Col sm="9">
-                                    <H5>  VM Team Ticket Comments  </H5>
+                                    <H5> VM Team Ticket Comments </H5>
                                 </Col>
                                 <Col sm="3">
-                                    {ticketData.statusVal == 2 && statusInput != '0' && (
-                                        <>
-                                            <VmResponseModal isOpen={modal2} title={'Add Comment'} toggler={toggle2} fromInuts={res} sendDataToParent={toggle2} changeTicketData={changeData} size="xl"></VmResponseModal>
-                                            <div className="pro-shop text-end">
-                                                <Btn attrBtn={{ color: 'primary', className: 'btn btn-primary me-2', onClick: toggle2 }}><i className="icofont icofont-ui-messaging me-2"></i> {'Add Comment'}</Btn>
-                                            </div>
-                                        </>
-                                    )}
+                                    {ticketData.statusVal == 2 &&
+                                        statusInput != "0" && (
+                                            <>
+                                                <VmResponseModal
+                                                    isOpen={modal2}
+                                                    title={"Add Comment"}
+                                                    toggler={toggle2}
+                                                    fromInuts={res}
+                                                    sendDataToParent={toggle2}
+                                                    changeTicketData={
+                                                        changeData
+                                                    }
+                                                    size="xl"
+                                                ></VmResponseModal>
+                                                <div className="pro-shop text-end">
+                                                    <Btn
+                                                        attrBtn={{
+                                                            color: "primary",
+                                                            className:
+                                                                "btn btn-primary me-2",
+                                                            onClick: toggle2,
+                                                        }}
+                                                    >
+                                                        <i className="icofont icofont-ui-messaging me-2"></i>{" "}
+                                                        {"Add Comment"}
+                                                    </Btn>
+                                                </div>
+                                            </>
+                                        )}
                                 </Col>
                             </Row>
                         </CardHeader>
                         <CardBody>
                             <div className="table-responsive">
-                                <Table className='table-bordered mb-10'>
+                                <Table className="table-bordered mb-10">
                                     <thead>
                                         <tr>
                                             <th>Username</th>
@@ -678,25 +1570,45 @@ const ViewTicket = (props) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {ticketData['TeamResponse'] ? (
+                                        {ticketData["TeamResponse"] ? (
                                             <>
-                                                {ticketData['TeamResponse'].map((item, index) => (
-                                                    <tr key={index}>
-                                                        <td scope="row">{item.created_by}</td>
-                                                        <td scope="row">
-                                                            <p className='mb-0' dangerouslySetInnerHTML={{ __html: item.response }} />
-                                                        </td>
-                                                        <td scope="row">{item.created_at}</td>
-                                                    </tr>
-                                                ))}
+                                                {ticketData["TeamResponse"].map(
+                                                    (item, index) => (
+                                                        <tr key={index}>
+                                                            <td scope="row">
+                                                                {
+                                                                    item.created_by
+                                                                }
+                                                            </td>
+                                                            <td scope="row">
+                                                                <p
+                                                                    className="mb-0"
+                                                                    dangerouslySetInnerHTML={{
+                                                                        __html: item.response,
+                                                                    }}
+                                                                />
+                                                            </td>
+                                                            <td scope="row">
+                                                                {
+                                                                    item.created_at
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )}
                                             </>
-                                        ) :
+                                        ) : (
                                             <>
                                                 <tr>
-                                                    <td colSpan="3" className='text-center'>NO Data Found</td>
+                                                    <td
+                                                        colSpan="3"
+                                                        className="text-center"
+                                                    >
+                                                        NO Data Found
+                                                    </td>
                                                 </tr>
                                             </>
-                                        }
+                                        )}
                                     </tbody>
                                 </Table>
                             </div>
@@ -704,55 +1616,67 @@ const ViewTicket = (props) => {
                     </Card>
                     {/*  time */}
                     <Card>
-                        <CardHeader className='b-t-primary p-b-0'>
+                        <CardHeader className="b-t-primary p-b-0">
                             <Row>
                                 <Col sm="12">
-                                    <H5>  Ticket Log  </H5>
+                                    <H5> Ticket Log </H5>
                                 </Col>
                             </Row>
                         </CardHeader>
                         <CardBody>
                             <div className="table-responsive">
-                                <Table className='table-bordered mb-10'>
+                                <Table className="table-bordered mb-10">
                                     <thead>
                                         <tr>
                                             <th>Username</th>
                                             <th>Ticket Status</th>
-                                            <th>Assigned To & Vendor resource</th>
+                                            <th>
+                                                Assigned To & Vendor resource
+                                            </th>
                                             <th>Created At</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr >
-                                            <td>
-                                                {ticketData.created_by}
-                                            </td>
+                                        <tr>
+                                            <td>{ticketData.created_by}</td>
                                             <td>New</td>
                                             <td></td>
 
-                                            <td>
-                                                {ticketData.created_at}
-                                            </td>
+                                            <td>{ticketData.created_at}</td>
                                         </tr>
-                                        {ticketData['Time'] && (
+                                        {ticketData["Time"] && (
                                             <>
-                                                {ticketData['Time'].map((item, index) => (
-                                                    <tr key={index}>
-                                                        <td scope="row">{item.created_by}</td>
-                                                        <td scope="row">
-                                                            {item.status}
-                                                        </td>
-                                                        <td scope="row">
-                                                            {item?.assign_to}
-                                                        </td>
-                                                        <td scope="row">{item.created_at}</td>
-                                                    </tr>
-                                                ))}
+                                                {ticketData["Time"].map(
+                                                    (item, index) => (
+                                                        <tr key={index}>
+                                                            <td scope="row">
+                                                                {
+                                                                    item.created_by
+                                                                }
+                                                            </td>
+                                                            <td scope="row">
+                                                                {item.status}
+                                                            </td>
+                                                            <td scope="row">
+                                                                {
+                                                                    item?.assign_to
+                                                                }
+                                                            </td>
+                                                            <td scope="row">
+                                                                {
+                                                                    item.created_at
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )}
                                             </>
                                         )}
-                                        <tr className='bg-light '>
+                                        <tr className="bg-light ">
                                             <th>Time taken</th>
-                                            <td colSpan={2}>{ticketData.TimeTaken}</td>
+                                            <td colSpan={2}>
+                                                {ticketData.TimeTaken}
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </Table>
@@ -760,7 +1684,7 @@ const ViewTicket = (props) => {
                         </CardBody>
                     </Card>
                 </>
-            }
+            )}
         </Fragment>
     );
 };
