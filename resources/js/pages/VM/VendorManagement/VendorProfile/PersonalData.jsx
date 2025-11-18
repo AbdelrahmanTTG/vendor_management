@@ -500,66 +500,66 @@ const PersonalData = React.memo((props) => {
               
                setValue("profile_status", profile_status);
            }
-          setValue("name", data.name);
-          setValue("email", data.email);
-          setValue("prfx_name", data.prfx_name);
-          setValue("vendor_source", data.vendor_source);
-          setValue("contact_name", data.contact_name);
-          setValue("legal_Name", data.legal_Name);
-          const country = data.country ? {
-            value: data.country.id,
-            label: data.country.name
+          setValue("name", data?.name);
+          setValue("email", data?.email);
+          setValue("prfx_name", data?.prfx_name);
+          setValue("vendor_source", data?.vendor_source);
+          setValue("contact_name", data?.contact_name);
+          setValue("legal_Name", data?.legal_Name);
+          const country = data?.country ? {
+            value: data?.country?.id,
+            label: data?.country?.name
           } : null;
           setSelectedOptionC(country);
-          setValue("country", country.value);
-          const extractedNumber = data.phone_number?.match(/(\+?\d+)/g)?.join('') || "";
+          setValue("country", country?.value);
+          const extractedNumber = data?.phone_number?.match(/(\+?\d+)/g)?.join('') || "";
           setValue("phone_number", extractedNumber);
-          setValue("Anothernumber", data.Anothernumber);
+          setValue("Anothernumber", data?.Anothernumber);
           const contact =
             [
-              { value: data.contact_linked_in, label: "LinkedIn" },
-              { value: data.contact_ProZ, label: "ProZ" },
-              { value: data.contact_other1, label: "other1" },
-              { value: data.contact_other2, label: "other2" },
-              { value: data.contact_other3, label: "other3" }
+              { value: data?.contact_linked_in, label: "LinkedIn" },
+              { value: data?.contact_ProZ, label: "ProZ" },
+              { value: data?.contact_other1, label: "other1" },
+              { value: data?.contact_other2, label: "other2" },
+              { value: data?.contact_other3, label: "other3" }
             ]
-          const filteredContact = contact.filter(item => item.value !== '' && item.value !== null);
+          const filteredContact = contact.filter(item => item?.value !== '' && item?.value !== null);
           setInputValues(filteredContact)
           setValue('contacts', filteredContact);
-          setValueContact('LinkedIn', data.contact_linked_in)
-          setValueContact('ProZ', data.contact_ProZ)
-          setValueContact('other1', data.contact_other1)
-          setValueContact('other2', data.contact_other2)
-          setValueContact('other3', data.contact_other3)
+          setValueContact('LinkedIn', data?.contact_linked_in)
+          setValueContact('ProZ', data?.contact_ProZ)
+          setValueContact('other1', data?.contact_other1)
+          setValueContact('other2', data?.contact_other2)
+          setValueContact('other3', data?.contact_other3)
           const region = data.region ? {
-            value: data.region.id,
-            label: data.region.name
+            value: data?.region?.id,
+            label: data?.region?.name
           } : null;
           setSelectedOptionR(region);
           setValue("region", region?.value);
-          const nationality = data.nationality ? {
-            value: data.nationality.id,
-            label: data.nationality.name
+          const nationality = data?.nationality ? {
+            value: data?.nationality?.id,
+            label: data?.nationality?.name
           } : null;
           setSelectedOptionN(nationality);
           setValue("nationality", nationality?.value);
-          const timezone = data.timezone ? {
-            value: data.timezone.id,
-            label: data.timezone.gmt
+          const timezone = data?.timezone ? {
+            value: data?.timezone?.id,
+            label: data?.timezone?.gmt
           } : null;
           setSelectedOptionT(timezone);
           setValue("timezone", timezone?.value);
 
-          setValue("street", data.street);
-          setValue("city", data.city);
-          setValue("address", data.address)
-          setValue('reject_reason', data.reject_reason);
-          setValue('note', data.note);
-          setValue('vendor_source', data.vendor_source);
-            if (data?.brands && data.brands.length > 0) {
-              const selected = data.brands.map((brand) => ({
-                  value: brand.id,
-                  label: brand.name,
+          setValue("street", data?.street);
+          setValue("city", data?.city);
+          setValue("address", data?.address)
+          setValue('reject_reason', data?.reject_reason);
+          setValue('note', data?.note);
+          setValue('vendor_source', data?.vendor_source);
+            if (data?.brands && data?.brands.length > 0) {
+              const selected = data?.brands.map((brand) => ({
+                  value: brand?.id,
+                  label: brand?.name,
               }));
 
               setSelectedBrands(selected);
@@ -570,9 +570,9 @@ const PersonalData = React.memo((props) => {
           }
              if (
                  data?.mother_tongue_languages &&
-                 data.mother_tongue_languages.length > 0
+                 data?.mother_tongue_languages?.length > 0
              ) {
-                 const selectedMotherTongues = data.mother_tongue_languages
+                 const selectedMotherTongues = data?.mother_tongue_languages
                  setValue("mother_tongue_language", selectedMotherTongues);
                  setSelectedOptionML(selectedMotherTongues);
              } else {
