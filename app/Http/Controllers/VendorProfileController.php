@@ -2016,7 +2016,7 @@ class VendorProfileController extends Controller
                     $vm_email  = env('MAIL_FROM_ADDRESS');
                     break;
             }
-            dd($nexusLink . "/home/instructions");
+
             $htmlTemplate = $this->getVendorEmailTemplate($vendor, $vendor->vendor_brands, $nexusLink);
 
             if (!$htmlTemplate) {
