@@ -1992,7 +1992,7 @@ class VendorProfileController extends Controller
             $nexusLink = env('NEXUS_LINK');
             switch ($vendor->vendor_brands) {
                 case 1:
-                    $subject   = "TTG || Nexus New Profile";
+                    $subject   = "The Translation Gate || Nexus New Profile";
                     $vm_email  = "vm.support@thetranslationgate.com";
                     $nexusLink .= "thetranslationgate.com";
                     break;
@@ -2054,7 +2054,7 @@ class VendorProfileController extends Controller
 
         switch ($brand) {
             case 1:
-                $title = "Nexus | Site Manager";
+                $title = "The Translation Gate | Site Manager";
                 break;
             case 2:
                 $title = "Localizera | Site Manager";
@@ -2066,6 +2066,7 @@ class VendorProfileController extends Controller
                 $title = "Columbuslang | Site Manager";
                 break;
             default:
+                $title = "Nexus | Site Manager";
                 return null;
         }
 
