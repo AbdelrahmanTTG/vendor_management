@@ -813,7 +813,7 @@ class VendorProfileController extends Controller
             'contact_name' => 'sometimes|nullable|string',
             'legal_Name' => 'sometimes|nullable|string',
             'phone_number' => 'sometimes|required|string',
-            'email' => 'sometimes|required|email', 
+            'email' => 'sometimes|required|email',
             'contact_linked_in' => 'sometimes|nullable|string',
             'contact_ProZ' => 'sometimes|nullable|string',
             'contact_other1' => 'sometimes|nullable|string',
@@ -1170,7 +1170,7 @@ class VendorProfileController extends Controller
             'create_billing',
             $request->fullUrl(),
             'billing_data',
-            $logData, 
+            $logData,
             $billingData->id
         );
 
@@ -1457,7 +1457,7 @@ class VendorProfileController extends Controller
                 $request->fullUrl(),
                 'messages',
                 array_merge($data->toArray(), [
-                    'vendor_id' => $vendor->id, 
+                    'vendor_id' => $vendor->id,
                 ]),
                 $data->id
             );
@@ -1568,7 +1568,7 @@ class VendorProfileController extends Controller
                 'delete_skill',
                 $request->fullUrl(),
                 'vendor_skills',
-                $rowData,   
+                $rowData,
                 $request->id
             );
         }
@@ -1994,24 +1994,29 @@ class VendorProfileController extends Controller
                 case 1:
                     $subject   = "TTG || Nexus New Profile";
                     $vm_email  = "vm.support@thetranslationgate.com";
+                    $nexusLink .= "thetranslationgate.com";
                     break;
                 case 3:
                     $subject   = "Europe Localize || Nexus New Profile";
                     $vm_email  = "vm.support@europelocalize.com";
+                    $nexusLink .= "europelocalize.com";
                     break;
                 case 11:
                     $subject   = "ColumbusLang || Nexus New Profile";
                     $vm_email  = "vm.support@columbuslang.com";
+                    $nexusLink .= "columbuslang.com";
                     break;
                 case 2:
                     $subject   = "Localizera || Nexus New Profile";
                     $vm_email  = "vm.support@localizera.com";
+                    $nexusLink .= "localizera.com";
                     break;
                 default:
                     $subject   = "Nexus || New Profile";
                     $vm_email  = env('MAIL_FROM_ADDRESS');
+                    break;
             }
-
+            dd($nexusLink . "/home/instructions");
             $htmlTemplate = $this->getVendorEmailTemplate($vendor, $vendor->vendor_brands, $nexusLink);
 
             if (!$htmlTemplate) {
@@ -2305,172 +2310,172 @@ class VendorProfileController extends Controller
         }
     }
     public function uploadFiles(Request $request)
-{
-    if (!$request->hasFile('cv') && !$request->hasFile('nda')) {
-        return response()->json(['error' => 'At least one file (CV or NDA) is required.'], 400);
-    }
-
-    $cvFile = $request->hasFile('cv') ? $request->file('cv') : null;
-    $ndaFile = $request->hasFile('nda') ? $request->file('nda') : null;
-
-    $allowedExtensions = ['zip', 'rar'];
-
-    if ($cvFile && $cvFile->getSize() > 5 * 1024 * 1024 && !in_array($cvFile->getClientOriginalExtension(), $allowedExtensions)) {
-        return response()->json(['error' => 'CV file must be ZIP or RAR if it is larger than 5MB.'], 400);
-    }
-
-    if ($ndaFile && $ndaFile->getSize() > 5 * 1024 * 1024 && !in_array($ndaFile->getClientOriginalExtension(), $allowedExtensions)) {
-        return response()->json(['error' => 'NDA file must be ZIP or RAR if it is larger than 5MB.'], 400);
-    }
-
-    DB::beginTransaction();
-
-    $additionalFiles = [];
-    $cvFilePath = null;
-    $ndaFilePath = null;
-
-    try {
-        $vendorId = $request->input('vendor_id');
-        $vendor = Vendor::find($vendorId);
-        
-        if (!$vendor) {
-            return response()->json(['error' => 'Vendor not found.'], 404);
+    {
+        if (!$request->hasFile('cv') && !$request->hasFile('nda')) {
+            return response()->json(['error' => 'At least one file (CV or NDA) is required.'], 400);
         }
 
-        if ($cvFile) {
-            $originalFileNameCV = $cvFile->getClientOriginalName();
-            $encryptedFileNameCV = Crypt::encryptString($originalFileNameCV);
-            $cvFilePath = $cvFile->storeAs(
-                'cv_upload',
-                $encryptedFileNameCV . '.' . $cvFile->getClientOriginalExtension(),
-                'external'
-            );
-            $vendor->cv = $cvFilePath;
+        $cvFile = $request->hasFile('cv') ? $request->file('cv') : null;
+        $ndaFile = $request->hasFile('nda') ? $request->file('nda') : null;
+
+        $allowedExtensions = ['zip', 'rar'];
+
+        if ($cvFile && $cvFile->getSize() > 5 * 1024 * 1024 && !in_array($cvFile->getClientOriginalExtension(), $allowedExtensions)) {
+            return response()->json(['error' => 'CV file must be ZIP or RAR if it is larger than 5MB.'], 400);
         }
 
-        if ($ndaFile) {
-            $originalFileNameNDA = $ndaFile->getClientOriginalName();
-            $encryptedFileNameNDA = Crypt::encryptString($originalFileNameNDA);
-            $ndaFilePath = $ndaFile->storeAs(
-                'nda_upload',
-                $encryptedFileNameNDA . '.' . $ndaFile->getClientOriginalExtension(),
-                'external'
-            );
-            $vendor->NDA = $ndaFilePath;
+        if ($ndaFile && $ndaFile->getSize() > 5 * 1024 * 1024 && !in_array($ndaFile->getClientOriginalExtension(), $allowedExtensions)) {
+            return response()->json(['error' => 'NDA file must be ZIP or RAR if it is larger than 5MB.'], 400);
         }
 
-        $vendor->save();
+        DB::beginTransaction();
 
-        foreach ($request->all() as $key => $value) {
-            if (strpos($key, 'file_') === 0 && !strpos($key, 'file_title_') && !strpos($key, 'file_content_') && !strpos($key, 'file_id_')) {
-                $file = $request->file($key);
-                $index = substr($key, 5);
-                $fileId = $request->input("file_id_" . $index);
-                $fileTitle = $request->input("file_title_" . $index);
-                $fileContent = $request->input("file_content_" . $index);
+        $additionalFiles = [];
+        $cvFilePath = null;
+        $ndaFilePath = null;
 
-                if ($file) {
-                    if ($file->getSize() > 5 * 1024 * 1024 && !in_array($file->getClientOriginalExtension(), $allowedExtensions)) {
-                        return response()->json(['error' => 'Each additional file must be ZIP or RAR if it is larger than 5MB.'], 400);
-                    }
+        try {
+            $vendorId = $request->input('vendor_id');
+            $vendor = Vendor::find($vendorId);
 
-                    $originalFileName = $file->getClientOriginalName();
-                    $encryptedFileName = Crypt::encryptString($originalFileName);
-                    $filePath = $file->storeAs(
-                        'other_files',
-                        $encryptedFileName . '.' . $file->getClientOriginalExtension(),
-                        'external'
-                    );
+            if (!$vendor) {
+                return response()->json(['error' => 'Vendor not found.'], 404);
+            }
 
-                    if ($fileId) {
-                        $vendorFile = VendorFile::find($fileId);
-                        if ($vendorFile) {
-                            if ($vendorFile->file_path) {
-                                Storage::disk('external')->delete($vendorFile->file_path);
+            if ($cvFile) {
+                $originalFileNameCV = $cvFile->getClientOriginalName();
+                $encryptedFileNameCV = Crypt::encryptString($originalFileNameCV);
+                $cvFilePath = $cvFile->storeAs(
+                    'cv_upload',
+                    $encryptedFileNameCV . '.' . $cvFile->getClientOriginalExtension(),
+                    'external'
+                );
+                $vendor->cv = $cvFilePath;
+            }
+
+            if ($ndaFile) {
+                $originalFileNameNDA = $ndaFile->getClientOriginalName();
+                $encryptedFileNameNDA = Crypt::encryptString($originalFileNameNDA);
+                $ndaFilePath = $ndaFile->storeAs(
+                    'nda_upload',
+                    $encryptedFileNameNDA . '.' . $ndaFile->getClientOriginalExtension(),
+                    'external'
+                );
+                $vendor->NDA = $ndaFilePath;
+            }
+
+            $vendor->save();
+
+            foreach ($request->all() as $key => $value) {
+                if (strpos($key, 'file_') === 0 && !strpos($key, 'file_title_') && !strpos($key, 'file_content_') && !strpos($key, 'file_id_')) {
+                    $file = $request->file($key);
+                    $index = substr($key, 5);
+                    $fileId = $request->input("file_id_" . $index);
+                    $fileTitle = $request->input("file_title_" . $index);
+                    $fileContent = $request->input("file_content_" . $index);
+
+                    if ($file) {
+                        if ($file->getSize() > 5 * 1024 * 1024 && !in_array($file->getClientOriginalExtension(), $allowedExtensions)) {
+                            return response()->json(['error' => 'Each additional file must be ZIP or RAR if it is larger than 5MB.'], 400);
+                        }
+
+                        $originalFileName = $file->getClientOriginalName();
+                        $encryptedFileName = Crypt::encryptString($originalFileName);
+                        $filePath = $file->storeAs(
+                            'other_files',
+                            $encryptedFileName . '.' . $file->getClientOriginalExtension(),
+                            'external'
+                        );
+
+                        if ($fileId) {
+                            $vendorFile = VendorFile::find($fileId);
+                            if ($vendorFile) {
+                                if ($vendorFile->file_path) {
+                                    Storage::disk('external')->delete($vendorFile->file_path);
+                                }
+                                $vendorFile->file_path = $filePath;
+                                $vendorFile->file_title = $fileTitle;
+                                $vendorFile->file_content = $fileContent;
+                                $vendorFile->save();
                             }
+                        } else {
+                            $vendorFile = new VendorFile();
+                            $vendorFile->vendor_id = $vendorId;
                             $vendorFile->file_path = $filePath;
                             $vendorFile->file_title = $fileTitle;
                             $vendorFile->file_content = $fileContent;
                             $vendorFile->save();
                         }
-                    } else {
-                        $vendorFile = new VendorFile();
-                        $vendorFile->vendor_id = $vendorId;
-                        $vendorFile->file_path = $filePath;
-                        $vendorFile->file_title = $fileTitle;
-                        $vendorFile->file_content = $fileContent;
-                        $vendorFile->save();
-                    }
 
-                    $additionalFiles[] = [
-                        'file_path' => $filePath,
-                        'file_title' => $fileTitle,
-                        'file_content' => $fileContent
-                    ];
-                } else if ($fileId && ($fileTitle || $fileContent)) {
-                    $vendorFile = VendorFile::find($fileId);
-                    if ($vendorFile) {
-                        $vendorFile->file_title = $fileTitle;
-                        $vendorFile->file_content = $fileContent;
-                        $vendorFile->save();
+                        $additionalFiles[] = [
+                            'file_path' => $filePath,
+                            'file_title' => $fileTitle,
+                            'file_content' => $fileContent
+                        ];
+                    } else if ($fileId && ($fileTitle || $fileContent)) {
+                        $vendorFile = VendorFile::find($fileId);
+                        if ($vendorFile) {
+                            $vendorFile->file_title = $fileTitle;
+                            $vendorFile->file_content = $fileContent;
+                            $vendorFile->save();
+                        }
                     }
                 }
             }
-        }
 
-        $user = JWTAuth::parseToken()->authenticate();
-        $userId = $user->id;
+            $user = JWTAuth::parseToken()->authenticate();
+            $userId = $user->id;
 
-        DataLogger::addToLogger(
-            $userId,
-            'upload_files',
-            $request->fullUrl(),
-            'vendor',
-            [
-                'vendor_id' => $vendorId,
-                'cv' => $cvFilePath,
-                'nda' => $ndaFilePath,
-                'additional_files' => $additionalFiles
-            ],
-            $vendor->id
-        );
-
-        DB::commit();
-
-        $vendor->refresh();
-        $files = VendorFile::where('vendor_id', $vendorId)->get();
-
-        return response()->json([
-            'message' => 'Files uploaded and vendor updated successfully.',
-            'files' => [
-                'vendor' => [
-                    'cv' => $vendor->cv,
-                    'nda' => $vendor->NDA
+            DataLogger::addToLogger(
+                $userId,
+                'upload_files',
+                $request->fullUrl(),
+                'vendor',
+                [
+                    'vendor_id' => $vendorId,
+                    'cv' => $cvFilePath,
+                    'nda' => $ndaFilePath,
+                    'additional_files' => $additionalFiles
                 ],
-                'files' => $files
-            ]
-        ], 200);
-    } catch (\Exception $e) {
-        DB::rollBack();
+                $vendor->id
+            );
 
-        if ($cvFilePath) {
-            Storage::disk('external')->delete($cvFilePath);
-        }
-        if ($ndaFilePath) {
-            Storage::disk('external')->delete($ndaFilePath);
-        }
-        foreach ($additionalFiles as $file) {
-            if (isset($file['file_path'])) {
-                Storage::disk('external')->delete($file['file_path']);
+            DB::commit();
+
+            $vendor->refresh();
+            $files = VendorFile::where('vendor_id', $vendorId)->get();
+
+            return response()->json([
+                'message' => 'Files uploaded and vendor updated successfully.',
+                'files' => [
+                    'vendor' => [
+                        'cv' => $vendor->cv,
+                        'nda' => $vendor->NDA
+                    ],
+                    'files' => $files
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if ($cvFilePath) {
+                Storage::disk('external')->delete($cvFilePath);
             }
-        }
+            if ($ndaFilePath) {
+                Storage::disk('external')->delete($ndaFilePath);
+            }
+            foreach ($additionalFiles as $file) {
+                if (isset($file['file_path'])) {
+                    Storage::disk('external')->delete($file['file_path']);
+                }
+            }
 
-        return response()->json([
-            'error' => 'An error occurred while processing the request.',
-            'details' => $e->getMessage()
-        ], 500);
+            return response()->json([
+                'error' => 'An error occurred while processing the request.',
+                'details' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
     public function NDA_vendor(Request $request)
     {
@@ -3002,7 +3007,7 @@ class VendorProfileController extends Controller
 
         $data['sheet_brand'] = $vendor->vendor_brands ?? null;
         $data['created_by'] = $userId;
-        $data['created_at'] =now();
+        $data['created_at'] = now();
 
         $vendorSheet = VendorSheet::create($data);
 
@@ -3052,7 +3057,7 @@ class VendorProfileController extends Controller
             'sheet_brand:id,name',
             'userCreated:id,user_name',
             'userUpdated:id,user_name',
-        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'subject_main', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency', 'sheet_brand', 'created_at', 'updated_at' , 'created_by', 'updated_by']);
+        ])->where('vendor', $vendorId)->get(['id', 'vendor', 'subject', 'subject_main', 'service', 'task_type', 'source_lang', 'target_lang', 'dialect', 'dialect_target', 'unit', 'rate', 'special_rate', 'Status', 'currency', 'sheet_brand', 'created_at', 'updated_at', 'created_by', 'updated_by']);
 
         if ($vendorData->isEmpty()) {
             return response()->json([
@@ -3081,7 +3086,7 @@ class VendorProfileController extends Controller
             'delete_pricelist',
             $request->fullUrl(),
             'vendor_sheet',
-            $rowData,  
+            $rowData,
             $request->id
         );
 
@@ -3127,7 +3132,7 @@ class VendorProfileController extends Controller
             $data['sheet_brand'] = $vendor->vendor_brands ?? null;
         }
         $data['updated_by'] = $userId;
-        $data['updated_at'] =now();
+        $data['updated_at'] = now();
 
         $vendorSheet->update($data);
 
@@ -3376,7 +3381,7 @@ class VendorProfileController extends Controller
             return $vendorTools;
         }
     }
- 
+
     public function AddVendorTest(Request $request)
     {
         DB::beginTransaction();
@@ -3523,7 +3528,7 @@ class VendorProfileController extends Controller
         return response()->json($data, 200);
     }
 
-   
+
     public function saveOrUpdateEducation(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -4102,7 +4107,7 @@ class VendorProfileController extends Controller
 
     public function SearchVendors(Request $request)
     {
-        
+
         if (!$request->has('queryParams') || empty($request->queryParams)) {
             return response()->json([
                 "vendors" => [],
@@ -4110,10 +4115,10 @@ class VendorProfileController extends Controller
             ], 200);
         }
 
-        
+
         $formatArray = ['name', 'email', "source_lang", "target_lang", "service", "task_type", 'rate', "brands"];
 
-       
+
         $relationships = [
             'country' => ['id', 'name'],
             'nationality' => ['id', 'name'],
@@ -4156,7 +4161,7 @@ class VendorProfileController extends Controller
             }
         }
 
-       
+
         $relatedColumns = array_filter($relatedColumns, function ($column) {
             return $column !== 'priceList' && strpos($column, 'vendors_mother_tongue') === false;
         });
@@ -4185,10 +4190,10 @@ class VendorProfileController extends Controller
             }]);
         }
 
-      
+
         if (in_array('priceList', $formatArray) || !empty($intersectColumnsVendorSheet)) {
 
-            
+
             if (in_array('priceList', $formatArray)) {
                 $vendorsQuery->addSelect(DB::raw("'' as `priceList`"));
             }
@@ -4199,7 +4204,7 @@ class VendorProfileController extends Controller
                     $selectedColumns = array_diff($selectedColumns, ['created_by']);
 
                     if (empty($selectedColumns)) {
-                        
+
                         $selectedColumns = ["source_lang", "target_lang", 'service', "task_type", 'rate'];
                     }
 
@@ -4225,7 +4230,6 @@ class VendorProfileController extends Controller
                         $vendorsQuery->leftJoin("billing_data as {$aliasBilling}", "{$aliasBilling}.vendor_id", '=', 'vendor.id');
                         $vendorsQuery->leftJoin("{$table} as {$aliasTarget}", "{$aliasTarget}.billing_data_id", '=', "{$aliasBilling}.id");
                         $vendorsQuery->addSelect("{$aliasTarget}.{$column} as {$column}");
-                    
                     } else {
                         $alias = "{$table}_{$joinCount}";
                         $vendorsQuery->leftJoin("{$table} as {$alias}", "{$alias}.vendor_id", '=', 'vendor.id');
@@ -4323,7 +4327,7 @@ class VendorProfileController extends Controller
                     } else {
                         if (!in_array($key, $formatArray)) {
                             if ($key === 'created_by' && $includeCreatedBy) {
-                            } 
+                            }
                             $formatArray[] = $key;
                         }
                     }
@@ -4410,7 +4414,7 @@ class VendorProfileController extends Controller
                                 });
                             });
 
-                            
+
 
                             $selectedColumnsRow = array_intersect($requestedVendorSheetColumns, $vendorSheet);
                             $selectedColumnsRow = array_diff($selectedColumnsRow, ['created_by']);
@@ -4572,7 +4576,7 @@ class VendorProfileController extends Controller
 
         return response()->json([
             "vendors" => $vendors,
-            "fields" => $finalFormatArray, 
+            "fields" => $finalFormatArray,
         ], 200);
     }
 }
