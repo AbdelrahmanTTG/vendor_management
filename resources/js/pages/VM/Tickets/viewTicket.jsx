@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState, useCallback } from "react";
+import React, { Fragment, useEffect, useState, useCallback ,useContext} from "react";
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import axiosClient from "../../AxiosClint";
 import { useStateContext } from '../../context/contextAuth';
@@ -15,10 +15,13 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { set } from 'react-hook-form';
 import { decryptData } from "../../../crypto";
 import VendorSearch from "../VendorManagement/VendorProfile/VendorSearch";
+import CheckContext from '../../../_helper/Customizer';
+
 
 const ViewTicket = (props) => {
     const [redirect, setRedirect] = useState(false);
     const location = useLocation();
+    const { toggleSidebar } = useContext(CheckContext);
     const [ticketData, setTicketData] = useState([]);
     // const { ticket } = location.state || {};
     const { user } = useStateContext();
@@ -35,17 +38,30 @@ const ViewTicket = (props) => {
     const [resourceVendors, setResourceVendors] = useState([]);
     const [vmUsers, setVmUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [opn, setOpn] = useState(true);
     const [optionsB, setOptionsB] = useState([]);
     const [Brand, setBrand] = useState([]);
     const [sub, setSub] = useState(false);
     const assignPermission = props.permissions?.assign;
      const params = new URLSearchParams(location.search);
      const encryptedData = params.get("data");
+     const [toggleSide, setToggleSide] = useState(true);
+    //  const [state, setState] = useState(true);
+     const openCloseSidebar = () => {
+             setToggleSide(false);
+             toggleSidebar(toggleSide);
+         };
+        //   const openSidebar = () => {
+        //       setToggleSide(true);
+        //       toggleSidebar(toggleSide);
+        //   };
     let ticket = {};
     if (encryptedData) {
             try {
                 ticket = decryptData(encryptedData);
+                
             } catch (e) {
+
             }
         }
     const res = {
@@ -53,7 +69,16 @@ const ViewTicket = (props) => {
         user: user.id,
 
     };
-
+    //   useEffect(() => {
+    //       return () => {
+    //           if (state) {
+    //               setState(false);
+    //           }else{
+    //               openSidebar();
+    //           }
+    //       };
+    //   }, []);
+    
     useEffect(() => {
         if (!ticket || !ticket.id) {
             setRedirect(true);
@@ -71,6 +96,7 @@ const ViewTicket = (props) => {
                 } catch (error) {
                     console.error("Error fetching Data:", error);
                 } finally {
+                    if (toggleSide) openCloseSidebar();
                     setSub(false);
                 }
             };

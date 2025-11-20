@@ -1154,7 +1154,10 @@ const Vendor = (props) => {
                                                                         <a
                                                                             href={`/vm/vendors/editprofiletest?data=${encodeURIComponent(
                                                                                 encryptData(
-                                                                                    item
+                                                                                    {
+                                                                                        id: item.id,
+                                                                                        email: item.email,
+                                                                                    }
                                                                                 )
                                                                             )}`}
                                                                             onClick={(
@@ -1172,7 +1175,10 @@ const Vendor = (props) => {
                                                                                 e.preventDefault();
                                                                                 const url = `/vm/vendors/editprofiletest?data=${encodeURIComponent(
                                                                                     encryptData(
-                                                                                        item
+                                                                                        {
+                                                                                            id: item.id,
+                                                                                            email: item.email,
+                                                                                        }
                                                                                     )
                                                                                 )}`;
                                                                                 navigate(
@@ -1654,7 +1660,10 @@ const Vendor = (props) => {
                                                                 <a
                                                                     href={`/vm/vendors/editprofiletest?data=${encodeURIComponent(
                                                                         encryptData(
-                                                                            item
+                                                                            {
+                                                                                id: item.id,
+                                                                                email: item.email,
+                                                                            }
                                                                         )
                                                                     )}`}
                                                                     onClick={(
@@ -1672,7 +1681,10 @@ const Vendor = (props) => {
                                                                         e.preventDefault();
                                                                         const url = `/vm/vendors/editprofiletest?data=${encodeURIComponent(
                                                                             encryptData(
-                                                                                item
+                                                                                {
+                                                                                    id: item.id,
+                                                                                    email: item.email,
+                                                                                }
                                                                             )
                                                                         )}`;
                                                                         navigate(
