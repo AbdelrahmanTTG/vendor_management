@@ -1,27 +1,32 @@
-import React, { Fragment, useEffect, useState, useCallback ,useContext} from "react";
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import React, { Fragment, useEffect, useState } from "react";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import axiosClient from "../../AxiosClint";
-import { useStateContext } from '../../context/contextAuth';
-import { Card, CardBody, CardHeader, Col, Input, Label, Row, Table } from 'reactstrap';
-import { Btn, H5, P, Spinner } from '../../../AbstractElements';
-import ResponseModal from './ResponseModal';
-import VmResponseModal from './VmResponseModal';
-import { FormGroup } from 'react-bootstrap';
-import { toast } from 'react-toastify';
-import Select from 'react-select';
-import SweetAlert from 'sweetalert2';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { set } from 'react-hook-form';
+import { useStateContext } from "../../context/contextAuth";
+import {
+    Card,
+    CardBody,
+    CardHeader,
+    Col,
+    Input,
+    Label,
+    Row,
+    Table,
+} from "reactstrap";
+import { Btn, H5, P, Spinner } from "../../../AbstractElements";
+import ResponseModal from "./ResponseModal";
+import VmResponseModal from "./VmResponseModal";
+import { FormGroup } from "react-bootstrap";
+import { toast } from "react-toastify";
+import Select from "react-select";
+import SweetAlert from "sweetalert2";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { set } from "react-hook-form";
 import { decryptData } from "../../../crypto";
-import VendorSearch from "../VendorManagement/VendorProfile/VendorSearch";
-import CheckContext from '../../../_helper/Customizer';
-
 
 const ViewTicket = (props) => {
     const [redirect, setRedirect] = useState(false);
     const location = useLocation();
-    const { toggleSidebar } = useContext(CheckContext);
     const [ticketData, setTicketData] = useState([]);
     // const { ticket } = location.state || {};
     const { user } = useStateContext();
@@ -38,47 +43,23 @@ const ViewTicket = (props) => {
     const [resourceVendors, setResourceVendors] = useState([]);
     const [vmUsers, setVmUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [opn, setOpn] = useState(true);
     const [optionsB, setOptionsB] = useState([]);
     const [Brand, setBrand] = useState([]);
     const [sub, setSub] = useState(false);
     const assignPermission = props.permissions?.assign;
-     const params = new URLSearchParams(location.search);
-     const encryptedData = params.get("data");
-     const [toggleSide, setToggleSide] = useState(true);
-    //  const [state, setState] = useState(true);
-     const openCloseSidebar = () => {
-             setToggleSide(false);
-             toggleSidebar(toggleSide);
-         };
-        //   const openSidebar = () => {
-        //       setToggleSide(true);
-        //       toggleSidebar(toggleSide);
-        //   };
+    const params = new URLSearchParams(location.search);
+    const encryptedData = params.get("data");
     let ticket = {};
     if (encryptedData) {
-            try {
-                ticket = decryptData(encryptedData);
-                
-            } catch (e) {
-
-            }
-        }
+        try {
+            ticket = decryptData(encryptedData);
+        } catch (e) {}
+    }
     const res = {
         ticket_id: ticket.id,
         user: user.id,
-
     };
-    //   useEffect(() => {
-    //       return () => {
-    //           if (state) {
-    //               setState(false);
-    //           }else{
-    //               openSidebar();
-    //           }
-    //       };
-    //   }, []);
-    
+
     useEffect(() => {
         if (!ticket || !ticket.id) {
             setRedirect(true);
@@ -96,7 +77,6 @@ const ViewTicket = (props) => {
                 } catch (error) {
                     console.error("Error fetching Data:", error);
                 } finally {
-                    if (toggleSide) openCloseSidebar();
                     setSub(false);
                 }
             };
@@ -105,19 +85,27 @@ const ViewTicket = (props) => {
     }, [ticket?.id, temp]);
 
     if (redirect) {
-        return <Navigate to='/' />;
+        return <Navigate to="/" />;
     }
 
     const handleDownload = async (filename) => {
         try {
-            const response = await axiosClient.post("download", { filename }, { responseType: 'blob' });
-            const file = new Blob([response.data], { type: response.headers['content-type'] });
-            const link = document.createElement('a');
+            const response = await axiosClient.post(
+                "download",
+                { filename },
+                { responseType: "blob" }
+            );
+            const file = new Blob([response.data], {
+                type: response.headers["content-type"],
+            });
+            const link = document.createElement("a");
             const url = window.URL.createObjectURL(file);
-            const contentDisposition = response.headers['content-disposition'];
-            const fileName = contentDisposition ? contentDisposition.split('filename=')[1] : filename;
+            const contentDisposition = response.headers["content-disposition"];
+            const fileName = contentDisposition
+                ? contentDisposition.split("filename=")[1]
+                : filename;
             link.href = url;
-            link.setAttribute('download', fileName);
+            link.setAttribute("download", fileName);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -125,28 +113,39 @@ const ViewTicket = (props) => {
         } catch (err) {
             const response = err.response;
             console.error(response);
-            alert('Error downloading the file: ' + (response?.data?.message || 'Unknown error'));
+            alert(
+                "Error downloading the file: " +
+                    (response?.data?.message || "Unknown error")
+            );
         }
     };
 
-    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
-        if (!tablename) return
+    const handelingSelect = async (
+        tablename,
+        setOptions,
+        fieldName,
+        searchTerm = ""
+    ) => {
+        if (!tablename) return;
         try {
             const { data } = await axiosClient.get("SelectDatat", {
                 params: {
                     search: searchTerm,
                     table: tablename,
-                    vendor_brands: Brand
+                    vendor_brands: Brand,
                 },
             });
-            const formattedOptions = data.map(item => ({
+            const formattedOptions = data.map((item) => ({
                 value: item.id,
                 label: item.name || item.gmt,
             }));
 
             setOptions(formattedOptions);
             if (!searchTerm) {
-                setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
+                setInitialOptions((prev) => ({
+                    ...prev,
+                    [fieldName]: formattedOptions,
+                }));
             }
         } catch (err) {
             const response = err.response;
@@ -158,13 +157,18 @@ const ViewTicket = (props) => {
                 setErrorMessage("An unexpected error occurred.");
             }
         }
-
     };
-    const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
+    const handleInputChange = (
+        inputValue,
+        tableName,
+        fieldName,
+        setOptions,
+        options
+    ) => {
         if (inputValue.length === 0) {
             setOptions([]);
         } else if (inputValue.length >= 1) {
-            const existingOption = options.some(option =>
+            const existingOption = options.some((option) =>
                 option.label.toLowerCase().includes(inputValue.toLowerCase())
             );
             if (!existingOption) {
@@ -172,105 +176,71 @@ const ViewTicket = (props) => {
             }
         }
     };
-const [selectedVendors, setSelectedVendors] = useState([]);
-const handleCheckboxChange = (vendor, index) => {
-    setSelectedVendors((prev) => {
-        const exists = prev.find((v) => v.rowKey === index);
-        if (exists) {
-            return prev.filter((v) => v.rowKey !== index);
+
+    const changeTicketStatus = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const TicketRes = {
+            ...Object.fromEntries(formData),
+            ticket: ticket.id,
+            user: user.id,
+            file: fileInput,
+            vendor: formData.getAll("vendor"),
+            comment: commentInput,
+        };
+
+        if (statusInput == "0" && commentInput.trim() == "") {
+            toast.error("Please Enter Rejection Reason!");
         } else {
-            return [...prev, { ...vendor, rowKey: index }];
+            //  setSub(true);
+            axiosClient
+                .post("changeTicketStatus", TicketRes, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                })
+                .then(({ data }) => {
+                    switch (data.type) {
+                        case "success":
+                            setTemp(!temp);
+                            setStatusInput("");
+                            setFileInput("");
+                            setCommentInput();
+                            toast.success(
+                                "The Vendor has been successfully selected."
+                            );
+                            break;
+                        case "error":
+                            toast.error(data.message);
+                            break;
+                    }
+                    //  setSub(false);
+                })
+                .catch(() => {
+                    toast.error("Something went wrong!");
+                    //  setSub(false);
+                });
         }
-    });
-};
-
-
- const changeTicketStatus = () => {
-     if (statusInput == "0" && commentInput.trim() === "") {
-         toast.error("Please Enter Rejection Reason!");
-         return;
-     }
-
-     let TicketRes = new FormData();
-
-     const finalStatus = statusInput || ticketData.statusVal;
-     TicketRes.append("status", finalStatus);
-
-     TicketRes.append("ticket", ticket.id);
-     TicketRes.append("user", user.id);
-     TicketRes.append("comment", commentInput);
-
-     if (fileInput) {
-         TicketRes.append("file", fileInput);
-     }
-
-     if (selectedVendors.length > 0) {
-         const uniqueVendorIds = new Set(selectedVendors.map((v) => v.id));
-         uniqueVendorIds.forEach((vendorId) => {
-             TicketRes.append("vendor[]", vendorId);
-         });
-     }
-
-
-     if (ticketData.request_type_val == 4 && ticketData.statusVal > 1) {
-         const numberInput = document.querySelector(
-             "[name='number_of_resource']"
-         );
-         if (numberInput) {
-             TicketRes.append("number_of_resource", numberInput.value);
-         }
-     }
-
-     setSub(true);
-
-     axiosClient
-         .post("changeTicketStatus", TicketRes, {
-             headers: { "Content-Type": "multipart/form-data" },
-         })
-         .then(({ data }) => {
-             switch (data.type) {
-                 case "success":
-                     setTemp(!temp);
-                     setStatusInput("");
-                     setFileInput("");
-                     setCommentInput("");
-                     setSelectedVendors([]); 
-                     toast.success(
-                         "The Vendor has been successfully selected."
-                     );
-                     break;
-                 case "error":
-                     toast.error(data.message);
-                     break;
-             }
-             setSub(false);
-         })
-         .catch(() => {
-             toast.error("Something went wrong!");
-             setSub(false);
-         });
- };
-
+    };
 
     const AssignTicket = (event) => {
-        
         event.preventDefault();
         setSub(true);
 
         const formData = new FormData(event.currentTarget);
         const res = {
             ...Object.fromEntries(formData),
-            'ticket': ticket.id,
-            'user': user.id,
-            'assignPermission': assignPermission,
+            ticket: ticket.id,
+            user: user.id,
+            assignPermission: assignPermission,
         };
         axiosClient.post("assignTicket", res).then(({ data }) => {
             switch (data.type) {
-                case 'success':
+                case "success":
                     toast.success(data.message);
-                    setTemp(!temp)
+                    setTemp(!temp);
                     break;
-                case 'error':
+                case "error":
                     toast.error(data.message);
                     break;
             }
@@ -280,13 +250,13 @@ const handleCheckboxChange = (vendor, index) => {
     const deleteRes = (id) => {
         if (id) {
             SweetAlert.fire({
-                title: 'Are you sure?',
+                title: "Are you sure?",
                 text: `Do you want to delete This Resource ?`,
-                icon: 'warning',
+                icon: "warning",
                 showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'No, cancel!',
-                reverseButtons: true
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true,
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     const payload = {
@@ -294,68 +264,34 @@ const handleCheckboxChange = (vendor, index) => {
                         ticket: ticket.id,
                         user: user.id,
                     };
-                    axiosClient.delete("deleteTicketResource", { data: payload }).then((response) => {
-                        if (response.status == 200) {
-                            setTemp(!temp)
-                            SweetAlert.fire(
-                                'Deleted!',
-                                `The Resource has been deleted..`,
-                                'success'
-                            );
-                        } else {
-                            SweetAlert.fire(
-                                'Ooops !',
-                                ' An error occurred while deleting. :)',
-                                'error'
-                            );
-                        }
-                    });
-
+                    axiosClient
+                        .delete("deleteTicketResource", { data: payload })
+                        .then((response) => {
+                            if (response.status == 200) {
+                                setTemp(!temp);
+                                SweetAlert.fire(
+                                    "Deleted!",
+                                    `The Resource has been deleted..`,
+                                    "success"
+                                );
+                            } else {
+                                SweetAlert.fire(
+                                    "Ooops !",
+                                    " An error occurred while deleting. :)",
+                                    "error"
+                                );
+                            }
+                        });
                 } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
                     SweetAlert.fire(
-                        'Cancelled',
-                        'Your item is safe :)',
-                        'info'
+                        "Cancelled",
+                        "Your item is safe :)",
+                        "info"
                     );
                 }
             });
         }
     };
-        const [queryParams, setQueryParams] = useState(null);
-        const [loading2, setLoading2] = useState(false);
-        const [perPage, setPerPage] = useState(10);
-        const [currentPage, setCurrentPage] = useState(1);
-        
-        const handleSearch = (searchParams) => {
-            setQueryParams(searchParams);
-            setCurrentPage(1);
-        };
-      const [vendors, setVendors] = useState([]);
-      const [fields, setFields] = useState([]);
-      const [lastPage, setLastPage] = useState(1);
-
-      const fetchData = useCallback(async () => {
-          const payload = {
-              per_page: perPage,
-              page: currentPage,
-              queryParams: queryParams,
-          };
-
-          try {
-              const { data } = await axiosClient.post("SearchVendors", payload);
-
-              setVendors(data.vendors.data);
-              setFields(data.fields);
-              setLastPage(data.vendors.last_page);
-          } catch (err) {
-              console.error(err);
-          }
-      }, [perPage, currentPage, queryParams]);
-
-
-      useEffect(() => {
-          fetchData();
-      }, [perPage, currentPage, queryParams]);
 
     return (
         <Fragment>
@@ -563,7 +499,10 @@ const handleCheckboxChange = (vendor, index) => {
                             </Row>
                         </CardHeader>
                         <CardBody>
-                            <div id="changeStatusForm">
+                            <form
+                                id="changeStatusForm"
+                                onSubmit={changeTicketStatus}
+                            >
                                 {ticketData.statusVal <= 5 && (
                                     <>
                                         <FormGroup className="row mt-2">
@@ -818,312 +757,44 @@ const handleCheckboxChange = (vendor, index) => {
                                     ticketData.statusVal > 1 && (
                                         <>
                                             {ticketData.statusVal == 2 && (
-                                                <>
-                                                    <VendorSearch
-                                                        onSearch={handleSearch}
-                                                        loading2={loading2}
-                                                    />
-
-                                                    {vendors?.length > 0 && (
-                                                        <>
-                                                            <div
-                                                                className="mt-4"
-                                                                style={{
-                                                                    maxHeight:
-                                                                        "400px",
-                                                                    overflow:
-                                                                        "auto",
-                                                                }}
-                                                            >
-                                                                <table className="table table-bordered">
-                                                                    <thead
-                                                                        style={{
-                                                                            position:
-                                                                                "sticky",
-                                                                            top: 0,
-                                                                            backgroundColor:
-                                                                                "#fff",
-                                                                            zIndex: 1,
-                                                                        }}
-                                                                    >
-                                                                        <tr>
-                                                                            <th>
-                                                                                <input type="checkbox" />
-                                                                            </th>
-                                                                            {fields.map(
-                                                                                (
-                                                                                    field
-                                                                                ) => (
-                                                                                    <th
-                                                                                        key={
-                                                                                            field
-                                                                                        }
-                                                                                    >
-                                                                                        {
-                                                                                            field
-                                                                                        }
-                                                                                    </th>
-                                                                                )
-                                                                            )}
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        {vendors.map(
-                                                                            (
-                                                                                vendor,
-                                                                                index
-                                                                            ) => (
-                                                                                <tr
-                                                                                    key={
-                                                                                        vendor.id +
-                                                                                        "-" +
-                                                                                        index
-                                                                                    }
-                                                                                >
-                                                                                    <td>
-                                                                                        <input
-                                                                                            type="checkbox"
-                                                                                            checked={selectedVendors.some(
-                                                                                                (
-                                                                                                    v
-                                                                                                ) =>
-                                                                                                    v.rowKey ===
-                                                                                                    index
-                                                                                            )}
-                                                                                            onChange={() =>
-                                                                                                handleCheckboxChange(
-                                                                                                    vendor,
-                                                                                                    index
-                                                                                                )
-                                                                                            }
-                                                                                        />
-                                                                                    </td>
-                                                                                    {fields.map(
-                                                                                        (
-                                                                                            field
-                                                                                        ) => {
-                                                                                            const value =
-                                                                                                vendor[
-                                                                                                    field
-                                                                                                ];
-                                                                                            return (
-                                                                                                <td
-                                                                                                    key={
-                                                                                                        vendor.id +
-                                                                                                        "-" +
-                                                                                                        field +
-                                                                                                        "-" +
-                                                                                                        index
-                                                                                                    }
-                                                                                                >
-                                                                                                    {value &&
-                                                                                                    typeof value ===
-                                                                                                        "object" &&
-                                                                                                    !Array.isArray(
-                                                                                                        value
-                                                                                                    )
-                                                                                                        ? Object.values(
-                                                                                                              value
-                                                                                                          )[1] ??
-                                                                                                          ""
-                                                                                                        : value ??
-                                                                                                          ""}
-                                                                                                </td>
-                                                                                            );
-                                                                                        }
-                                                                                    )}
-                                                                                </tr>
-                                                                            )
-                                                                        )}
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                            <div className="mt-4">
-                                                                <h5>
-                                                                    Selected
-                                                                    Vendors
-                                                                </h5>
-                                                                {selectedVendors.length ===
-                                                                0 ? (
-                                                                    <p>
-                                                                        No
-                                                                        vendors
-                                                                        selected
-                                                                    </p>
-                                                                ) : (
-                                                                    <div
-                                                                        style={{
-                                                                            maxHeight:
-                                                                                "300px",
-                                                                            overflowY:
-                                                                                "auto",
-                                                                        }}
-                                                                    >
-                                                                        <table className="table table-bordered table-sm">
-                                                                            <thead
-                                                                                className="table-light"
-                                                                                style={{
-                                                                                    position:
-                                                                                        "sticky",
-                                                                                    top: 0,
-                                                                                    zIndex: 1,
-                                                                                }}
-                                                                            >
-                                                                                <tr>
-                                                                                    <th>
-                                                                                        Name
-                                                                                    </th>
-                                                                                    {fields.map(
-                                                                                        (
-                                                                                            field
-                                                                                        ) => (
-                                                                                            <th
-                                                                                                key={
-                                                                                                    field
-                                                                                                }
-                                                                                            >
-                                                                                                {
-                                                                                                    field
-                                                                                                }
-                                                                                            </th>
-                                                                                        )
-                                                                                    )}
-                                                                                    <th>
-                                                                                        Action
-                                                                                    </th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                {selectedVendors.map(
-                                                                                    (
-                                                                                        vendor
-                                                                                    ) => (
-                                                                                        <tr
-                                                                                            key={
-                                                                                                vendor.id
-                                                                                            }
-                                                                                        >
-                                                                                            <td>
-                                                                                                {
-                                                                                                    vendor.name
-                                                                                                }
-                                                                                            </td>
-                                                                                            {fields.map(
-                                                                                                (
-                                                                                                    field
-                                                                                                ) => {
-                                                                                                    const value =
-                                                                                                        vendor[
-                                                                                                            field
-                                                                                                        ];
-                                                                                                    return (
-                                                                                                        <td
-                                                                                                            key={
-                                                                                                                vendor.id +
-                                                                                                                "-" +
-                                                                                                                field
-                                                                                                            }
-                                                                                                        >
-                                                                                                            {value &&
-                                                                                                            typeof value ===
-                                                                                                                "object" &&
-                                                                                                            !Array.isArray(
-                                                                                                                value
-                                                                                                            )
-                                                                                                                ? Object.values(
-                                                                                                                      value
-                                                                                                                  )[1] ??
-                                                                                                                  ""
-                                                                                                                : value ??
-                                                                                                                  ""}
-                                                                                                        </td>
-                                                                                                    );
-                                                                                                }
-                                                                                            )}
-                                                                                            <td>
-                                                                                                <button
-                                                                                                    type="button"
-                                                                                                    className="btn btn-sm btn-danger"
-                                                                                                    onClick={() =>
-                                                                                                        setSelectedVendors(
-                                                                                                            (
-                                                                                                                prev
-                                                                                                            ) =>
-                                                                                                                prev.filter(
-                                                                                                                    (
-                                                                                                                        v
-                                                                                                                    ) =>
-                                                                                                                        v.id !==
-                                                                                                                        vendor.id
-                                                                                                                )
-                                                                                                        )
-                                                                                                    }
-                                                                                                >
-                                                                                                    Remove
-                                                                                                </button>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    )
-                                                                                )}
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            {/* Pagination */}
-                                                            <div className="d-flex justify-content-between align-items-center mt-3">
-                                                                <button
-                                                                    className="btn btn-secondary"
-                                                                    disabled={
-                                                                        currentPage ===
-                                                                        1
-                                                                    }
-                                                                    onClick={() =>
-                                                                        setCurrentPage(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                prev -
-                                                                                1
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    Previous
-                                                                </button>
-
-                                                                <span>
-                                                                    Page{" "}
-                                                                    {
-                                                                        currentPage
-                                                                    }{" "}
-                                                                    of{" "}
-                                                                    {lastPage}
-                                                                </span>
-
-                                                                <button
-                                                                    className="btn btn-secondary"
-                                                                    disabled={
-                                                                        currentPage ===
-                                                                        lastPage
-                                                                    }
-                                                                    onClick={() =>
-                                                                        setCurrentPage(
-                                                                            (
-                                                                                prev
-                                                                            ) =>
-                                                                                prev +
-                                                                                1
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    Next
-                                                                </button>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </>
+                                                <FormGroup className="row mt-3">
+                                                    {/* Vendor */}
+                                                    <Col md="12">
+                                                        <Label
+                                                            className="col-form-label-sm f-12 mb-1"
+                                                            htmlFor="vendor"
+                                                        >
+                                                            Select Vendor
+                                                        </Label>
+                                                        <Select
+                                                            id="vendor"
+                                                            name="vendor"
+                                                            options={optionsV}
+                                                            className="js-example-basic-single"
+                                                            isMulti
+                                                            required={
+                                                                resourceVendors !=
+                                                                    null ||
+                                                                ticketData.statusVal ==
+                                                                    1
+                                                                    ? false
+                                                                    : true
+                                                            }
+                                                            onInputChange={(
+                                                                inputValue
+                                                            ) =>
+                                                                handleInputChange(
+                                                                    inputValue,
+                                                                    "vendors",
+                                                                    "vendor",
+                                                                    setOptionsV,
+                                                                    optionsV
+                                                                )
+                                                            }
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
                                             )}
-
                                             {resourceVendors != null &&
                                                 resourceVendors.length > 0 && (
                                                     <div className="table-responsive mt-5">
@@ -1406,10 +1077,8 @@ const handleCheckboxChange = (vendor, index) => {
                                                 <Btn
                                                     attrBtn={{
                                                         color: "primary",
-                                                        type: "button",
+                                                        type: "submit",
                                                         disabled: sub,
-                                                        onClick:
-                                                            changeTicketStatus,
                                                     }}
                                                 >
                                                     <i className="fa fa-check-square-o"></i>
@@ -1425,7 +1094,7 @@ const handleCheckboxChange = (vendor, index) => {
                                             </Col>
                                         </Row>
                                     )}
-                            </div>
+                            </form>
                         </CardBody>
                     </Card>
                     {/*  response */}

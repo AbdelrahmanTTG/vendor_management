@@ -508,11 +508,14 @@ const Vendor = (props) => {
             const row = worksheet.addRow(
                 headersArray.map((header) => rowData[header] ?? "")
             );
-            row.eachCell((cell) => {
-                if (typeof cell.value === "number") {
-                    cell.numFmt = "0";
+            row.eachCell((cell, colNumber) => {
+                const header = headersArray[colNumber - 1]; 
+                if (header === "rate" && typeof cell.value === "number") {
+                    cell.numFmt = "0.00"; 
+                } else if (typeof cell.value === "number") {
+                    cell.numFmt = "0"; 
                 } else {
-                    cell.numFmt = "@";
+                    cell.numFmt = "@"; 
                 }
                 cell.border = {
                     top: { style: "thin" },
@@ -521,6 +524,7 @@ const Vendor = (props) => {
                     right: { style: "thin" },
                 };
             });
+
             setProgress(30 + Math.round(((index + 1) / data.length) * 60));
         });
 
