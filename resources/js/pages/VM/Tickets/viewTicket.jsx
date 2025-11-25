@@ -136,8 +136,8 @@ const ViewTicket = (props) => {
                 },
             });
             const formattedOptions = data.map((item) => ({
-                value: item.id,
-                label: item.name || item.gmt,
+                value: item?.id,
+                label: item?.name || item?.gmt,
             }));
 
             setOptions(formattedOptions);
@@ -350,24 +350,24 @@ const ViewTicket = (props) => {
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>{ticketData.id}</td>
-                                            <td>{ticketData.request_type}</td>
-                                            <td>{ticket.brand.name}</td>
+                                            <td>{ticketData?.id}</td>
+                                            <td>{ticketData?.request_type}</td>
+                                            <td>{ticket?.brand?.name}</td>
                                             <td>
-                                                {ticketData.number_of_resource}
+                                                {ticketData?.number_of_resource}
                                             </td>
-                                            <td>{ticketData.service}</td>
-                                            <td>{ticketData.task_type}</td>
-                                            <td>{ticketData.rate}</td>
-                                            <td>{ticketData.count}</td>
-                                            <td>{ticketData.unit}</td>
-                                            <td>{ticketData.currency}</td>
-                                            <td>{ticketData.source_lang}</td>
-                                            <td>{ticketData.target_lang}</td>
-                                            <td>{ticketData.start_date}</td>
-                                            <td>{ticketData.delivery_date}</td>
-                                            <td>{ticketData.subject}</td>
-                                            <td>{ticketData.software}</td>
+                                            <td>{ticketData?.service}</td>
+                                            <td>{ticketData?.task_type}</td>
+                                            <td>{ticketData?.rate}</td>
+                                            <td>{ticketData?.count}</td>
+                                            <td>{ticketData?.unit}</td>
+                                            <td>{ticketData?.currency}</td>
+                                            <td>{ticketData?.source_lang}</td>
+                                            <td>{ticketData?.target_lang}</td>
+                                            <td>{ticketData?.start_date}</td>
+                                            <td>{ticketData?.delivery_date}</td>
+                                            <td>{ticketData?.subject}</td>
+                                            <td>{ticketData?.software}</td>
                                             <td>
                                                 {ticketData.fileLink != null ? (
                                                     <Link
@@ -896,7 +896,7 @@ const ViewTicket = (props) => {
                                                                                     item[
                                                                                         "vendor"
                                                                                     ]
-                                                                                        .name
+                                                                                        ?.name
                                                                                 }
                                                                             </td>
                                                                             <td>

@@ -16,7 +16,10 @@ class Vendor extends Authenticatable  implements JWTSubject
     public $timestamps = true;
     const UPDATED_AT = null;
     protected $appends = ['brands'];
-
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'vendor', 'id');
+    }
     public static function vendor($email, $password)
     {
         $encryptedPassword = base64_encode($password);

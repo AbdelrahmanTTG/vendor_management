@@ -334,6 +334,7 @@ const Vendor = (props) => {
             sheet_brand: "Sheet Brand",
             profile_status: "Profile status",
             created_by: "Created by",
+            number_of_task: "Number of task",
             "vendors_mother_tongue.language_id": "Mother tongue",
         };
         format?.flatMap(
@@ -603,6 +604,7 @@ const Vendor = (props) => {
             sheet_brand: "Sheet Brand",
             profile_status: "Profile status",
             created_by: "Created by",
+            number_of_task: "Number of task",
         };
 
         return mapping[input] || input;
@@ -935,6 +937,10 @@ const Vendor = (props) => {
                                                 {
                                                     value: "created_by",
                                                     label: "Created by",
+                                                },
+                                                {
+                                                    value: "number_of_task",
+                                                    label: "Number of task",
                                                 },
                                             ],
                                         },
