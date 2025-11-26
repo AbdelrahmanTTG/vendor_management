@@ -1989,7 +1989,7 @@ class VendorProfileController extends Controller
         if ($vendor) {
             $vendor->password = base64_encode($password);
             $vendor->save();
-            $nexusLink = env('NEXUS_LINK');
+            $nexusLink = env('NEXUS_LINK', 'https://aixnexus.com/');
             switch ($vendor->vendor_brands) {
                 case 1:
                     $subject   = "The Translation Gate || Nexus New Profile";
