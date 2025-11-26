@@ -57,14 +57,7 @@ const CustomizerProvider = (props) => {
 
     const toggleSidebar = (toggle) => {
         setToggleIcon(toggle);
-        // if (toggle) {
-        //     setsize("")
-        //     document.getElementById('nav-componant').style.width = size;
-        // } 
-        // if (!toggle) {
-        //     setsize("87%")
-        //     document.getElementById('nav-componant').style.width = size;
-        // }
+      
     
 
     };

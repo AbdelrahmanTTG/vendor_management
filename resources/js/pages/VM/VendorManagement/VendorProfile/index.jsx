@@ -334,6 +334,7 @@ const Vendor = (props) => {
             sheet_brand: "Sheet Brand",
             profile_status: "Profile status",
             created_by: "Created by",
+            number_of_task: "Number of task",
             "vendors_mother_tongue.language_id": "Mother tongue",
         };
         format?.flatMap(
@@ -508,11 +509,14 @@ const Vendor = (props) => {
             const row = worksheet.addRow(
                 headersArray.map((header) => rowData[header] ?? "")
             );
-            row.eachCell((cell) => {
-                if (typeof cell.value === "number") {
-                    cell.numFmt = "0";
+            row.eachCell((cell, colNumber) => {
+                const header = headersArray[colNumber - 1]; 
+                if (header === "rate" && typeof cell.value === "number") {
+                    cell.numFmt = "0.00"; 
+                } else if (typeof cell.value === "number") {
+                    cell.numFmt = "0"; 
                 } else {
-                    cell.numFmt = "@";
+                    cell.numFmt = "@"; 
                 }
                 cell.border = {
                     top: { style: "thin" },
@@ -521,6 +525,7 @@ const Vendor = (props) => {
                     right: { style: "thin" },
                 };
             });
+
             setProgress(30 + Math.round(((index + 1) / data.length) * 60));
         });
 
@@ -599,6 +604,7 @@ const Vendor = (props) => {
             sheet_brand: "Sheet Brand",
             profile_status: "Profile status",
             created_by: "Created by",
+            number_of_task: "Number of task",
         };
 
         return mapping[input] || input;
@@ -932,6 +938,10 @@ const Vendor = (props) => {
                                                     value: "created_by",
                                                     label: "Created by",
                                                 },
+                                                {
+                                                    value: "number_of_task",
+                                                    label: "Number of task",
+                                                },
                                             ],
                                         },
                                         {
@@ -1154,7 +1164,10 @@ const Vendor = (props) => {
                                                                         <a
                                                                             href={`/vm/vendors/editprofiletest?data=${encodeURIComponent(
                                                                                 encryptData(
-                                                                                    item
+                                                                                    {
+                                                                                        id: item.id,
+                                                                                        email: item.email,
+                                                                                    }
                                                                                 )
                                                                             )}`}
                                                                             onClick={(
@@ -1172,7 +1185,10 @@ const Vendor = (props) => {
                                                                                 e.preventDefault();
                                                                                 const url = `/vm/vendors/editprofiletest?data=${encodeURIComponent(
                                                                                     encryptData(
-                                                                                        item
+                                                                                        {
+                                                                                            id: item.id,
+                                                                                            email: item.email,
+                                                                                        }
                                                                                     )
                                                                                 )}`;
                                                                                 navigate(
@@ -1654,7 +1670,10 @@ const Vendor = (props) => {
                                                                 <a
                                                                     href={`/vm/vendors/editprofiletest?data=${encodeURIComponent(
                                                                         encryptData(
-                                                                            item
+                                                                            {
+                                                                                id: item.id,
+                                                                                email: item.email,
+                                                                            }
                                                                         )
                                                                     )}`}
                                                                     onClick={(
@@ -1672,7 +1691,10 @@ const Vendor = (props) => {
                                                                         e.preventDefault();
                                                                         const url = `/vm/vendors/editprofiletest?data=${encodeURIComponent(
                                                                             encryptData(
-                                                                                item
+                                                                                {
+                                                                                    id: item.id,
+                                                                                    email: item.email,
+                                                                                }
                                                                             )
                                                                         )}`;
                                                                         navigate(

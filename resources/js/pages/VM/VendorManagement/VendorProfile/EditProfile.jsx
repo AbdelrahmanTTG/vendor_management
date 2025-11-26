@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState, useRef, Suspense } from 'react';
+import React, { Fragment, useEffect, useState, useRef, Suspense ,useContext } from 'react';
 import { Card, CardBody } from 'reactstrap';
 import { useLocation } from 'react-router-dom';
 import { Spinner } from '../../../../AbstractElements';
@@ -23,8 +23,12 @@ import { Navigate } from 'react-router-dom';
 import axiosClient from "../../../../pages/AxiosClint";
 import ErrorBoundary from "../../../../ErrorBoundary";
 import { decryptData } from "../../../../crypto";
+import CheckContext from '../../../../_helper/Customizer';
+
 const EditProfile = (props) => {
     const [id, setId] = useState('');
+    const { toggleSidebar } = useContext(CheckContext);
+    
     // const location = useLocation();
     // const vendor = Object.values(location.state || {})[0] || {};
     const [redirect, setRedirect] = useState(false);
@@ -44,7 +48,11 @@ const EditProfile = (props) => {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const encryptedData = params.get("data");
-
+    const [toggleSide, setToggleSide] = useState(true);
+        const openCloseSidebar = () => {
+            setToggleSide(false);
+            toggleSidebar(toggleSide);
+        };
     let vendor = {};
     if (encryptedData) {
         try {
@@ -155,6 +163,8 @@ const EditProfile = (props) => {
                 });
             } catch (error) {
                 // console.error("Error fetching vendor:", error);
+            } finally {
+                    if (toggleSide) openCloseSidebar();
             }
         };
 

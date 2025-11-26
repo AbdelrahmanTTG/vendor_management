@@ -84,7 +84,7 @@ class VendorProfileController extends Controller
         });
 
         if ($filteredFormats->isEmpty()) {
-            $formatArray = ['name', 'email', 'status', "priceList", 'type', 'country', "source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "subject_main", "dialect_target", "brands"];
+            $formatArray = ['name', 'email', 'status', "priceList", 'type', 'country', "source_lang", "target_lang", 'dialect', "service", "task_type", 'rate', 'special_rate', 'unit', 'currency', "subject", 'Status', "subject_main", "dialect_target", "brands", "number_of_task"];
         } else {
             $formatArray = $filteredFormats->pluck('format')->toArray();
             $formatArray = array_merge(...array_map(function ($item) {
@@ -157,7 +157,7 @@ class VendorProfileController extends Controller
         } else {
             $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands');
         }
-
+        $vendorsQuery->withCount(['tasks as number_of_task']);
         // Add mother tongue relation if needed
         if ($includeMotherTongue) {
             $vendorsQuery->with(['motherTongues' => function ($query) {

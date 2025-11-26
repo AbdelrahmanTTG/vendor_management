@@ -1230,25 +1230,25 @@ const TicketsList = (props) => {
                                                                                 backgroundColor:
                                                                                     "#f5f5f5",
                                                                                 color: "#333",
-                                                                            }; 
+                                                                            };
                                                                         case "Opened":
                                                                             return {
                                                                                 backgroundColor:
                                                                                     "#d4edda",
                                                                                 color: "#155724",
-                                                                            }; 
+                                                                            };
                                                                         case "Rejected":
                                                                             return {
                                                                                 backgroundColor:
                                                                                     "#fff3cd",
                                                                                 color: "#856404",
-                                                                            }; 
+                                                                            };
                                                                         default:
                                                                             return {
                                                                                 backgroundColor:
                                                                                     "#e2e3e5",
                                                                                 color: "#383d41",
-                                                                            }; 
+                                                                            };
                                                                     }
                                                                 };
 
@@ -1328,9 +1328,10 @@ const TicketsList = (props) => {
                                                     <td>
                                                         <a
                                                             href={`/vm/ViewTicket?data=${encodeURIComponent(
-                                                                encryptData(
-                                                                    item
-                                                                )
+                                                                encryptData({
+                                                                    id: item?.id,
+                                                                    brand: item?.brand,
+                                                                })
                                                             )}`}
                                                             onClick={(e) => {
                                                                 if (
@@ -1344,7 +1345,10 @@ const TicketsList = (props) => {
                                                                 navigate(
                                                                     `/vm/ViewTicket?data=${encodeURIComponent(
                                                                         encryptData(
-                                                                            item
+                                                                            {
+                                                                                id: item?.id,
+                                                                                brand: item?.brand,
+                                                                            }
                                                                         )
                                                                     )}`
                                                                 );
