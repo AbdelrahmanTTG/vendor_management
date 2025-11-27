@@ -1,4 +1,10 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, {
+    Fragment,
+    useEffect,
+    useState,
+    useCallback,
+    useContext,
+} from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import axiosClient from "../../AxiosClint";
 import { useStateContext } from "../../context/contextAuth";
@@ -23,10 +29,13 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { set } from "react-hook-form";
 import { decryptData } from "../../../crypto";
+import VendorSearch from "./VendorSearch";
+import CheckContext from "../../../_helper/Customizer";
 
 const ViewTicket = (props) => {
     const [redirect, setRedirect] = useState(false);
     const location = useLocation();
+    const { toggleSidebar } = useContext(CheckContext);
     const [ticketData, setTicketData] = useState([]);
     // const { ticket } = location.state || {};
     const { user } = useStateContext();
@@ -43,12 +52,23 @@ const ViewTicket = (props) => {
     const [resourceVendors, setResourceVendors] = useState([]);
     const [vmUsers, setVmUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [opn, setOpn] = useState(true);
     const [optionsB, setOptionsB] = useState([]);
     const [Brand, setBrand] = useState([]);
     const [sub, setSub] = useState(false);
     const assignPermission = props.permissions?.assign;
     const params = new URLSearchParams(location.search);
     const encryptedData = params.get("data");
+    const [toggleSide, setToggleSide] = useState(true);
+    //  const [state, setState] = useState(true);
+    const openCloseSidebar = () => {
+        setToggleSide(false);
+        toggleSidebar(toggleSide);
+    };
+    //   const openSidebar = () => {
+    //       setToggleSide(true);
+    //       toggleSidebar(toggleSide);
+    //   };
     let ticket = {};
     if (encryptedData) {
         try {
@@ -59,6 +79,15 @@ const ViewTicket = (props) => {
         ticket_id: ticket.id,
         user: user.id,
     };
+    //   useEffect(() => {
+    //       return () => {
+    //           if (state) {
+    //               setState(false);
+    //           }else{
+    //               openSidebar();
+    //           }
+    //       };
+    //   }, []);
 
     useEffect(() => {
         if (!ticket || !ticket.id) {
@@ -77,6 +106,7 @@ const ViewTicket = (props) => {
                 } catch (error) {
                     console.error("Error fetching Data:", error);
                 } finally {
+                    if (toggleSide) openCloseSidebar();
                     setSub(false);
                 }
             };
@@ -176,51 +206,81 @@ const ViewTicket = (props) => {
             }
         }
     };
+    const [selectedVendors, setSelectedVendors] = useState([]);
+    const handleCheckboxChange = (vendor, index) => {
+        setSelectedVendors((prev) => {
+            const exists = prev.find((v) => v.rowKey === index);
+            if (exists) {
+                return prev.filter((v) => v.rowKey !== index);
+            } else {
+                return [...prev, { ...vendor, rowKey: index }];
+            }
+        });
+    };
 
-    const changeTicketStatus = (event) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const TicketRes = {
-            ...Object.fromEntries(formData),
-            ticket: ticket.id,
-            user: user.id,
-            file: fileInput,
-            vendor: formData.getAll("vendor"),
-            comment: commentInput,
-        };
-
-        if (statusInput == "0" && commentInput.trim() == "") {
+    const changeTicketStatus = () => {
+        if (statusInput == "0" && commentInput.trim() === "") {
             toast.error("Please Enter Rejection Reason!");
-        } else {
-            //  setSub(true);
-            axiosClient
-                .post("changeTicketStatus", TicketRes, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                })
-                .then(({ data }) => {
-                    switch (data.type) {
-                        case "success":
-                            setTemp(!temp);
-                            setStatusInput("");
-                            setFileInput("");
-                            setCommentInput();
-                            toast.success(
-                                "The Vendor has been successfully selected."
-                            );
-                            break;
-                        case "error":
-                            toast.error(data.message);
-                            break;
-                    }
-                    //  setSub(false);
-                })
-                .catch(() => {
-                    toast.error("Something went wrong!");
-                    //  setSub(false);
-                });
+            return;
         }
+
+        let TicketRes = new FormData();
+
+        const finalStatus = statusInput || ticketData.statusVal;
+        TicketRes.append("status", finalStatus);
+
+        TicketRes.append("ticket", ticket.id);
+        TicketRes.append("user", user.id);
+        TicketRes.append("comment", commentInput);
+
+        if (fileInput) {
+            TicketRes.append("file", fileInput);
+        }
+
+        if (selectedVendors.length > 0) {
+            const uniqueVendorIds = new Set(selectedVendors.map((v) => v.id));
+            uniqueVendorIds.forEach((vendorId) => {
+                TicketRes.append("vendor[]", vendorId);
+            });
+        }
+
+        if (ticketData.request_type_val == 4 && ticketData.statusVal > 1) {
+            const numberInput = document.querySelector(
+                "[name='number_of_resource']"
+            );
+            if (numberInput) {
+                TicketRes.append("number_of_resource", numberInput.value);
+            }
+        }
+
+        setSub(true);
+
+        axiosClient
+            .post("changeTicketStatus", TicketRes, {
+                headers: { "Content-Type": "multipart/form-data" },
+            })
+            .then(({ data }) => {
+                switch (data.type) {
+                    case "success":
+                        setTemp(!temp);
+                        setStatusInput("");
+                        setFileInput("");
+                        setCommentInput("");
+                        setSelectedVendors([]);
+                        toast.success(
+                            "The Vendor has been successfully selected."
+                        );
+                        break;
+                    case "error":
+                        toast.error(data.message);
+                        break;
+                }
+                setSub(false);
+            })
+            .catch(() => {
+                toast.error("Something went wrong!");
+                setSub(false);
+            });
     };
 
     const AssignTicket = (event) => {
@@ -292,6 +352,42 @@ const ViewTicket = (props) => {
             });
         }
     };
+    const [queryParams, setQueryParams] = useState(null);
+    const [loading2, setLoading2] = useState(false);
+    const [perPage, setPerPage] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const handleSearch = (searchParams) => {
+        setQueryParams(searchParams);
+        setCurrentPage(1);
+    };
+    const [vendors, setVendors] = useState([]);
+    const [fields, setFields] = useState([]);
+    const [lastPage, setLastPage] = useState(1);
+
+    const fetchData = useCallback(async () => {
+        const payload = {
+            per_page: perPage,
+            page: currentPage,
+            queryParams: queryParams,
+            vendor_brands: [1],
+        };
+
+        try {
+            const { data } = await axiosClient.post("SearchVendors", payload);
+
+            setVendors(data.vendors.data);
+            setFields(data.fields);
+            setLastPage(data.vendors.last_page);
+            // console.log(data.vendors);
+        } catch (err) {
+            // console.error(err);
+        }
+    }, [perPage, currentPage, queryParams]);
+
+    useEffect(() => {
+        fetchData();
+    }, [perPage, currentPage, queryParams]);
 
     return (
         <Fragment>
@@ -369,7 +465,7 @@ const ViewTicket = (props) => {
                                             <td>{ticketData?.subject}</td>
                                             <td>{ticketData?.software}</td>
                                             <td>
-                                                {ticketData.fileLink != null ? (
+                                                {ticketData?.fileLink != null ? (
                                                     <Link
                                                         to={ticketData.fileLink}
                                                         className="txt-dangers"
@@ -380,9 +476,9 @@ const ViewTicket = (props) => {
                                                     "No File Found"
                                                 )}
                                             </td>
-                                            <td>{ticketData.status}</td>
-                                            <td>{ticketData.created_by}</td>
-                                            <td>{ticketData.created_at}</td>
+                                            <td>{ticketData?.status}</td>
+                                            <td>{ticketData?.created_by}</td>
+                                            <td>{ticketData?.created_at}</td>
                                         </tr>
                                         <tr>
                                             <th colSpan={2}>
@@ -391,7 +487,7 @@ const ViewTicket = (props) => {
                                             <td colSpan={18}>
                                                 {" "}
                                                 {
-                                                    ticketData.requester_function
+                                                    ticketData?.requester_function
                                                 }{" "}
                                             </td>
                                         </tr>
@@ -400,11 +496,11 @@ const ViewTicket = (props) => {
                                             <td
                                                 colSpan={18}
                                                 dangerouslySetInnerHTML={{
-                                                    __html: ticketData.comment,
+                                                    __html: ticketData?.comment,
                                                 }}
                                             ></td>
                                         </tr>
-                                        {ticketData.statusVal == 0 && (
+                                        {ticketData?.statusVal == 0 && (
                                             <tr>
                                                 <th colSpan={2}>
                                                     {"Rejection Reason"}
@@ -417,13 +513,13 @@ const ViewTicket = (props) => {
                                                 ></td>
                                             </tr>
                                         )}
-                                        {ticketData.assignedUser != 0 && (
+                                        {ticketData?.assignedUser != 0 && (
                                             <tr>
                                                 <th colSpan={2}>
                                                     {"Assigned To"}
                                                 </th>
                                                 <td colSpan={18}>
-                                                    {ticketData.assignedUser}
+                                                    {ticketData?.assignedUser}
                                                 </td>
                                             </tr>
                                         )}
@@ -435,8 +531,8 @@ const ViewTicket = (props) => {
                     {/*  Assign Ticket */}
                     {assignPermission == 1 &&
                         statusInput != "0" &&
-                        (ticketData.statusVal == 1 ||
-                            ticketData.statusVal == 2) && (
+                        (ticketData?.statusVal == 1 ||
+                            ticketData?.statusVal == 2) && (
                             <>
                                 <Card>
                                     <CardHeader className="b-t-primary p-b-0">
@@ -499,10 +595,7 @@ const ViewTicket = (props) => {
                             </Row>
                         </CardHeader>
                         <CardBody>
-                            <form
-                                id="changeStatusForm"
-                                onSubmit={changeTicketStatus}
-                            >
+                            <div id="changeStatusForm">
                                 {ticketData.statusVal <= 5 && (
                                     <>
                                         <FormGroup className="row mt-2">
@@ -757,44 +850,312 @@ const ViewTicket = (props) => {
                                     ticketData.statusVal > 1 && (
                                         <>
                                             {ticketData.statusVal == 2 && (
-                                                <FormGroup className="row mt-3">
-                                                    {/* Vendor */}
-                                                    <Col md="12">
-                                                        <Label
-                                                            className="col-form-label-sm f-12 mb-1"
-                                                            htmlFor="vendor"
-                                                        >
-                                                            Select Vendor
-                                                        </Label>
-                                                        <Select
-                                                            id="vendor"
-                                                            name="vendor"
-                                                            options={optionsV}
-                                                            className="js-example-basic-single"
-                                                            isMulti
-                                                            required={
-                                                                resourceVendors !=
-                                                                    null ||
-                                                                ticketData.statusVal ==
-                                                                    1
-                                                                    ? false
-                                                                    : true
-                                                            }
-                                                            onInputChange={(
-                                                                inputValue
-                                                            ) =>
-                                                                handleInputChange(
-                                                                    inputValue,
-                                                                    "vendors",
-                                                                    "vendor",
-                                                                    setOptionsV,
-                                                                    optionsV
-                                                                )
-                                                            }
-                                                        />
-                                                    </Col>
-                                                </FormGroup>
+                                                <>
+                                                    <VendorSearch
+                                                        onSearch={handleSearch}
+                                                        loading2={loading2}
+                                                    />
+
+                                                    {vendors?.length > 0 && (
+                                                        <>
+                                                            <div
+                                                                className="mt-4"
+                                                                style={{
+                                                                    maxHeight:
+                                                                        "400px",
+                                                                    overflow:
+                                                                        "auto",
+                                                                }}
+                                                            >
+                                                                <table className="table table-bordered">
+                                                                    <thead
+                                                                        style={{
+                                                                            position:
+                                                                                "sticky",
+                                                                            top: 0,
+                                                                            backgroundColor:
+                                                                                "#fff",
+                                                                            zIndex: 1,
+                                                                        }}
+                                                                    >
+                                                                        <tr>
+                                                                            <th>
+                                                                                <input type="checkbox" />
+                                                                            </th>
+                                                                            {fields.map(
+                                                                                (
+                                                                                    field
+                                                                                ) => (
+                                                                                    <th
+                                                                                        key={
+                                                                                            field
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            field
+                                                                                        }
+                                                                                    </th>
+                                                                                )
+                                                                            )}
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {vendors.map(
+                                                                            (
+                                                                                vendor,
+                                                                                index
+                                                                            ) => (
+                                                                                <tr
+                                                                                    key={
+                                                                                        vendor.id +
+                                                                                        "-" +
+                                                                                        index
+                                                                                    }
+                                                                                >
+                                                                                    <td>
+                                                                                        <input
+                                                                                            type="checkbox"
+                                                                                            checked={selectedVendors.some(
+                                                                                                (
+                                                                                                    v
+                                                                                                ) =>
+                                                                                                    v.rowKey ===
+                                                                                                    index
+                                                                                            )}
+                                                                                            onChange={() =>
+                                                                                                handleCheckboxChange(
+                                                                                                    vendor,
+                                                                                                    index
+                                                                                                )
+                                                                                            }
+                                                                                        />
+                                                                                    </td>
+                                                                                    {fields.map(
+                                                                                        (
+                                                                                            field
+                                                                                        ) => {
+                                                                                            const value =
+                                                                                                vendor[
+                                                                                                    field
+                                                                                                ];
+                                                                                            return (
+                                                                                                <td
+                                                                                                    key={
+                                                                                                        vendor.id +
+                                                                                                        "-" +
+                                                                                                        field +
+                                                                                                        "-" +
+                                                                                                        index
+                                                                                                    }
+                                                                                                >
+                                                                                                    {value &&
+                                                                                                    typeof value ===
+                                                                                                        "object" &&
+                                                                                                    !Array.isArray(
+                                                                                                        value
+                                                                                                    )
+                                                                                                        ? Object.values(
+                                                                                                              value
+                                                                                                          )[1] ??
+                                                                                                          ""
+                                                                                                        : value ??
+                                                                                                          ""}
+                                                                                                </td>
+                                                                                            );
+                                                                                        }
+                                                                                    )}
+                                                                                </tr>
+                                                                            )
+                                                                        )}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <div className="mt-4">
+                                                                <h5>
+                                                                    Selected
+                                                                    Vendors
+                                                                </h5>
+                                                                {selectedVendors.length ===
+                                                                0 ? (
+                                                                    <p>
+                                                                        No
+                                                                        vendors
+                                                                        selected
+                                                                    </p>
+                                                                ) : (
+                                                                    <div
+                                                                        style={{
+                                                                            maxHeight:
+                                                                                "300px",
+                                                                            overflowY:
+                                                                                "auto",
+                                                                        }}
+                                                                    >
+                                                                        <table className="table table-bordered table-sm">
+                                                                            <thead
+                                                                                className="table-light"
+                                                                                style={{
+                                                                                    position:
+                                                                                        "sticky",
+                                                                                    top: 0,
+                                                                                    zIndex: 1,
+                                                                                }}
+                                                                            >
+                                                                                <tr>
+                                                                                    <th>
+                                                                                        Name
+                                                                                    </th>
+                                                                                    {fields.map(
+                                                                                        (
+                                                                                            field
+                                                                                        ) => (
+                                                                                            <th
+                                                                                                key={
+                                                                                                    field
+                                                                                                }
+                                                                                            >
+                                                                                                {
+                                                                                                    field
+                                                                                                }
+                                                                                            </th>
+                                                                                        )
+                                                                                    )}
+                                                                                    <th>
+                                                                                        Action
+                                                                                    </th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {selectedVendors.map(
+                                                                                    (
+                                                                                        vendor
+                                                                                    ) => (
+                                                                                        <tr
+                                                                                            key={
+                                                                                                vendor?.id
+                                                                                            }
+                                                                                        >
+                                                                                            <td>
+                                                                                                {
+                                                                                                    vendor?.name
+                                                                                                }
+                                                                                            </td>
+                                                                                            {fields.map(
+                                                                                                (
+                                                                                                    field
+                                                                                                ) => {
+                                                                                                    const value =
+                                                                                                        vendor[
+                                                                                                            field
+                                                                                                        ];
+                                                                                                    return (
+                                                                                                        <td
+                                                                                                            key={
+                                                                                                                vendor.id +
+                                                                                                                "-" +
+                                                                                                                field
+                                                                                                            }
+                                                                                                        >
+                                                                                                            {value &&
+                                                                                                            typeof value ===
+                                                                                                                "object" &&
+                                                                                                            !Array.isArray(
+                                                                                                                value
+                                                                                                            )
+                                                                                                                ? Object.values(
+                                                                                                                      value
+                                                                                                                  )[1] ??
+                                                                                                                  ""
+                                                                                                                : value ??
+                                                                                                                  ""}
+                                                                                                        </td>
+                                                                                                    );
+                                                                                                }
+                                                                                            )}
+                                                                                            <td>
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    className="btn btn-sm btn-danger"
+                                                                                                    onClick={() =>
+                                                                                                        setSelectedVendors(
+                                                                                                            (
+                                                                                                                prev
+                                                                                                            ) =>
+                                                                                                                prev.filter(
+                                                                                                                    (
+                                                                                                                        v
+                                                                                                                    ) =>
+                                                                                                                        v.id !==
+                                                                                                                        vendor.id
+                                                                                                                )
+                                                                                                        )
+                                                                                                    }
+                                                                                                >
+                                                                                                    Remove
+                                                                                                </button>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    )
+                                                                                )}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {/* Pagination */}
+                                                            <div className="d-flex justify-content-between align-items-center mt-3">
+                                                                <button
+                                                                    className="btn btn-secondary"
+                                                                    disabled={
+                                                                        currentPage ===
+                                                                        1
+                                                                    }
+                                                                    onClick={() =>
+                                                                        setCurrentPage(
+                                                                            (
+                                                                                prev
+                                                                            ) =>
+                                                                                prev -
+                                                                                1
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Previous
+                                                                </button>
+
+                                                                <span>
+                                                                    Page{" "}
+                                                                    {
+                                                                        currentPage
+                                                                    }{" "}
+                                                                    of{" "}
+                                                                    {lastPage}
+                                                                </span>
+
+                                                                <button
+                                                                    className="btn btn-secondary"
+                                                                    disabled={
+                                                                        currentPage ===
+                                                                        lastPage
+                                                                    }
+                                                                    onClick={() =>
+                                                                        setCurrentPage(
+                                                                            (
+                                                                                prev
+                                                                            ) =>
+                                                                                prev +
+                                                                                1
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Next
+                                                                </button>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </>
                                             )}
+
                                             {resourceVendors != null &&
                                                 resourceVendors.length > 0 && (
                                                     <div className="table-responsive mt-5">
@@ -904,7 +1265,7 @@ const ViewTicket = (props) => {
                                                                                     item[
                                                                                         "vendor"
                                                                                     ]
-                                                                                        .email
+                                                                                        ?.email
                                                                                 }
                                                                             </td>
                                                                             <td>
@@ -912,7 +1273,7 @@ const ViewTicket = (props) => {
                                                                                     item[
                                                                                         "vendor"
                                                                                     ]
-                                                                                        .contact
+                                                                                        ?.contact
                                                                                 }
                                                                             </td>
                                                                             <td>
@@ -930,7 +1291,7 @@ const ViewTicket = (props) => {
                                                                                     item[
                                                                                         "vendor"
                                                                                     ]
-                                                                                        .mother_tongue
+                                                                                        ?.mother_tongue
                                                                                 }
                                                                             </td>
                                                                             <td>
@@ -938,7 +1299,7 @@ const ViewTicket = (props) => {
                                                                                     item[
                                                                                         "vendor"
                                                                                     ]
-                                                                                        .profile
+                                                                                        ?.profile
                                                                                 }
                                                                             </td>
                                                                             <td>
@@ -1077,8 +1438,10 @@ const ViewTicket = (props) => {
                                                 <Btn
                                                     attrBtn={{
                                                         color: "primary",
-                                                        type: "submit",
+                                                        type: "button",
                                                         disabled: sub,
+                                                        onClick:
+                                                            changeTicketStatus,
                                                     }}
                                                 >
                                                     <i className="fa fa-check-square-o"></i>
@@ -1094,7 +1457,7 @@ const ViewTicket = (props) => {
                                             </Col>
                                         </Row>
                                     )}
-                            </form>
+                            </div>
                         </CardBody>
                     </Card>
                     {/*  response */}
