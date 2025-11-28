@@ -370,7 +370,7 @@ const ViewTicket = (props) => {
             per_page: perPage,
             page: currentPage,
             queryParams: queryParams,
-            vendor_brands: [1],
+            vendor_brands: Brand,
         };
 
         try {
