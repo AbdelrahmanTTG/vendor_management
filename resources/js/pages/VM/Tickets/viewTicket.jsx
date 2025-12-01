@@ -209,9 +209,13 @@ const ViewTicket = (props) => {
     const [selectedVendors, setSelectedVendors] = useState([]);
     const handleCheckboxChange = (vendor, index) => {
         setSelectedVendors((prev) => {
-            const exists = prev.find((v) => v.rowKey === index);
+            const exists = prev.find(
+                (v) => v.vendor_price_list === vendor.vendor_price_list
+            );
             if (exists) {
-                return prev.filter((v) => v.rowKey !== index);
+                return prev.filter(
+                    (v) => v.vendor_price_list !== vendor.vendor_price_list
+                );
             } else {
                 return [...prev, { ...vendor, rowKey: index }];
             }
@@ -219,69 +223,69 @@ const ViewTicket = (props) => {
     };
 
     const changeTicketStatus = () => {
-        if (statusInput == "0" && commentInput.trim() === "") {
-            toast.error("Please Enter Rejection Reason!");
-            return;
+    if (statusInput == "0" && commentInput.trim() === "") {
+        toast.error("Please Enter Rejection Reason!");
+        return;
+    }
+
+    let TicketRes = new FormData();
+
+    const finalStatus = statusInput || ticketData.statusVal;
+    TicketRes.append("status", finalStatus);
+
+    TicketRes.append("ticket", ticket.id);
+    TicketRes.append("user", user.id);
+    TicketRes.append("comment", commentInput);
+
+    if (fileInput) {
+        TicketRes.append("file", fileInput);
+    }
+
+    if (selectedVendors.length > 0) {
+        selectedVendors.forEach((vendor) => {
+            TicketRes.append("vendor[]", vendor.id);
+            TicketRes.append("vendor_price_list[]", vendor.vendor_price_list || '');
+        });
+    }
+
+    if (ticketData.request_type_val == 4 && ticketData.statusVal > 1) {
+        const numberInput = document.querySelector(
+            "[name='number_of_resource']"
+        );
+        if (numberInput) {
+            TicketRes.append("number_of_resource", numberInput.value);
         }
+    }
 
-        let TicketRes = new FormData();
+    setSub(true);
 
-        const finalStatus = statusInput || ticketData.statusVal;
-        TicketRes.append("status", finalStatus);
-
-        TicketRes.append("ticket", ticket.id);
-        TicketRes.append("user", user.id);
-        TicketRes.append("comment", commentInput);
-
-        if (fileInput) {
-            TicketRes.append("file", fileInput);
-        }
-
-        if (selectedVendors.length > 0) {
-            const uniqueVendorIds = new Set(selectedVendors.map((v) => v.id));
-            uniqueVendorIds.forEach((vendorId) => {
-                TicketRes.append("vendor[]", vendorId);
-            });
-        }
-
-        if (ticketData.request_type_val == 4 && ticketData.statusVal > 1) {
-            const numberInput = document.querySelector(
-                "[name='number_of_resource']"
-            );
-            if (numberInput) {
-                TicketRes.append("number_of_resource", numberInput.value);
+    axiosClient
+        .post("changeTicketStatus", TicketRes, {
+            headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then(({ data }) => {
+            switch (data.type) {
+                case "success":
+                    setTemp(!temp);
+                    setStatusInput("");
+                    setFileInput("");
+                    setCommentInput("");
+                    setSelectedVendors([]);
+                    toast.success(
+                        "The Vendor has been successfully selected."
+                    );
+                    break;
+                case "error":
+                    toast.error(data.message);
+                    break;
             }
-        }
-
-        setSub(true);
-
-        axiosClient
-            .post("changeTicketStatus", TicketRes, {
-                headers: { "Content-Type": "multipart/form-data" },
-            })
-            .then(({ data }) => {
-                switch (data.type) {
-                    case "success":
-                        setTemp(!temp);
-                        setStatusInput("");
-                        setFileInput("");
-                        setCommentInput("");
-                        setSelectedVendors([]);
-                        toast.success(
-                            "The Vendor has been successfully selected."
-                        );
-                        break;
-                    case "error":
-                        toast.error(data.message);
-                        break;
-                }
-                setSub(false);
-            })
-            .catch(() => {
-                toast.error("Something went wrong!");
-                setSub(false);
-            });
-    };
+            setSub(false);
+        })
+        .catch(() => {
+            toast.error("Something went wrong!");
+            setSub(false);
+        });
+};
 
     const AssignTicket = (event) => {
         event.preventDefault();
@@ -370,7 +374,7 @@ const ViewTicket = (props) => {
             per_page: perPage,
             page: currentPage,
             queryParams: queryParams,
-            vendor_brands: Brand,
+            vendor_brands: [1],
         };
 
         try {
@@ -379,7 +383,7 @@ const ViewTicket = (props) => {
             setVendors(data.vendors.data);
             setFields(data.fields);
             setLastPage(data.vendors.last_page);
-            // console.log(data.vendors);
+            console.log(data.vendors);
         } catch (err) {
             // console.error(err);
         }
@@ -465,7 +469,8 @@ const ViewTicket = (props) => {
                                             <td>{ticketData?.subject}</td>
                                             <td>{ticketData?.software}</td>
                                             <td>
-                                                {ticketData?.fileLink != null ? (
+                                                {ticketData?.fileLink !=
+                                                null ? (
                                                     <Link
                                                         to={ticketData.fileLink}
                                                         className="txt-dangers"
@@ -907,7 +912,7 @@ const ViewTicket = (props) => {
                                                                             ) => (
                                                                                 <tr
                                                                                     key={
-                                                                                        vendor.id +
+                                                                                        vendor.vendor_price_list +
                                                                                         "-" +
                                                                                         index
                                                                                     }
@@ -919,8 +924,8 @@ const ViewTicket = (props) => {
                                                                                                 (
                                                                                                     v
                                                                                                 ) =>
-                                                                                                    v.rowKey ===
-                                                                                                    index
+                                                                                                    v.vendor_price_list ===
+                                                                                                    vendor.vendor_price_list
                                                                                             )}
                                                                                             onChange={() =>
                                                                                                 handleCheckboxChange(
@@ -941,7 +946,7 @@ const ViewTicket = (props) => {
                                                                                             return (
                                                                                                 <td
                                                                                                     key={
-                                                                                                        vendor.id +
+                                                                                                        vendor.vendor_price_list +
                                                                                                         "-" +
                                                                                                         field +
                                                                                                         "-" +
@@ -1032,7 +1037,7 @@ const ViewTicket = (props) => {
                                                                                     ) => (
                                                                                         <tr
                                                                                             key={
-                                                                                                vendor?.id
+                                                                                                vendor.vendor_price_list
                                                                                             }
                                                                                         >
                                                                                             <td>
@@ -1051,7 +1056,7 @@ const ViewTicket = (props) => {
                                                                                                     return (
                                                                                                         <td
                                                                                                             key={
-                                                                                                                vendor.id +
+                                                                                                                vendor.vendor_price_list +
                                                                                                                 "-" +
                                                                                                                 field
                                                                                                             }
@@ -1085,8 +1090,8 @@ const ViewTicket = (props) => {
                                                                                                                     (
                                                                                                                         v
                                                                                                                     ) =>
-                                                                                                                        v.id !==
-                                                                                                                        vendor.id
+                                                                                                                        v.vendor_price_list !==
+                                                                                                                        vendor.vendor_price_list
                                                                                                                 )
                                                                                                         )
                                                                                                     }

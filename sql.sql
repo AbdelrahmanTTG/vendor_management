@@ -770,3 +770,4 @@ INSERT INTO `permission` (`id`, `groups`, `screen`, `role`, `follow`, `add`, `ed
 (NULL, '5', '349', '11', '1', '1', '1', '1', '1', '0'),
 (NULL, '5', '353', '11', '1', '1', '1', '1', '1', '0'),
 (NULL, '5', '350', '11', '1', '1', '1', '1', '1', '0');
+ALTER TABLE `vm_ticket_resource` ADD `vendor_price_list` INT NULL AFTER `file`;

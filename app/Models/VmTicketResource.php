@@ -15,4 +15,8 @@ class VmTicketResource extends Model
     {
         return  $this->belongsTo(Vendor::class, 'vendor');
     }
+    public function vendorSheet()
+    {
+        return $this->belongsTo(VendorSheet::class, 'vendor_price_list', 'id');
+    }
 }
