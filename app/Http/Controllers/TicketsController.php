@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\DB;
-
+use Carbon\Carbon;
 class TicketsController extends Controller
 {
     protected $vmEmail;
@@ -254,65 +254,296 @@ class TicketsController extends Controller
 
         return response()->json($users);
     }
+    // public function getTicketData(Request $request)
+    // {
+    //     $user = Crypt::decrypt($request->user);
+    //     $ticket = VmTicket::with(['Time', 'Response', 'TeamResponse', 'TicketResource'])->findorfail($request->ticket_id);
+    //     if ($ticket->request_type == 1 || $ticket->request_type == 3) {
+    //         if (count($ticket->TicketResource) > 0) {
+    //             foreach ($ticket->TicketResource as $res) {
+    //                 $hasSheet = VendorSheet::where('i', $res->id)
+    //                     ->where('ticket_id', $ticket->id)
+    //                     ->where('vendor', $res->vendor)
+    //                     ->exists();
+    //                 $vendors[] = VmTicketResource::with([
+    //                     'vendor' => function ($query) {
+    //                         $query->select('id', 'name', 'email', 'profile', 'cv', 'country', 'contact', 'mother_tongue', 'created_by');
+    //                     },
+    //                     'vendor.vendor_sheet' => function ($query) use ($res, $ticket, $hasSheet) {
+    //                         $query->select('id', 'vendor', 'source_lang', 'target_lang', 'service', 'task_type', 'dialect', 'rate', 'currency', 'unit', 'i', 'subject')->limit(1);
+
+    //                         if ($hasSheet) {
+    //                             $query->where('i', $res->id)
+    //                                 ->where('ticket_id', $ticket->id);
+    //                         }
+    //                     },
+    //                     'vendor.vendor_sheet.source_lang' => function ($query) {
+    //                         $query->select('id', 'name');
+    //                     },
+    //                     'vendor.vendor_sheet.target_lang' => function ($query) {
+    //                         $query->select('id', 'name');
+    //                     },
+    //                     'vendor.vendor_sheet.service' => function ($query) {
+    //                         $query->select('id', 'name');
+    //                     },
+    //                     'vendor.vendor_sheet.task_type' => function ($query) {
+    //                         $query->select('id', 'name');
+    //                     },
+    //                     'vendor.vendor_sheet.unit' => function ($query) {
+    //                         $query->select('id', 'name');
+    //                     },
+    //                     'vendor.vendor_sheet.currency' => function ($query) {
+    //                         $query->select('id', 'name');
+    //                     },
+    //                     'vendor.vendor_sheet.subject' => function ($query) {
+    //                         $query->select('id', 'name');
+    //                     },
+    //                     'vendor.created_by' => function ($query) {
+    //                         $query->select('id', 'user_name');
+    //                     },
+    //                     'vendor.country' => function ($query) {
+    //                         $query->select('id', 'name');
+    //                     }
+    //                 ])->find($res->id);
+    //             }
+    //         }
+    //     }
+    //     $vmUsers = BrandUsers::SelectVmData();
+    //     foreach ($vmUsers as $k => $vmUser) {
+    //         $vmArray[$k]['label'] = $vmUser->user_name;
+    //         $vmArray[$k]['value'] = $vmUser->id;
+    //     };
+
+    //     return response()->json([
+    //         "ticket" => new TicketResource($ticket),
+    //         "resourceVendors" => $vendors ?? null,
+    //         "vmUsers" => $vmArray ?? []
+    //     ]);
+    // }
+    // public function getTicketData(Request $request)
+    // {
+    //     $user = Crypt::decrypt($request->user);
+
+    //     $ticket = VmTicket::with(['Time', 'Response', 'TeamResponse', 'TicketResource'])
+    //         ->findOrFail($request->ticket_id);
+
+    //     if ($ticket->request_type == 1 || $ticket->request_type == 3) {
+
+    //         if (count($ticket->TicketResource) > 0) {
+
+    //             foreach ($ticket->TicketResource as $res) {
+
+    //                 $vendors[] = VmTicketResource::with([
+    //                     'vendor' => function ($query) use ($res) {
+    //                         $query->select(
+    //                             'id',
+    //                             'name',
+    //                             'email',
+    //                             'profile',
+    //                             'cv',
+    //                             'country',
+    //                             'contact',
+    //                             'mother_tongue',
+    //                             'created_by'
+    //                         )
+    //                             ->with([
+    //                                 'vendor_sheet' => function ($q) use ($res) {
+    //                                     $q->where('id', $res->vendor_price_list)     
+    //                                         ->select(
+    //                                             'id',
+    //                                             'vendor',
+    //                                             'source_lang',
+    //                                             'target_lang',
+    //                                             'service',
+    //                                             'task_type',
+    //                                             'dialect',
+    //                                             'rate',
+    //                                             'currency',
+    //                                             'unit',
+    //                                             'subject'
+    //                                         );
+    //                                 },
+    //                                 'vendor_sheet.source_lang' => function ($q) {
+    //                                     $q->select('id', 'name');
+    //                                 },
+    //                                 'vendor_sheet.target_lang' => function ($q) {
+    //                                     $q->select('id', 'name');
+    //                                 },
+    //                                 'vendor_sheet.service' => function ($q) {
+    //                                     $q->select('id', 'name');
+    //                                 },
+    //                                 'vendor_sheet.task_type' => function ($q) {
+    //                                     $q->select('id', 'name');
+    //                                 },
+    //                                 'vendor_sheet.currency' => function ($q) {
+    //                                     $q->select('id', 'name');
+    //                                 },
+    //                                 'vendor_sheet.unit' => function ($q) {
+    //                                     $q->select('id', 'name');
+    //                                 },
+    //                                 'vendor_sheet.subject' => function ($q) {
+    //                                     $q->select('id', 'name');
+    //                                 },
+    //                                 'created_by' => function ($q) {
+    //                                     $q->select('id', 'user_name');
+    //                                 },
+    //                                 'country' => function ($q) {
+    //                                     $q->select('id', 'name');
+    //                                 }
+    //                             ]);
+    //                     }
+
+    //                 ])->find($res->id);
+    //             }
+    //         }
+    //     }
+
+    //     $vmUsers = BrandUsers::SelectVmData();
+    //     foreach ($vmUsers as $k => $vmUser) {
+    //         $vmArray[$k]['label'] = $vmUser->user_name;
+    //         $vmArray[$k]['value'] = $vmUser->id;
+    //     }
+
+    //     return response()->json([
+    //         "ticket" => new TicketResource($ticket),
+    //         "resourceVendors" => $vendors ?? null,
+    //         "vmUsers" => $vmArray ?? []
+    //     ]);
+    // }
     public function getTicketData(Request $request)
     {
-        $user = Crypt::decrypt($request->user);
-        $ticket = VmTicket::with(['Time', 'Response', 'TeamResponse', 'TicketResource'])->findorfail($request->ticket_id);
+        $ticket = VmTicket::with(['Time', 'Response', 'TeamResponse', 'TicketResource'])
+            ->findOrFail($request->ticket_id);
+
+        $cutoffDate = Carbon::create(2025, 12, 2, 0, 0, 0);
+
+        $ticketCreatedAt = Carbon::parse($ticket->created_at);
+
         if ($ticket->request_type == 1 || $ticket->request_type == 3) {
             if (count($ticket->TicketResource) > 0) {
-                foreach ($ticket->TicketResource as $res) {
-                    $hasSheet = VendorSheet::where('i', $res->id)
-                        ->where('ticket_id', $ticket->id)
-                        ->where('vendor', $res->vendor)
-                        ->exists();
-                    $vendors[] = VmTicketResource::with([
-                        'vendor' => function ($query) {
-                            $query->select('id', 'name', 'email', 'profile', 'cv', 'country', 'contact', 'mother_tongue', 'created_by');
-                        },
-                        'vendor.vendor_sheet' => function ($query) use ($res, $ticket, $hasSheet) {
-                            $query->select('id', 'vendor', 'source_lang', 'target_lang', 'service', 'task_type', 'dialect', 'rate', 'currency', 'unit', 'i', 'subject')->limit(1);
 
-                            if ($hasSheet) {
-                                $query->where('i', $res->id)
-                                    ->where('ticket_id', $ticket->id);
+                if ($ticketCreatedAt->lt($cutoffDate)) {
+
+                    foreach ($ticket->TicketResource as $res) {
+                        $hasSheet = VendorSheet::where('i', $res->id)
+                            ->where('ticket_id', $ticket->id)
+                            ->where('vendor', $res->vendor)
+                            ->exists();
+
+                        $vendors[] = VmTicketResource::with([
+                            'vendor' => function ($query) {
+                                $query->select('id', 'name', 'email', 'profile', 'cv', 'country', 'contact', 'mother_tongue', 'created_by');
+                            },
+                            'vendor.vendor_sheet' => function ($query) use ($res, $ticket, $hasSheet) {
+                                $query->select('id', 'vendor', 'source_lang', 'target_lang', 'service', 'task_type', 'dialect', 'rate', 'currency', 'unit', 'i', 'subject')->limit(1);
+
+                                if ($hasSheet) {
+                                    $query->where('i', $res->id)
+                                        ->where('ticket_id', $ticket->id);
+                                }
+                            },
+                            'vendor.vendor_sheet.source_lang' => function ($query) {
+                                $query->select('id', 'name');
+                            },
+                            'vendor.vendor_sheet.target_lang' => function ($query) {
+                                $query->select('id', 'name');
+                            },
+                            'vendor.vendor_sheet.service' => function ($query) {
+                                $query->select('id', 'name');
+                            },
+                            'vendor.vendor_sheet.task_type' => function ($query) {
+                                $query->select('id', 'name');
+                            },
+                            'vendor.vendor_sheet.unit' => function ($query) {
+                                $query->select('id', 'name');
+                            },
+                            'vendor.vendor_sheet.currency' => function ($query) {
+                                $query->select('id', 'name');
+                            },
+                            'vendor.vendor_sheet.subject' => function ($query) {
+                                $query->select('id', 'name');
+                            },
+                            'vendor.created_by' => function ($query) {
+                                $query->select('id', 'user_name');
+                            },
+                            'vendor.country' => function ($query) {
+                                $query->select('id', 'name');
                             }
-                        },
-                        'vendor.vendor_sheet.source_lang' => function ($query) {
-                            $query->select('id', 'name');
-                        },
-                        'vendor.vendor_sheet.target_lang' => function ($query) {
-                            $query->select('id', 'name');
-                        },
-                        'vendor.vendor_sheet.service' => function ($query) {
-                            $query->select('id', 'name');
-                        },
-                        'vendor.vendor_sheet.task_type' => function ($query) {
-                            $query->select('id', 'name');
-                        },
-                        'vendor.vendor_sheet.unit' => function ($query) {
-                            $query->select('id', 'name');
-                        },
-                        'vendor.vendor_sheet.currency' => function ($query) {
-                            $query->select('id', 'name');
-                        },
-                        'vendor.vendor_sheet.subject' => function ($query) {
-                            $query->select('id', 'name');
-                        },
-                        'vendor.created_by' => function ($query) {
-                            $query->select('id', 'user_name');
-                        },
-                        'vendor.country' => function ($query) {
-                            $query->select('id', 'name');
-                        }
-                    ])->find($res->id);
+                        ])->find($res->id);
+                    }
+                } else {
+
+                    foreach ($ticket->TicketResource as $res) {
+                        $vendors[] = VmTicketResource::with([
+                            'vendor' => function ($query) use ($res) {
+                                $query->select(
+                                    'id',
+                                    'name',
+                                    'email',
+                                    'profile',
+                                    'cv',
+                                    'country',
+                                    'contact',
+                                    'mother_tongue',
+                                    'created_by'
+                                )
+                                    ->with([
+                                        'vendor_sheet' => function ($q) use ($res) {
+                                            $q->where('id', $res->vendor_price_list)
+                                                ->select(
+                                                    'id',
+                                                    'vendor',
+                                                    'source_lang',
+                                                    'target_lang',
+                                                    'service',
+                                                    'task_type',
+                                                    'dialect',
+                                                    'rate',
+                                                    'currency',
+                                                    'unit',
+                                                    'subject'
+                                                );
+                                        },
+                                        'vendor_sheet.source_lang' => function ($q) {
+                                            $q->select('id', 'name');
+                                        },
+                                        'vendor_sheet.target_lang' => function ($q) {
+                                            $q->select('id', 'name');
+                                        },
+                                        'vendor_sheet.service' => function ($q) {
+                                            $q->select('id', 'name');
+                                        },
+                                        'vendor_sheet.task_type' => function ($q) {
+                                            $q->select('id', 'name');
+                                        },
+                                        'vendor_sheet.currency' => function ($q) {
+                                            $q->select('id', 'name');
+                                        },
+                                        'vendor_sheet.unit' => function ($q) {
+                                            $q->select('id', 'name');
+                                        },
+                                        'vendor_sheet.subject' => function ($q) {
+                                            $q->select('id', 'name');
+                                        },
+                                        'created_by' => function ($q) {
+                                            $q->select('id', 'user_name');
+                                        },
+                                        'country' => function ($q) {
+                                            $q->select('id', 'name');
+                                        }
+                                    ]);
+                            }
+                        ])->find($res->id);
+                    }
                 }
             }
         }
+
         $vmUsers = BrandUsers::SelectVmData();
         foreach ($vmUsers as $k => $vmUser) {
             $vmArray[$k]['label'] = $vmUser->user_name;
             $vmArray[$k]['value'] = $vmUser->id;
-        };
+        }
 
         return response()->json([
             "ticket" => new TicketResource($ticket),
@@ -875,9 +1106,18 @@ class TicketsController extends Controller
                 foreach ($request->vendor as $i => $vendor) {
                     if (!empty($vendor)) {
                         $this->changeTicketToOpen($ticket_id, $user);
-                        $check = VmTicketResource::where('vendor', $vendor)->where('ticket', $ticket_id)->count();
+
+                        $vendorPriceList = isset($request->vendor_price_list[$i]) ? $request->vendor_price_list[$i] : null;
+
+                        $check = VmTicketResource::where('vendor', $vendor)
+                            ->where('ticket', $ticket_id)
+                            ->where('vendor_price_list', $vendorPriceList)
+                            ->count();
+
                         if ($check == 0) {
                             $data['vendor'] = $vendor;
+                            $data['vendor_price_list'] = $vendorPriceList;
+                            $data['ticket'] = $ticket_id;
                             $data['i'] = ++$i;
 
                             $vendorCount = Vendor::where('id', $vendor)->where('created_by', $user)->count();
@@ -893,14 +1133,11 @@ class TicketsController extends Controller
                                     ->count();
                                 $data['type'] = $vendorSheetCount > 0 ? 3 : 2;
                             }
+
                             $newVmTicketResource = VmTicketResource::create($data);
-                            VendorSheet::where('vendor', $vendor)
-                                ->where('source_lang', $ticket->source_lang)
-                                ->where('target_lang', $ticket->target_lang)
-                                ->where('task_type', $ticket->task_type)
-                                ->where('service', $ticket->service)
-                                ->update(['i' => $newVmTicketResource->id, 'ticket_id' => $ticket_id]);
+
                             $this->addTicketTimeStatus($ticket_id, $user, 7, $vendor);
+
                             $mailData = [
                                 'user_name' => $user_name,
                                 'subject'   => "New Resource : # " . $ticket_id,
@@ -920,12 +1157,12 @@ class TicketsController extends Controller
                             } else {
                                 $from = 'vm.support@aixnexus.com';
                             }
+
                             Mail::to($toEmail)
                                 ->cc($from)
                                 ->send(
                                     (new TicketMail($mailData))->from($this->vmEmail, 'Support Team')
                                 );
-                            // Mail::to($toEmail)->cc($this->vmEmail)->send(new TicketMail($mailData));
 
                             $message .= "Ticket Resource Added Successfully <br/>";
                         }

@@ -4109,7 +4109,7 @@ class VendorProfileController extends Controller
     public function SearchVendors(Request $request)
     {
 
-        if (!$request->has('queryParams') || empty($request->queryParams)) {
+        if (!$request->has('queryParams') || empty($request->queryParams) || empty(array_filter($request->queryParams, fn($v) => !empty($v)))) {
             return response()->json([
                 "vendors" => [],
                 "fields" => []
@@ -4184,7 +4184,8 @@ class VendorProfileController extends Controller
         } else {
             $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands');
         }
-
+        $vendorsQuery->where('status', "0")
+            ->where('vendor_brands', $request->vendor_brands);
         if ($includeMotherTongue) {
             $vendorsQuery->with(['motherTongues' => function ($query) {
                 $query->with('language:id,name');
@@ -4435,6 +4436,7 @@ class VendorProfileController extends Controller
 
                             $vendorsQuery->with(['vendor_sheet' => function ($query) use ($selectedColumns, $filter, $selectedColumnsRow) {
                                 $query->select($selectedColumns);
+                                // $query->where('Status', 0);
                                 $query->where(function ($query) use ($filter) {
                                     foreach ($filter['columns'] as $columnFilter) {
                                         if (!empty($columnFilter['column']) && !empty($columnFilter['value'])) {
@@ -4525,7 +4527,7 @@ class VendorProfileController extends Controller
         $tableKeys = array_column($queryParams['filters'] ?? [], 'table');
         $vendorsData = $vendors->toArray();
 
-        $flattenedVendors = $this->flattenVendorsWithSheets($vendorsData['data']);
+        $flattenedVendors = $this->flattenVendorsWithSheetsSearch($vendorsData['data']);
 
         $flattenedVendors = array_map(function ($vendor) use ($tableKeys, $includeMotherTongue) {
             foreach ($tableKeys as $table) {
@@ -4579,5 +4581,50 @@ class VendorProfileController extends Controller
             "vendors" => $vendors,
             "fields" => $finalFormatArray,
         ], 200);
+    }
+    function flattenVendorsWithSheetsSearch($vendors)
+    {
+        $flattenedVendors = [];
+
+        foreach ($vendors as $vendor) {
+            $vendorData = $vendor;
+            $vendorId = $vendor['id'];
+            unset($vendorData['vendor_sheet'], $vendorData['id']);
+
+            if (isset($vendorData['priceList'])) {
+                unset($vendorData['priceList']);
+            }
+
+            if (!empty($vendor['vendor_sheet']) && is_array($vendor['vendor_sheet'])) {
+                foreach ($vendor['vendor_sheet'] as $sheet) {
+
+                    $vendorPriceListId = $sheet['id'];
+
+                    unset($sheet['id'], $sheet['vendor']);
+
+                    $adjustedVendorData = [];
+                    foreach ($vendorData as $key => $value) {
+                        if (array_key_exists($key, $sheet)) {
+                            $adjustedVendorData["vendorTest.{$key}"] = $value;
+                        } else {
+                            $adjustedVendorData[$key] = $value;
+                        }
+                    }
+
+                    $flattenedVendors[] = array_merge(
+                        [
+                            'id' => $vendorId,
+                            'vendor_price_list' => $vendorPriceListId  
+                        ],
+                        $adjustedVendorData,
+                        $sheet
+                    );
+                }
+            } else {
+                $flattenedVendors[] = ['id' => $vendorId] + $vendorData;
+            }
+        }
+
+        return $flattenedVendors;
     }
 }
