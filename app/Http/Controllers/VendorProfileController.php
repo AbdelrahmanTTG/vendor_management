@@ -1994,22 +1994,22 @@ class VendorProfileController extends Controller
                 case 1:
                     $subject   = "The Translation Gate || Nexus New Profile";
                     $vm_email  = "vm.support@thetranslationgate.com";
-                    $nexusLink .= "thetranslationgate.com";
+                    $nexusLink .= "thetranslationgate.com/";
                     break;
                 case 3:
                     $subject   = "Europe Localize || Nexus New Profile";
                     $vm_email  = "vm.support@europelocalize.com";
-                    $nexusLink .= "europelocalize.com";
+                    $nexusLink .= "europelocalize.com/";
                     break;
                 case 11:
                     $subject   = "ColumbusLang || Nexus New Profile";
                     $vm_email  = "vm.support@columbuslang.com";
-                    $nexusLink .= "columbuslang.com";
+                    $nexusLink .= "columbuslang.com/";
                     break;
                 case 2:
                     $subject   = "Localizera || Nexus New Profile";
                     $vm_email  = "vm.support@localizera.com";
-                    $nexusLink .= "localizera.com";
+                    $nexusLink .= "localizera.com/";
                     break;
                 default:
                     $subject   = "Nexus || New Profile";

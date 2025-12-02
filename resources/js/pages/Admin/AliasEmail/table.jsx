@@ -1,13 +1,24 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Col, Card, CardHeader, Pagination, PaginationItem, PaginationLink, Table, FormGroup, Label, Input } from 'reactstrap';
-import { H5, Spinner } from '../../../AbstractElements';
-import Add from './ModelAdd'
-import AddUser from './ModelAddUser'
-import Edit from './ModelEdit'
-import { Previous, Next } from '../../../Constant';
-import { toast } from 'react-toastify';
+import React, { Fragment, useContext, useEffect, useState } from "react";
+import {
+    Col,
+    Card,
+    CardHeader,
+    Pagination,
+    PaginationItem,
+    PaginationLink,
+    Table,
+    FormGroup,
+    Label,
+    Input,
+} from "reactstrap";
+import { H5, Spinner } from "../../../AbstractElements";
+import Add from "./ModelAdd";
+import AddUser from "./ModelAddUser";
+import Edit from "./ModelEdit";
+import { Previous, Next } from "../../../Constant";
+import { toast } from "react-toastify";
 
-import SweetAlert from 'sweetalert2';
+import SweetAlert from "sweetalert2";
 
 import axiosClient from "../../../pages/AxiosClint";
 
@@ -17,23 +28,22 @@ const TableAlias = (props) => {
     const [activeItemAlias, setActiveItemAlias] = useState(null);
     const [pageLinks, setPageLinks] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
-    const [currentPage, setCurrentPage] = useState(1)
+    const [currentPage, setCurrentPage] = useState(1);
     const [queryParams, setQueryParams] = useState(null);
-    ;
     const [loading, setLoading] = useState(true);
     useEffect(() => {
-            setQueryParams(props.queryParams)
-    }, [props?.queryParams])
+        setQueryParams(props.queryParams);
+    }, [props?.queryParams]);
     const basictoaster = (toastname, status) => {
         switch (toastname) {
-            case 'successToast':
+            case "successToast":
                 toast.success(status, {
-                    position: "top-right"
+                    position: "top-right",
                 });
                 break;
-            case 'dangerToast':
+            case "dangerToast":
                 toast.error(status, {
-                    position: "top-right"
+                    position: "top-right",
                 });
                 break;
             default:
@@ -42,15 +52,14 @@ const TableAlias = (props) => {
     };
     const handleCheckboxChange = async (idAlias, id, stat) => {
         try {
-
             const formData = {
                 user_id: id,
                 alias_id: idAlias,
-                status: stat
+                status: stat,
             };
             const { data } = await axiosClient.post("ChangeStatus", formData);
-            var em = '';
-            var alias = '';
+            var em = "";
+            var alias = "";
 
             const statusLabels = {
                 true: "activated",
@@ -62,24 +71,25 @@ const TableAlias = (props) => {
 
                     return item.id === idAlias
                         ? {
-                            ...item,
-                            users: item.users.map((subItem) => {
-                                if (subItem.id === id) {
-                                    em = subItem.email;
-                                    return { ...subItem, status: stat };
-                                }
-                                return subItem;
-                            }),
-                        }
+                              ...item,
+                              users: item.users.map((subItem) => {
+                                  if (subItem.id === id) {
+                                      em = subItem.email;
+                                      return { ...subItem, status: stat };
+                                  }
+                                  return subItem;
+                              }),
+                          }
                         : item;
                 })
             );
 
             setTimeout(() => {
-                basictoaster("successToast", `Email ${em} is ${statusLabels[stat]} in the alias ${alias}`);
+                basictoaster(
+                    "successToast",
+                    `Email ${em} is ${statusLabels[stat]} in the alias ${alias}`
+                );
             }, 0);
-
-
         } catch (err) {
             const response = err.response;
             // if (response && response.data) {
@@ -88,14 +98,12 @@ const TableAlias = (props) => {
             //     setErrorMessage("An unexpected error occurred.");
             // }
             // console.log(err)
-            basictoaster("dangerToast", response.data.message)
-
+            basictoaster("dangerToast", response.data.message);
         }
-
     };
     const onUpdateData = (id, newUsers) => {
-        setdataTable(prevData =>
-            prevData.map(item =>
+        setdataTable((prevData) =>
+            prevData.map((item) =>
                 item.id === id
                     ? { ...item, users: [...item.users, ...newUsers] }
                     : item
@@ -103,8 +111,8 @@ const TableAlias = (props) => {
         );
     };
     const onUpdateDataAlias = (id, newData) => {
-        setdataTable(prevData =>
-            prevData.map(item =>
+        setdataTable((prevData) =>
+            prevData.map((item) =>
                 item.id === id
                     ? { ...item, ...newData, users: item.users }
                     : item
@@ -113,24 +121,30 @@ const TableAlias = (props) => {
     };
 
     const onAddData = (newData) => {
-        setdataTable(prevData => [...prevData, newData]);
+        setdataTable((prevData) => [...prevData, newData]);
     };
     const onDelete = async (id) => {
         try {
             const payload = {
                 id: id,
-            }
-            const { data } = await axiosClient.delete("deleteAlias", { data: payload });
-            setdataTable(prevData => prevData.filter(item => item.id !== id));
-            return data
+            };
+            const { data } = await axiosClient.delete("deleteAlias", {
+                data: payload,
+            });
+            setdataTable((prevData) =>
+                prevData.filter((item) => item.id !== id)
+            );
+            return data;
         } catch (err) {
             const response = err.response;
             if (response && response.data) {
-                setErrorMessage(response.data.message || "An unexpected error occurred.");
+                setErrorMessage(
+                    response.data.message || "An unexpected error occurred."
+                );
             } else {
                 setErrorMessage("An unexpected error occurred.");
             }
-            return false
+            return false;
             // basictoaster("dangerToast", response.data.message)
         }
     };
@@ -139,14 +153,17 @@ const TableAlias = (props) => {
             const payload = {
                 user_id: id,
                 alias_id: alias,
-            }
-            const { data } = await axiosClient.delete("deleteAliasEmail", { data: payload });
+            };
+            const { data } = await axiosClient.delete("deleteAliasEmail", {
+                data: payload,
+            });
             setdataTable((prevData) =>
                 prevData.map((item) => ({
                     ...item,
-                    users: item.id === alias
-                        ? item.users.filter((subItem) => subItem.id !== id)
-                        : item.users,
+                    users:
+                        item.id === alias
+                            ? item.users.filter((subItem) => subItem.id !== id)
+                            : item.users,
                 }))
             );
 
@@ -154,11 +171,13 @@ const TableAlias = (props) => {
         } catch (err) {
             const response = err.response;
             if (response && response.data) {
-                setErrorMessage(response.data.message || "An unexpected error occurred.");
+                setErrorMessage(
+                    response.data.message || "An unexpected error occurred."
+                );
             } else {
                 setErrorMessage("An unexpected error occurred.");
             }
-            return false
+            return false;
             // basictoaster("dangerToast", response.data.message)
         }
     };
@@ -171,7 +190,9 @@ const TableAlias = (props) => {
             };
             try {
                 setLoading(true);
-                const { data } = await axiosClient.get("allAlias", { params: payload });
+                const { data } = await axiosClient.get("allAlias", {
+                    params: payload,
+                });
                 // console.log(data)
                 setdataTable(data?.data);
                 // setPageLinks(data?.Links);
@@ -202,74 +223,64 @@ const TableAlias = (props) => {
     };
     const handelDelete = (item) => {
         SweetAlert.fire({
-            title: 'Are you sure?',
+            title: "Are you sure?",
             text: `You want to delete ( ${item.name} ) !`,
-            icon: 'warning',
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'No, cancel!',
-            reverseButtons: true
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!",
+            reverseButtons: true,
         }).then(async (result) => {
             if (result.isConfirmed) {
                 const success = await onDelete(item.id);
                 if (success) {
                     SweetAlert.fire(
-                        'Deleted!',
+                        "Deleted!",
                         `${item.name} has been deleted.`,
-                        'success'
+                        "success"
                     );
                 } else {
                     SweetAlert.fire(
-                        'Ooops !',
-                        ' An error occurred while deleting. :)',
-                        'error'
+                        "Ooops !",
+                        " An error occurred while deleting. :)",
+                        "error"
                     );
                 }
-
             } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
-                SweetAlert.fire(
-                    'Cancelled',
-                    'Your item is safe :)',
-                    'info'
-                );
+                SweetAlert.fire("Cancelled", "Your item is safe :)", "info");
             }
         });
-    }
+    };
     const handelDeleteEmail = (alias, id, email) => {
         SweetAlert.fire({
-            title: 'Are you sure?',
+            title: "Are you sure?",
             text: `You want to delete ( ${email} ) !`,
-            icon: 'warning',
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'No, cancel!',
-            reverseButtons: true
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!",
+            reverseButtons: true,
         }).then(async (result) => {
             if (result.isConfirmed) {
                 const success = await onDeleteEmail(alias, id);
                 if (success) {
                     SweetAlert.fire(
-                        'Deleted!',
+                        "Deleted!",
                         `${email} has been deleted.`,
-                        'success'
+                        "success"
                     );
                 } else {
                     SweetAlert.fire(
-                        'Ooops !',
-                        ' An error occurred while deleting. :)',
-                        'error'
+                        "Ooops !",
+                        " An error occurred while deleting. :)",
+                        "error"
                     );
                 }
-
             } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
-                SweetAlert.fire(
-                    'Cancelled',
-                    'Your item is safe :)',
-                    'info'
-                );
+                SweetAlert.fire("Cancelled", "Your item is safe :)", "info");
             }
         });
-    }
+    };
     const getPaginationItems = () => {
         const items = [];
         const displayedPages = 5;
@@ -286,7 +297,11 @@ const TableAlias = (props) => {
         }
         for (let i = startPage; i <= endPage; i++) {
             items.push(
-                <PaginationItem key={i} active={i === currentPage} onClick={() => handlePageChange(i)}>
+                <PaginationItem
+                    key={i}
+                    active={i === currentPage}
+                    onClick={() => handlePageChange(i)}
+                >
                     <PaginationLink>{i}</PaginationLink>
                 </PaginationItem>
             );
@@ -314,7 +329,10 @@ const TableAlias = (props) => {
         }
         if (endPage < totalPages) {
             items.push(
-                <PaginationItem onClick={() => handlePageChange(totalPages)} key={totalPages}>
+                <PaginationItem
+                    onClick={() => handlePageChange(totalPages)}
+                    key={totalPages}
+                >
                     <PaginationLink>{totalPages}</PaginationLink>
                 </PaginationItem>
             );
@@ -328,24 +346,22 @@ const TableAlias = (props) => {
         }
     };
     const test = async () => {
-        const userId = JSON.parse(localStorage.getItem('USER'));
+        const userId = JSON.parse(localStorage.getItem("USER"));
 
         const te = {
-            "id": userId.id,
-            "sender_email": "dev.support@lingotalents.com",
-            "receiver_email": "dev.support@lingotalents.com",
-            "content": "Vendor file  ",
-            "screen": "admin/masterUsers",
-            "screen_id": 1
-        }
+            id: userId.id,
+            sender_email: "dev.support@aixnexus.com",
+            receiver_email: "dev.support@aixnexus.com",
+            content: "Vendor file  ",
+            screen: "admin/masterUsers",
+            screen_id: 1,
+        };
         try {
             const { data } = await axiosClient.post("notice", te);
-           
         } catch (err) {
             const response = err.response;
-        
         }
-    }
+    };
     return (
         <Fragment>
             <button onClick={() => test()}>tt</button>
@@ -355,135 +371,324 @@ const TableAlias = (props) => {
                     <CardHeader className="d-flex justify-content-between align-items-center">
                         <H5>Alias email</H5>
                         <div className="ml-auto">
-                            <Add onAddData={onAddData} nameBtm="Add new alias" titelModel="New alias" />
+                            <Add
+                                onAddData={onAddData}
+                                nameBtm="Add new alias"
+                                titelModel="New alias"
+                            />
                         </div>
                     </CardHeader>
                     <div className="table-responsive">
                         <Table hover responsive>
                             <thead>
                                 <tr>
-                                    <th scope="col">{'ID'}</th>
-                                    <th scope="col">{'Name'}</th>
-                                    <th scope="col">{'Alias email'}</th>
-                                    <th scope="col">{'Emails'}</th>
-                                    <th scope="col">{'Status'}</th>
-                                    <th scope="col">{'Add user'}</th>
-                                    <th scope="col">{'Edit'}</th>
-                                    <th scope="col">{'Delete'}</th>
+                                    <th scope="col">{"ID"}</th>
+                                    <th scope="col">{"Name"}</th>
+                                    <th scope="col">{"Alias email"}</th>
+                                    <th scope="col">{"Emails"}</th>
+                                    <th scope="col">{"Status"}</th>
+                                    <th scope="col">{"Add user"}</th>
+                                    <th scope="col">{"Edit"}</th>
+                                    <th scope="col">{"Delete"}</th>
                                 </tr>
                             </thead>
 
                             <tbody>
                                 {loading ? (
-                                    <tr colSpan={'lode'}>
-                                        <td colSpan="8" style={{ textAlign: "center", verticalAlign: "middle", height: "100px" }}>
+                                    <tr colSpan={"lode"}>
+                                        <td
+                                            colSpan="8"
+                                            style={{
+                                                textAlign: "center",
+                                                verticalAlign: "middle",
+                                                height: "100px",
+                                            }}
+                                        >
                                             <div className="loader-box">
-                                                <Spinner attrSpinner={{ className: 'loader-9' }} />
+                                                <Spinner
+                                                    attrSpinner={{
+                                                        className: "loader-9",
+                                                    }}
+                                                />
                                             </div>
                                         </td>
                                     </tr>
                                 ) : dataTable.length === 0 ? (
                                     <tr>
-                                        <td colSpan="7" style={{ textAlign: "center", verticalAlign: "middle", height: "100px", fontSize: "16px", fontWeight: "bold" }}>
+                                        <td
+                                            colSpan="7"
+                                            style={{
+                                                textAlign: "center",
+                                                verticalAlign: "middle",
+                                                height: "100px",
+                                                fontSize: "16px",
+                                                fontWeight: "bold",
+                                            }}
+                                        >
                                             No data available
                                         </td>
                                     </tr>
                                 ) : (
                                     dataTable.map((item) => (
                                         <tr key={item.id}>
-                                            <td style={{ textAlign: "center", verticalAlign: "middle" }}>{item.id}</td>
-                                            <td style={{ textAlign: "center", verticalAlign: "middle" }}>{item.name}</td>
-                                            <td style={{ textAlign: "center", verticalAlign: "middle" }}>{item.email}</td>
+                                            <td
+                                                style={{
+                                                    textAlign: "center",
+                                                    verticalAlign: "middle",
+                                                }}
+                                            >
+                                                {item.id}
+                                            </td>
+                                            <td
+                                                style={{
+                                                    textAlign: "center",
+                                                    verticalAlign: "middle",
+                                                }}
+                                            >
+                                                {item.name}
+                                            </td>
+                                            <td
+                                                style={{
+                                                    textAlign: "center",
+                                                    verticalAlign: "middle",
+                                                }}
+                                            >
+                                                {item.email}
+                                            </td>
                                             {/* <td>{item.age}</td> */}
-                                            <td >
-                                                <Table bordered hover striped responsive>
-
+                                            <td>
+                                                <Table
+                                                    bordered
+                                                    hover
+                                                    striped
+                                                    responsive
+                                                >
                                                     <tbody>
-                                                        {item.users.map((subItem, index) => (
-                                                            <tr key={subItem.id}>
-                                                                <td style={{ width: "80%" }}>{subItem.email}</td>
-                                                                <td style={{ width: "10%" }}>
-                                                                    <FormGroup check>
-                                                                        <Label check>
-                                                                            <Input
-                                                                                className="checkbox_animated"
-                                                                                id="test_result"
-                                                                                type="checkbox"
-                                                                                name="test_result"
-                                                                                value="1"
-                                                                                checked={subItem.status == 1}
-                                                                                onChange={() => handleCheckboxChange(item.id, subItem.id, !subItem.status)}
-                                                                            />
-                                                                        </Label>
-                                                                    </FormGroup>
-                                                                </td>
-                                                                <td style={{ width: "10%" }}>
-                                                                    <button
-                                                                        onClick={() => handelDeleteEmail(item.id, subItem.id, subItem.email)}
-                                                                        style={{ border: "none", backgroundColor: "transparent", padding: 0, fontSize: "15px" }}
+                                                        {item.users.map(
+                                                            (
+                                                                subItem,
+                                                                index
+                                                            ) => (
+                                                                <tr
+                                                                    key={
+                                                                        subItem.id
+                                                                    }
+                                                                >
+                                                                    <td
+                                                                        style={{
+                                                                            width: "80%",
+                                                                        }}
                                                                     >
-                                                                        ⛔
-                                                                    </button>
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                                        {
+                                                                            subItem.email
+                                                                        }
+                                                                    </td>
+                                                                    <td
+                                                                        style={{
+                                                                            width: "10%",
+                                                                        }}
+                                                                    >
+                                                                        <FormGroup
+                                                                            check
+                                                                        >
+                                                                            <Label
+                                                                                check
+                                                                            >
+                                                                                <Input
+                                                                                    className="checkbox_animated"
+                                                                                    id="test_result"
+                                                                                    type="checkbox"
+                                                                                    name="test_result"
+                                                                                    value="1"
+                                                                                    checked={
+                                                                                        subItem.status ==
+                                                                                        1
+                                                                                    }
+                                                                                    onChange={() =>
+                                                                                        handleCheckboxChange(
+                                                                                            item.id,
+                                                                                            subItem.id,
+                                                                                            !subItem.status
+                                                                                        )
+                                                                                    }
+                                                                                />
+                                                                            </Label>
+                                                                        </FormGroup>
+                                                                    </td>
+                                                                    <td
+                                                                        style={{
+                                                                            width: "10%",
+                                                                        }}
+                                                                    >
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                handelDeleteEmail(
+                                                                                    item.id,
+                                                                                    subItem.id,
+                                                                                    subItem.email
+                                                                                )
+                                                                            }
+                                                                            style={{
+                                                                                border: "none",
+                                                                                backgroundColor:
+                                                                                    "transparent",
+                                                                                padding: 0,
+                                                                                fontSize:
+                                                                                    "15px",
+                                                                            }}
+                                                                        >
+                                                                            ⛔
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            )
+                                                        )}
                                                     </tbody>
-
-
                                                 </Table>
                                             </td>
-                                            <td style={{ textAlign: "center", verticalAlign: "middle" }}>{item.status == 0 ? <i className="fa fa-circle font-danger f-12" /> : <i className="fa fa-circle font-success f-12" />}</td>
-                                            <td style={{ textAlign: "center", verticalAlign: "middle" }}>
-                                                <button onClick={() => handleEditClick(item.id)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
+                                            <td
+                                                style={{
+                                                    textAlign: "center",
+                                                    verticalAlign: "middle",
+                                                }}
+                                            >
+                                                {item.status == 0 ? (
+                                                    <i className="fa fa-circle font-danger f-12" />
+                                                ) : (
+                                                    <i className="fa fa-circle font-success f-12" />
+                                                )}
+                                            </td>
+                                            <td
+                                                style={{
+                                                    textAlign: "center",
+                                                    verticalAlign: "middle",
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={() =>
+                                                        handleEditClick(item.id)
+                                                    }
+                                                    style={{
+                                                        border: "none",
+                                                        backgroundColor:
+                                                            "transparent",
+                                                        padding: 0,
+                                                    }}
+                                                >
                                                     <i className="icofont icofont-ui-add"></i>
                                                 </button>
-                                                {activeItem === item.id && <AddUser
-                                                    data={true}
-                                                    handleEditClick={handleEditClick}
-                                                    titelModel={`Add an email to an alias email ${item.name}`}
-                                                    aliasId={item.id}
-                                                    onUpdateData={onUpdateData}
-                                                />}
+                                                {activeItem === item.id && (
+                                                    <AddUser
+                                                        data={true}
+                                                        handleEditClick={
+                                                            handleEditClick
+                                                        }
+                                                        titelModel={`Add an email to an alias email ${item.name}`}
+                                                        aliasId={item.id}
+                                                        onUpdateData={
+                                                            onUpdateData
+                                                        }
+                                                    />
+                                                )}
                                             </td>
-                                            <td style={{ textAlign: "center", verticalAlign: "middle" }}>
-                                                <button onClick={() => handleEditClickAlias(item.id)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
-                                                    <i className="fa fa-pencil-square-o" aria-hidden="true" style={{ fontSize: '18px' }}></i>
+                                            <td
+                                                style={{
+                                                    textAlign: "center",
+                                                    verticalAlign: "middle",
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={() =>
+                                                        handleEditClickAlias(
+                                                            item.id
+                                                        )
+                                                    }
+                                                    style={{
+                                                        border: "none",
+                                                        backgroundColor:
+                                                            "transparent",
+                                                        padding: 0,
+                                                    }}
+                                                >
+                                                    <i
+                                                        className="fa fa-pencil-square-o"
+                                                        aria-hidden="true"
+                                                        style={{
+                                                            fontSize: "18px",
+                                                        }}
+                                                    ></i>
                                                 </button>
-                                                {activeItemAlias === item.id && <Edit
-                                                    data={true}
-                                                    handleEditClick={handleEditClickAlias}
-                                                    titelModel={`Edit alias information ${item.name}`}
-                                                    alias={item}
-                                                    onUpdateData={onUpdateDataAlias}
-
-                                                />}
-
+                                                {activeItemAlias ===
+                                                    item.id && (
+                                                    <Edit
+                                                        data={true}
+                                                        handleEditClick={
+                                                            handleEditClickAlias
+                                                        }
+                                                        titelModel={`Edit alias information ${item.name}`}
+                                                        alias={item}
+                                                        onUpdateData={
+                                                            onUpdateDataAlias
+                                                        }
+                                                    />
+                                                )}
                                             </td>
-                                            <td style={{ textAlign: "center", verticalAlign: "middle" }}>
-                                                <button onClick={() => handelDelete(item)} style={{ border: 'none', backgroundColor: 'transparent', padding: 0 }}>
-                                                    <i className="fa fa-trash" aria-hidden="true" style={{ fontSize: '18px' }}></i>
+                                            <td
+                                                style={{
+                                                    textAlign: "center",
+                                                    verticalAlign: "middle",
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={() =>
+                                                        handelDelete(item)
+                                                    }
+                                                    style={{
+                                                        border: "none",
+                                                        backgroundColor:
+                                                            "transparent",
+                                                        padding: 0,
+                                                    }}
+                                                >
+                                                    <i
+                                                        className="fa fa-trash"
+                                                        aria-hidden="true"
+                                                        style={{
+                                                            fontSize: "18px",
+                                                        }}
+                                                    ></i>
                                                 </button>
-
-
                                             </td>
                                         </tr>
                                     ))
                                 )}
                             </tbody>
-
                         </Table>
                     </div>
-                    {totalPages > 1 &&
-                        <Pagination aria-label="Page navigation example" className="pagination-primary mt-3">
-                            <PaginationItem onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-                                <PaginationLink >{Previous}</PaginationLink>
+                    {totalPages > 1 && (
+                        <Pagination
+                            aria-label="Page navigation example"
+                            className="pagination-primary mt-3"
+                        >
+                            <PaginationItem
+                                onClick={() =>
+                                    handlePageChange(currentPage - 1)
+                                }
+                                disabled={currentPage === 1}
+                            >
+                                <PaginationLink>{Previous}</PaginationLink>
                             </PaginationItem>
                             {getPaginationItems()}
-                            <PaginationItem onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-                                <PaginationLink >{Next}</PaginationLink>
+                            <PaginationItem
+                                onClick={() =>
+                                    handlePageChange(currentPage + 1)
+                                }
+                                disabled={currentPage === totalPages}
+                            >
+                                <PaginationLink>{Next}</PaginationLink>
                             </PaginationItem>
                         </Pagination>
-                    }
+                    )}
                 </Card>
             </Col>
         </Fragment>

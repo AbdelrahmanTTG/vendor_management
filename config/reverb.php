@@ -121,11 +121,11 @@ return [
         'reverb' => [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
             'port' => env('REVERB_SERVER_PORT', 6001),
-            'hostname' => env('REVERB_HOST', "portal.lingotalents.com"),
+            'hostname' => env('REVERB_HOST', "vm.aixnexus.com"),
             'options' => [
                 'tls' => [
-                    'local_cert' => '/etc/letsencrypt/live/portal.lingotalents.com/fullchain.pem',
-                    'local_pk'   => '/etc/letsencrypt/live/portal.lingotalents.com/privkey.pem',
+                    'local_cert' => '/etc/letsencrypt/live/vm.aixnexus.com/fullchain.pem',
+                    'local_pk'   => '/etc/letsencrypt/live/vm.aixnexus.com/privkey.pem',
                     'verify_peer' => true,
                 ],
             ],
@@ -158,7 +158,7 @@ return [
                 'secret' => env('REVERB_APP_SECRET', "pbcycd8psvfrxkv2qkuf"),
                 'app_id' => env('REVERB_APP_ID', '897670'),
                 'options' => [
-                    'host' => env('REVERB_HOST', 'portal.lingotalents.com'),
+                    'host' => env('REVERB_HOST', 'vm.aixnexus.com'),
                     'port' => env('REVERB_PORT', 6001),
                     'scheme' => env('REVERB_SCHEME', 'https'),
                     'useTLS' => true,
@@ -172,5 +172,5 @@ return [
         ]
     ],
 
-    
+
 ];
