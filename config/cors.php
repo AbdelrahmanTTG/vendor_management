@@ -15,9 +15,9 @@ return [
     |
     */
 
-    'paths' => ['api/MyAlias', 'api/Notification', "api/seen", 'broadcasting/auth'], 
+    'paths' => ['api/MyAlias', 'api/Notification', "api/seen", 'broadcasting/auth' ,'api/*'], 
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['https://stage.aixnexus.com'], 
+    'allowed_origins' => ['https://stage.aixnexus.com' , 'http://localhost:3000'], 
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
