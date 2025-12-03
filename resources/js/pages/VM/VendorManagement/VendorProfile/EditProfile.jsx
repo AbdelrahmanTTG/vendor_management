@@ -99,7 +99,7 @@ const EditProfile = (props) => {
         };
     }, []);
     useEffect(() => {
-        if (!vendor || !vendor.id) {
+        if (!vendor || !vendor?.id) {
             setRedirect(true);
             return;
         }
@@ -259,7 +259,7 @@ const EditProfile = (props) => {
                     <LazyWrapper>
 
                         <div id='Portal_User' >
-                            <Portal_User email={ vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.Portal_User} onSubmit="onUpdate" mode="edit" />
+                            <Portal_User brand={vendorPersonalData?.PersonalData?.brands} email={ vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.Portal_User} onSubmit="onUpdate" mode="edit" />
                         </div>
                     </LazyWrapper>
                 )}

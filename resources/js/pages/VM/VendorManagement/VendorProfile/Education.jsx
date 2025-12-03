@@ -59,7 +59,7 @@ const Education = (props) => {
                     table: tablename
                 }
             });
-            const formattedOptions = data.map(item => ({
+            const formattedOptions = data?.map(item => ({
                 value: item.id,
                 label: item.name || item.gmt || item.dialect,
             }));
@@ -142,7 +142,7 @@ const Education = (props) => {
             if (props.EducationVendor.EducationVendor) {
                 const data = props.EducationVendor.EducationVendor
                 setValue("university_name", data?.university_name)
-                setValue("latest_degree", { value: data?.latest_degree.id, label: data?.latest_degree.name } )
+                setValue("latest_degree", { value: data?.latest_degree?.id, label: data?.latest_degree?.name } )
                 setValue("year_of_graduation", data?.year_of_graduation)
                 setValue("major", data?.major)
 

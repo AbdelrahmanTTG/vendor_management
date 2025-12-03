@@ -23,6 +23,7 @@ const Portal_User = (props) => {
     const [isOpen, setIsOpen] = useState(false);
     const { register, handleSubmit, setValue, formState: { errors } } = useForm();
     const [value, setValueemail] = useState(props.email);
+    const [brand, setBrand] = useState(props?.brand[0]?.id);
     const [inputType, setInputType] = useState('text'); 
     const [value2, setValue2] = useState(''); 
 
@@ -65,6 +66,7 @@ const Portal_User = (props) => {
         } else {
             const formData = { ...data };
             formData["email"] = props.email
+            formData["brand"] = props?.brand[0]?.id;
             try {
                 const response = await axiosClient.post("GeneratePassword", formData);
                 basictoaster("successToast", "Password created successfully !");
@@ -86,6 +88,7 @@ const Portal_User = (props) => {
     };
  
     useEffect(() => {
+        setBrand(props?.brand[0]?.id);
         setValueemail(props.email)
     }, [props.email])
     const onError = (errors) => {
