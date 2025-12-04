@@ -23,7 +23,7 @@ const Portal_User = (props) => {
     const [isOpen, setIsOpen] = useState(false);
     const { register, handleSubmit, setValue, formState: { errors } } = useForm();
     const [value, setValueemail] = useState(props.email);
-    const [id, setID] = useState(props?.brand[0]?.id);
+    const [id, setID] = useState(props?.id);
     const [inputType, setInputType] = useState('text'); 
     const [value2, setValue2] = useState(''); 
 
