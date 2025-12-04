@@ -259,7 +259,7 @@ const EditProfile = (props) => {
                     <LazyWrapper>
 
                         <div id='Portal_User' >
-                            <Portal_User brand={vendorPersonalData?.PersonalData?.brands} email={ vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.Portal_User} onSubmit="onUpdate" mode="edit" />
+                            <Portal_User id={vendorPersonalData?.PersonalData?.id} email={ vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.Portal_User} onSubmit="onUpdate" mode="edit" />
                         </div>
                     </LazyWrapper>
                 )}

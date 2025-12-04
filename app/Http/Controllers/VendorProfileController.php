@@ -1978,7 +1978,7 @@ class VendorProfileController extends Controller
         $request->validate([
             'email' => 'required|email|exists:vendor,email',
             'password' => 'required|min:8',
-            'brand' => 'required',
+            'id' => 'required',
         ]);
 
         $user = JWTAuth::parseToken()->authenticate();
@@ -1986,13 +1986,13 @@ class VendorProfileController extends Controller
 
         $email = $request->input('email');
         $password = $request->input('password');
-        $brand = $request->input('brand');
-        $vendor = Vendor::where('email', $email)->first();
+        $id = $request->input('id');
+        $vendor = Vendor::where('id', $id)->first();
         if ($vendor) {
             $vendor->password = base64_encode($password);
             $vendor->save();
             $nexusLink = env('NEXUS_LINK', 'https://aixnexus.com/');
-            switch ($brand) {
+            switch ($vendor->vendor_brands) {
                 case 1:
                     $subject   = "The Translation Gate || Nexus New Profile";
                     $vm_email  = "vm.support@thetranslationgate.com";
@@ -2019,7 +2019,7 @@ class VendorProfileController extends Controller
                     break;
             }
 
-            $htmlTemplate = $this->getVendorEmailTemplate($vendor, $brand, $nexusLink);
+            $htmlTemplate = $this->getVendorEmailTemplate($vendor, $vendor->vendor_brands, $nexusLink);
 
             if (!$htmlTemplate) {
                 return response()->json(['message' => 'Brand template not found'], 404);

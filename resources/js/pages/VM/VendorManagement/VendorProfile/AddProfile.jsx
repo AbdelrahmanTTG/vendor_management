@@ -168,7 +168,7 @@ const AddProfile = (props) => {
 
                         <div id="Portal_User" className="row mb-3">
                             <div className="col-12">
-                                <Portal_User brand={data?.brands} backPermissions={props.permissions?.Portal_User} email={data?.email} onSubmit="onSubmit" />
+                                <Portal_User id={data?.id} backPermissions={props.permissions?.Portal_User} email={data?.email} onSubmit="onSubmit" />
                             </div>
                         </div>
                     </LazyWrapper>
