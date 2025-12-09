@@ -49,6 +49,12 @@ const EditProfile = (props) => {
     const params = new URLSearchParams(location.search);
     const encryptedData = params.get("data");
     const [toggleSide, setToggleSide] = useState(true);
+    const [refreshFlag, setRefreshFlag] = useState(false);
+
+    const triggerRefresh = () => {
+        setRefreshFlag((prev) => !prev);
+    };
+
         const openCloseSidebar = () => {
             setToggleSide(false);
             toggleSidebar(toggleSide);
@@ -66,10 +72,12 @@ const EditProfile = (props) => {
         setCurrancy(Currancystat);
         setCUR(Cur)
     }
-    const handleDataSend = (data) => {
-        setData({ country: data.country, nationality: data?.nationality })
-        setPersonalData({ PersonalData:data });
-    };
+   const handleDataSend = (data) => {
+       setData({ country: data.country, nationality: data?.nationality });
+       setPersonalData({ PersonalData: data });
+       triggerRefresh(); 
+   };
+
     const LazyWrapper = ({ children }) => (
         <ErrorBoundary>
         <Suspense fallback={
@@ -140,7 +148,9 @@ const EditProfile = (props) => {
                         EducationVendor: "EducationVendor",
                     }),
                 };
+
                 const data = await axiosClient.post("EditVendor", payload);
+
                 setPersonalData({ PersonalData: data.data.Data });
                 setData({
                     country: data?.data?.Data?.country,
@@ -162,14 +172,13 @@ const EditProfile = (props) => {
                     EducationVendor: data.data.EducationVendor,
                 });
             } catch (error) {
-                // console.error("Error fetching vendor:", error);
-            } finally {
-                    if (toggleSide) openCloseSidebar();
+                console.error("Error fetching vendor:", error);
             }
         };
 
         fetchVendor();
-    }, [vendor?.id]);
+    }, [vendor?.id, refreshFlag]);
+
 
     if (redirect) {
         return <Navigate to='*' />;
