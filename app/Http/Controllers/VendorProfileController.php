@@ -1978,7 +1978,7 @@ class VendorProfileController extends Controller
         $request->validate([
             'email' => 'required|email|exists:vendor,email',
             'password' => 'required|min:8',
-            'brand' => 'required',
+            'id' => 'required',
         ]);
 
         $user = JWTAuth::parseToken()->authenticate();
@@ -1986,13 +1986,13 @@ class VendorProfileController extends Controller
 
         $email = $request->input('email');
         $password = $request->input('password');
-        $brand = $request->input('brand');
-        $vendor = Vendor::where('email', $email)->first();
+        $id = $request->input('id');
+        $vendor = Vendor::where('id', $id)->first();
         if ($vendor) {
             $vendor->password = base64_encode($password);
             $vendor->save();
             $nexusLink = env('NEXUS_LINK', 'https://aixnexus.com/');
-            switch ($brand) {
+            switch ($vendor->vendor_brands) {
                 case 1:
                     $subject   = "The Translation Gate || Nexus New Profile";
                     $vm_email  = "vm.support@thetranslationgate.com";
@@ -2019,7 +2019,7 @@ class VendorProfileController extends Controller
                     break;
             }
 
-            $htmlTemplate = $this->getVendorEmailTemplate($vendor, $brand, $nexusLink);
+            $htmlTemplate = $this->getVendorEmailTemplate($vendor, $vendor->vendor_brands, $nexusLink);
 
             if (!$htmlTemplate) {
                 return response()->json(['message' => 'Brand template not found'], 404);
@@ -2347,23 +2347,37 @@ class VendorProfileController extends Controller
 
             if ($cvFile) {
                 $originalFileNameCV = $cvFile->getClientOriginalName();
-                $encryptedFileNameCV = Crypt::encryptString($originalFileNameCV);
+                $encryptedName = Crypt::encryptString($originalFileNameCV);
+                $encryptedFileNameCV = bin2hex($encryptedName);
+
                 $cvFilePath = $cvFile->storeAs(
                     'cv_upload',
                     $encryptedFileNameCV . '.' . $cvFile->getClientOriginalExtension(),
                     'external'
                 );
+
+                if (!$cvFilePath || strlen($cvFilePath) < 5) {
+                    throw new \Exception('Failed to store CV file');
+                }
+
                 $vendor->cv = $cvFilePath;
             }
 
             if ($ndaFile) {
                 $originalFileNameNDA = $ndaFile->getClientOriginalName();
-                $encryptedFileNameNDA = Crypt::encryptString($originalFileNameNDA);
+                $encryptedName = Crypt::encryptString($originalFileNameNDA);
+                $encryptedFileNameNDA = bin2hex($encryptedName);
+
                 $ndaFilePath = $ndaFile->storeAs(
                     'nda_upload',
                     $encryptedFileNameNDA . '.' . $ndaFile->getClientOriginalExtension(),
                     'external'
                 );
+
+                if (!$ndaFilePath || strlen($ndaFilePath) < 5) {
+                    throw new \Exception('Failed to store NDA file');
+                }
+
                 $vendor->NDA = $ndaFilePath;
             }
 
@@ -2379,16 +2393,22 @@ class VendorProfileController extends Controller
 
                     if ($file) {
                         if ($file->getSize() > 5 * 1024 * 1024 && !in_array($file->getClientOriginalExtension(), $allowedExtensions)) {
-                            return response()->json(['error' => 'Each additional file must be ZIP or RAR if it is larger than 5MB.'], 400);
+                            throw new \Exception('Each additional file must be ZIP or RAR if it is larger than 5MB.');
                         }
 
                         $originalFileName = $file->getClientOriginalName();
-                        $encryptedFileName = Crypt::encryptString($originalFileName);
+                        $encryptedName = Crypt::encryptString($originalFileName);
+                        $encryptedFileName = bin2hex($encryptedName);
+
                         $filePath = $file->storeAs(
                             'other_files',
                             $encryptedFileName . '.' . $file->getClientOriginalExtension(),
                             'external'
                         );
+
+                        if (!$filePath || strlen($filePath) < 5) {
+                            throw new \Exception('Failed to store additional file');
+                        }
 
                         if ($fileId) {
                             $vendorFile = VendorFile::find($fileId);
@@ -2460,7 +2480,6 @@ class VendorProfileController extends Controller
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-
             if ($cvFilePath) {
                 Storage::disk('external')->delete($cvFilePath);
             }
@@ -2479,6 +2498,7 @@ class VendorProfileController extends Controller
             ], 500);
         }
     }
+
 
     public function NDA_vendor(Request $request)
     {
@@ -2563,9 +2583,10 @@ class VendorProfileController extends Controller
     public function download(Request $request)
     {
         $file = $request->input("filename");
+
         $isOnlyFileName = !str_contains($file, "/") && !str_contains($file, "\\");
         if ($isOnlyFileName) {
-            $possibleDirs = ['vendors', 'NDA'];
+            $possibleDirs = ['vendors', 'NDA', 'cv_upload', 'nda_upload', 'other_files'];
             foreach ($possibleDirs as $dir) {
                 $path = "{$dir}/{$file}";
                 if (Storage::disk('external')->exists($path)) {
@@ -2573,8 +2594,9 @@ class VendorProfileController extends Controller
                     return response()->download($filePath, $file);
                 }
             }
-            return response()->json(['message' => 'File not found in vendors or NDA'], 404);
+            return response()->json(['message' => 'File not found in expected directories'], 404);
         }
+
         $directory = dirname($file);
         $fileName = basename($file);
         $filePath = Storage::disk('external')->path("{$directory}/{$fileName}");
@@ -2584,15 +2606,22 @@ class VendorProfileController extends Controller
         }
 
         $encryptedNameOnly = pathinfo($fileName, PATHINFO_FILENAME);
+        $originalFileName = $fileName; 
 
         try {
-            $originalFileName = Crypt::decryptString($encryptedNameOnly);
+            if (ctype_xdigit($encryptedNameOnly)) {
+                $decoded = hex2bin($encryptedNameOnly);
+                $originalFileName = Crypt::decryptString($decoded);
+            } else {
+                $originalFileName = Crypt::decryptString($encryptedNameOnly);
+            }
         } catch (\Exception $e) {
-            return response()->download($filePath, $fileName);
+            $originalFileName = $fileName;
         }
 
         return response()->download($filePath, $originalFileName);
     }
+
     public function deleteFile(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();

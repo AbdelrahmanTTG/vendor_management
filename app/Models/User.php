@@ -32,20 +32,15 @@ class User extends Authenticatable implements JWTSubject
     }
     public static function getUserAccount($user)
     {
-        // $brand = !empty($user->favourite_brand_id)
-        //     ? $user->favourite_brand_id
-        //     :
-             DB::table('users')
-
+        DB::table('users')
             ->where('master_user_id', $user->id)
             ->where('status', '1')
-            ->orderBy('id', 'asc') 
+            ->orderBy('id', 'asc')
             ->value('brand');
 
         $userAccount = DB::table('users')
             ->where('employees_id', $user->employees_id)
             ->where('master_user_id', $user->id)
-            // ->where('brand', $brand)
             ->where('status', '1')
             ->first();
 
@@ -54,12 +49,26 @@ class User extends Authenticatable implements JWTSubject
                 ->where('employees_id', $user->employees_id)
                 ->where('master_user_id', $user->id)
                 ->where('status', '1')
-                ->orderBy('id', 'asc') 
+                ->orderBy('id', 'asc')
                 ->first();
+        }
+
+        if ($userAccount) {
+
+            $employeeTitle = DB::table('employees')
+                ->where('id', $userAccount->employees_id)
+                ->value('title');
+
+            $structureTitle = DB::table('structure')
+                ->where('id', $employeeTitle)
+                ->value('title');
+
+            $userAccount->title = $structureTitle;
         }
 
         return $userAccount;
     }
+
 
     public static function updateAccountData($userAccount)
     {
