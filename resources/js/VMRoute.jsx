@@ -1,48 +1,54 @@
-import Home from './pages/Home'
+import Home from "./pages/Home";
 import React, { Suspense } from "react";
-const VendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/AddProfile'));
-const ProfileIndex = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile'));
-const EditVendorProfile = React.lazy(() => import('./pages/VM/VendorManagement/VendorProfile/EditProfile'));
-const CodeTable = React.lazy(() => import('./pages/VM/VendorManagement/CodeTable/index'));
-const Tickets = React.lazy(() => import('./pages/VM/Tickets/index'));
-const ViewTicket = React.lazy(() => import('./pages/VM/Tickets/viewTicket'));
-const AllTasks = React.lazy(() => import('./pages/VM/Reports/AllTasks'));
-const VmActivity = React.lazy(() => import('./pages/VM/Reports/VmActivity'));
-const VPOs = React.lazy(() => import('./pages/VM/Reports/VPOS'));
-const AliasEmail = React.lazy(() => import('./pages/Admin/AliasEmail/bac'));
+const VendorProfile = React.lazy(() =>
+    import("./pages/VM/VendorManagement/VendorProfile/AddProfile")
+);
+const ProfileIndex = React.lazy(() =>
+    import("./pages/VM/VendorManagement/VendorProfile")
+);
+const EditVendorProfile = React.lazy(() =>
+    import("./pages/VM/VendorManagement/VendorProfile/EditProfile")
+);
+const CodeTable = React.lazy(() =>
+    import("./pages/VM/VendorManagement/CodeTable/index")
+);
+const Tickets = React.lazy(() => import("./pages/VM/Tickets/index"));
+const ViewTicket = React.lazy(() => import("./pages/VM/Tickets/viewTicket"));
+const AllTasks = React.lazy(() => import("./pages/VM/Reports/AllTasks"));
+const VmActivity = React.lazy(() => import("./pages/VM/Reports/VmActivity"));
+const VPOs = React.lazy(() => import("./pages/VM/Reports/VPOS"));
+const AliasEmail = React.lazy(() => import("./pages/Admin/AliasEmail/bac"));
 const Tasks = React.lazy(() => import("./pages/Admin/tasks/bac"));
 
 import ErrorBoundary from "./ErrorBoundary";
 
-import axios from './pages/AxiosClint';
-import { Spinner } from './AbstractElements';
+import axios from "./pages/AxiosClint";
+import { Spinner } from "./AbstractElements";
 
 const LazyWrapper = ({ children }) => (
     <ErrorBoundary>
-
-    <Suspense fallback={
-        <div
-            className="loader-box"
-            style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                width: '100%',
-                position: 'fixed',
-                top: 0,
-                left: "10vw",
-            }}
+        <Suspense
+            fallback={
+                <div
+                    className="loader-box"
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100vh",
+                        width: "100%",
+                        position: "fixed",
+                        top: 0,
+                        left: "10vw",
+                    }}
+                >
+                    <Spinner attrSpinner={{ className: "loader-6" }} />
+                </div>
+            }
         >
-            <Spinner attrSpinner={{ className: 'loader-6' }} />
-        </div>
-
-
-    }>
-        {children}
+            {children}
         </Suspense>
     </ErrorBoundary>
-        
 );
 const checkIfRouteAllowed = (path, routes) => {
     return routes.includes(path);
@@ -50,9 +56,9 @@ const checkIfRouteAllowed = (path, routes) => {
 const fetchAllowedRoutes = async () => {
     try {
         const payload = {
-            role: JSON.parse(localStorage.getItem('USER')).role
-        }
-        const response = await axios.get('perm', { params: payload });
+            role: JSON.parse(localStorage.getItem("USER")).role,
+        };
+        const response = await axios.get("perm", { params: payload });
         // console.log(response)
         response.data.allowedRoutes.push({ url: "" });
         return response.data.allowedRoutes || [];
@@ -671,14 +677,27 @@ export const VM = (allowedPermissions) => [
                     permissions={allowedPermissions["languages"]}
                     table="Languages"
                     dataTable="languages"
-                    header={["ID", "name", "Active", "Edit", "Delete"]}
-                    columns={["id", "name", "Active"]}
+                    header={[
+                        "ID",
+                        "name",
+                        "ISO Code",
+                        "Active",
+                        "Edit",
+                        "Delete",
+                    ]}
+                    columns={["id", "name", "iso_code", "Active"]}
                     fields={[
                         {
                             name: "name",
                             type: "text",
                             field: "input",
                             label: "Name",
+                        },
+                        {
+                            name: "iso_code",
+                            type: "text",
+                            field: "input",
+                            label: "ISO Code",
                         },
                         {
                             name: "Active",
@@ -859,7 +878,7 @@ export const VM = (allowedPermissions) => [
 export const getAllowedRoutes = async () => {
     const allowedRoutes = await fetchAllowedRoutes();
 
-    const allowedUrls = allowedRoutes.map(route => route.url.toLowerCase());
+    const allowedUrls = allowedRoutes.map((route) => route.url.toLowerCase());
 
     const permissions = allowedRoutes.reduce((acc, route) => {
         const urlKey = route?.url;
@@ -875,7 +894,7 @@ export const getAllowedRoutes = async () => {
 
     const alwaysIncludedRoutes = ["tasks"];
 
-    return VM(permissions).filter(route => {
+    return VM(permissions).filter((route) => {
         const path = route.path.toLowerCase();
         return (
             checkIfRouteAllowed(path, allowedUrls) ||
@@ -883,6 +902,3 @@ export const getAllowedRoutes = async () => {
         );
     });
 };
-
-
-
