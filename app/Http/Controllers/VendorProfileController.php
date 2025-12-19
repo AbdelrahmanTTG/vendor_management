@@ -42,9 +42,15 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-
+use App\Services\CancellationService;
 class VendorProfileController extends Controller
 {
+    protected $cancellationService;
+
+    public function __construct(CancellationService $cancellationService)
+    {
+        $this->cancellationService = $cancellationService;
+    }
     public function format($request)
     {
 
@@ -4657,5 +4663,44 @@ class VendorProfileController extends Controller
         }
 
         return $flattenedVendors;
+    }
+    public function deleteVendor($id)
+    {
+        $url = request()->path();
+        $screen = 0;
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $cancellationService = new CancellationService();
+
+        $conditions = array_merge(
+            $cancellationService->buildDeleteCondition('job_task', [['vendor', '=', $id]]),
+            $cancellationService->buildDeleteCondition('vendor_sheet', [['vendor', '=', $id]]),
+            $cancellationService->buildDeleteCondition('vm_ticket_resource', [['vendor', '=', $id]]),
+        );
+
+        $cancel_status = $cancellationService->FlexibleCancellationProcedures(
+            'vendor',
+            $id,
+            $user->id,
+            'delete',
+            $url,
+            $screen,
+            'id',
+            0,
+            0,
+            $conditions
+        );
+
+        if ($cancel_status['record_deleted'] == 'done') {
+            return [
+                'status' => 'true',
+                'message' => 'Record Deleted Successfully ...',
+            ];
+        } else {
+            return [
+                'status' => 'error',
+                'message' => $cancel_status['reason'],
+            ];
+        }
     }
 }

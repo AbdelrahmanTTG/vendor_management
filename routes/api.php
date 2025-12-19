@@ -28,6 +28,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('permission', [AuthController::class, 'userpermission']);
     Route::get('logout', [AuthController::class, 'logout']);
     Route::post('tableDate', [VmCodeTableController::class, 'SelectDataTable']);
+    Route::delete('/vendor/{id}', [VendorProfileController::class, 'deleteVendor']);
     // Route::get('SelectDatat', [CodingTableController::class, 'SelectDatatTable']);
     Route::post('SubmetData', [CodingTableController::class, 'store']);
     Route::delete('/deleteData', [CodingTableController::class, 'destroy']);

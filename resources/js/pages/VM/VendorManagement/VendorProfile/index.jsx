@@ -771,7 +771,55 @@ const Vendor = (props) => {
         setQueryParams(searchParams);
         setCurrentPage(1);
     };
-    
+    const handleDelete = async (id) => {
+        const result = await SweetAlert.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel",
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await axiosClient.delete(`/vendor/${id}`);
+
+                if (response.data.status === "true") {
+                    setVendors((prevVendors) =>
+                        prevVendors.filter((vendor) => vendor.id !== id)
+                    );
+
+                    SweetAlert.fire({
+                        title: "Deleted!",
+                        text: response.data.message,
+                        icon: "success",
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
+                } else {
+                    SweetAlert.fire({
+                        title: "Error!",
+                        text: response.data.message,
+                        icon: "error",
+                    });
+                }
+            } catch (error) {
+                const errorMessage =
+                    error.response?.data?.message ||
+                    error.response?.data?.reason ||
+                    "Something went wrong!";
+
+                SweetAlert.fire({
+                    title: "Error!",
+                    text: errorMessage,
+                    icon: "error",
+                });
+            }
+        }
+    };
     return (
         <Fragment>
             <VendorSearch onSearch={handleSearch} loading2={loading2} />
@@ -1716,7 +1764,18 @@ const Vendor = (props) => {
                                                         {props.permissions
                                                             ?.delete == 1 && (
                                                             <td>
-                                                                <i className="icofont icofont-ui-delete"></i>
+                                                                <i
+                                                                    className="icofont icofont-ui-delete"
+                                                                    onClick={() =>
+                                                                        handleDelete(
+                                                                            item.id
+                                                                        )
+                                                                    }
+                                                                    style={{
+                                                                        cursor: "pointer",
+                                                                        color: "#dc3545",
+                                                                    }}
+                                                                ></i>
                                                             </td>
                                                         )}
                                                     </tr>

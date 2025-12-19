@@ -61,7 +61,19 @@ return [
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
-
+        'mysql_cancel' => [
+            'driver' => 'mysql',
+            'host' => env('DB_CANCEL_HOST', '127.0.0.1'),
+            'port' => env('DB_CANCEL_PORT', '3306'),
+            'database' => env('DB_CANCEL_DATABASE', 'falaq_cancel'),
+            'username' => env('DB_CANCEL_USERNAME', 'root'),
+            'password' => env('DB_CANCEL_PASSWORD', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_general_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
