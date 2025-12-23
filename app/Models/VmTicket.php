@@ -168,5 +168,15 @@ class VmTicket extends Model
     {
         return $this->belongsTo(BrandUsers::class, 'assigned_to');
     }
+
+    public function SourceDialectName()
+    {
+        return  $this->belongsTo(Dialect::class, 'source_lang_dialect');
+    }
+
+    public function TargetDialectName()
+    {
+        return  $this->belongsTo(Dialect::class, 'target_lang_dialect');
+    }
    
 }

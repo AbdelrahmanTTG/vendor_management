@@ -41,6 +41,8 @@ class TicketResource extends JsonResource
             'currency' => $this->currencyData-> name ?? null,
             'source_lang' => $this->SourceName-> name ?? null,
             'target_lang' => $this->TargetName-> name ?? null,          
+            'source_dialect' => $this->SourceDialectName->dialect ?? null,
+            'target_dialect' => $this->SourceDialectName->dialect ?? null,          
             'start_date' => $this-> start_date ?? null,
             'delivery_date' => $this-> delivery_date ?? null,
             'subject' => $this->SubjectName-> name ?? null,

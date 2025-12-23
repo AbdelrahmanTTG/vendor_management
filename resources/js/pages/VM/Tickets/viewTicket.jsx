@@ -430,7 +430,13 @@ const ViewTicket = (props) => {
                                                 {"Source Language"}
                                             </th>
                                             <th scope="col">
+                                                {"Source Language Dialect"}
+                                            </th> 
+                                            <th scope="col">
                                                 {"Target Language"}
+                                            </th>                                           
+                                            <th scope="col">
+                                                {"Target Language Dialect"}
                                             </th>
                                             <th scope="col">{"Start Date"}</th>
                                             <th scope="col">
@@ -463,7 +469,9 @@ const ViewTicket = (props) => {
                                             <td>{ticketData?.unit}</td>
                                             <td>{ticketData?.currency}</td>
                                             <td>{ticketData?.source_lang}</td>
-                                            <td>{ticketData?.target_lang}</td>
+                                            <td>{ticketData?.source_dialect}</td>
+                                            <td>{ticketData?.source_lang}</td>
+                                            <td>{ticketData?.target_dialect}</td>
                                             <td>{ticketData?.start_date}</td>
                                             <td>{ticketData?.delivery_date}</td>
                                             <td>{ticketData?.subject}</td>
