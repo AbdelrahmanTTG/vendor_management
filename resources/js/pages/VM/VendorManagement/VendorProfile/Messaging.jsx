@@ -297,22 +297,37 @@ const Messaging = (props) => {
         }
     };
     useEffect(() => {
-        if (props.mode === "edit") {
+        if (props.mode === "edit" || props.mode === "clone") {
             if (props.InstantMessaging) {
                 if (props.InstantMessaging.InstantMessaging) {
                     const data = props.InstantMessaging.InstantMessaging;
                     setLoading2(true);
-                    setRows(data.map((element, index) => {
-                        setValue(`contact[${index + 1}]`, element.contact);
-                        setValue(`messaging[${index + 1}]`, { value: element.messaging_type?.id, label: element.messaging_type?.name });
-                        handleSelectChange({ value: element.messaging_type?.id, label: element.messaging_type?.name }, index + 1)
-                        return {
-                            id: index + 1,
-                            idUpdate: element.id,
-                            messaging_type_id: { value: element.messaging_type?.id, label: element.messaging_type?.name },
-                            inputValue: element.contact
-                        };
-                    }));
+                    setRows(
+                        data.map((element, index) => {
+                            setValue(`contact[${index + 1}]`, element.contact);
+                            setValue(`messaging[${index + 1}]`, {
+                                value: element.messaging_type?.id,
+                                label: element.messaging_type?.name,
+                            });
+                            handleSelectChange(
+                                {
+                                    value: element.messaging_type?.id,
+                                    label: element.messaging_type?.name,
+                                },
+                                index + 1
+                            );
+                            return {
+                                id: index + 1,
+                                idUpdate:
+                                    props.mode === "clone" ? null : element.id,
+                                messaging_type_id: {
+                                    value: element.messaging_type?.id,
+                                    label: element.messaging_type?.name,
+                                },
+                                inputValue: element.contact,
+                            };
+                        })
+                    );
                     setLoading2(false);
                 }
             }

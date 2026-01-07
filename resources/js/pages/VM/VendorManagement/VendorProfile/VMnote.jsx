@@ -19,25 +19,39 @@ const VMnote = (props) => {
 
     const toggleCollapse = () => setIsOpen(!isOpen);
 
-    useEffect(() => {
-        if (props.lastMessage) {
-            setLoading(true);
-            if (props.lastMessage.VMNotes === null) { setLoading(false); }
-            if (props.lastMessage.VMNotes) {
-                try {
-                    const { content } = props.lastMessage.VMNotes;
-                    props.lastMessage.VMNotes.content = content.replace(/<[^>]*>/g, '');
-                    setMessages([props.lastMessage.VMNotes]);
-                } catch (error) {
-                    // console.error(error);
-                } finally {
-                    setLoading(false);
-                }
-            }
-            
-        }
-
-    }, [props.lastMessage]);
+   useEffect(() => {
+       if (props.lastMessage && Object.keys(props.lastMessage).length > 0) {
+           setLoading(true);
+           if (
+               props.lastMessage.VMNotes === null ||
+               props.lastMessage.VMNotes === undefined
+           ) {
+               setLoading(false);
+               setMessages([]);
+               return;
+           }
+           if (props.lastMessage.VMNotes) {
+               try {
+                   const { content } = props.lastMessage.VMNotes;
+                   props.lastMessage.VMNotes.content = content.replace(
+                       /<[^>]*>/g,
+                       ""
+                   );
+                   setMessages([props.lastMessage.VMNotes]);
+               } catch (error) {
+                   // console.error(error);
+               } finally {
+                   setLoading(false);
+               }
+           } else {
+               setLoading(false);
+               setMessages([]);
+           }
+       } else {
+           setLoading(false);
+           setMessages([]);
+       }
+   }, [props.lastMessage]);
 
 
     const showToast = (type, message) => {

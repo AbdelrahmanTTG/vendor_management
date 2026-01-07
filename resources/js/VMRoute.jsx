@@ -19,6 +19,7 @@ const VmActivity = React.lazy(() => import("./pages/VM/Reports/VmActivity"));
 const VPOs = React.lazy(() => import("./pages/VM/Reports/VPOS"));
 const AliasEmail = React.lazy(() => import("./pages/Admin/AliasEmail/bac"));
 const Tasks = React.lazy(() => import("./pages/Admin/tasks/bac"));
+const Clone = React.lazy(() => import("./pages/VM/VendorManagement/VendorProfile/CloneProfile"));
 
 import ErrorBoundary from "./ErrorBoundary";
 
@@ -70,6 +71,34 @@ export const VM = (allowedPermissions) => [
     {
         path: "",
         element: <Home />,
+    },
+    {
+        path: "vendors/cloneprofile",
+        element: (
+            <LazyWrapper>
+                <Clone
+                    permissions={{
+                        Profile: allowedPermissions["vendors/cloneprofile"],
+                        PersonalData: allowedPermissions["PersonalData"],
+                        Messaging: allowedPermissions["Messaging type"],
+                        VMnote: allowedPermissions["VMnote"],
+                        FilesCertificate:
+                            allowedPermissions["FilesCertificate"],
+                        Education: allowedPermissions["Education"],
+                        Experience: allowedPermissions["Experience"],
+                        Test: allowedPermissions["Test"],
+                        Billing: allowedPermissions["Billing"],
+                        Portal_User: allowedPermissions["Portal_User"],
+                        Price_List: allowedPermissions["Price_List"],
+                        Evaluation: allowedPermissions["Test"],
+                        Feedback: allowedPermissions["Feedback"],
+                        Vacation: allowedPermissions["Vacation"],
+                        History: allowedPermissions["History"],
+                        VendorLog: allowedPermissions["VendorLog"],
+                    }}
+                />
+            </LazyWrapper>
+        ),
     },
     {
         path: "Tickets",

@@ -285,92 +285,126 @@ const Billing = (props) => {
             // console.log(props?.Cru)
         }
     }, [props?.Cru]);
-    useEffect(() => {
-        if (props.Bill) {
-            setIsSubmitting(true)
-        }
-        if (props.mode === "edit" || props.Bill) {
-            setLoading(true);
-            // console.log(props?.countryAndNationality)
-            if (props.BillingData || props.Bill) {
-                if (props.BillingData?.BillingData || props.Bill) {
-                    // if (!dataB) { setdataB(props.BillingData.BillingData) }
+   useEffect(() => {
+       if (props.Bill) {
+           setIsSubmitting(true);
+       }
+       if (props.mode === "edit" || props.mode === "clone" || props.Bill) {
+           setLoading(true);
+           if (props.BillingData || props.Bill) {
+               if (props.BillingData?.BillingData || props.Bill) {
+                   const data = props?.BillingData?.BillingData || props.Bill;
 
-                    const data = props?.BillingData?.BillingData || props.Bill;
+                   if (data?.billingData) {
+                       if (props.mode !== "clone") {
+                           setAdd(false);
+                           setBillingData_id(data.billingData.id);
+                       } else {
+                           setAdd(true);
+                       }
+                       setValue(
+                           "billing_legal_name",
+                           data.billingData.billing_legal_name
+                       );
+                       setValue("city", data.billingData.city);
+                       setValue("city", data.billingData.city);
+                       const billing_currency = data.billingData
+                           .billing_currency
+                           ? {
+                                 value: data.billingData.billing_currency.id,
+                                 label: data.billingData.billing_currency.name,
+                             }
+                           : null;
+                       setSelectedOptionC(billing_currency);
+                       // props.Currancy(billing_currency)
+                       setValue("billing_currency", billing_currency?.value);
+                       setValue("street", data.billingData.street);
+                       setValue(
+                           "billing_address",
+                           data.billingData?.billing_address
+                       );
+                       setValue(
+                           "bank_required",
+                           data.billingData?.bank_required
+                       );
+                       setValue(
+                           "wallet_required",
+                           data.billingData?.wallet_required
+                       );
+                       if (
+                           data.billingData?.billing_status !== null &&
+                           data.billingData?.billing_status !== undefined
+                       ) {
+                           const vendorTypeOption = {
+                               value: "",
+                               // value: props.permission?.status !== "disable"? data.billingData.status:null,
+                               label:
+                                   data.billingData.billing_status == 0
+                                       ? "Inactive"
+                                       : data.billingData.billing_status == 1
+                                       ? "Active"
+                                       : data.billingData.billing_status == 2
+                                       ? "Pending"
+                                       : "Unknown",
+                           };
+                           setValue("billing_status", vendorTypeOption);
+                       }
+                   }
+                   if (data?.bankData) {
+                       if (props.mode !== "clone") {
+                           setBankData_id(data.bankData.id);
+                       }
+                       setValue("bank_name", data.bankData.bank_name);
+                       setValue("account_holder", data.bankData.account_holder);
+                       setValue("swift_bic", data.bankData.swift_bic);
+                       setValue("iban", data.bankData.iban);
+                       setValue("payment_terms", data.bankData.payment_terms);
+                       setValue("bank_address", data.bankData.bank_address);
+                   }
+                   if (data?.walletData) {
+                       setRows([]);
+                       data.walletData.forEach((element) => {
+                           editRow(
+                               element.id,
+                               {
+                                   value: element.method.id,
+                                   label: element.method.name,
+                               },
+                               element.account,
+                               element.defaults
+                           );
+                           setValue(`method[${element.id}]`, {
+                               value: element.method.id,
+                               label: element.method.name,
+                           });
+                           setValue(
+                               `defaults[${element.id}]`,
+                               element.defaults
+                           );
+                           const x = {
+                               [element.id]: element.defaults,
+                           };
 
-                    if (data?.billingData) {
-                        setAdd(false)
-                        setBillingData_id(data.billingData.id)
-                        setValue("billing_legal_name", data.billingData.billing_legal_name)
-                        setValue("city", data.billingData.city)
-                        setValue("city", data.billingData.city)
-                        const billing_currency = data.billingData.billing_currency ? {
-                            value: data.billingData.billing_currency.id,
-                            label: data.billingData.billing_currency.name
-                        } : null;
-                        setSelectedOptionC(billing_currency);
-                        // props.Currancy(billing_currency)
-                        setValue("billing_currency", billing_currency?.value);
-                        setValue("street", data.billingData.street)
-                        setValue("billing_address", data.billingData?.billing_address)
-                        setValue(
-                            "bank_required",
-                            data.billingData?.bank_required
-                        );
-                        setValue("wallet_required", data.billingData?.wallet_required);
-                        if (data.billingData?.billing_status !== null && data.billingData?.billing_status !== undefined) {
-                            const vendorTypeOption = {
-                                value: "",
-                                // value: props.permission?.status !== "disable"? data.billingData.status:null,
-                                label:
-                                    data.billingData.billing_status == 0 ? "Inactive" :
-                                        data.billingData.billing_status == 1 ? "Active" :
-                                            data.billingData.billing_status == 2 ? "Pending" :
-                                                "Unknown"
-                            };
-                            setValue("billing_status", vendorTypeOption);
-                        }
-
-                    }
-                    if (data?.bankData) {
-                        setBankData_id(data.bankData.id)
-                        setValue("bank_name", data.bankData.bank_name)
-                        setValue("account_holder", data.bankData.account_holder)
-                        setValue("swift_bic", data.bankData.swift_bic)
-                        setValue("iban", data.bankData.iban)
-                        setValue("payment_terms", data.bankData.payment_terms)
-                        setValue("bank_address", data.bankData.bank_address)
-                    }
-                    if (data?.walletData) {
-                        setRows([])
-                        data.walletData.forEach(element => {
-
-                            editRow(element.id, { value: element.method.id, label: element.method.name }, element.account)
-                            setValue(`method[${element.id}]`, { value: element.method.id, label: element.method.name })
-                            setValue(`defaults[${element.id}]`, element.defaults)
-                            const x = {
-                                [element.id]: element.defaults
-                            };
-                            
-
-                            setSelectedDefaults(prevSelectedDefaults => ({
-                                ...prevSelectedDefaults,
-                                ...x
-                            }));
-                            setSelectedOptionM(prev => ({ ...prev, [element.id]: { value: element.method.id, label: element.method.name } }));
-                        });
-
-                    }
-                    setLoading(false);
-                } else {
-                    setAdd(true)
-                }
-
-            }
-
-        }
-
-    }, [props.BillingData, setValue, dataB])
+                           setSelectedDefaults((prevSelectedDefaults) => ({
+                               ...prevSelectedDefaults,
+                               ...x,
+                           }));
+                           setSelectedOptionM((prev) => ({
+                               ...prev,
+                               [element.id]: {
+                                   value: element.method.id,
+                                   label: element.method.name,
+                               },
+                           }));
+                       });
+                   }
+                   setLoading(false);
+               } else {
+                   setAdd(true);
+               }
+           }
+       }
+   }, [props.BillingData, setValue, dataB]);
 
     const onSubmit = async (data) => {
         if (!props.backPermissions?.add) {

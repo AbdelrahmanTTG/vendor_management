@@ -73,25 +73,32 @@ const PriceList = (props) => {
         setdataPrice(prevData => prevData.filter(item => item.id !== id));
     };
     useEffect(() => {
-        if (props.priceList?.priceList && props.priceList?.priceList.length > 0) {
-            setdataPrice(props.priceList.priceList[0]);
+        if (
+            props.priceList?.priceList &&
+            props.priceList?.priceList.length > 0
+        ) {
+            if (props.mode !== "clone") {
+                setdataPrice(props.priceList.priceList[0]);
+            }
+
             const currency = props?.priceList?.priceList[0][0]?.currency;
             if (currency) {
-                setCurr(true)
+                setCurr(true);
                 setSelectedOptionC({
                     label: currency.name,
                     value: currency.id,
                 });
             }
 
-            const transformedArray = props.priceList.priceList[1]?.map(item => ({
-                value: item.id,
-                label: item.name
-            }));
-            setValue("tool", transformedArray)
+            const transformedArray = props.priceList.priceList[1]?.map(
+                (item) => ({
+                    value: item.id,
+                    label: item.name,
+                })
+            );
+            setValue("tool", transformedArray);
         }
-
-    }, [props.priceList]);
+    }, [props.priceList, props.mode]);
 
     const deleteRow = (id) => {
         if (id) {

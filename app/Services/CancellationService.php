@@ -9,7 +9,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CancellationService
 {
- 
+   
     public function buildDeleteCondition($table, $conditionsArray, $blockIfFound = true)
     {
         $formattedConditions = [];
@@ -76,7 +76,9 @@ class CancellationService
         }
 
         $transformResult = $this->transformAndInsert($tableName, $rowID);
-        $this->addToLogger($created_by, $action, $url, $tableName, $rowID, null);
+
+        $this->addToLogger($created_by, $action, $url, $tableName, null, $rowID);
+
         $this->addToLoggerDelete($tableName, $screen, $transaction_id_name, $rowID, $parent, $parent_id, $created_by);
 
         DB::table($tableName)->where('id', $rowID)->delete();
@@ -89,7 +91,7 @@ class CancellationService
         ];
     }
 
-   
+    
     public function transformAndInsert($tableName, $rowID)
     {
         $old_table = $tableName;
@@ -113,6 +115,8 @@ class CancellationService
             ");
         }
 
+        $this->syncTableColumns($old_table, $new_table);
+
         $row = DB::table($tableName)->where('id', $rowID)->first();
 
         if ($row) {
@@ -134,8 +138,40 @@ class CancellationService
         }
     }
 
-  
-    public function addToLogger($created_by, $action, $url, $table_name, $id_row, $data = null)
+    
+    private function syncTableColumns($oldTable, $newTable)
+    {
+        $oldColumns = DB::select("SHOW COLUMNS FROM `{$oldTable}`");
+
+        $newColumns = Schema::connection('mysql_cancel')->getColumnListing($newTable);
+
+        $columnMap = [];
+        foreach ($oldColumns as $col) {
+            $columnMap[$col->Field] = $col;
+        }
+
+        foreach ($columnMap as $field => $col) {
+            if (in_array($field, $newColumns)) {
+                continue;
+            }
+
+            $type = $col->Type;
+            $null = ($col->Null === 'YES') ? 'NULL' : 'NOT NULL';
+            $default = '';
+
+            if ($col->Default !== null) {
+                $default = " DEFAULT " . DB::connection('mysql_cancel')->getPdo()->quote($col->Default);
+            }
+
+            DB::connection('mysql_cancel')->statement("
+                ALTER TABLE `{$newTable}`
+                ADD `{$field}` {$type} {$null} {$default}
+            ");
+        }
+    }
+
+   
+    public function addToLogger($created_by, $action, $url, $table_name, $data = null, $id_row = null)
     {
         $insertData = [
             'created_by' => $created_by,

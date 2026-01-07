@@ -198,27 +198,44 @@ const Test = (props) => {
             return acc;
         }, {});
     };
-    useEffect(() => {
-        if (props.VendorTestData) {
-            if (props.VendorTestData.VendorTestData) {
-                setIsChecked(true)
-                const data = props.VendorTestData.VendorTestData
-                setSelectedOption(data?.test_type)
-                setTestResult(data?.test_result)
-                if (data.test_upload) {
-                    setTestFileName(data.test_upload)
-                    setTestFile(true)
-                 }
+   useEffect(() => {
+       if (props.VendorTestData) {
+           if (props.VendorTestData.VendorTestData) {
+               setIsChecked(true);
+               const data = props.VendorTestData.VendorTestData;
+               setSelectedOption(data?.test_type);
+               setTestResult(data?.test_result);
+               if (data.test_upload) {
+                   setTestFileName(data.test_upload);
+                   setTestFile(true);
+               }
 
-
-                setValue("source_lang", renameKeys(data?.source_lang, { id: "value", name: "label" }))
-                setValue("target_lang", renameKeys(data?.target_lang, { id: "value", name: "label" }))
-                setValue("main_subject", renameKeys(data?.main_subject, { id: "value", name: "label" }))
-                setValue("sub_subject", renameKeys(data?.sub_subject, { id: "value", name: "label" }))
-                setValue("service", renameKeys(data?.service, { id: "value", name: "label" }))
-            }
-        }
-    }, [props.VendorTestData])
+               setValue(
+                   "source_lang",
+                   renameKeys(data?.source_lang, { id: "value", name: "label" })
+               );
+               setValue(
+                   "target_lang",
+                   renameKeys(data?.target_lang, { id: "value", name: "label" })
+               );
+               setValue(
+                   "main_subject",
+                   renameKeys(data?.main_subject, {
+                       id: "value",
+                       name: "label",
+                   })
+               );
+               setValue(
+                   "sub_subject",
+                   renameKeys(data?.sub_subject, { id: "value", name: "label" })
+               );
+               setValue(
+                   "service",
+                   renameKeys(data?.service, { id: "value", name: "label" })
+               );
+           }
+       }
+   }, [props.VendorTestData]);
     const onError = (errors) => {
         for (const [key, value] of Object.entries(errors)) {
             switch (key) {

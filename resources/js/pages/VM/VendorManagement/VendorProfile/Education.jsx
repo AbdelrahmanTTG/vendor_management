@@ -137,18 +137,20 @@ const Education = (props) => {
             return acc;
         }, {});
     };
-    useEffect(() => {
-        if (props.EducationVendor) {
-            if (props.EducationVendor.EducationVendor) {
-                const data = props.EducationVendor.EducationVendor
-                setValue("university_name", data?.university_name)
-                setValue("latest_degree", { value: data?.latest_degree?.id, label: data?.latest_degree?.name } )
-                setValue("year_of_graduation", data?.year_of_graduation)
-                setValue("major", data?.major)
-
-            }
-        }
-    }, [props.EducationVendor])
+   useEffect(() => {
+       if (props.EducationVendor) {
+           if (props.EducationVendor.EducationVendor) {
+               const data = props.EducationVendor.EducationVendor;
+               setValue("university_name", data?.university_name);
+               setValue("latest_degree", {
+                   value: data?.latest_degree?.id,
+                   label: data?.latest_degree?.name,
+               });
+               setValue("year_of_graduation", data?.year_of_graduation);
+               setValue("major", data?.major);
+           }
+       }
+   }, [props.EducationVendor, props.mode]);
     const onError = (errors) => {
         for (const [key, value] of Object.entries(errors)) {
             switch (key) {

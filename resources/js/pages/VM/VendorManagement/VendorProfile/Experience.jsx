@@ -98,15 +98,23 @@ const Experience = (props) => {
     //     handelingSelect("skills", setOptionsN, "skill");
     // }, []);
     useEffect(() => {
-        if (props.mode === "edit" || dataE) {
+        if (props.mode === "edit" || props.mode === "clone" || dataE) {
             setLoading2(true);
             if (props.Experience || dataE) {
                 if (props.Experience?.Experience || dataE) {
-                    if (!dataE) { setData(props.Experience.Experience) }
+                    if (!dataE) {
+                        setData(props.Experience.Experience);
+                    }
                     const data = dataE;
                     if (data?.started_working) {
-                        setValue("started_working", { value: data?.started_working, label: data?.started_working });
-                        setSelectedYear({ value: data?.started_working, label: data?.started_working });
+                        setValue("started_working", {
+                            value: data?.started_working,
+                            label: data?.started_working,
+                        });
+                        setSelectedYear({
+                            value: data?.started_working,
+                            label: data?.started_working,
+                        });
                     }
 
                     if (data?.experience_year) {
@@ -117,7 +125,7 @@ const Experience = (props) => {
                         setValue("summary", data?.summary);
                     }
 
-                    setexpID(data?.id)
+                    setexpID(data?.id);
 
                     if (data?.skills) {
                         // data.skills.forEach(element => {
@@ -125,16 +133,32 @@ const Experience = (props) => {
                         //     setValue(`skill-${element.skill_id}`, element.skill_id)
                         //     handleSelectChange({ value: element.skill_id, label: element.name }, element.skill_id)
                         // });
-                        setRows(data.skills.map((element, index) => {
-                            setValue(`skill-${index + 1}`, element.skill_id);
-                            handleSelectChange({ value: element?.skill_id, label: element?.name }, index + 1)
-                            return {
-                                id: index + 1,
-                                idUpdate: element.id,
-                                skill: { value: element?.skill_id, label: element?.name },
-                            };
-                        }));
-
+                        setRows(
+                            data.skills.map((element, index) => {
+                                setValue(
+                                    `skill-${index + 1}`,
+                                    element.skill_id
+                                );
+                                handleSelectChange(
+                                    {
+                                        value: element?.skill_id,
+                                        label: element?.name,
+                                    },
+                                    index + 1
+                                );
+                                return {
+                                    id: index + 1,
+                                    idUpdate:
+                                        props.mode === "clone"
+                                            ? null
+                                            : element.id,
+                                    skill: {
+                                        value: element?.skill_id,
+                                        label: element?.name,
+                                    },
+                                };
+                            })
+                        );
                     }
                     setLoading2(false);
                 }

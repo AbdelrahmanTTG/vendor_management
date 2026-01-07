@@ -85,7 +85,7 @@ const Vendor = (props) => {
     const [progress, setProgress] = useState(0);
     const [openId, setOpenId] = useState(null);
     const [perPage, setPerPage] = useState(50);
-    
+
     const handleFormatsChanged = () => {
         setFormatsChanged(!formatsChanged);
     };
@@ -276,6 +276,7 @@ const Vendor = (props) => {
     const Add = () => {
         navigate("/vm/vendors/profiletest");
     };
+    
     const formatData = (format) => {
         const labelMapping = {
             name: "Name",
@@ -510,13 +511,13 @@ const Vendor = (props) => {
                 headersArray.map((header) => rowData[header] ?? "")
             );
             row.eachCell((cell, colNumber) => {
-                const header = headersArray[colNumber - 1]; 
+                const header = headersArray[colNumber - 1];
                 if (header === "rate" && typeof cell.value === "number") {
-                    cell.numFmt = "0.00"; 
+                    cell.numFmt = "0.00";
                 } else if (typeof cell.value === "number") {
-                    cell.numFmt = "0"; 
+                    cell.numFmt = "0";
                 } else {
-                    cell.numFmt = "@"; 
+                    cell.numFmt = "@";
                 }
                 cell.border = {
                     top: { style: "thin" },
@@ -1181,6 +1182,9 @@ const Vendor = (props) => {
                                             {props.permissions?.edit == 1 && (
                                                 <th scope="col">{"Edit"}</th>
                                             )}
+                                            {props.permissions?.add == 1 && (
+                                                <th scope="col">{"Clone"}</th>
+                                            )}
                                             {props.permissions?.delete == 1 && (
                                                 <th scope="col">{"Delete"}</th>
                                             )}
@@ -1760,7 +1764,56 @@ const Vendor = (props) => {
                                                                 </a>
                                                             </td>
                                                         )}
+                                                        {props.permissions
+                                                            ?.add == 1 && (
+                                                            <td>
+                                                                <a
+                                                                    href={`/vm/vendors/cloneprofile?data=${encodeURIComponent(
+                                                                        encryptData(
+                                                                            {
+                                                                                id: item.id,
+                                                                                email: item.email,
+                                                                                clone: true,
+                                                                            }
+                                                                        )
+                                                                    )}`}
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        if (
+                                                                            e.button ===
+                                                                                1 ||
+                                                                            e.ctrlKey ||
+                                                                            e.metaKey
+                                                                        ) {
+                                                                            return;
+                                                                        }
 
+                                                                        e.preventDefault();
+                                                                        const url = `/vm/vendors/cloneprofiletest?data=${encodeURIComponent(
+                                                                            encryptData(
+                                                                                {
+                                                                                    id: item.id,
+                                                                                    email: item.email,
+                                                                                    clone: true,
+                                                                                }
+                                                                            )
+                                                                        )}`;
+                                                                        navigate(
+                                                                            url
+                                                                        );
+                                                                    }}
+                                                                    style={{
+                                                                        textDecoration:
+                                                                            "none",
+                                                                        color: "#28a745",
+                                                                        cursor: "pointer",
+                                                                    }}
+                                                                >
+                                                                    <i className="icofont icofont-copy"></i>
+                                                                </a>
+                                                            </td>
+                                                        )}
                                                         {props.permissions
                                                             ?.delete == 1 && (
                                                             <td>

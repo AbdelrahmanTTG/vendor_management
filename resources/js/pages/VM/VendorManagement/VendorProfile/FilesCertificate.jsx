@@ -265,28 +265,34 @@ const Update = async () => {
     }
 };
     useEffect(() => {
-
-        if (props.mode === "edit") {
+        if (props.mode === "edit" || props.mode === "clone") {
             // setLoading2(true);
             if (props.VendorFiles) {
                 if (props.VendorFiles.VendorFiles) {
                     const data = props.VendorFiles.VendorFiles;
+
                     setCvFileName(data.vendor.cv);
-                    setNdaFileName(data.vendor.nda)
-                    data.vendor.cv ? setCvFileNames(true) : setCvFileNames(false)
-                    data.vendor.nda ? setNdaFileNames(true) : setNdaFileNames(false)
-                    setRows(data.files.map((file, index) => ({
-                        id: index + 1,
-                        idUpdate: file.id ,
-                        File_Title: file.file_title,
-                        File_Content: file.file_content,
-                        File_URL: file.file_path 
-                    })));
-                    // setNdaFileName(nda_file);
+                    setNdaFileName(data.vendor.nda);
+                    data.vendor.cv
+                        ? setCvFileNames(true)
+                        : setCvFileNames(false);
+                    data.vendor.nda
+                        ? setNdaFileNames(true)
+                        : setNdaFileNames(false);
+
+                    setRows(
+                        data.files.map((file, index) => ({
+                            id: index + 1,
+                            idUpdate: props.mode === "clone" ? null : file.id,
+                            File_Title: file.file_title,
+                            File_Content: file.file_content,
+                            File_URL: file.file_path,
+                        }))
+                    );
                 }
             }
         }
-    }, [props.VendorFiles]);
+    }, [props.VendorFiles, props.mode]);
     const handleDownload = async (filename) => {
         try {
             const response = await axiosClient.post("download", { filename }, { responseType: 'blob' });
