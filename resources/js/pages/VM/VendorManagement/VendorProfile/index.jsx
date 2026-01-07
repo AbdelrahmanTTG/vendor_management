@@ -1790,7 +1790,7 @@ const Vendor = (props) => {
                                                                         }
 
                                                                         e.preventDefault();
-                                                                        const url = `/vm/vendors/cloneprofiletest?data=${encodeURIComponent(
+                                                                        const url = `/vm/vendors/cloneprofile?data=${encodeURIComponent(
                                                                             encryptData(
                                                                                 {
                                                                                     id: item.id,

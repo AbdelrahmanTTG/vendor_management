@@ -26,15 +26,20 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Services\VendorProfileService;
 class TicketsController extends Controller
 {
-    protected $vmEmail;
+     protected $vendorProfileService;
+     protected $vmEmail;
 
-    public function __construct()
+    public function __construct(VendorProfileService $vendorProfileService)
     {
+        $this->vendorProfileService = $vendorProfileService;
         $vmConfig = VmSetup::first();
         $this->vmEmail = $vmConfig ? $vmConfig->vm_email : '';
     }
+
+  
 
     public function index(Request $request)
     {
@@ -55,7 +60,8 @@ class TicketsController extends Controller
             ], 400);
         }
         // check for special format
-        $formats = (new VendorProfileController)->format($request);
+        $formats = $this->vendorProfileService->format($request);
+        // $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
         });

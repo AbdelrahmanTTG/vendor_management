@@ -17,9 +17,16 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Storage;
+use App\Services\VendorProfileService;
 
 class ReportsController extends Controller
 {
+    protected $vendorProfileService;
+
+    public function __construct(VendorProfileService $vendorProfileService)
+    {
+        $this->vendorProfileService = $vendorProfileService;
+    }
     // public function vmActivity(Request $request)
     // {
     //     $permissions = $request->permissions;
@@ -192,7 +199,8 @@ class ReportsController extends Controller
         ];
 
         // check for special format
-        $formats = (new VendorProfileController)->format($request);
+        $formats = $this->vendorProfileService->format($request);
+        // $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
         });
@@ -351,7 +359,8 @@ class ReportsController extends Controller
 
         $renameArrayForSearch = ['job.priceList.source' => 'source_name', 'job.priceList.target' => 'target_name', 'user.brand' => 'brand_name', 'brand' => 'brand_name'];
         // check for special format
-        $formats = (new VendorProfileController)->format($request);
+        $formats = $this->vendorProfileService->format($request);
+        // $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
         });
@@ -572,8 +581,8 @@ class ReportsController extends Controller
             "job_portal" => 't.job_portal',
             "brand" => 'b.name as brand',
         ];
-
-        $formats = (new VendorProfileController)->format($request);
+        $formats = $this->vendorProfileService->format($request);
+        // $formats = (new VendorProfileController)->format($request);
         $filteredFormats = $formats->filter(function ($format) {
             return $format->status == 1;
         });
