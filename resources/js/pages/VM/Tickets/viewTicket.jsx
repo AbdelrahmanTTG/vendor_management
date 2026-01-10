@@ -383,7 +383,7 @@ const ViewTicket = (props) => {
             setVendors(data.vendors.data);
             setFields(data.fields);
             setLastPage(data.vendors.last_page);
-            console.log(data.vendors);
+            // console.log(data.vendors);
         } catch (err) {
             // console.error(err);
         }
@@ -431,10 +431,10 @@ const ViewTicket = (props) => {
                                             </th>
                                             <th scope="col">
                                                 {"Source Language Dialect"}
-                                            </th> 
+                                            </th>
                                             <th scope="col">
                                                 {"Target Language"}
-                                            </th>                                           
+                                            </th>
                                             <th scope="col">
                                                 {"Target Language Dialect"}
                                             </th>
@@ -469,9 +469,13 @@ const ViewTicket = (props) => {
                                             <td>{ticketData?.unit}</td>
                                             <td>{ticketData?.currency}</td>
                                             <td>{ticketData?.source_lang}</td>
-                                            <td>{ticketData?.source_dialect}</td>
-                                            <td>{ticketData?.source_lang}</td>
-                                            <td>{ticketData?.target_dialect}</td>
+                                            <td>
+                                                {ticketData?.source_dialect}
+                                            </td>
+                                            <td>{ticketData?.target_lang}</td>
+                                            <td>
+                                                {ticketData?.target_dialect}
+                                            </td>
                                             <td>{ticketData?.start_date}</td>
                                             <td>{ticketData?.delivery_date}</td>
                                             <td>{ticketData?.subject}</td>
