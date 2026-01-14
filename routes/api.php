@@ -73,7 +73,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/getAllTask', [VendorProfileController::class, 'getAllUserTasks']);
     Route::post('/logs', [VendorProfileController::class, 'vendorLogs']);
     Route::post('/SearchVendors', [VendorProfileController::class, 'SearchVendors']);
-
+    Route::get('typePermissions', [VendorProfileController::class, 'typePermissions']);
 
     Route::post('/getTickets', [TicketsController::class, 'index']);
     Route::post('/getTicketsTotal', [TicketsController::class, 'getTicketsTotal']);

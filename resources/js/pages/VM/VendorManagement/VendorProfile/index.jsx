@@ -140,6 +140,7 @@ const Vendor = (props) => {
         key: "id",
         direction: "asc",
     });
+    const [initialLoadDone, setInitialLoadDone] = useState(false);
     const fetchData = useCallback(
         async (ex) => {
             const payload = {
@@ -151,6 +152,7 @@ const Vendor = (props) => {
                 table: "vendors",
                 export: ex,
                 view: props.permissions?.view,
+                typePermissions: queryParams?.typePermissions || null,
             };
             try {
                 setLoading2(true);
@@ -177,6 +179,10 @@ const Vendor = (props) => {
         setCurrentPage(1);
     };
     useEffect(() => {
+        if (!initialLoadDone) {
+            setInitialLoadDone(true);
+            return;
+        }
         fetchData();
     }, [currentPage, queryParams, sortConfig, formatsChanged, perPage]);
     useEffect(() => {

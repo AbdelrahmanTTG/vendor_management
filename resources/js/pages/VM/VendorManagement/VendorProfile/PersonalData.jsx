@@ -29,7 +29,8 @@ const PersonalData = React.memo((props) => {
   };
   const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
   const { register: registerContact, handleSubmit: handleSubmitContact, setValue: setValueContact, formState: { errors: errorsContact } } = useForm();
-
+const [typePermissions, setTypePermissions] = useState([]);
+const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
   const [inputValues, setInputValues] = useState([]);
   const [nameLabel, setNameLabel] = useState('Name');
   const [ContactLabel, setContactLabel] = useState('Contact name');
@@ -64,7 +65,24 @@ const PersonalData = React.memo((props) => {
 
     const [idVendor, setidVendor] = useState(false);
     const [Sub, setSub] = useState(false);
-
+useEffect(() => {
+    const fetchTypePermissions = async () => {
+        try {
+            const { data } = await axiosClient.get("typePermissions");
+            if (
+                data.allowedTypes &&
+                data.allowedTypes.length > 0 &&
+                data.allowedTypes.length < 4
+            ) {
+                setTypePermissions(data.allowedTypes);
+                setHasTypeRestriction(true);
+            }
+        } catch (err) {
+            console.error("Error fetching type permissions:", err);
+        }
+    };
+    fetchTypePermissions();
+}, []);
   const toggle = () => setModal(!modal);
 
   const toggleCollapse = () => {
@@ -671,24 +689,64 @@ const PersonalData = React.memo((props) => {
                                                                   label: "-- Select Type --",
                                                               }
                                                           }
-                                                          options={[
-                                                              {
-                                                                  value: "0",
-                                                                  label: "Freelance",
-                                                              },
-                                                              {
-                                                                  value: "2",
-                                                                  label: "Agency",
-                                                              },
-                                                              {
-                                                                  value: "3",
-                                                                  label: "Contractor",
-                                                              },
-                                                              {
-                                                                  value: "1",
-                                                                  label: "In House",
-                                                              },
-                                                          ]}
+                                                          options={
+                                                              hasTypeRestriction
+                                                                  ? [
+                                                                        {
+                                                                            value: "0",
+                                                                            label: "Freelance",
+                                                                        },
+                                                                        {
+                                                                            value: "1",
+                                                                            label: "In House",
+                                                                        },
+                                                                        {
+                                                                            value: "2",
+                                                                            label: "Agency",
+                                                                        },
+                                                                        {
+                                                                            value: "3",
+                                                                            label: "Contractor",
+                                                                        },
+                                                                    ].filter(
+                                                                        (
+                                                                            option
+                                                                        ) =>
+                                                                            typePermissions.includes(
+                                                                                parseInt(
+                                                                                    option.value
+                                                                                )
+                                                                            )
+                                                                    )
+                                                                  : [
+                                                                        {
+                                                                            value: "0",
+                                                                            label: "Freelance",
+                                                                        },
+                                                                        {
+                                                                            value: "2",
+                                                                            label: "Agency",
+                                                                        },
+                                                                        {
+                                                                            value: "3",
+                                                                            label: "Contractor",
+                                                                        },
+                                                                        {
+                                                                            value: "1",
+                                                                            label: "In House",
+                                                                        },
+                                                                    ]
+                                                          }
+                                                          isDisabled={
+                                                              (props.permission &&
+                                                                  props
+                                                                      .permission
+                                                                      .type ===
+                                                                      "disable") ||
+                                                              (hasTypeRestriction &&
+                                                                  typePermissions.length ===
+                                                                      1)
+                                                          }
                                                           className="js-example-basic-single col-sm-12"
                                                           onChange={(
                                                               option

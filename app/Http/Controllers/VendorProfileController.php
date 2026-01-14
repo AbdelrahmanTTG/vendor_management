@@ -72,6 +72,7 @@ class VendorProfileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $payload = JWTAuth::getPayload(JWTAuth::getToken());
         $view = $request->input('view');
+        $typePermissions = $request->input('typePermissions');
         if ($request->filled('view')) {
             if ($view == 1) {
                 $piv = explode(',', $payload["piv"]);
@@ -164,6 +165,9 @@ class VendorProfileController extends Controller
             $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands');
         }
         $vendorsQuery->withCount(['tasks as number_of_task']);
+        if (!empty($typePermissions) && is_array($typePermissions)) {
+            $vendorsQuery->whereIn('vendor.type', $typePermissions);
+        }
         // Add mother tongue relation if needed
         if ($includeMotherTongue) {
             $vendorsQuery->with(['motherTongues' => function ($query) {
@@ -266,7 +270,7 @@ class VendorProfileController extends Controller
 
             foreach ($queryParams as $key => $val) {
                 if ($key !== 'filters' && !empty($val)) {
-                    if ($key === 'timezone_from' || $key === 'timezone_to') {
+                    if ($key === 'timezone_from' || $key === 'timezone_to' || $key === 'typePermissions') {
                         continue;
                     }
 
@@ -4702,5 +4706,48 @@ class VendorProfileController extends Controller
                 'message' => $cancel_status['reason'],
             ];
         }
+    }
+    public function typePermissions()
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Token invalid or expired'], 401);
+        }
+
+        $permissions = DB::table('vendor_permissions')
+            ->where('user_id', $user->id)
+            ->select('freelance', 'in_house', 'agency', 'contractor')
+            ->first();
+
+        if (!$permissions) {
+            return response()->json([
+                'permissions' => [
+                    'freelance' => 0,
+                    'in_house' => 0,
+                    'agency' => 0,
+                    'contractor' => 0
+                ]
+            ], 200);
+        }
+
+        $allowedTypes = [];
+        if ($permissions->freelance == 1) $allowedTypes[] = 0;
+        if ($permissions->in_house == 1) $allowedTypes[] = 1;
+        if ($permissions->agency == 1) $allowedTypes[] = 2;
+        if ($permissions->contractor == 1) $allowedTypes[] = 3;
+
+        return response()->json([
+            'permissions' => [
+                'freelance' => $permissions->freelance,
+                'in_house' => $permissions->in_house,
+                'agency' => $permissions->agency,
+                'contractor' => $permissions->contractor
+            ],
+            'allowedTypes' => $allowedTypes
+        ], 200);
     }
 }
