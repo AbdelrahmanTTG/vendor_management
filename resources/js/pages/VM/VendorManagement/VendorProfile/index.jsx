@@ -179,10 +179,10 @@ const Vendor = (props) => {
         setCurrentPage(1);
     };
     useEffect(() => {
-        if (!initialLoadDone) {
-            setInitialLoadDone(true);
-            return;
-        }
+        // if (!initialLoadDone) {
+            // setInitialLoadDone(true);
+            // return;
+        // }
         fetchData();
     }, [currentPage, queryParams, sortConfig, formatsChanged, perPage]);
     useEffect(() => {
