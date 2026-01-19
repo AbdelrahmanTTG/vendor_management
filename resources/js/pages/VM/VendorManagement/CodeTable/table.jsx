@@ -25,6 +25,8 @@ const table = (props) => {
     const [exportLoading, setExportLoading] = useState(false);
     const [alert, setalert] = useState(false);
     const [queryParams, setQueryParams] = useState(null);
+    const [sortBy, setSortBy] = useState(null);
+    const [sortDirection, setSortDirection] = useState("asc");
 
     const onAddData = (newData) => {
         setdataTable((prevData) => [...prevData, newData]);
@@ -33,8 +35,8 @@ const table = (props) => {
     const onUpdateData = (updatedData) => {
         setdataTable((prevData) =>
             prevData.map((item) =>
-                item.id === updatedData.id ? updatedData : item
-            )
+                item.id === updatedData.id ? updatedData : item,
+            ),
         );
     };
 
@@ -52,6 +54,7 @@ const table = (props) => {
                 columns: props.columns,
                 related: props.related ? props.related : "",
                 export: false,
+                ...(sortBy && { sortBy, sortDirection }),
             };
 
             try {
@@ -74,7 +77,53 @@ const table = (props) => {
         };
 
         fetchData();
-    }, [currentPage, queryParams]);
+    }, [currentPage, queryParams, sortBy, sortDirection]);
+
+    const handleSort = (columnName) => {
+    
+        if (
+            columnName.toLowerCase() === "edit" ||
+            columnName.toLowerCase() === "delete"
+        ) {
+            return;
+        }
+
+        
+        const columnIndex = props.header.findIndex((h) => h === columnName);
+        const actualColumn = props.columns[columnIndex];
+
+        if (actualColumn) {
+            if (sortBy === actualColumn) {
+               
+                setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+            } else {
+                
+                setSortBy(actualColumn);
+                setSortDirection("asc");
+            }
+            setCurrentPage(1); 
+        }
+    };
+
+    const getSortIcon = (columnName) => {
+        const columnIndex = props.header.findIndex((h) => h === columnName);
+        const actualColumn = props.columns[columnIndex];
+
+        if (sortBy !== actualColumn) {
+            return (
+                <i
+                    className="icofont icofont-sort ms-1"
+                    style={{ opacity: 0.3 }}
+                ></i>
+            );
+        }
+
+        if (sortDirection === "asc") {
+            return <i className="icofont icofont-sort-amount-asc ms-1"></i>;
+        } else {
+            return <i className="icofont icofont-sort-amount-desc ms-1"></i>;
+        }
+    };
 
     const handleExport = async () => {
         try {
@@ -86,6 +135,7 @@ const table = (props) => {
                 columns: props.columns,
                 related: props.related ? props.related : "",
                 export: true,
+                ...(sortBy && { sortBy, sortDirection }),
             };
 
             const { data } = await axiosClient.post("tableDate", payload);
@@ -106,7 +156,7 @@ const table = (props) => {
             const headers = props.header.filter(
                 (h) =>
                     h.trim().toLowerCase() !== "edit" &&
-                    h.trim().toLowerCase() !== "delete"
+                    h.trim().toLowerCase() !== "delete",
             );
             worksheet.addRow(headers);
 
@@ -124,7 +174,7 @@ const table = (props) => {
 
                     if (fieldInfo?.static) {
                         const match = fieldInfo.static.find(
-                            (opt) => opt.value === value
+                            (opt) => opt.value === value,
                         );
                         value = match ? match.label : value;
                     }
@@ -211,7 +261,7 @@ const table = (props) => {
                     onClick={() => handlePageChange(i)}
                 >
                     <PaginationLink>{i}</PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         }
 
@@ -219,7 +269,7 @@ const table = (props) => {
             items.unshift(
                 <PaginationItem disabled key="ellipsis-start">
                     <PaginationLink disabled>...</PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         }
 
@@ -227,7 +277,7 @@ const table = (props) => {
             items.push(
                 <PaginationItem disabled key="ellipsis-end">
                     <PaginationLink disabled>...</PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         }
 
@@ -235,7 +285,7 @@ const table = (props) => {
             items.unshift(
                 <PaginationItem onClick={() => handlePageChange(1)} key={1}>
                     <PaginationLink>{1}</PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         }
 
@@ -246,7 +296,7 @@ const table = (props) => {
                     key={totalPages}
                 >
                     <PaginationLink>{totalPages}</PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         }
 
@@ -269,13 +319,13 @@ const table = (props) => {
                     SweetAlert.fire(
                         "Deleted!",
                         `${item.name} has been deleted.`,
-                        "success"
+                        "success",
                     );
                 } else {
                     SweetAlert.fire(
                         "Ooops !",
                         " An error occurred while deleting. :)",
-                        "error"
+                        "error",
                     );
                 }
             } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
@@ -294,14 +344,14 @@ const table = (props) => {
                 data: payload,
             });
             setdataTable((prevData) =>
-                prevData.filter((item) => item.id !== id)
+                prevData.filter((item) => item.id !== id),
             );
             return data;
         } catch (err) {
             const response = err.response;
             if (response && response.data) {
                 setErrorMessage(
-                    response.data.message || "An unexpected error occurred."
+                    response.data.message || "An unexpected error occurred.",
                 );
             } else {
                 setErrorMessage("An unexpected error occurred.");
@@ -367,36 +417,63 @@ const table = (props) => {
                                             props.header.length > 0 ? (
                                                 props.header.map(
                                                     (col, index) => (
-                                                        <th key={index}>
+                                                        <th
+                                                            key={index}
+                                                            onClick={() =>
+                                                                handleSort(col)
+                                                            }
+                                                            style={{
+                                                                cursor:
+                                                                    col
+                                                                        .trim()
+                                                                        .toLowerCase() !==
+                                                                        "edit" &&
+                                                                    col
+                                                                        .trim()
+                                                                        .toLowerCase() !==
+                                                                        "delete"
+                                                                        ? "pointer"
+                                                                        : "default",
+                                                                userSelect:
+                                                                    "none",
+                                                            }}
+                                                        >
                                                             {col
                                                                 .trim()
                                                                 .toLowerCase() ===
-                                                            "edit"
-                                                                ? props
-                                                                      .permissions
-                                                                      ?.edit ==
-                                                                  1
-                                                                    ? col
-                                                                          .trim()
-                                                                          .toUpperCase()
-                                                                    : null
-                                                                : col
-                                                                      .trim()
-                                                                      .toLowerCase() ===
-                                                                  "delete"
-                                                                ? props
-                                                                      .permissions
-                                                                      ?.delete ==
-                                                                  1
-                                                                    ? col
-                                                                          .trim()
-                                                                          .toUpperCase()
-                                                                    : null
-                                                                : col
-                                                                      .trim()
-                                                                      .toUpperCase()}
+                                                            "edit" ? (
+                                                                props
+                                                                    .permissions
+                                                                    ?.edit ==
+                                                                1 ? (
+                                                                    col
+                                                                        .trim()
+                                                                        .toUpperCase()
+                                                                ) : null
+                                                            ) : col
+                                                                  .trim()
+                                                                  .toLowerCase() ===
+                                                              "delete" ? (
+                                                                props
+                                                                    .permissions
+                                                                    ?.delete ==
+                                                                1 ? (
+                                                                    col
+                                                                        .trim()
+                                                                        .toUpperCase()
+                                                                ) : null
+                                                            ) : (
+                                                                <>
+                                                                    {col
+                                                                        .trim()
+                                                                        .toUpperCase()}
+                                                                    {getSortIcon(
+                                                                        col,
+                                                                    )}
+                                                                </>
+                                                            )}
                                                         </th>
-                                                    )
+                                                    ),
                                                 )
                                             ) : (
                                                 <th>No Data</th>
@@ -405,12 +482,28 @@ const table = (props) => {
                                           0 ? (
                                             Object.keys(props.header).map(
                                                 (key) => (
-                                                    <th key={key}>
+                                                    <th
+                                                        key={key}
+                                                        onClick={() =>
+                                                            handleSort(
+                                                                props.header[
+                                                                    key
+                                                                ],
+                                                            )
+                                                        }
+                                                        style={{
+                                                            cursor: "pointer",
+                                                            userSelect: "none",
+                                                        }}
+                                                    >
                                                         {props.header[key]
                                                             .trim()
                                                             .toUpperCase()}
+                                                        {getSortIcon(
+                                                            props.header[key],
+                                                        )}
                                                     </th>
-                                                )
+                                                ),
                                             )
                                         ) : (
                                             <th>No Data</th>
@@ -445,7 +538,7 @@ const table = (props) => {
                                             {props.columns.map((col) => {
                                                 const fieldInfo =
                                                     props.fields.find(
-                                                        (f) => f.name === col
+                                                        (f) => f.name === col,
                                                     );
 
                                                 let value = item[col];
@@ -454,7 +547,7 @@ const table = (props) => {
                                                         fieldInfo.static.find(
                                                             (opt) =>
                                                                 opt.value ===
-                                                                value
+                                                                value,
                                                         );
                                                     value = match
                                                         ? match.label
@@ -478,7 +571,7 @@ const table = (props) => {
                                                     <button
                                                         onClick={() =>
                                                             handleEditClick(
-                                                                item.id
+                                                                item.id,
                                                             )
                                                         }
                                                         style={{

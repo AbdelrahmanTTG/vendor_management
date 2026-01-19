@@ -20,40 +20,28 @@ const Notifications = () => {
         fetchNotifications(page);
     }, []);
 
-    const fetchNotifications = async (pageNumber) => {
-        if (loading || !hasMore) return;
+   const fetchNotifications = async (pageNumber) => {
+       if (loading || !hasMore) return;
+       if (!userId?.id) return; 
 
-        setLoading(true);
-        try {
-            const { data } = await axiosClient.get("Notification", {
-                params: { account_id: userId.id, page: pageNumber },
-            });
-            setTotal(data.total)
-            setNotifications((prev) => [
-                ...prev,
-                ...(Array.isArray(data?.data) ? data.data : []),
-            ]);
+       setLoading(true);
+       try {
+           const { data } = await axiosClient.get("Notification", {
+               params: { account_id: userId.id, page: pageNumber },
+           });
+           setTotal(data.total);
+           setNotifications((prev) => [
+               ...prev,
+               ...(Array.isArray(data?.data) ? data.data : []),
+           ]);
+           setHasMore(data.next_page_url !== null);
+           setPage(pageNumber + 1);
+       } catch (error) {
+           console.error("Error fetching notifications", error);
+       }
+       setLoading(false);
+   };
 
-            setHasMore(data.next_page_url !== null);
-            setPage(pageNumber + 1);
-            // if (audio.muted === false && audio.currentTime === 0) {
-            //     audio.muted = true;
-            //     audio
-            //         .play()
-            //         .then(() => {
-            //             audio.pause();
-            //             audio.currentTime = 0;
-            //             audio.muted = false;
-            //         })
-            //         .catch((err) => {
-            //             console.error("Silent pre-play failed:", err);
-            //         });
-            // }
-        } catch (error) {
-            console.error("Error fetching notifications", error);
-        }
-        setLoading(false);
-    };
 
     const handleScroll = (event) => {
         const { scrollTop, scrollHeight, clientHeight } = event.target;
@@ -68,14 +56,14 @@ const Notifications = () => {
 
   
     useEffect(() => {
-        axiosClient.post("MyAlias", { account_id: userId.id })
+        if (!userId?.id) return; 
+        axiosClient
+            .post("MyAlias", { account_id: userId.id })
             .then(({ data }) => {
-                // console.log(data)
-setAlias(Array.isArray(data) ? data : []);
-
+                setAlias(Array.isArray(data) ? data : []);
             });
-
     }, []);
+
     useEffect(() => {
         const loadEcho = async () => {
             const { echo } = await import('../../../real-time');
@@ -122,6 +110,7 @@ setAlias(Array.isArray(data) ? data : []);
     //     }
     // }, [sound]);
     const Seen = async (notice_id) => {
+        if (!userId?.id) return;
         const payload = {
             user_id: userId.id,
             notification_id:notice_id
@@ -179,8 +168,8 @@ setAlias(Array.isArray(data) ? data : []);
                                     {total > 99
                                         ? "99+"
                                         : total > 0
-                                        ? total
-                                        : ""}
+                                          ? total
+                                          : ""}
                                 </Badges>
                             </span>
                         )}
@@ -202,15 +191,15 @@ setAlias(Array.isArray(data) ? data : []);
                 >
                     {Array.isArray(notifications) &&
                         notifications.map((item) => (
-                            <li key={item.id} className="noti-primary">
+                            <li key={item?.id} className="noti-primary">
                                 <a
                                     onClick={(event) => {
                                         handleNavigation(
                                             event,
-                                            item.screen,
-                                            item.screen_id
+                                            item?.screen,
+                                            item?.screen_id,
                                         );
-                                        Seen(item.id);
+                                        Seen(item?.id);
                                     }}
                                 >
                                     <div className="media">
@@ -231,7 +220,7 @@ setAlias(Array.isArray(data) ? data : []);
                                             <p>{item.content}</p>
                                             <span>
                                                 {new Date(
-                                                    item.created_at
+                                                    item.created_at,
                                                 ).toLocaleString()}
                                             </span>
                                         </div>
