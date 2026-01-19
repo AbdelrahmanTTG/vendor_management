@@ -161,7 +161,7 @@ class TicketsController extends Controller
                                     }
                                 }
                             });
-                        } else {
+                        } else { 
                             if ($key == 'start_date') {
                                 // $start_date = $request->queryParams['start_date'];
                                 // $tickets->where('vm_ticket.created_at', '>=', $start_date);
