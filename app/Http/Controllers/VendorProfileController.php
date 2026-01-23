@@ -539,8 +539,17 @@ class VendorProfileController extends Controller
                         $vendor['brands'] = implode(', ', $brandNames);
                     }
 
-                    return $this->flattenObject($vendor, $tableKeys);
-                }, $flattenedVendors);
+                    $flattenedVendor = $this->flattenObject($vendor, $tableKeys);
+
+                    if (isset($flattenedVendor['cv']) && !empty($flattenedVendor['cv'])) {
+                        $flattenedVendor['cv'] = 'https://aixnexus.com/erp' . $flattenedVendor['cv'];
+                    }
+                    if (isset($flattenedVendor['nda']) && !empty($flattenedVendor['nda'])) {
+                        $flattenedVendor['nda'] = 'https://aixnexus.com/erp' . $flattenedVendor['nda'];
+                    }
+
+                    return $flattenedVendor;
+                }, $flattenedVendors);;
 
                 $AllVendors = array_merge($AllVendors, $flattenedVendors);
             });
