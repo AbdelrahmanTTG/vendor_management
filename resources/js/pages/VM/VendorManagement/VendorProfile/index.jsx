@@ -85,7 +85,7 @@ const Vendor = (props) => {
     const [progress, setProgress] = useState(0);
     const [openId, setOpenId] = useState(null);
     const [perPage, setPerPage] = useState(50);
-
+    const [userTypePermissions, setUserTypePermissions] = useState([]);
     const handleFormatsChanged = () => {
         setFormatsChanged(!formatsChanged);
     };
@@ -134,7 +134,17 @@ const Vendor = (props) => {
         handelingSelect("countries", setOptionsN, "nationality");
         handelingSelect("regions", setOptionsR, "region");
         handelingSelect("vendortimezone", setOptionsT, "timeZone");
-        // console.log(props.permissions);
+        const fetchTypePermissions = async () => {
+            try {
+                const { data } = await axiosClient.get("typePermissions");
+                if (data.allowedTypes && data.allowedTypes.length > 0) {
+                    setUserTypePermissions(data.allowedTypes);
+                }
+            } catch (err) {
+                console.error("Error fetching type permissions:", err);
+            }
+        };
+        fetchTypePermissions();
     }, []);
     const [sortConfig, setSortConfig] = useState({
         key: "id",
@@ -152,8 +162,9 @@ const Vendor = (props) => {
                 table: "vendors",
                 export: ex,
                 view: props.permissions?.view,
-                typePermissions: queryParams?.typePermissions || null,
-            };
+                typePermissions:
+                    userTypePermissions.length > 0 ? userTypePermissions : null, 
+            };;
             try {
                 setLoading2(true);
                 const { data } = await axiosClient.post("Vendors", payload);

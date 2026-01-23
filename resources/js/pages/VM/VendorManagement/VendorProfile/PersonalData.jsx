@@ -710,32 +710,35 @@ useEffect(() => {
                                                                         },
                                                                     ].filter(
                                                                         (
-                                                                            option
+                                                                            option,
                                                                         ) =>
                                                                             typePermissions.includes(
                                                                                 parseInt(
-                                                                                    option.value
-                                                                                )
-                                                                            )
+                                                                                    option.value,
+                                                                                ),
+                                                                            ),
                                                                     )
-                                                                  : [
-                                                                        {
-                                                                            value: "0",
-                                                                            label: "Freelance",
-                                                                        },
-                                                                        {
-                                                                            value: "2",
-                                                                            label: "Agency",
-                                                                        },
-                                                                        {
-                                                                            value: "3",
-                                                                            label: "Contractor",
-                                                                        },
-                                                                        {
-                                                                            value: "1",
-                                                                            label: "In House",
-                                                                        },
-                                                                    ]
+                                                                  : typePermissions.length ===
+                                                                      0
+                                                                    ? [] 
+                                                                    : [
+                                                                          {
+                                                                              value: "0",
+                                                                              label: "Freelance",
+                                                                          },
+                                                                          {
+                                                                              value: "2",
+                                                                              label: "Agency",
+                                                                          },
+                                                                          {
+                                                                              value: "3",
+                                                                              label: "Contractor",
+                                                                          },
+                                                                          {
+                                                                              value: "1",
+                                                                              label: "In House",
+                                                                          },
+                                                                      ]
                                                           }
                                                           isDisabled={
                                                               (props.permission &&
@@ -749,13 +752,13 @@ useEffect(() => {
                                                           }
                                                           className="js-example-basic-single col-sm-12"
                                                           onChange={(
-                                                              option
+                                                              option,
                                                           ) => {
                                                               handleVendorTypeChange(
-                                                                  option
+                                                                  option,
                                                               );
                                                               field.onChange(
-                                                                  option
+                                                                  option,
                                                               );
                                                           }}
                                                           isDisabled={
@@ -829,13 +832,13 @@ useEffect(() => {
                                                           ]}
                                                           className="js-example-basic-single col-sm-12"
                                                           onChange={(
-                                                              option
+                                                              option,
                                                           ) => {
                                                               handleStatusChange(
-                                                                  option
+                                                                  option,
                                                               );
                                                               field.onChange(
-                                                                  option
+                                                                  option,
                                                               );
                                                           }}
                                                           isDisabled={
@@ -904,7 +907,7 @@ useEffect(() => {
                                                       defaultValue=""
                                                       {...register(
                                                           "prfx_name",
-                                                          { required: false }
+                                                          { required: false },
                                                       )}
                                                   >
                                                       <option value="" disabled>
@@ -935,7 +938,7 @@ useEffect(() => {
                                                       name="contact_name"
                                                       {...register(
                                                           "contact_name",
-                                                          { required: false }
+                                                          { required: false },
                                                       )}
                                                       placeholder={ContactLabel}
                                                   />
@@ -1027,13 +1030,13 @@ useEffect(() => {
                                                               pattern: {
                                                                   value: /^\+[1-9]{1}[0-9]{3,14}$/,
                                                               },
-                                                          }
+                                                          },
                                                       )}
                                                       onInput={(e) => {
                                                           e.target.value =
                                                               e.target.value.replace(
                                                                   /[^+\d]/g,
-                                                                  ""
+                                                                  "",
                                                               );
                                                       }}
                                                   />
@@ -1046,7 +1049,7 @@ useEffect(() => {
                                                       placeholder="Another number"
                                                       {...register(
                                                           "Anothernumber",
-                                                          { required: false }
+                                                          { required: false },
                                                       )}
                                                   />
                                               </InputGroup>
@@ -1138,14 +1141,14 @@ useEffect(() => {
                                                           className="js-example-basic-single col-sm-12"
                                                           isSearchable
                                                           onInputChange={(
-                                                              inputValue
+                                                              inputValue,
                                                           ) =>
                                                               handleInputChange(
                                                                   inputValue,
                                                                   "countries",
                                                                   "Country",
                                                                   setOptionsC,
-                                                                  optionsC
+                                                                  optionsC,
                                                               )
                                                           }
                                                           noOptionsMessage={() =>
@@ -1163,19 +1166,19 @@ useEffect(() => {
                                                               )
                                                           }
                                                           onChange={(
-                                                              option
+                                                              option,
                                                           ) => {
                                                               setSelectedOptionC(
-                                                                  option
+                                                                  option,
                                                               );
                                                               handelingSelectTimeZone(
-                                                                  option?.value
+                                                                  option?.value,
                                                               );
                                                               handelingRegions(
-                                                                  option?.regions
+                                                                  option?.regions,
                                                               );
                                                               field.onChange(
-                                                                  option?.value
+                                                                  option?.value,
                                                               );
                                                           }}
                                                       />
@@ -1232,13 +1235,13 @@ useEffect(() => {
                                                               )
                                                           }
                                                           onChange={(
-                                                              option
+                                                              option,
                                                           ) => {
                                                               setSelectedOptionR(
-                                                                  option
+                                                                  option,
                                                               );
                                                               field.onChange(
-                                                                  option.value
+                                                                  option.value,
                                                               );
                                                               // handelingSelectCountry(option.value)
                                                           }}
@@ -1278,14 +1281,14 @@ useEffect(() => {
                                                           }
                                                           options={optionsN}
                                                           onInputChange={(
-                                                              inputValue
+                                                              inputValue,
                                                           ) =>
                                                               handleInputChange(
                                                                   inputValue,
                                                                   "countries",
                                                                   "Nationality",
                                                                   setOptionsN,
-                                                                  optionsN
+                                                                  optionsN,
                                                               )
                                                           }
                                                           className="js-example-basic-single col-sm-12"
@@ -1305,13 +1308,13 @@ useEffect(() => {
                                                               )
                                                           }
                                                           onChange={(
-                                                              option
+                                                              option,
                                                           ) => {
                                                               setSelectedOptionN(
-                                                                  option
+                                                                  option,
                                                               );
                                                               field.onChange(
-                                                                  option.value
+                                                                  option.value,
                                                               );
                                                           }}
                                                       />
@@ -1405,13 +1408,13 @@ useEffect(() => {
                                                               )
                                                           }
                                                           onChange={(
-                                                              option
+                                                              option,
                                                           ) => {
                                                               setSelectedOptionT(
-                                                                  option
+                                                                  option,
                                                               );
                                                               field.onChange(
-                                                                  option.value
+                                                                  option.value,
                                                               );
                                                           }}
                                                       />
@@ -1490,7 +1493,7 @@ useEffect(() => {
                                                   name="vendor_source"
                                                   {...register(
                                                       "vendor_source",
-                                                      { required: true }
+                                                      { required: true },
                                                   )}
                                                   placeholder="Vendor Source"
                                               />
@@ -1623,14 +1626,14 @@ useEffect(() => {
                                                               !isReadOnlyBrands
                                                           }
                                                           onInputChange={(
-                                                              inputValue
+                                                              inputValue,
                                                           ) =>
                                                               handleInputChange(
                                                                   inputValue,
                                                                   "brand",
                                                                   "vendor_brands",
                                                                   setOptionsB,
-                                                                  optionsB
+                                                                  optionsB,
                                                               )
                                                           }
                                                           className="js-example-basic-single col-sm-12"
@@ -1649,13 +1652,13 @@ useEffect(() => {
                                                               )
                                                           }
                                                           onChange={(
-                                                              option
+                                                              option,
                                                           ) => {
                                                               setSelectedBrands(
-                                                                  option
+                                                                  option,
                                                               );
                                                               field.onChange(
-                                                                  option
+                                                                  option,
                                                               );
                                                           }}
                                                       />
@@ -1707,13 +1710,13 @@ useEffect(() => {
                                                           ]}
                                                           className="js-example-basic-single col-sm-12"
                                                           onChange={(
-                                                              option
+                                                              option,
                                                           ) => {
                                                               handleVendorTypeChange(
-                                                                  option
+                                                                  option,
                                                               );
                                                               field.onChange(
-                                                                  option
+                                                                  option,
                                                               );
                                                           }}
                                                           isDisabled={
@@ -1757,14 +1760,14 @@ useEffect(() => {
                                                           }
                                                           options={optionsML}
                                                           onInputChange={(
-                                                              inputValue
+                                                              inputValue,
                                                           ) =>
                                                               handleInputChange(
                                                                   inputValue,
                                                                   "languages",
                                                                   "mother_tongue_language",
                                                                   setOptionsML,
-                                                                  optionsML
+                                                                  optionsML,
                                                               )
                                                           }
                                                           className="js-example-basic-single col-sm-12"
@@ -1784,13 +1787,13 @@ useEffect(() => {
                                                               )
                                                           }
                                                           onChange={(
-                                                              option
+                                                              option,
                                                           ) => {
                                                               setSelectedOptionML(
-                                                                  option
+                                                                  option,
                                                               );
                                                               field.onChange(
-                                                                  option
+                                                                  option,
                                                               );
                                                           }}
                                                           isMulti
@@ -1869,13 +1872,13 @@ useEffect(() => {
                                                       }
                                                       onChange={(
                                                           event,
-                                                          editor
+                                                          editor,
                                                       ) => {
                                                           const data =
                                                               editor.getData();
                                                           setValue(
                                                               "reject_reason",
-                                                              data
+                                                              data,
                                                           );
                                                       }}
                                                       disabled={
@@ -1890,7 +1893,7 @@ useEffect(() => {
                                                       hidden
                                                       {...register(
                                                           "reject_reason",
-                                                          { required: false }
+                                                          { required: false },
                                                       )}
                                                   />
                                               </Col>
@@ -1910,7 +1913,7 @@ useEffect(() => {
                                           disabled: Sub,
                                           onClick: handleSubmit(
                                               handleClick,
-                                              onError
+                                              onError,
                                           ),
                                       }}
                                   >

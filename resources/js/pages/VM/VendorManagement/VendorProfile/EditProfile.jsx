@@ -190,10 +190,16 @@ const EditProfile = (props) => {
     }
     const isEmpty = isPermissionsEmpty(props.permissions);
     return (
-        <Fragment >
+        <Fragment>
             <div
-                id="nav-componant" className="position-relative" style={{ marginBottom }}>
-                <div className=" position-fixed" style={{ zIndex: "2", top: "8.4vh" }}>
+                id="nav-componant"
+                className="position-relative"
+                style={{ marginBottom }}
+            >
+                <div
+                    className=" position-fixed"
+                    style={{ zIndex: "2", top: "8.4vh" }}
+                >
                     <NavBar permissions={props.permissions} />
                 </div>
             </div>
@@ -201,82 +207,140 @@ const EditProfile = (props) => {
             <div className=" mt-5 mt-sm-6 mt-md-8 mt-lg-10 mt-xl-12 py-3 py-md-5">
                 {props.permissions?.PersonalData?.view == 1 && (
                     <LazyWrapper>
-
                         <div id="personal-data">
-                            <PersonalData onSubmit="onUpdate" mode="edit" onDataSend={handleDataSend}
-                                 backPermissions={props.permissions?.PersonalData} vendorPersonalData={vendorPersonalData}
+                            <PersonalData
+                                onSubmit="onUpdate"
+                                mode="edit"
+                                onDataSend={handleDataSend}
+                                backPermissions={
+                                    props.permissions?.PersonalData
+                                }
+                                vendorPersonalData={vendorPersonalData}
                             />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.Messaging?.view == 1 && (
                     <LazyWrapper>
-
                         <div id="messaging">
-                            <Messaging id={vendor?.id} backPermissions={props.permissions?.Messaging} mode="edit" onSubmit="onUpdate" InstantMessaging={InstantMessaging} />
+                            <Messaging
+                                id={vendor?.id}
+                                backPermissions={props.permissions?.Messaging}
+                                mode="edit"
+                                onSubmit="onUpdate"
+                                InstantMessaging={InstantMessaging}
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.VMnote?.view == 1 && (
                     <LazyWrapper>
-
-                        <div id='VM-Notes'>
-                            <VMnote id={vendor?.id} email={vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.VMnote} lastMessage={lastMessage} />
+                        <div id="VM-Notes">
+                            <VMnote
+                                id={vendor?.id}
+                                email={vendorPersonalData?.PersonalData?.email}
+                                backPermissions={props.permissions?.VMnote}
+                                lastMessage={lastMessage}
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.FilesCertificate?.view == 1 && (
                     <LazyWrapper>
-
-                        <div id='Files-Certificate'>
-                            <FilesCertificate id={vendor?.id} mode="edit" backPermissions={props.permissions?.FilesCertificate} VendorFiles={VendorFiles} onSubmit="onUpdate" />
+                        <div id="Files-Certificate">
+                            <FilesCertificate
+                                id={vendor?.id}
+                                mode="edit"
+                                backPermissions={
+                                    props.permissions?.FilesCertificate
+                                }
+                                VendorFiles={VendorFiles}
+                                onSubmit="onUpdate"
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.Education?.view == 1 && (
                     <LazyWrapper>
-                        <div id='Education'>
-                            <Education id={vendor?.id} EducationVendor={EducationVendor} backPermissions={props.permissions?.Education} mode="edit" />
+                        <div id="Education">
+                            <Education
+                                id={vendor?.id}
+                                EducationVendor={EducationVendor}
+                                backPermissions={props.permissions?.Education}
+                                mode="edit"
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.Experience?.view == 1 && (
                     <LazyWrapper>
-
-                        <div id='Experience'>
-                            <Experience id={vendor?.id} Experience={VendorExperience} backPermissions={props.permissions?.Experience} mode="edit" onSubmit="onUpdate" />
+                        <div id="Experience">
+                            <Experience
+                                id={vendor?.id}
+                                Experience={VendorExperience}
+                                backPermissions={props.permissions?.Experience}
+                                mode="edit"
+                                onSubmit="onUpdate"
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.Test?.view == 1 && (
                     <LazyWrapper>
-
-                        <div id='Test'>
-                            <Test id={vendor?.id} VendorTestData={VendorTestData} backPermissions={props.permissions?.Test} mode="edit" />
+                        <div id="Test">
+                            <Test
+                                id={vendor?.id}
+                                VendorTestData={VendorTestData}
+                                backPermissions={props.permissions?.Test}
+                                mode="edit"
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.Billing?.view == 1 && (
                     <LazyWrapper>
-
-                        <div id='Billing'>
-                            <Billing countryAndNationality={data} Bill={Currancydata} Currancy={getCurrancy} id={vendor?.id} BillingData={BillingData} onSubmit="onUpdate" backPermissions={props.permissions?.Billing} mode="edit" />
+                        <div id="Billing">
+                            <Billing
+                                countryAndNationality={data}
+                                Bill={Currancydata}
+                                Currancy={getCurrancy}
+                                id={vendor?.id}
+                                BillingData={BillingData}
+                                onSubmit="onUpdate"
+                                backPermissions={props.permissions?.Billing}
+                                mode="edit"
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.Portal_User?.view == 1 && (
                     <LazyWrapper>
-
-                        <div id='Portal_User' >
-                            <Portal_User id={vendorPersonalData?.PersonalData?.id} email={ vendorPersonalData?.PersonalData?.email} backPermissions={props.permissions?.Portal_User} onSubmit="onUpdate" mode="edit" />
+                        <div id="Portal_User">
+                            <Portal_User
+                                id={vendorPersonalData?.PersonalData?.id}
+                                email={vendorPersonalData?.PersonalData?.email}
+                                backPermissions={props.permissions?.Portal_User}
+                                onSubmit="onUpdate"
+                                mode="edit"
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.Price_List?.view == 1 && (
                     <LazyWrapper>
-
-                        <div id='Price_List'>
-                            <Price_List Currency={BillingData?.BillingData?.billingData?.billing_currency || Cur} backPermissions={props.permissions?.Price_List} id={vendor?.id} priceList={priceList} />
+                        <div id="Price_List">
+                            <Price_List
+                                UpdateCurrency={
+                                    props.permissions?.UpdateCurrency
+                                }
+                                Currency={
+                                    BillingData?.BillingData?.billingData
+                                        ?.billing_currency || Cur
+                                }
+                                backPermissions={props.permissions?.Price_List}
+                                id={vendor?.id}
+                                priceList={priceList}
+                            />
                         </div>
                     </LazyWrapper>
                 )}
@@ -284,39 +348,49 @@ const EditProfile = (props) => {
                     <LazyWrapper>
                         <div id="VendorLog" className="row mb-3">
                             <div className="col-12">
-                                <VendorLog backPermissions={props.permissions?.VendorLog} id={vendor?.id}/>
+                                <VendorLog
+                                    backPermissions={
+                                        props.permissions?.VendorLog
+                                    }
+                                    id={vendor?.id}
+                                />
                             </div>
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.Evaluation?.view == 1 && (
                     <LazyWrapper>
-
-                        <div id='Evaluation'>
-                            <Evaluation backPermissions={props.permissions?.Evaluation} />
+                        <div id="Evaluation">
+                            <Evaluation
+                                backPermissions={props.permissions?.Evaluation}
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.Feedback?.view == 1 && (
                     <LazyWrapper>
-
-                        <div id='Feedback'>
-                            <Feedback backPermissions={props.permissions?.Feedback} />
+                        <div id="Feedback">
+                            <Feedback
+                                backPermissions={props.permissions?.Feedback}
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.Vacation?.view == 1 && (
                     <LazyWrapper>
-
-                        <div id='Vacation'>
-                            <Vacation backPermissions={props.permissions?.Vacation} />
+                        <div id="Vacation">
+                            <Vacation
+                                backPermissions={props.permissions?.Vacation}
+                            />
                         </div>
                     </LazyWrapper>
                 )}
                 {props.permissions?.History?.view == 1 && (
                     <LazyWrapper>
-                        <div id='History'>
-                            <History backPermissions={props.permissions?.History} />
+                        <div id="History">
+                            <History
+                                backPermissions={props.permissions?.History}
+                            />
                         </div>
                     </LazyWrapper>
                 )}
@@ -324,17 +398,18 @@ const EditProfile = (props) => {
                     {isEmpty && (
                         <Card>
                             <CardBody>
-                                <div style={{ textAlign: 'center' }}>
+                                <div style={{ textAlign: "center" }}>
                                     <h5>Oops !!</h5>
-                                    <h6>You are not allowed to see any sections here ):</h6>
+                                    <h6>
+                                        You are not allowed to see any sections
+                                        here ):
+                                    </h6>
                                 </div>
                             </CardBody>
                         </Card>
                     )}
                 </Fragment>
             </div>
-
-
         </Fragment>
     );
 };

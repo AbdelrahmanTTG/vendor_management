@@ -103,6 +103,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/ChangeStatus', [AdminController::class, 'activeEmail']);
     Route::post('/updateAlias', [AdminController::class, 'updateAlias']);
     Route::post('/notice', [AdminController::class, 'MailProvider']);
+    Route::post('/UpdateCurrencyPriceList', [VendorProfileController::class, 'UpdateCurrencyPriceList']);
 });
 Route::middleware([App\Http\Middleware\AdminAuth::class])->prefix('Portal')->group(function () {
     Route::group(['prefix' => 'Vendor'], function () {

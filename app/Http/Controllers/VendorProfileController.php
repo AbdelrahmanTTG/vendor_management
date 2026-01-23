@@ -21,6 +21,7 @@ use App\Models\Experience;
 use App\Models\VendorFile;
 use App\Models\InstantMessaging;
 use App\Models\TaskType;
+use App\Models\Task;
 use App\Models\VendorSheet;
 use App\Models\VendorTest;
 use App\Models\VendorEducation;
@@ -165,8 +166,10 @@ class VendorProfileController extends Controller
             $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands');
         }
         $vendorsQuery->withCount(['tasks as number_of_task']);
-        if (!empty($typePermissions) && is_array($typePermissions)) {
+        if (is_array($typePermissions) && count($typePermissions) > 0) {
             $vendorsQuery->whereIn('vendor.type', $typePermissions);
+        } elseif (is_array($typePermissions) && count($typePermissions) === 0) {
+            $vendorsQuery->whereRaw('1 = 0');
         }
         // Add mother tongue relation if needed
         if ($includeMotherTongue) {
@@ -3151,7 +3154,7 @@ class VendorProfileController extends Controller
             'rate' => 'required|numeric',
             'special_rate' => 'nullable|numeric',
             'Status' => 'required|string',
-            'currency' => 'required|integer',
+            // 'currency' => 'required|integer',
         ]);
 
         if ($validator->fails()) {
@@ -3166,7 +3169,7 @@ class VendorProfileController extends Controller
         $data = $request->except(['vendor']);
         $data['dialect'] = $data['dialect'] ?? null;
         $data['dialect_target'] = $data['dialect_target'] ?? null;
-        $data['currency'] = $data['currency'] ?? null;
+        // $data['currency'] = $data['currency'] ?? null;
         $data['subject_main'] = $data['subject_main'] ?? null;
         $data['subject'] = $data['subject'] ?? null;
         $vendor = Vendor::find($vendorSheet->vendor);
@@ -3216,6 +3219,61 @@ class VendorProfileController extends Controller
 
         return response()->json($vendorSheet, 200);
     }
+    public function UpdateCurrencyPriceList(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer',
+            'currency' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $vendorId = $request->id;
+        $currencyId = $request->currency;
+
+        $hasUnverifiedTasks = Task::where('vendor', $vendorId)
+            ->where('verified', '!=', 1)
+            ->exists();
+
+        if ($hasUnverifiedTasks) {
+            return response()->json([
+                'message' => 'Cannot update currency. There are unverified tasks for this vendor.'
+            ], 422);
+        }
+
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = $user->id;
+
+        VendorSheet::where('vendor', $vendorId)
+            ->update([
+                'currency' => $currencyId,
+                'updated_by' => $userId,
+                'updated_at' => now()
+            ]);
+
+        $updatedPriceList = VendorSheet::where('vendor', $vendorId)
+            ->with([
+                'source_lang:id,name',
+                'target_lang:id,name',
+                'dialect:id,dialect',
+                'dialect_target:id,dialect',
+                'service:id,name',
+                'task_type:id,name',
+                'unit:id,name',
+                'currency:id,name',
+                'subject:id,name',
+                'subject_main:id,name',
+                'sheet_brand:id,name',
+                'userCreated:id,user_name',
+                'userUpdated:id,user_name',
+            ])
+            ->get();
+
+        return response()->json($updatedPriceList, 200);
+    }
+
 
 
     // public function UpdatePriceList(Request $request)

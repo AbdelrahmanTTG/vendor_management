@@ -187,6 +187,7 @@ export const VM = (allowedPermissions) => [
                         Vacation: allowedPermissions["Vacation"],
                         History: allowedPermissions["History"],
                         VendorLog: allowedPermissions["VendorLog"],
+                        UpdateCurrency: allowedPermissions["updateCurrency"],
                     }}
                 />
             </LazyWrapper>
@@ -215,6 +216,7 @@ export const VM = (allowedPermissions) => [
                         Vacation: allowedPermissions["Vacation"],
                         History: allowedPermissions["History"],
                         VendorLog: allowedPermissions["VendorLog"],
+                        UpdateCurrency: allowedPermissions["updateCurrency"],
                     }}
                 />
             </LazyWrapper>

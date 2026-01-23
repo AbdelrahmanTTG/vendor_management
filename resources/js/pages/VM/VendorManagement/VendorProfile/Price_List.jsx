@@ -1,28 +1,43 @@
-import React, { Fragment, useState, useEffect, Suspense } from 'react';
-import { Card, CardBody, CardHeader, Col, Collapse, Label, Row, Input, Table } from 'reactstrap';
+import React, { Fragment, useState, useEffect, Suspense } from "react";
+import {
+    Card,
+    CardBody,
+    CardHeader,
+    Col,
+    Collapse,
+    Label,
+    Row,
+    Input,
+    Table,
+} from "reactstrap";
 import { Btn, H5, Spinner } from "../../../../AbstractElements";
-import Select from 'react-select';
-import { toast } from 'react-toastify';
-import SweetAlert from 'sweetalert2';
+import Select from "react-select";
+import { toast } from "react-toastify";
+import SweetAlert from "sweetalert2";
 import axiosClient from "../../../AxiosClint";
-const Model = React.lazy(() => import('./models/modelAddPriceList'));
-const ModelEdit = React.lazy(() => import('./models/modelEditPriceList'));
-import { useForm, Controller } from 'react-hook-form';
+const Model = React.lazy(() => import("./models/modelAddPriceList"));
+const ModelEdit = React.lazy(() => import("./models/modelEditPriceList"));
+import { useForm, Controller } from "react-hook-form";
 import ErrorBoundary from "../../../../ErrorBoundary";
 
 const PriceList = (props) => {
     const LazyWrapper = ({ children }) => (
         <ErrorBoundary>
-            <Suspense fallback={<div>Loading...</div>}>
-                {children}
-            </Suspense>
+            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
         </ErrorBoundary>
     );
     const [isOpen, setIsOpen] = useState(false);
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
-    }
-    const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
+    };
+    const {
+        control,
+        register,
+        handleSubmit,
+        reset,
+        setValue,
+        formState: { errors },
+    } = useForm();
     const [optionsT, setOptionsT] = useState([]);
     const [loading, setLoading] = useState(false);
     const [initialOptions, setInitialOptions] = useState({});
@@ -36,41 +51,42 @@ const PriceList = (props) => {
     const [curr, setCurr] = useState(false);
     const [openId, setOpenId] = useState(null);
     const [C, setC] = useState(false);
-
-     const basictoaster = (toastname, status) => {
+    const [loadingCurrency, setLoadingCurrency] = useState(false);
+    const basictoaster = (toastname, status) => {
         switch (toastname) {
-          case 'successToast':
-            toast.success(status, {
-              position: "top-right"
-            });
-            break;
-          case 'dangerToast':
-            toast.error(status, {
-              position: "top-right"
-            });
-            break;
-          default:
+            case "successToast":
+                toast.success(status, {
+                    position: "top-right",
+                });
+                break;
+            case "dangerToast":
+                toast.error(status, {
+                    position: "top-right",
+                });
+                break;
+            default:
         }
-      };
-    const getData = (newData , form , status) => {
+    };
+    const getData = (newData, form, status) => {
         setdataPrice((prevData) => {
             const validData = Array.isArray(prevData) ? prevData : [];
             const index = validData.findIndex((item) => item.id === newData.id);
             if (index !== -1) {
-                return validData.map((item, i) => (i === index ? newData : item));
+                return validData.map((item, i) =>
+                    i === index ? newData : item,
+                );
             } else {
                 return [...validData, newData];
             }
         });
-        setRows(true)
+        setRows(true);
         if (status) {
-         
             setC(newData);
         }
     };
 
     const removeDataById = (id) => {
-        setdataPrice(prevData => prevData.filter(item => item.id !== id));
+        setdataPrice((prevData) => prevData.filter((item) => item.id !== id));
     };
     useEffect(() => {
         if (
@@ -94,7 +110,7 @@ const PriceList = (props) => {
                 (item) => ({
                     value: item.id,
                     label: item.name,
-                })
+                }),
             );
             setValue("tool", transformedArray);
         }
@@ -103,35 +119,34 @@ const PriceList = (props) => {
     const deleteRow = (id) => {
         if (id) {
             SweetAlert.fire({
-                title: 'Are you sure?',
+                title: "Are you sure?",
                 text: `Do you want to delete that price list ?`,
-                icon: 'warning',
+                icon: "warning",
                 showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'No, cancel!',
-                reverseButtons: true
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true,
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     const success = await onDelete(id);
                     if (success) {
                         SweetAlert.fire(
-                            'Deleted!',
+                            "Deleted!",
                             `This price list has been deleted..`,
-                            'success'
+                            "success",
                         );
                     } else {
                         SweetAlert.fire(
-                            'Ooops !',
-                            ' An error occurred while deleting. :)',
-                            'error'
+                            "Ooops !",
+                            " An error occurred while deleting. :)",
+                            "error",
                         );
                     }
-
                 } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
                     SweetAlert.fire(
-                        'Cancelled',
-                        'Your item is safe :)',
-                        'info'
+                        "Cancelled",
+                        "Your item is safe :)",
+                        "info",
                     );
                 }
             });
@@ -139,33 +154,116 @@ const PriceList = (props) => {
     };
     const onDelete = async (id) => {
         if (!props.backPermissions?.delete) {
-            basictoaster("dangerToast", " Oops! You are not authorized to delete this section .");
+            basictoaster(
+                "dangerToast",
+                " Oops! You are not authorized to delete this section .",
+            );
             return;
         }
         try {
             const payload = {
                 id: id,
-            }
-            const { data } = await axiosClient.delete("deletePricelist", { data: payload });
-            removeDataById(id)
-            return data
+            };
+            const { data } = await axiosClient.delete("deletePricelist", {
+                data: payload,
+            });
+            removeDataById(id);
+            return data;
         } catch (err) {
             const response = err.response;
             if (response && response.data) {
-                setErrorMessage(response.data.message || "An unexpected error occurred.");
+                setErrorMessage(
+                    response.data.message || "An unexpected error occurred.",
+                );
             } else {
                 setErrorMessage("An unexpected error occurred.");
             }
-            return false
+            return false;
         }
     };
-    const handleInputChange = (inputValue, tableName, fieldName, setOptions, options) => {
+    const handleCurrencyUpdate = async () => {
+        if (!props?.UpdateCurrency?.edit) {
+            basictoaster(
+                "dangerToast",
+                "Oops! You are not authorized to update currency.",
+            );
+            return;
+        }
 
+        if (!selectedOptionC || !props?.id) {
+            basictoaster("dangerToast", "Please select a currency first.");
+            return;
+        }
+
+        SweetAlert.fire({
+            title: "Are you sure?",
+            text: "This will change the currency for all price lists of this vendor.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, update it!",
+            cancelButtonText: "No, cancel!",
+            reverseButtons: true,
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                setLoadingCurrency(true);
+                try {
+                    const { data } = await axiosClient.post(
+                        "UpdateCurrencyPriceList",
+                        {
+                            id: props.id,
+                            currency: selectedOptionC.value,
+                        },
+                    );
+
+                    setdataPrice(data);
+                    setCurr(true);
+                    basictoaster(
+                        "successToast",
+                        "Currency updated successfully!",
+                    );
+
+                    SweetAlert.fire(
+                        "Updated!",
+                        "Currency has been updated for all price lists.",
+                        "success",
+                    );
+                } catch (err) {
+                    const response = err.response;
+                    if (response && response.data) {
+                        const errorMsg =
+                            response.data.message ||
+                            "An unexpected error occurred.";
+                        basictoaster("dangerToast", errorMsg);
+                        SweetAlert.fire("Error!", errorMsg, "error");
+                    } else {
+                        basictoaster(
+                            "dangerToast",
+                            "An unexpected error occurred.",
+                        );
+                        SweetAlert.fire(
+                            "Error!",
+                            "An unexpected error occurred.",
+                            "error",
+                        );
+                    }
+                } finally {
+                    setLoadingCurrency(false);
+                }
+            }
+        });
+    };
+    const handleInputChange = (
+        inputValue,
+        tableName,
+        fieldName,
+        setOptions,
+        options,
+    ) => {
         if (inputValue.length === 0) {
             setOptions(initialOptions[fieldName] || []);
         } else if (inputValue.length >= 1) {
-            const existingOption = options.some(option =>
-                option.label.toLowerCase().includes(inputValue.toLowerCase())
+            const existingOption = options.some((option) =>
+                option.label.toLowerCase().includes(inputValue.toLowerCase()),
             );
             if (!existingOption) {
                 setLoading(true);
@@ -173,25 +271,33 @@ const PriceList = (props) => {
             }
         }
     };
-    const handelingSelect = async (tablename, setOptions, fieldName, searchTerm = '') => {
+    const handelingSelect = async (
+        tablename,
+        setOptions,
+        fieldName,
+        searchTerm = "",
+    ) => {
         // console.log(props.Currency)
-        if (!tablename) return
+        if (!tablename) return;
         try {
             setLoading(true);
             const { data } = await axiosClient.get("SelectDatat", {
                 params: {
                     search: searchTerm,
-                    table: tablename
-                }
+                    table: tablename,
+                },
             });
-            const formattedOptions = data.map(item => ({
+            const formattedOptions = data.map((item) => ({
                 value: item.id,
                 label: item.name || item.gmt || item.dialect,
             }));
 
             setOptions(formattedOptions);
             if (!searchTerm) {
-                setInitialOptions(prev => ({ ...prev, [fieldName]: formattedOptions }));
+                setInitialOptions((prev) => ({
+                    ...prev,
+                    [fieldName]: formattedOptions,
+                }));
             }
         } catch (err) {
             const response = err.response;
@@ -205,16 +311,18 @@ const PriceList = (props) => {
         } finally {
             setLoading(false);
         }
-
     };
 
     const onSubmit = async (data) => {
         if (!props.backPermissions?.add) {
-            basictoaster("dangerToast", " Oops! You are not authorized to add this section .");
+            basictoaster(
+                "dangerToast",
+                " Oops! You are not authorized to add this section .",
+            );
             return;
         }
         const formDate = Object.entries(data?.tool).map(([key, value]) => {
-            if (typeof value === 'object' && value !== null) {
+            if (typeof value === "object" && value !== null) {
                 return { tool: value.value };
             }
             return { tool: value };
@@ -222,9 +330,8 @@ const PriceList = (props) => {
 
         const newData = {
             tool: formDate,
-            vendor_id: props?.id
-
-        }
+            vendor_id: props?.id,
+        };
         setSub(true);
         try {
             const response = await axiosClient.post("AddVendorstools", newData);
@@ -234,24 +341,26 @@ const PriceList = (props) => {
             const response = err.response;
             if (response && response.data) {
                 const errors = response.data;
-                Object.keys(errors).forEach(key => {
+                Object.keys(errors).forEach((key) => {
                     const messages = errors[key];
                     if (messages.length > 0) {
-                        messages.forEach(message => {
+                        messages.forEach((message) => {
                             basictoaster("dangerToast", message);
                         });
                     }
                 });
             }
-        }finally {
+        } finally {
             setSub(false);
-        }   
-    }
+        }
+    };
     useEffect(() => {
         if (props.Currency) {
-            setSelectedOptionC({ value: props?.Currency?.id, label: props?.Currency?.name })
+            setSelectedOptionC({
+                value: props?.Currency?.id,
+                label: props?.Currency?.name,
+            });
         }
-
     }, [props.Currency]);
     return (
         <Fragment>
@@ -303,7 +412,7 @@ const PriceList = (props) => {
                                                     "tools",
                                                     "tool",
                                                     setOptionsT,
-                                                    optionsT
+                                                    optionsT,
                                                 )
                                             }
                                             className="js-example-basic-single col-sm-11"
@@ -318,8 +427,8 @@ const PriceList = (props) => {
                                                                     o.value ===
                                                                         option.value &&
                                                                     o.label ===
-                                                                        option.label
-                                                            )
+                                                                        option.label,
+                                                            ),
                                                     );
                                                 field.onChange(uniqueOptions);
                                             }}
@@ -356,25 +465,26 @@ const PriceList = (props) => {
                                 </Col>
                             )}
                         </Row>
-                        <Col md="6" className="mb-3">
-                            <Label
-                                className="col-sm-4 col-form-label"
-                                for="validationCustom01"
-                            >
-                                {(props.backPermissions?.add == 1 ||
-                                    props.backPermissions?.edit == 1) && (
-                                    <span
-                                        style={{
-                                            color: "red",
-                                            fontSize: "18px",
-                                        }}
-                                    >
-                                        *
-                                    </span>
-                                )}
-                                Currency
-                            </Label>
-                            <Col sm="8">
+                        <Row className="g-3 mb-3">
+                            <Col md="10" className="mb-3">
+                                <Label
+                                    className="form-label"
+                                    for="validationCustom01"
+                                >
+                                    {(props.backPermissions?.add == 1 ||
+                                        props.backPermissions?.edit == 1) && (
+                                        <span
+                                            style={{
+                                                color: "red",
+                                                fontSize: "18px",
+                                            }}
+                                        >
+                                            *
+                                        </span>
+                                    )}
+                                    Currency
+                                </Label>
+
                                 <Controller
                                     name="currency"
                                     control={control}
@@ -390,13 +500,18 @@ const PriceList = (props) => {
                                                     "currency",
                                                     "Currency",
                                                     setOptionsC,
-                                                    optionsC
+                                                    optionsC,
                                                 )
                                             }
                                             isDisabled={
-                                                props?.Currency || rows || curr
+                                                props?.UpdateCurrency?.edit ===
+                                                1
+                                                    ? false
+                                                    : props?.Currency ||
+                                                      rows ||
+                                                      curr
                                             }
-                                            className="js-example-basic-single col-sm-12"
+                                            className="js-example-basic-single col-sm-11"
                                             isSearchable
                                             noOptionsMessage={() =>
                                                 loading2 ? (
@@ -420,7 +535,34 @@ const PriceList = (props) => {
                                     )}
                                 />
                             </Col>
-                        </Col>
+
+                            {props?.UpdateCurrency?.view === 1 &&
+                                props?.UpdateCurrency?.edit === 1 && (
+                                    <Col
+                                        md="2"
+                                        className="mb-3 d-flex flex-column justify-content-end align-items-center"
+                                    >
+                                        <Btn
+                                            attrBtn={{
+                                                disabled:
+                                                    loadingCurrency ||
+                                                    !selectedOptionC,
+                                                onClick: handleCurrencyUpdate,
+                                            }}
+                                        >
+                                            {loadingCurrency ? (
+                                                <>
+                                                    <Spinner size="sm" />{" "}
+                                                    Submitting...
+                                                </>
+                                            ) : (
+                                                "Update Currency"
+                                            )}
+                                        </Btn>
+                                    </Col>
+                                )}
+                        </Row>
+
                         <Col
                             md="12"
                             className="d-flex justify-content-end mb-3"
@@ -431,8 +573,8 @@ const PriceList = (props) => {
                                         <Model
                                             currency={selectedOptionC}
                                             id={props.id}
-                                        getData={getData}
-                                        c={C}
+                                            getData={getData}
+                                            c={C}
                                         />
                                     </LazyWrapper>
                                 )}
@@ -477,9 +619,7 @@ const PriceList = (props) => {
                                             <tr key={item?.id}>
                                                 <td>{index + 1}</td>
                                                 <td>{item?.subject?.name}</td>
-                                                <td>
-                                                    {item?.subject?.name}
-                                                </td>
+                                                <td>{item?.subject?.name}</td>
                                                 <td>{item?.service?.name}</td>
                                                 <td>{item?.task_type?.name}</td>
                                                 <td>
@@ -496,10 +636,10 @@ const PriceList = (props) => {
                                                     {item?.Status == 0
                                                         ? "Active"
                                                         : item?.Status == 1
-                                                        ? "Not Active"
-                                                        : item?.Status == 2
-                                                        ? "Pending by PM"
-                                                        : ""}
+                                                          ? "Not Active"
+                                                          : item?.Status == 2
+                                                            ? "Pending by PM"
+                                                            : ""}
                                                 </td>
                                                 <td>
                                                     {
@@ -524,7 +664,7 @@ const PriceList = (props) => {
                                                                 color: "btn btn-primary",
                                                                 onClick: () =>
                                                                     setOpenId(
-                                                                        item.id
+                                                                        item.id,
                                                                     ),
                                                             }}
                                                         >
@@ -546,7 +686,7 @@ const PriceList = (props) => {
                                                                     }
                                                                     onClose={() =>
                                                                         setOpenId(
-                                                                            null
+                                                                            null,
                                                                         )
                                                                     }
                                                                 />
@@ -562,7 +702,7 @@ const PriceList = (props) => {
                                                                 color: "btn btn-danger-gradien",
                                                                 onClick: () =>
                                                                     deleteRow(
-                                                                        item?.id
+                                                                        item?.id,
                                                                     ),
                                                             }}
                                                             className="me-2"
