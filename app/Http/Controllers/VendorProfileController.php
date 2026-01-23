@@ -803,22 +803,8 @@ class VendorProfileController extends Controller
 
     public function updatePersonalInfo(Request $request)
     {
-        if (!$request->has('id')) {
-            return response()->json([
-                'message' => 'ID is required'
-            ], 400);
-        }
-
-        $id = $request->input('id');
-        $vendor = Vendor::find($id);
-
-        if (!$vendor) {
-            return response()->json([
-                'message' => 'Vendor not found'
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
+        $request->validate([
+            'id' => 'required|integer',
             'name' => 'sometimes|required|string',
             'type' => 'sometimes|required|string',
             'status' => 'sometimes|required|string',
@@ -848,105 +834,91 @@ class VendorProfileController extends Controller
             'mother_tongue_language.*.value' => 'required_with:mother_tongue_language|integer'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        $vendor = Vendor::find($request->id);
+        if (!$vendor) return response()->json(['message' => 'Vendor not found'], 404);
+
+        $data = $request->only([
+            'name',
+            'type',
+            'status',
+            'prfx_name',
+            'contact_name',
+            'legal_Name',
+            'phone_number',
+            'email',
+            'contact_linked_in',
+            'contact_ProZ',
+            'contact_other1',
+            'contact_other2',
+            'contact_other3',
+            'Anothernumber',
+            'region',
+            'country',
+            'vendor_source',
+            'nationality',
+            'timezone',
+            'street',
+            'city',
+            'address',
+            'reject_reason',
+            'vendor_brands',
+            'profile_status'
+        ]);
+
+        if (isset($data['type'])) {
+            $oldType = $vendor->type;
+            $newType = $data['type'];
+            if (($oldType == 1 || $newType == 1) && $oldType != $newType) {
+                $taskCount = Task::where('vendor', $vendor->id)->count();
+                if ($taskCount > 0) unset($data['type']);
+            }
         }
 
-        $newEmail = $request->email ?? $vendor->email;
-        $newBrands = is_array($request->vendor_brands)
-            ? $request->vendor_brands
-            : explode(',', $request->vendor_brands);
-
-        $emailChanged = $request->has('email') && $newEmail !== $vendor->email;
-        $brandsChanged = $request->has('vendor_brands') &&
-            json_encode($newBrands) !== json_encode(explode(',', $vendor->vendor_brands));
-
-        if ($emailChanged || $brandsChanged) {
+        $newEmail = $data['email'] ?? $vendor->email;
+        $newBrands = is_array($data['vendor_brands']) ? $data['vendor_brands'] : explode(',', $data['vendor_brands']);
+        if (($data['email'] ?? false) || isset($data['vendor_brands'])) {
             $duplicate = Vendor::where('email', $newEmail)
                 ->where('id', '!=', $vendor->id)
                 ->get()
-                ->filter(function ($v) use ($newBrands) {
-                    $existingBrands = explode(',', $v->vendor_brands);
-                    return count(array_intersect($newBrands, $existingBrands)) > 0;
-                })
+                ->filter(fn($v) => count(array_intersect($newBrands, explode(',', $v->vendor_brands))) > 0)
                 ->first();
-
-            if ($duplicate) {
-                return response()->json([
-                    'message' => 'This email is already registered for one of the selected brands.'
-                ], 409);
-            }
+            if ($duplicate) return response()->json(['message' => 'This email is already registered for one of the selected brands.'], 409);
         }
 
-        $data = $validator->validated();
         $data['brand'] = $data['vendor_brands'];
         $vendor->update($data);
 
-        if ($request->has('mother_tongue_language') && is_array($request->mother_tongue_language)) {
-            DB::table('vendors_mother_tongue')
-                ->where('vendor_id', $vendor->id)
-                ->delete();
-
-            $motherTongues = [];
-            foreach ($request->mother_tongue_language as $lang) {
-                if (isset($lang['value']) && !empty($lang['value'])) {
-                    $motherTongues[] = [
-                        'vendor_id'   => $vendor->id,
-                        'language_id' => $lang['value'],
-                        'created_at'  => now(),
-                        'updated_at'  => now()
-                    ];
-                }
-            }
-
-            if (!empty($motherTongues)) {
-                DB::table('vendors_mother_tongue')->insert($motherTongues);
-            }
+        if ($request->filled('mother_tongue_language')) {
+            DB::table('vendors_mother_tongue')->where('vendor_id', $vendor->id)->delete();
+            $motherTongues = array_map(fn($lang) => [
+                'vendor_id' => $vendor->id,
+                'language_id' => $lang['value'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ], array_filter($request->mother_tongue_language, fn($l) => !empty($l['value'])));
+            if ($motherTongues) DB::table('vendors_mother_tongue')->insert($motherTongues);
         }
 
-        $user = JWTAuth::parseToken()->authenticate();
-        $userId = $user->id;
+        $userId = JWTAuth::parseToken()->authenticate()->id;
+        DataLogger::addToLogger($userId, 'update_vendor', $request->fullUrl(), 'vendor', $vendor->toArray(), $vendor->id);
 
-        DataLogger::addToLogger(
-            $userId,
-            'update_vendor',
-            $request->fullUrl(),
-            'vendor',
-            $vendor->toArray(),
-            $vendor->id
-        );
-
-        if ($request->VendorSide == true) {
+        if ($request->VendorSide) {
             $brand = $vendor->vendor_brands;
-            $from = "vm.support@thetranslationgate.com";
-            $cc = [$from];
+            $mailMap = [
+                1 => "vm.support@thetranslationgate.com",
+                2 => "vm.support@localizera.com",
+                3 => "vm.support@europelocalize.com",
+                4 => "vm@afaqtranslations.com",
+                11 => "vm.support@columbuslang.com"
+            ];
+            $from = $mailMap[$brand] ?? "vm.support@thetranslationgate.com";
+            $cc = $brand == 4 ? [$from, "nour.mahmoud@afaqtranslations.com"] : [$from];
 
-            if ($brand == 1) {
-                $from = "vm.support@thetranslationgate.com";
-                $cc = [$from];
-            } elseif ($brand == 2) {
-                $from = "vm.support@localizera.com";
-                $cc = [$from];
-            } elseif ($brand == 3) {
-                $from = "vm.support@europelocalize.com";
-                $cc = [$from];
-            } elseif ($brand == 4) {
-                $from = "vm@afaqtranslations.com";
-                $cc = ["vm@afaqtranslations.com", "nour.mahmoud@afaqtranslations.com"];
-            } elseif ($brand == 11) {
-                $from = "vm.support@columbuslang.com";
-                $cc = [$from];
-            }
-
-            $mailData = [
+            Mail::to($from)->cc($cc)->send(new UpdateDataMail([
                 'subject' => 'Portal - Vendor Profile Updates',
                 'title' => 'The vendor has made changes to their data',
                 'personalData' => $this->PersonalData($vendor->id),
-            ];
-
-            Mail::to($from)
-                ->cc($cc)
-                ->send(new UpdateDataMail($mailData));
+            ]));
         }
 
         return response()->json([
@@ -957,6 +929,7 @@ class VendorProfileController extends Controller
             ]
         ], 200);
     }
+
 
 
 
@@ -4776,6 +4749,19 @@ class VendorProfileController extends Controller
             return response()->json(['error' => 'Token invalid or expired'], 401);
         }
 
+      
+        if ($user->use_type == 2) {
+            return response()->json([
+                'permissions' => [
+                    'freelance'  => 1,
+                    'in_house'   => 1,
+                    'agency'     => 1,
+                    'contractor' => 1
+                ],
+                'allowedTypes' => [0, 1, 2, 3]
+            ], 200);
+        }
+
         $permissions = DB::table('vendor_permissions')
             ->where('user_id', $user->id)
             ->select('freelance', 'in_house', 'agency', 'contractor')
@@ -4784,25 +4770,26 @@ class VendorProfileController extends Controller
         if (!$permissions) {
             return response()->json([
                 'permissions' => [
-                    'freelance' => 0,
-                    'in_house' => 0,
-                    'agency' => 0,
+                    'freelance'  => 0,
+                    'in_house'   => 0,
+                    'agency'     => 0,
                     'contractor' => 0
-                ]
+                ],
+                'allowedTypes' => []
             ], 200);
         }
 
         $allowedTypes = [];
-        if ($permissions->freelance == 1) $allowedTypes[] = 0;
-        if ($permissions->in_house == 1) $allowedTypes[] = 1;
-        if ($permissions->agency == 1) $allowedTypes[] = 2;
+        if ($permissions->freelance == 1)  $allowedTypes[] = 0;
+        if ($permissions->in_house == 1)   $allowedTypes[] = 1;
+        if ($permissions->agency == 1)     $allowedTypes[] = 2;
         if ($permissions->contractor == 1) $allowedTypes[] = 3;
 
         return response()->json([
             'permissions' => [
-                'freelance' => $permissions->freelance,
-                'in_house' => $permissions->in_house,
-                'agency' => $permissions->agency,
+                'freelance'  => $permissions->freelance,
+                'in_house'   => $permissions->in_house,
+                'agency'     => $permissions->agency,
                 'contractor' => $permissions->contractor
             ],
             'allowedTypes' => $allowedTypes
