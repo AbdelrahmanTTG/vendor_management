@@ -85,7 +85,7 @@ const Vendor = (props) => {
     const [progress, setProgress] = useState(0);
     const [openId, setOpenId] = useState(null);
     const [perPage, setPerPage] = useState(50);
-    const [userTypePermissions, setUserTypePermissions] = useState([]);
+    const [userTypePermissions, setUserTypePermissions] = useState(null);
     const handleFormatsChanged = () => {
         setFormatsChanged(!formatsChanged);
     };
@@ -129,23 +129,27 @@ const Vendor = (props) => {
             setLoading(false);
         }
     };
-    useEffect(() => {
-        handelingSelect("countries", setOptionsC, "country");
-        handelingSelect("countries", setOptionsN, "nationality");
-        handelingSelect("regions", setOptionsR, "region");
-        handelingSelect("vendortimezone", setOptionsT, "timeZone");
-        const fetchTypePermissions = async () => {
-            try {
-                const { data } = await axiosClient.get("typePermissions");
-                if (data.allowedTypes && data.allowedTypes.length > 0) {
-                    setUserTypePermissions(data.allowedTypes);
-                }
-            } catch (err) {
-                console.error("Error fetching type permissions:", err);
-            }
-        };
-        fetchTypePermissions();
-    }, []);
+   useEffect(() => {
+       handelingSelect("countries", setOptionsC, "country");
+       handelingSelect("countries", setOptionsN, "nationality");
+       handelingSelect("regions", setOptionsR, "region");
+       handelingSelect("vendortimezone", setOptionsT, "timeZone");
+
+       const fetchTypePermissions = async () => {
+           try {
+               const { data } = await axiosClient.get("typePermissions");
+               if (data.allowedTypes) {
+                   setUserTypePermissions(data.allowedTypes);
+               } else {
+                   setUserTypePermissions([]);
+               }
+           } catch (err) {
+               console.error("Error fetching type permissions:", err);
+               setUserTypePermissions([]);
+           }
+       };
+       fetchTypePermissions();
+   }, []);
     const [sortConfig, setSortConfig] = useState({
         key: "id",
         direction: "asc",
@@ -162,9 +166,8 @@ const Vendor = (props) => {
                 table: "vendors",
                 export: ex,
                 view: props.permissions?.view,
-                typePermissions:
-                    userTypePermissions.length > 0 ? userTypePermissions : null, 
-            };;
+                typePermissions: userTypePermissions,
+            };
             try {
                 setLoading2(true);
                 const { data } = await axiosClient.post("Vendors", payload);
@@ -183,19 +186,31 @@ const Vendor = (props) => {
                 setLoading2(false);
             }
         },
-        [perPage, currentPage, queryParams, sortConfig, formatsChanged]
+        [
+            perPage,
+            currentPage,
+            queryParams,
+            sortConfig,
+            formatsChanged,
+            userTypePermissions,
+        ],
     );
     const handlePerPageChange = (e) => {
         setPerPage(Number(e.target.value));
         setCurrentPage(1);
     };
     useEffect(() => {
-        // if (!initialLoadDone) {
-            // setInitialLoadDone(true);
-            // return;
-        // }
-        fetchData();
-    }, [currentPage, queryParams, sortConfig, formatsChanged, perPage]);
+        if (userTypePermissions !== null) {
+            fetchData();
+        }
+    }, [
+        currentPage,
+        queryParams,
+        sortConfig,
+        formatsChanged,
+        perPage,
+        userTypePermissions,
+    ]);
     useEffect(() => {
         formatData(formats);
     }, [formats]);

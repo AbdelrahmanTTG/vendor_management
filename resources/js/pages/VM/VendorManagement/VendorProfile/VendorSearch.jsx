@@ -70,20 +70,24 @@ const VendorSearch = ({ onSearch, loading2 }) => {
     const fetchTypePermissions = async () => {
         try {
             const { data } = await axiosClient.get("typePermissions");
-            if (
-                data.allowedTypes &&
-                data.allowedTypes.length > 0 &&
-                data.allowedTypes.length < 4
-            ) {
+            if (data.allowedTypes && data.allowedTypes.length > 0) {
                 setTypePermissions(data.allowedTypes);
                 setHasTypeRestriction(true);
                 onSearch({ typePermissions: data.allowedTypes });
+            } else if (data.allowedTypes && data.allowedTypes.length === 0) {
+                setTypePermissions([]);
+                setHasTypeRestriction(true);
+                onSearch({ typePermissions: [] });
             } else {
+                setTypePermissions(null);
+                setHasTypeRestriction(false);
                 onSearch(null);
             }
         } catch (err) {
             console.error("Error fetching type permissions:", err);
-            onSearch(null);
+            setTypePermissions([]);
+            setHasTypeRestriction(true);
+            onSearch({ typePermissions: [] });
         }
     };
     fetchTypePermissions();
@@ -256,11 +260,15 @@ const VendorSearch = ({ onSearch, loading2 }) => {
     };
 
     const handleSearchInputsOnChange = (values) => {
-        setSelectedSearchCol(values.map((item) => item.value));
-        if (values.length === 0) {
+    setSelectedSearchCol(values.map((item) => item.value));
+    if (values.length === 0) {
+        if (hasTypeRestriction && typePermissions && typePermissions.length >= 0) {
+            onSearch({ typePermissions: typePermissions });
+        } else {
             onSearch(null);
         }
-    };
+    }
+};
 
     const removeLastIfNumber = (str) => {
         if (/\d$/.test(str)) {
@@ -522,7 +530,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "nameInput"
+                                                                        "nameInput",
                                                                     ),
                                                             }}
                                                         >
@@ -537,7 +545,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "nameInput"
+                                                                        "nameInput",
                                                                     ),
                                                             }}
                                                         >
@@ -554,7 +562,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "legal_name"
+                                            "legal_name",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="legalInput">
@@ -572,7 +580,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "legalInput"
+                                                                        "legalInput",
                                                                     ),
                                                             }}
                                                         >
@@ -587,7 +595,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "legalInput"
+                                                                        "legalInput",
                                                                     ),
                                                             }}
                                                         >
@@ -642,7 +650,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "contact_name"
+                                            "contact_name",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="contactNameInput">
@@ -660,7 +668,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "contactNameInput"
+                                                                        "contactNameInput",
                                                                     ),
                                                             }}
                                                         >
@@ -675,7 +683,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "contactNameInput"
+                                                                        "contactNameInput",
                                                                     ),
                                                             }}
                                                         >
@@ -709,7 +717,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "emailInput"
+                                                                        "emailInput",
                                                                     ),
                                                             }}
                                                         >
@@ -724,7 +732,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "emailInput"
+                                                                        "emailInput",
                                                                     ),
                                                             }}
                                                         >
@@ -741,7 +749,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "phone_number"
+                                            "phone_number",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="phoneNumberInput">
@@ -759,7 +767,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "phoneNumberInput"
+                                                                        "phoneNumberInput",
                                                                     ),
                                                             }}
                                                         >
@@ -774,7 +782,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "phoneNumberInput"
+                                                                        "phoneNumberInput",
                                                                     ),
                                                             }}
                                                         >
@@ -791,7 +799,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "AnotherNumber"
+                                            "AnotherNumber",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="anotherNumberInput">
@@ -809,7 +817,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "anotherNumberInput"
+                                                                        "anotherNumberInput",
                                                                     ),
                                                             }}
                                                         >
@@ -824,7 +832,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "anotherNumberInput"
+                                                                        "anotherNumberInput",
                                                                     ),
                                                             }}
                                                         >
@@ -850,83 +858,142 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                     >
                                                         {"Type"}
                                                     </Label>
-                                                    <Select
-                                                        id="type"
-                                                        required
-                                                        name="type"
-                                                        value={
-                                                            selectedOptionType
-                                                        }
-                                                        options={
-                                                            hasTypeRestriction
-                                                                ? [
-                                                                      {
-                                                                          value: "0",
-                                                                          label: "Freelance",
-                                                                      },
-                                                                      {
-                                                                          value: "1",
-                                                                          label: "In House",
-                                                                      },
-                                                                      {
-                                                                          value: "2",
-                                                                          label: "Agency",
-                                                                      },
-                                                                      {
-                                                                          value: "3",
-                                                                          label: "Contractor",
-                                                                      },
-                                                                  ].filter(
-                                                                      (
-                                                                          option
-                                                                      ) =>
-                                                                          typePermissions.includes(
-                                                                              parseInt(
-                                                                                  option.value
-                                                                              )
-                                                                          )
-                                                                  )
-                                                                : [
-                                                                      {
-                                                                          value: "0",
-                                                                          label: "Freelance",
-                                                                      },
-                                                                      {
-                                                                          value: "2",
-                                                                          label: "Agency",
-                                                                      },
-                                                                      {
-                                                                          value: "3",
-                                                                          label: "Contractor",
-                                                                      },
-                                                                      {
-                                                                          value: "1",
-                                                                          label: "In House",
-                                                                      },
-                                                                  ]
-                                                        }
-                                                        className="js-example-basic-multiple typeInput mb-1"
-                                                        isMulti
-                                                        onChange={(selected) =>
-                                                            setSelectedOptionType(
-                                                                selected
-                                                            )
-                                                        }
-                                                    />
-                                                    {hasTypeRestriction && (
-                                                        <div
-                                                            className="alert alert-info mt-2"
-                                                            style={{
-                                                                fontSize:
-                                                                    "11px",
-                                                                padding: "6px",
-                                                            }}
-                                                        >
-                                                            <i className="fa fa-info-circle me-1"></i>
-                                                            You can only search
-                                                            within your assigned
-                                                            vendor types
-                                                        </div>
+                                                    {hasTypeRestriction &&
+                                                    typePermissions &&
+                                                    typePermissions.length ===
+                                                        0 ? (
+                                                        <>
+                                                            <Select
+                                                                id="type"
+                                                                name="type"
+                                                                options={[]}
+                                                                className="js-example-basic-multiple typeInput mb-1"
+                                                                isMulti
+                                                                isDisabled={
+                                                                    true
+                                                                }
+                                                                placeholder="No permissions available"
+                                                            />
+                                                            <div
+                                                                className="alert alert-danger mt-2"
+                                                                style={{
+                                                                    fontSize:
+                                                                        "11px",
+                                                                    padding:
+                                                                        "6px",
+                                                                }}
+                                                            >
+                                                                <i className="fa fa-ban me-1"></i>
+                                                                You don't have
+                                                                permission to
+                                                                access any
+                                                                vendor types.
+                                                                Contact
+                                                                administrator.
+                                                            </div>
+                                                        </>
+                                                    ) : hasTypeRestriction &&
+                                                      typePermissions &&
+                                                      typePermissions.length >
+                                                          0 ? (
+                                                        <>
+                                                            <Select
+                                                                id="type"
+                                                                required
+                                                                name="type"
+                                                                value={
+                                                                    selectedOptionType
+                                                                }
+                                                                options={[
+                                                                    {
+                                                                        value: "0",
+                                                                        label: "Freelance",
+                                                                    },
+                                                                    {
+                                                                        value: "1",
+                                                                        label: "In House",
+                                                                    },
+                                                                    {
+                                                                        value: "2",
+                                                                        label: "Agency",
+                                                                    },
+                                                                    {
+                                                                        value: "3",
+                                                                        label: "Contractor",
+                                                                    },
+                                                                ].filter(
+                                                                    (option) =>
+                                                                        typePermissions.includes(
+                                                                            parseInt(
+                                                                                option.value,
+                                                                            ),
+                                                                        ),
+                                                                )}
+                                                                className="js-example-basic-multiple typeInput mb-1"
+                                                                isMulti
+                                                                onChange={(
+                                                                    selected,
+                                                                ) =>
+                                                                    setSelectedOptionType(
+                                                                        selected,
+                                                                    )
+                                                                }
+                                                            />
+                                                            <div
+                                                                className="alert alert-info mt-2"
+                                                                style={{
+                                                                    fontSize:
+                                                                        "11px",
+                                                                    padding:
+                                                                        "6px",
+                                                                }}
+                                                            >
+                                                                <i className="fa fa-info-circle me-1"></i>
+                                                                Showing only
+                                                                your assigned
+                                                                vendor types (
+                                                                {
+                                                                    typePermissions.length
+                                                                }{" "}
+                                                                of 4)
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <Select
+                                                            id="type"
+                                                            required
+                                                            name="type"
+                                                            value={
+                                                                selectedOptionType
+                                                            }
+                                                            options={[
+                                                                {
+                                                                    value: "0",
+                                                                    label: "Freelance",
+                                                                },
+                                                                {
+                                                                    value: "1",
+                                                                    label: "In House",
+                                                                },
+                                                                {
+                                                                    value: "2",
+                                                                    label: "Agency",
+                                                                },
+                                                                {
+                                                                    value: "3",
+                                                                    label: "Contractor",
+                                                                },
+                                                            ]}
+                                                            className="js-example-basic-multiple typeInput mb-1"
+                                                            isMulti
+                                                            onChange={(
+                                                                selected,
+                                                            ) =>
+                                                                setSelectedOptionType(
+                                                                    selected,
+                                                                )
+                                                            }
+                                                        />
                                                     )}
                                                 </FormGroup>
                                             </Col>
@@ -970,7 +1037,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "profile_status"
+                                            "profile_status",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -1018,7 +1085,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         className="js-example-basic-single"
                                                         onChange={(option) => {
                                                             handelingSelectCountry(
-                                                                option.value
+                                                                option.value,
                                                             );
                                                         }}
                                                         isMulti
@@ -1027,7 +1094,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "created_by"
+                                            "created_by",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -1044,14 +1111,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsUS}
                                                         className="js-example-basic-single "
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "users",
                                                                 "users",
                                                                 setOptionsUS,
-                                                                optionsUS
+                                                                optionsUS,
                                                             )
                                                         }
                                                         isMulti
@@ -1116,14 +1183,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsC}
                                                         className="js-example-basic-single "
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "countries",
                                                                 "country",
                                                                 setOptionsC,
-                                                                optionsC
+                                                                optionsC,
                                                             )
                                                         }
                                                         isMulti
@@ -1150,7 +1217,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "cityInput"
+                                                                        "cityInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1165,7 +1232,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "cityInput"
+                                                                        "cityInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1182,7 +1249,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "nationality"
+                                            "nationality",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -1199,14 +1266,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsN}
                                                         className="js-example-basic-single "
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "countries",
                                                                 "nationality",
                                                                 setOptionsN,
-                                                                optionsN
+                                                                optionsN,
                                                             )
                                                         }
                                                         isMulti
@@ -1215,7 +1282,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "contact_linked_in"
+                                            "contact_linked_in",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="contactLinkedInput">
@@ -1233,7 +1300,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "contactLinkedInput"
+                                                                        "contactLinkedInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1248,7 +1315,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "contactLinkedInput"
+                                                                        "contactLinkedInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1265,7 +1332,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "contact_ProZ"
+                                            "contact_ProZ",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="contactProzInput">
@@ -1283,7 +1350,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "contactProzInput"
+                                                                        "contactProzInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1298,7 +1365,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "contactProzInput"
+                                                                        "contactProzInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1315,7 +1382,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "contact_other1"
+                                            "contact_other1",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="contactOther1Input">
@@ -1333,7 +1400,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "contactOther1Input"
+                                                                        "contactOther1Input",
                                                                     ),
                                                             }}
                                                         >
@@ -1348,7 +1415,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "contactOther1Input"
+                                                                        "contactOther1Input",
                                                                     ),
                                                             }}
                                                         >
@@ -1365,7 +1432,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "contact_other2"
+                                            "contact_other2",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="contactOther2Input">
@@ -1383,7 +1450,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "contactOther2Input"
+                                                                        "contactOther2Input",
                                                                     ),
                                                             }}
                                                         >
@@ -1398,7 +1465,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "contactOther2Input"
+                                                                        "contactOther2Input",
                                                                     ),
                                                             }}
                                                         >
@@ -1415,7 +1482,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "contact_other3"
+                                            "contact_other3",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="contactOther3Input">
@@ -1433,7 +1500,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "contactOther3Input"
+                                                                        "contactOther3Input",
                                                                     ),
                                                             }}
                                                         >
@@ -1448,7 +1515,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "contactOther3Input"
+                                                                        "contactOther3Input",
                                                                     ),
                                                             }}
                                                         >
@@ -1465,7 +1532,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "vendor_brands"
+                                            "vendor_brands",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -1483,14 +1550,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsVB}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "brand",
                                                                 "vendor_brands",
                                                                 setOptionsVB,
-                                                                optionsVB
+                                                                optionsVB,
                                                             )
                                                         }
                                                         isMulti
@@ -1501,7 +1568,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                     </Row>
                                     <Row>
                                         {selectedSearchCol.indexOf(
-                                            "source_lang"
+                                            "source_lang",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -1519,14 +1586,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsSL}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "languages",
                                                                 "source_lang",
                                                                 setOptionsSL,
-                                                                optionsSL
+                                                                optionsSL,
                                                             )
                                                         }
                                                         isMulti
@@ -1535,7 +1602,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "target_lang"
+                                            "target_lang",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -1552,14 +1619,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsTL}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "languages",
                                                                 "target_lang",
                                                                 setOptionsTL,
-                                                                optionsTL
+                                                                optionsTL,
                                                             )
                                                         }
                                                         isMulti
@@ -1585,14 +1652,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsSre}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "services",
                                                                 "service",
                                                                 setOptionsSer,
-                                                                optionsSre
+                                                                optionsSre,
                                                             )
                                                         }
                                                         isMulti
@@ -1601,7 +1668,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "task_type"
+                                            "task_type",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -1619,14 +1686,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsTS}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "task_type",
                                                                 "task_type",
                                                                 setOptionsTS,
-                                                                optionsTS
+                                                                optionsTS,
                                                             )
                                                         }
                                                         isMulti
@@ -1651,14 +1718,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsUnit}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "unit",
                                                                 "unit",
                                                                 setOptionsUnit,
-                                                                optionsUnit
+                                                                optionsUnit,
                                                             )
                                                         }
                                                         isMulti
@@ -1684,7 +1751,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "rateInput"
+                                                                        "rateInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1699,7 +1766,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "rateInput"
+                                                                        "rateInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1717,7 +1784,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "special_rate"
+                                            "special_rate",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="specialInput">
@@ -1735,7 +1802,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "specialInput"
+                                                                        "specialInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1750,7 +1817,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "specialInput"
+                                                                        "specialInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1784,14 +1851,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsCU}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "currency",
                                                                 "Currency",
                                                                 setOptionsCU,
-                                                                optionsCU
+                                                                optionsCU,
                                                             )
                                                         }
                                                         isMulti
@@ -1800,7 +1867,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "subject_main"
+                                            "subject_main",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -1817,14 +1884,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsMain}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "mainsubject",
                                                                 "subject_main",
                                                                 setOptionsMain,
-                                                                optionsMain
+                                                                optionsMain,
                                                             )
                                                         }
                                                         isMulti
@@ -1849,14 +1916,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsSub}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "subSubject",
                                                                 "subject",
                                                                 setOptionsSub,
-                                                                optionsSub
+                                                                optionsSub,
                                                             )
                                                         }
                                                         isMulti
@@ -1865,7 +1932,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "sheet_brand"
+                                            "sheet_brand",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -1883,14 +1950,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsVB}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "brand",
                                                                 "sheet_brand",
                                                                 setOptionsVB,
-                                                                optionsVB
+                                                                optionsVB,
                                                             )
                                                         }
                                                         isMulti
@@ -1901,7 +1968,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                     </Row>
                                     <Row>
                                         {selectedSearchCol.indexOf(
-                                            "university_name"
+                                            "university_name",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="university_nameInput">
@@ -1919,7 +1986,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "university_nameInput"
+                                                                        "university_nameInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1934,7 +2001,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "university_nameInput"
+                                                                        "university_nameInput",
                                                                     ),
                                                             }}
                                                         >
@@ -1951,7 +2018,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "latest_degree"
+                                            "latest_degree",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -1968,14 +2035,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsLD}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "University_Degree",
                                                                 "latest_degree",
                                                                 setoptionsLD,
-                                                                optionsLD
+                                                                optionsLD,
                                                             )
                                                         }
                                                         isMulti
@@ -2000,11 +2067,11 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                     title: "Add More Fields",
                                                                     color: "btn px-2 py-0",
                                                                     onClick: (
-                                                                        e
+                                                                        e,
                                                                     ) =>
                                                                         addBtn(
                                                                             e,
-                                                                            "majorInput"
+                                                                            "majorInput",
                                                                         ),
                                                                 }}
                                                             >
@@ -2017,11 +2084,11 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                     title: "Delete Last Row",
                                                                     color: "btn px-2 py-0",
                                                                     onClick: (
-                                                                        e
+                                                                        e,
                                                                     ) =>
                                                                         delBtn(
                                                                             e,
-                                                                            "majorInput"
+                                                                            "majorInput",
                                                                         ),
                                                                 }}
                                                             >
@@ -2051,7 +2118,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             // </Col>
                                         }
                                         {selectedSearchCol.indexOf(
-                                            "year_of_graduation"
+                                            "year_of_graduation",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="year_of_graduationInput">
@@ -2069,7 +2136,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "year_of_graduationInput"
+                                                                        "year_of_graduationInput",
                                                                     ),
                                                             }}
                                                         >
@@ -2084,7 +2151,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "year_of_graduationInput"
+                                                                        "year_of_graduationInput",
                                                                     ),
                                                             }}
                                                         >
@@ -2103,7 +2170,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                     </Row>
                                     <Row>
                                         {selectedSearchCol.indexOf(
-                                            "source_lang2"
+                                            "source_lang2",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -2123,14 +2190,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsSL}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "languages",
                                                                 "source_lang2",
                                                                 setOptionsSL,
-                                                                optionsSL
+                                                                optionsSL,
                                                             )
                                                         }
                                                         isMulti
@@ -2139,7 +2206,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "target_lang2"
+                                            "target_lang2",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -2158,14 +2225,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsTL}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "languages",
                                                                 "target_lang2",
                                                                 setOptionsTL,
-                                                                optionsTL
+                                                                optionsTL,
                                                             )
                                                         }
                                                         isMulti
@@ -2174,7 +2241,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "main_subject"
+                                            "main_subject",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -2193,14 +2260,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsMain}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "mainsubject",
                                                                 "main_subject",
                                                                 setOptionsMain,
-                                                                optionsMain
+                                                                optionsMain,
                                                             )
                                                         }
                                                         isMulti
@@ -2209,7 +2276,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "sub_subject2"
+                                            "sub_subject2",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -2228,14 +2295,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsSub}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "subSubject",
                                                                 "sub_subject2",
                                                                 setOptionsSub,
-                                                                optionsSub
+                                                                optionsSub,
                                                             )
                                                         }
                                                         isMulti
@@ -2244,7 +2311,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "mother_tongue"
+                                            "mother_tongue",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
@@ -2261,14 +2328,14 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         options={optionsMo}
                                                         className="js-example-basic-single"
                                                         onInputChange={(
-                                                            inputValue
+                                                            inputValue,
                                                         ) =>
                                                             handleInputChange(
                                                                 inputValue,
                                                                 "languages",
                                                                 "mother_tongue",
                                                                 setoptionsMo,
-                                                                optionsMo
+                                                                optionsMo,
                                                             )
                                                         }
                                                         isMulti
@@ -2277,7 +2344,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "test_type"
+                                            "test_type",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="testStatusInput">
@@ -2321,7 +2388,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "test_result"
+                                            "test_result",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="testStatusInput">
@@ -2367,7 +2434,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                     </Row>
                                     <Row>
                                         {selectedSearchCol.indexOf(
-                                            "experience_year"
+                                            "experience_year",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="experience_yearInput">
@@ -2385,7 +2452,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "experience_yearInput"
+                                                                        "experience_yearInput",
                                                                     ),
                                                             }}
                                                         >
@@ -2400,7 +2467,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "experience_yearInput"
+                                                                        "experience_yearInput",
                                                                     ),
                                                             }}
                                                         >
@@ -2420,7 +2487,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                     </Row>
                                     <Row>
                                         {selectedSearchCol.indexOf(
-                                            "bank_name"
+                                            "bank_name",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup id="bank_nameInput">
@@ -2438,7 +2505,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     addBtn(
                                                                         e,
-                                                                        "bank_nameInput"
+                                                                        "bank_nameInput",
                                                                     ),
                                                             }}
                                                         >
@@ -2453,7 +2520,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 onClick: (e) =>
                                                                     delBtn(
                                                                         e,
-                                                                        "bank_nameInput"
+                                                                        "bank_nameInput",
                                                                     ),
                                                             }}
                                                         >
@@ -2471,7 +2538,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </Col>
                                         )}
                                         {selectedSearchCol.indexOf(
-                                            "billing_status"
+                                            "billing_status",
                                         ) > -1 && (
                                             <Col md="3">
                                                 <FormGroup>
