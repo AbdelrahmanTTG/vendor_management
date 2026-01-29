@@ -13,6 +13,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\VendorProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\InHousePriceListController;
 
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -104,6 +105,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/updateAlias', [AdminController::class, 'updateAlias']);
     Route::post('/notice', [AdminController::class, 'MailProvider']);
     Route::post('/UpdateCurrencyPriceList', [VendorProfileController::class, 'UpdateCurrencyPriceList']);
+    Route::post('/in-house/get-data', [InHousePriceListController::class, 'getInHouseData']);
+    Route::post('/in-house/save-main-data', [InHousePriceListController::class, 'saveInHouseMainData']);
+    Route::post('/in-house/add-language', [InHousePriceListController::class, 'addInHouseLanguage']);
+    Route::post('/in-house/update-language', [InHousePriceListController::class, 'updateInHouseLanguage']);
+    Route::delete('/in-house/delete-language', [InHousePriceListController::class, 'deleteInHouseLanguage']);
 });
 Route::middleware([App\Http\Middleware\AdminAuth::class])->prefix('Portal')->group(function () {
     Route::group(['prefix' => 'Vendor'], function () {

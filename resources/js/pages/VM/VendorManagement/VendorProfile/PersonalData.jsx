@@ -65,24 +65,28 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
 
     const [idVendor, setidVendor] = useState(false);
     const [Sub, setSub] = useState(false);
-useEffect(() => {
-    const fetchTypePermissions = async () => {
-        try {
-            const { data } = await axiosClient.get("typePermissions");
-            if (
-                data.allowedTypes &&
-                data.allowedTypes.length > 0 &&
-                data.allowedTypes.length < 4
-            ) {
-                setTypePermissions(data.allowedTypes);
-                setHasTypeRestriction(true);
+    useEffect(() => {
+        const fetchTypePermissions = async () => {
+            try {
+                const { data } = await axiosClient.get("typePermissions");
+
+                if (data.allowedTypes && data.allowedTypes.length > 0) {
+                    setTypePermissions(data.allowedTypes);
+
+                    if (data.allowedTypes.length < 4) {
+                        setHasTypeRestriction(true);
+                    } else {
+                        setHasTypeRestriction(false);
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching type permissions:", err);
             }
-        } catch (err) {
-            console.error("Error fetching type permissions:", err);
-        }
-    };
-    fetchTypePermissions();
-}, []);
+        };
+
+        fetchTypePermissions();
+    }, []);
+
   const toggle = () => setModal(!modal);
 
   const toggleCollapse = () => {

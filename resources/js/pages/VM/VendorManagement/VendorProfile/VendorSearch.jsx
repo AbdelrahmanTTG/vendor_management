@@ -43,6 +43,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
     const [typePermissions, setTypePermissions] = useState([]);
     const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
     const [selectedOptionType, setSelectedOptionType] = useState(null);
+    const [optionsDialect, setOptionsDialect] = useState([]);
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     };
@@ -52,13 +53,13 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         tableName,
         fieldName,
         setOptions,
-        options
+        options,
     ) => {
         if (inputValue.length === 0) {
             setOptions(initialOptions[fieldName] || []);
         } else if (inputValue.length >= 1) {
             const existingOption = options.some((option) =>
-                option.label.toLowerCase().includes(inputValue.toLowerCase())
+                option.label.toLowerCase().includes(inputValue.toLowerCase()),
             );
             if (!existingOption) {
                 setLoading(true);
@@ -67,36 +68,39 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         }
     };
     useEffect(() => {
-    const fetchTypePermissions = async () => {
-        try {
-            const { data } = await axiosClient.get("typePermissions");
-            if (data.allowedTypes && data.allowedTypes.length > 0) {
-                setTypePermissions(data.allowedTypes);
-                setHasTypeRestriction(true);
-                onSearch({ typePermissions: data.allowedTypes });
-            } else if (data.allowedTypes && data.allowedTypes.length === 0) {
+        const fetchTypePermissions = async () => {
+            try {
+                const { data } = await axiosClient.get("typePermissions");
+                if (data.allowedTypes && data.allowedTypes.length > 0) {
+                    setTypePermissions(data.allowedTypes);
+                    setHasTypeRestriction(true);
+                    onSearch({ typePermissions: data.allowedTypes });
+                } else if (
+                    data.allowedTypes &&
+                    data.allowedTypes.length === 0
+                ) {
+                    setTypePermissions([]);
+                    setHasTypeRestriction(true);
+                    onSearch({ typePermissions: [] });
+                } else {
+                    setTypePermissions(null);
+                    setHasTypeRestriction(false);
+                    onSearch(null);
+                }
+            } catch (err) {
+                console.error("Error fetching type permissions:", err);
                 setTypePermissions([]);
                 setHasTypeRestriction(true);
                 onSearch({ typePermissions: [] });
-            } else {
-                setTypePermissions(null);
-                setHasTypeRestriction(false);
-                onSearch(null);
             }
-        } catch (err) {
-            console.error("Error fetching type permissions:", err);
-            setTypePermissions([]);
-            setHasTypeRestriction(true);
-            onSearch({ typePermissions: [] });
-        }
-    };
-    fetchTypePermissions();
-}, []);
+        };
+        fetchTypePermissions();
+    }, []);
     const handelingSelect = async (
         tablename,
         setOptions,
         fieldName,
-        searchTerm = ""
+        searchTerm = "",
     ) => {
         if (!tablename) return;
         try {
@@ -109,7 +113,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
             });
             const formattedOptions = data.map((item) => ({
                 value: item.gmt ? item.gmt : item.id,
-                label: item.name || item.gmt || item.user_name,
+                label: item.name || item.gmt || item.user_name || item.dialect,
             }));
 
             setOptions(formattedOptions);
@@ -167,6 +171,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         handelingSelect("countries", setOptionsN, "nationality");
         handelingSelect("regions", setOptionsR, "region");
         handelingSelect("vendortimezone", setOptionsT, "timeZone");
+        handelingSelect("dialects", setOptionsDialect, "languages_dialect");
     }, []);
 
     const options = [
@@ -246,6 +251,39 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                 { value: "method", label: "Wallet payment method" },
             ],
         },
+        {
+            label: "In House Price List",
+            options: [
+                {
+                    value: "in_house_currency",
+                    label: "Currency",
+                },
+                {
+                    value: "in_house_quota_hours",
+                    label: "Quota Hours",
+                },
+                {
+                    value: "in_house_salary",
+                    label: "Salary",
+                },
+                {
+                    value: "in_house_source_language",
+                    label: "Source Language",
+                },
+                {
+                    value: "in_house_source_dialect",
+                    label: "Source Dialect",
+                },
+                {
+                    value: "in_house_target_language",
+                    label: "Target Language",
+                },
+                {
+                    value: "in_house_target_dialect",
+                    label: "Target Dialect",
+                },
+            ],
+        },
     ];
 
     const customStyles = {
@@ -260,15 +298,19 @@ const VendorSearch = ({ onSearch, loading2 }) => {
     };
 
     const handleSearchInputsOnChange = (values) => {
-    setSelectedSearchCol(values.map((item) => item.value));
-    if (values.length === 0) {
-        if (hasTypeRestriction && typePermissions && typePermissions.length >= 0) {
-            onSearch({ typePermissions: typePermissions });
-        } else {
-            onSearch(null);
+        setSelectedSearchCol(values.map((item) => item.value));
+        if (values.length === 0) {
+            if (
+                hasTypeRestriction &&
+                typePermissions &&
+                typePermissions.length >= 0
+            ) {
+                onSearch({ typePermissions: typePermissions });
+            } else {
+                onSearch(null);
+            }
         }
-    }
-};
+    };
 
     const removeLastIfNumber = (str) => {
         if (/\d$/.test(str)) {
@@ -310,7 +352,13 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         const BillingArr = ["billing_status"];
         const WalletArr = ["method"];
         const motherTongueArr = ["language_id"];
-
+        const inHousePriceListArr = ["currency", "quota_hours", "salary"];
+        const inHouseLanguagesArr = [
+            "source_language",
+            "source_dialect",
+            "target_language",
+            "target_dialect",
+        ];
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const priceList = [];
@@ -321,13 +369,19 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         const Billing = [];
         const Wallet = [];
         const MotherTongue = [];
+        const InHousePriceList = [];
+        const InHouseLanguages = [];
+        let autoDetectedType = null;
 
         const data = {};
         const keysToDelete = [];
         for (let [key, value] of formData.entries()) {
+            if (selectedSearchCol.some((col) => col.startsWith("in_house_"))) {
+                autoDetectedType = [1]; 
+            }
             if (WalletArr.includes(key)) {
                 const existingFilter = Wallet.find(
-                    (filter) => filter.column === key
+                    (filter) => filter.column === key,
                 );
                 if (existingFilter) {
                     existingFilter.value.push(value);
@@ -338,7 +392,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
             }
             if (priceListArr.includes(key)) {
                 const existingFilter = priceList.find(
-                    (filter) => filter.column === key
+                    (filter) => filter.column === key,
                 );
                 if (existingFilter) {
                     existingFilter.value.push(value);
@@ -349,7 +403,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
             }
             if (BillingArr.includes(key)) {
                 const existingFilter = Billing.find(
-                    (filter) => filter.column === key
+                    (filter) => filter.column === key,
                 );
                 if (existingFilter) {
                     existingFilter.value.push(value);
@@ -360,7 +414,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
             }
             if (EducationArr.includes(key)) {
                 const existingFilter = Education.find(
-                    (filter) => filter.column === key
+                    (filter) => filter.column === key,
                 );
                 if (existingFilter) {
                     existingFilter.value.push(value);
@@ -371,7 +425,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
             }
             if (TestArr.includes(key)) {
                 const existingFilter = Test.find(
-                    (filter) => filter.column === key
+                    (filter) => filter.column === key,
                 );
                 if (existingFilter) {
                     existingFilter.value.push(value);
@@ -385,7 +439,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
             }
             if (ExpArr.includes(key)) {
                 const existingFilter = Exp.find(
-                    (filter) => filter.column === key
+                    (filter) => filter.column === key,
                 );
                 if (existingFilter) {
                     existingFilter.value.push(value);
@@ -396,7 +450,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
             }
             if (BankArr.includes(key)) {
                 const existingFilter = Bank.find(
-                    (filter) => filter.column === key
+                    (filter) => filter.column === key,
                 );
                 if (existingFilter) {
                     existingFilter.value.push(value);
@@ -407,7 +461,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
             }
             if (motherTongueArr.includes(key)) {
                 const existingFilter = MotherTongue.find(
-                    (filter) => filter.column === key
+                    (filter) => filter.column === key,
                 );
                 if (existingFilter) {
                     existingFilter.value.push(value);
@@ -415,6 +469,50 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                     MotherTongue.push({ column: key, value: [value] });
                 }
                 keysToDelete.push(key);
+            }
+            if (
+                key.startsWith("in_house_") &&
+                (key === "in_house_currency" ||
+                    key === "in_house_quota_hours" ||
+                    key === "in_house_salary")
+            ) {
+                const columnName = key.replace("in_house_", "");
+                const existingFilter = InHousePriceList.find(
+                    (filter) => filter.column === columnName,
+                );
+                if (existingFilter) {
+                    existingFilter.value.push(value);
+                } else {
+                    InHousePriceList.push({
+                        column: columnName,
+                        value: [value],
+                    });
+                }
+                keysToDelete.push(key);
+                continue;
+            }
+
+            if (
+                key.startsWith("in_house_") &&
+                (key === "in_house_source_language" ||
+                    key === "in_house_source_dialect" ||
+                    key === "in_house_target_language" ||
+                    key === "in_house_target_dialect")
+            ) {
+                const columnName = key.replace("in_house_", "");
+                const existingFilter = InHouseLanguages.find(
+                    (filter) => filter.column === columnName,
+                );
+                if (existingFilter) {
+                    existingFilter.value.push(value);
+                } else {
+                    InHouseLanguages.push({
+                        column: columnName,
+                        value: [value],
+                    });
+                }
+                keysToDelete.push(key);
+                continue;
             }
         }
 
@@ -424,9 +522,11 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         for (let [key, value] of formData.entries()) {
             data[key] = formData.getAll(key);
         }
+        const finalTypePermissions =
+            autoDetectedType || (hasTypeRestriction ? typePermissions : null);
+
         const queryParams = {
             ...data,
-            typePermissions: hasTypeRestriction ? typePermissions : null,
             filters: [
                 priceList.length > 0
                     ? { table: "vendor_sheet", columns: priceList }
@@ -451,6 +551,15 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                     : undefined,
                 MotherTongue.length > 0
                     ? { table: "vendors_mother_tongue", columns: MotherTongue }
+                    : undefined,
+                InHousePriceList.length > 0
+                    ? {
+                          table: "in_house_price_list",
+                          columns: InHousePriceList,
+                      }
+                    : undefined,
+                InHouseLanguages.length > 0
+                    ? { table: "in_house_languages", columns: InHouseLanguages }
                     : undefined,
             ].filter(Boolean),
         };
@@ -2619,6 +2728,285 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                 </Btn>
                                             </div>
                                         </Col>
+                                    </Row>
+
+                                    <Row>
+                                        {selectedSearchCol.indexOf(
+                                            "in_house_currency",
+                                        ) > -1 && (
+                                            <Col md="3">
+                                                <FormGroup>
+                                                    <Label
+                                                        className="col-form-label-sm f-12"
+                                                        htmlFor="in_house_currency"
+                                                    >
+                                                        {"In House Currency"}
+                                                    </Label>
+                                                    <Select
+                                                        name="in_house_currency"
+                                                        id="in_house_currency"
+                                                        required
+                                                        options={optionsCU}
+                                                        className="js-example-basic-single"
+                                                        onInputChange={(
+                                                            inputValue,
+                                                        ) =>
+                                                            handleInputChange(
+                                                                inputValue,
+                                                                "currency",
+                                                                "in_house_currency",
+                                                                setOptionsCU,
+                                                                optionsCU,
+                                                            )
+                                                        }
+                                                        isMulti
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        )}
+                                        {selectedSearchCol.indexOf(
+                                            "in_house_quota_hours",
+                                        ) > -1 && (
+                                            <Col md="3">
+                                                <FormGroup id="inHouseQuotaInput">
+                                                    <Label
+                                                        className="col-form-label-sm f-12"
+                                                        htmlFor="in_house_quota_hours"
+                                                    >
+                                                        {"In House Quota Hours"}
+                                                        <Btn
+                                                            attrBtn={{
+                                                                datatoggle:
+                                                                    "tooltip",
+                                                                title: "Add More Fields",
+                                                                color: "btn px-2 py-0",
+                                                                onClick: (e) =>
+                                                                    addBtn(
+                                                                        e,
+                                                                        "inHouseQuotaInput",
+                                                                    ),
+                                                            }}
+                                                        >
+                                                            <i className="fa fa-plus-circle"></i>
+                                                        </Btn>
+                                                        <Btn
+                                                            attrBtn={{
+                                                                datatoggle:
+                                                                    "tooltip",
+                                                                title: "Delete Last Row",
+                                                                color: "btn px-2 py-0",
+                                                                onClick: (e) =>
+                                                                    delBtn(
+                                                                        e,
+                                                                        "inHouseQuotaInput",
+                                                                    ),
+                                                            }}
+                                                        >
+                                                            <i className="fa fa-minus-circle"></i>
+                                                        </Btn>
+                                                    </Label>
+                                                    <Input
+                                                        className="form-control form-control-sm inHouseQuotaInput mb-1"
+                                                        type="number"
+                                                        min="0"
+                                                        name="in_house_quota_hours"
+                                                        required
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        )}
+                                        {selectedSearchCol.indexOf(
+                                            "in_house_salary",
+                                        ) > -1 && (
+                                            <Col md="3">
+                                                <FormGroup id="inHouseSalaryInput">
+                                                    <Label
+                                                        className="col-form-label-sm f-12"
+                                                        htmlFor="in_house_salary"
+                                                    >
+                                                        {"In House Salary"}
+                                                        <Btn
+                                                            attrBtn={{
+                                                                datatoggle:
+                                                                    "tooltip",
+                                                                title: "Add More Fields",
+                                                                color: "btn px-2 py-0",
+                                                                onClick: (e) =>
+                                                                    addBtn(
+                                                                        e,
+                                                                        "inHouseSalaryInput",
+                                                                    ),
+                                                            }}
+                                                        >
+                                                            <i className="fa fa-plus-circle"></i>
+                                                        </Btn>
+                                                        <Btn
+                                                            attrBtn={{
+                                                                datatoggle:
+                                                                    "tooltip",
+                                                                title: "Delete Last Row",
+                                                                color: "btn px-2 py-0",
+                                                                onClick: (e) =>
+                                                                    delBtn(
+                                                                        e,
+                                                                        "inHouseSalaryInput",
+                                                                    ),
+                                                            }}
+                                                        >
+                                                            <i className="fa fa-minus-circle"></i>
+                                                        </Btn>
+                                                    </Label>
+                                                    <Input
+                                                        className="form-control form-control-sm inHouseSalaryInput mb-1"
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0"
+                                                        name="in_house_salary"
+                                                        required
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        )}
+                                        {selectedSearchCol.indexOf(
+                                            "in_house_source_language",
+                                        ) > -1 && (
+                                            <Col md="3">
+                                                <FormGroup>
+                                                    <Label
+                                                        className="col-form-label-sm f-12"
+                                                        htmlFor="in_house_source_language"
+                                                    >
+                                                        {
+                                                            "In House Source Language"
+                                                        }
+                                                    </Label>
+                                                    <Select
+                                                        name="in_house_source_language"
+                                                        id="in_house_source_language"
+                                                        required
+                                                        options={optionsSL}
+                                                        className="js-example-basic-single"
+                                                        onInputChange={(
+                                                            inputValue,
+                                                        ) =>
+                                                            handleInputChange(
+                                                                inputValue,
+                                                                "languages",
+                                                                "in_house_source_language",
+                                                                setOptionsSL,
+                                                                optionsSL,
+                                                            )
+                                                        }
+                                                        isMulti
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        )}
+                                        {selectedSearchCol.indexOf(
+                                            "in_house_source_dialect",
+                                        ) > -1 && (
+                                            <Col md="3">
+                                                <FormGroup>
+                                                    <Label
+                                                        className="col-form-label-sm f-12"
+                                                        htmlFor="in_house_source_dialect"
+                                                    >
+                                                        {
+                                                            "In House Source Dialect"
+                                                        }
+                                                    </Label>
+                                                    <Select
+                                                        name="in_house_source_dialect"
+                                                        id="in_house_source_dialect"
+                                                        required
+                                                        options={optionsDialect}
+                                                        className="js-example-basic-single"
+                                                        onInputChange={(
+                                                            inputValue,
+                                                        ) =>
+                                                            handleInputChange(
+                                                                inputValue,
+                                                                "languages_dialect",
+                                                                "in_house_source_dialect",
+                                                                setOptionsDialect,
+                                                                optionsDialect,
+                                                            )
+                                                        }
+                                                        isMulti
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        )}
+                                        {selectedSearchCol.indexOf(
+                                            "in_house_target_language",
+                                        ) > -1 && (
+                                            <Col md="3">
+                                                <FormGroup>
+                                                    <Label
+                                                        className="col-form-label-sm f-12"
+                                                        htmlFor="in_house_target_language"
+                                                    >
+                                                        {
+                                                            "In House Target Language"
+                                                        }
+                                                    </Label>
+                                                    <Select
+                                                        name="in_house_target_language"
+                                                        id="in_house_target_language"
+                                                        required
+                                                        options={optionsTL}
+                                                        className="js-example-basic-single"
+                                                        onInputChange={(
+                                                            inputValue,
+                                                        ) =>
+                                                            handleInputChange(
+                                                                inputValue,
+                                                                "languages",
+                                                                "in_house_target_language",
+                                                                setOptionsTL,
+                                                                optionsTL,
+                                                            )
+                                                        }
+                                                        isMulti
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        )}
+                                        {selectedSearchCol.indexOf(
+                                            "in_house_target_dialect",
+                                        ) > -1 && (
+                                            <Col md="3">
+                                                <FormGroup>
+                                                    <Label
+                                                        className="col-form-label-sm f-12"
+                                                        htmlFor="in_house_target_dialect"
+                                                    >
+                                                        {
+                                                            "In House Target Dialect"
+                                                        }
+                                                    </Label>
+                                                    <Select
+                                                        name="in_house_target_dialect"
+                                                        id="in_house_target_dialect"
+                                                        required
+                                                        options={optionsDialect}
+                                                        className="js-example-basic-single"
+                                                        onInputChange={(
+                                                            inputValue,
+                                                        ) =>
+                                                            handleInputChange(
+                                                                inputValue,
+                                                                "languages_dialect",
+                                                                "in_house_target_dialect",
+                                                                setOptionsDialect,
+                                                                optionsDialect,
+                                                            )
+                                                        }
+                                                        isMulti
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        )}
                                     </Row>
                                 </form>
                             )}

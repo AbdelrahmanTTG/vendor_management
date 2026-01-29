@@ -15,6 +15,7 @@ const Test = React.lazy(() => import('./Test'));
 const Billing = React.lazy(() => import('./Billing'));
 const History = React.lazy(() => import('./History'));
 const Portal_User = React.lazy(() => import('./Portal_User'));
+const InHousePriceList = React.lazy(() => import("./InHousePriceList"));
 import NavBar from './NavBar';
 import ErrorBoundary from "../../../../ErrorBoundary";
 import { Spinner } from '../../../../AbstractElements';
@@ -23,7 +24,7 @@ const AddProfile = (props) => {
     const [data, setdata] = useState(null);
     const [Currancydata, setCurrancy] = useState(null);
     const [Cur, setCUR] = useState(null);
-
+    const [showInHousePriceList, setShowInHousePriceList] = useState(false);
     const [progressValue, setProgressValue] = useState(20);
     const [marginBottom, setMarginBottom] = useState('18vh');
       const LazyWrapper = ({ children }) => (
@@ -43,6 +44,8 @@ const AddProfile = (props) => {
     }
     const handleDataSend = (data) => {
         setdata(data);
+        console.log(data)
+        setShowInHousePriceList(data?.type == 1);
     };
     const getCurrancy = (Currancystat , Cur) => {
         setCurrancy(Currancystat);
@@ -232,16 +235,29 @@ const AddProfile = (props) => {
                     <LazyWrapper>
                         <div id="Price_List" className="row mb-3">
                             <div className="col-12">
-                                <Price_List
-                                    UpdateCurrency={
-                                        props.permissions?.UpdateCurrency
-                                    }
-                                    backPermissions={
-                                        props.permissions?.Price_List
-                                    }
-                                    Currency={Cur}
-                                    id={data?.id}
-                                />
+                                {showInHousePriceList ? (
+                                    <InHousePriceList
+                                        UpdateCurrency={
+                                            props.permissions?.UpdateCurrency
+                                        }
+                                        backPermissions={
+                                            props.permissions?.Price_List
+                                        }
+                                        Currency={Cur}
+                                        id={data?.id}
+                                    />
+                                ) : (
+                                    <Price_List
+                                        UpdateCurrency={
+                                            props.permissions?.UpdateCurrency
+                                        }
+                                        backPermissions={
+                                            props.permissions?.Price_List
+                                        }
+                                        Currency={Cur}
+                                        id={data?.id}
+                                    />
+                                )}
                             </div>
                         </div>
                     </LazyWrapper>

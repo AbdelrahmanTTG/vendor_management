@@ -253,4 +253,13 @@ class Vendor extends Authenticatable  implements JWTSubject
         return $this->hasMany(VendorMotherTongue::class, 'vendor_id')
             ->with('language');
     }
+    public function inHousePriceList()
+    {
+        return $this->hasOne(InHousePriceList::class, 'vendor_id');
+    }
+
+    public function inHouseLanguages()
+    {
+        return $this->hasMany(InHouseLanguage::class, 'vendor_id');
+    }
 }

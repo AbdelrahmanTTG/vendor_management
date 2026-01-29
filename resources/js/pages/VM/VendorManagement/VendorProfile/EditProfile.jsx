@@ -17,7 +17,7 @@ const Billing = React.lazy(() => import('./Billing'));
 const History = React.lazy(() => import('./History'));
 const Portal_User = React.lazy(() => import('./Portal_User'));
 const VendorLog = React.lazy(() => import('./Log'));
-
+const InHousePriceList = React.lazy(() => import("./InHousePriceList"));
 import NavBar from './NavBar';
 import { Navigate } from 'react-router-dom';
 import axiosClient from "../../../../pages/AxiosClint";
@@ -50,7 +50,7 @@ const EditProfile = (props) => {
     const encryptedData = params.get("data");
     const [toggleSide, setToggleSide] = useState(true);
     const [refreshFlag, setRefreshFlag] = useState(false);
-
+    const [showInHousePriceList, setShowInHousePriceList] = useState(false);
     const triggerRefresh = () => {
         setRefreshFlag((prev) => !prev);
     };
@@ -75,6 +75,7 @@ const EditProfile = (props) => {
    const handleDataSend = (data) => {
        setData({ country: data.country, nationality: data?.nationality });
        setPersonalData({ PersonalData: data });
+       setShowInHousePriceList(data?.type === 1);
        triggerRefresh(); 
    };
 
@@ -152,6 +153,7 @@ const EditProfile = (props) => {
                 const data = await axiosClient.post("EditVendor", payload);
 
                 setPersonalData({ PersonalData: data.data.Data });
+                setShowInHousePriceList(data.data.Data?.type == 1);
                 setData({
                     country: data?.data?.Data?.country,
                     nationality: data?.data?.Data?.nationality,
@@ -329,18 +331,37 @@ const EditProfile = (props) => {
                 {props.permissions?.Price_List?.view == 1 && (
                     <LazyWrapper>
                         <div id="Price_List">
-                            <Price_List
-                                UpdateCurrency={
-                                    props.permissions?.UpdateCurrency
-                                }
-                                Currency={
-                                    BillingData?.BillingData?.billingData
-                                        ?.billing_currency || Cur
-                                }
-                                backPermissions={props.permissions?.Price_List}
-                                id={vendor?.id}
-                                priceList={priceList}
-                            />
+                            {showInHousePriceList ? (
+                                <InHousePriceList
+                                    UpdateCurrency={
+                                        props.permissions?.UpdateCurrency
+                                    }
+                                    Currency={
+                                        BillingData?.BillingData?.billingData
+                                            ?.billing_currency || Cur
+                                    }
+                                    backPermissions={
+                                        props.permissions?.Price_List
+                                    }
+                                    id={vendor?.id}
+                                    priceList={priceList}
+                                />
+                            ) : (
+                                <Price_List
+                                    UpdateCurrency={
+                                        props.permissions?.UpdateCurrency
+                                    }
+                                    Currency={
+                                        BillingData?.BillingData?.billingData
+                                            ?.billing_currency || Cur
+                                    }
+                                    backPermissions={
+                                        props.permissions?.Price_List
+                                    }
+                                    id={vendor?.id}
+                                    priceList={priceList}
+                                />
+                            )}
                         </div>
                     </LazyWrapper>
                 )}
