@@ -20,7 +20,7 @@ class Dialect extends Model
             'dialect' => $insetData->dialect,
             'language' => (object) [
                 'id' => $relatedRecord->id,
-                'name' => $relatedRecord->name
+                'dialect' => $relatedRecord->dialect
             ],
             'Active' => $insetData->Active,
         ];
@@ -41,7 +41,7 @@ class Dialect extends Model
             'dialect' => $item->dialect,
             'language' => (object) [
                 'id' => $relatedRecord->id,
-                'name' => $relatedRecord->name
+                'dialect' => $relatedRecord->dialect
             ],
             'Active' => $item->Active,
         ];
@@ -53,7 +53,7 @@ class Dialect extends Model
         if ($searchTerm) {
             $query = self::where('dialect', 'like', '%' . $searchTerm . '%')->where('Active', 1);
         } else {
-            $query = self::select('id', 'name')->limit(5)->where('Active', 1);
+            $query = self::select('id', 'dialect')->limit(5)->where('Active', 1);
 
         }
         return $query->get();

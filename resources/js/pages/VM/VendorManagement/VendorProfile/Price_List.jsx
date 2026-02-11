@@ -618,7 +618,9 @@ const PriceList = (props) => {
                                         dataPrice.map((item, index) => (
                                             <tr key={item?.id}>
                                                 <td>{index + 1}</td>
-                                                <td>{item?.subject?.name}</td>
+                                                <td>
+                                                    {item?.subject_main?.name}
+                                                </td>
                                                 <td>{item?.subject?.name}</td>
                                                 <td>{item?.service?.name}</td>
                                                 <td>{item?.task_type?.name}</td>

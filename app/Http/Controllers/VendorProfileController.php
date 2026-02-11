@@ -4269,7 +4269,7 @@ class VendorProfileController extends Controller
         }
         $vendorsQuery->where('status', "0")
             ->where('vendor_brands', $request->vendor_brands)
-            ->where('vendor_type', '!=', 1);
+            ->where('type', '!=', 1);
         if ($includeMotherTongue) {
             $vendorsQuery->with(['motherTongues' => function ($query) {
                 $query->with('language:id,name');
