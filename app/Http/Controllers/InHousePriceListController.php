@@ -301,7 +301,7 @@ class InHousePriceListController extends Controller
             $priceList = InHousePriceList::find($request->id);
 
             $newStatus = !$priceList->is_active;
-
+ 
             // if ($newStatus) {
             //     $overlapping = InHousePriceList::where('vendor_id', $priceList->vendor_id)
             //         ->where('id', '!=', $request->id)
