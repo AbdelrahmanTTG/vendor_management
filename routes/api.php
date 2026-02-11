@@ -106,10 +106,19 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/notice', [AdminController::class, 'MailProvider']);
     Route::post('/UpdateCurrencyPriceList', [VendorProfileController::class, 'UpdateCurrencyPriceList']);
     Route::post('/in-house/get-data', [InHousePriceListController::class, 'getInHouseData']);
-    Route::post('/in-house/save-main-data', [InHousePriceListController::class, 'saveInHouseMainData']);
-    Route::post('/in-house/add-language', [InHousePriceListController::class, 'addInHouseLanguage']);
-    Route::post('/in-house/update-language', [InHousePriceListController::class, 'updateInHouseLanguage']);
-    Route::delete('/in-house/delete-language', [InHousePriceListController::class, 'deleteInHouseLanguage']);
+
+    Route::post('/in-house/save-price-list', [InHousePriceListController::class, 'savePriceList']);
+    Route::post('/in-house/update-price-list', [InHousePriceListController::class, 'updatePriceList']);
+    Route::delete('/in-house/delete-price-list', [InHousePriceListController::class, 'deletePriceList']);
+    Route::post('/in-house/toggle-price-list-status', [InHousePriceListController::class, 'togglePriceListStatus']);
+
+    Route::post('/in-house/add-language', [InHousePriceListController::class, 'addLanguageToPriceList']);
+    Route::post('/in-house/update-language', [InHousePriceListController::class, 'updateLanguage']);
+    Route::delete('/in-house/delete-language', [InHousePriceListController::class, 'deleteLanguage']);
+
+    Route::post('/in-house/save-unit-conversion', [InHousePriceListController::class, 'saveUnitConversion']);
+    Route::post('/in-house/update-unit-conversion', [InHousePriceListController::class, 'updateUnitConversion']);
+    Route::delete('/in-house/delete-unit-conversion', [InHousePriceListController::class, 'deleteUnitConversion']);
 });
 Route::middleware([App\Http\Middleware\AdminAuth::class])->prefix('Portal')->group(function () {
     Route::group(['prefix' => 'Vendor'], function () {

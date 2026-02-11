@@ -4855,10 +4855,10 @@ class VendorProfileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $payload = JWTAuth::getPayload(JWTAuth::getToken());
 
-        // ✅ الحصول على الصلاحيات من قاعدة البيانات مباشرة
+       
         $userTypePermissions = $this->getUserTypePermissions($user->id, $user->use_type);
 
-        // ✅ التحقق من وجود صلاحيات
+       
         if (empty($userTypePermissions)) {
             return response()->json([
                 'message' => 'You do not have permission to view any vendor types.'
@@ -4885,10 +4885,10 @@ class VendorProfileController extends Controller
         $intersectColumns = $this->extractIntersectColumns($formatArray, $vendorColumns, $includeCreatedBy);
         $intersectColumnsVendorSheet = array_intersect($formatArray, $vendorSheet);
 
-        // ✅ كشف نوع الفلتر من الطلب (إن وجد)
+      
         $searchTypeFilter = $this->detectSearchTypeFilter($request);
 
-        // ✅ التحقق من أن المستخدم مصرح له بالبحث عن هذا النوع
+       
         if ($searchTypeFilter !== null) {
             $invalidTypes = array_diff($searchTypeFilter, $userTypePermissions);
             if (!empty($invalidTypes)) {
@@ -4900,7 +4900,7 @@ class VendorProfileController extends Controller
             }
         }
 
-        // ✅ استخدام الصلاحيات من قاعدة البيانات فقط
+       
         $vendorsQuery = $this->initializeVendorsQuery(
             $intersectColumns, 
             $userTypePermissions, 
@@ -4943,7 +4943,7 @@ class VendorProfileController extends Controller
                 $vendorSheet, 
                 $includeMotherTongue, 
                 $includeCreatedBy,
-                $userTypePermissions // ✅ تمرير الصلاحيات الحقيقية من قاعدة البيانات
+                $userTypePermissions
             );
         }
 
@@ -4994,7 +4994,7 @@ class VendorProfileController extends Controller
         $filters = $request->queryParams['filters'];
 
         // Check if searching in In House specific tables
-        $inHouseTables = ['in_house_price_list', 'in_house_languages'];
+        $inHouseTables = ['in_house_price_lists', 'in_house_languages'];
 
         foreach ($filters as $filter) {
             if (isset($filter['table']) && in_array($filter['table'], $inHouseTables)) {
@@ -5162,7 +5162,6 @@ class VendorProfileController extends Controller
                 ]);
             }
 
-            // ✅ تحميل بيانات In House فقط إذا كان المستخدم مصرح له
             if ($canViewInHouse) {
                 $vendorsQuery->with([
                     'inHousePriceList' => function ($query) {
@@ -5258,7 +5257,6 @@ class VendorProfileController extends Controller
 
         foreach ($queryParams as $key => $val) {
             if ($key !== 'filters' && !empty($val)) {
-                // ✅ تجاهل typePermissions إذا أرسلها الفرونت (للأمان)
                 if ($key === 'timezone_from' || $key === 'timezone_to' || $key === 'typePermissions') {
                     continue;
                 }
@@ -5392,9 +5390,7 @@ class VendorProfileController extends Controller
             $table = $filter['table'];
             $normalizedTable = $this->normalizeTableName($table);
 
-            // ✅ منع الوصول لجداول In House إذا لم يكن مصرح
-            if (!$canViewInHouse && in_array($table, ['in_house_price_list', 'in_house_languages'])) {
-                // تخطي هذا الفلتر بصمت - للأمان
+            if (!$canViewInHouse && in_array($table, ['in_house_price_lists', 'in_house_languages'])) {
                 continue;
             }
 
@@ -5403,7 +5399,7 @@ class VendorProfileController extends Controller
                     $this->applyMotherTongueFilter($vendorsQuery, $filter, $formatArray);
                 } elseif ($table === 'vendor_sheet') {
                     $this->applyVendorSheetFilter($vendorsQuery, $filter, $formatArray, $diffFormatArray, $vendorSheet);
-                } elseif ($table === 'in_house_price_list') {
+                } elseif ($table === 'in_house_price_lists') {
                     $this->applyInHousePriceListFilter($vendorsQuery, $filter, $formatArray);
                 } elseif ($table === 'in_house_languages') {
                     $this->applyInHouseLanguagesFilter($vendorsQuery, $filter, $formatArray);
@@ -5458,8 +5454,8 @@ class VendorProfileController extends Controller
             }
         }]);
 
-        if (!in_array('in_house_price_list', $formatArray)) {
-            $formatArray[] = 'in_house_price_list';
+        if (!in_array('in_house_price_lists', $formatArray)) {
+            $formatArray[] = 'in_house_price_lists';
         }
     }
 
@@ -5713,7 +5709,7 @@ class VendorProfileController extends Controller
                 }
 
                 if ($canViewInHouse && isset($vendor['type']) && $vendor['type'] == 1) {
-                    $priceListKey = isset($vendor['inHousePriceList']) ? 'inHousePriceList' : (isset($vendor['in_house_price_list']) ? 'in_house_price_list' : null);
+                    $priceListKey = isset($vendor['inHousePriceList']) ? 'inHousePriceList' : (isset($vendor['in_house_price_lists']) ? 'in_house_price_lists' : null);
 
                     if ($priceListKey && isset($vendor[$priceListKey])) {
                         $priceList = $vendor[$priceListKey];
@@ -5809,7 +5805,7 @@ class VendorProfileController extends Controller
             if ($canViewInHouse && $isInHouse) {
                 $vendor['is_in_house'] = true;
 
-                $priceListKey = isset($vendor['inHousePriceList']) ? 'inHousePriceList' : (isset($vendor['in_house_price_list']) ? 'in_house_price_list' : null);
+                $priceListKey = isset($vendor['inHousePriceList']) ? 'inHousePriceList' : (isset($vendor['in_house_price_lists']) ? 'in_house_price_lists' : null);
 
                 if ($priceListKey && isset($vendor[$priceListKey])) {
                     $vendor['in_house_data'] = $vendor[$priceListKey];
@@ -5828,7 +5824,7 @@ class VendorProfileController extends Controller
                 unset($vendor['in_house_data']);
                 unset($vendor['in_house_languages_data']);
                 unset($vendor['inHousePriceList']);
-                unset($vendor['in_house_price_list']);
+                unset($vendor['in_house_price_lists']);
                 unset($vendor['inHouseLanguages']);
                 unset($vendor['in_house_languages']);
             }
@@ -5915,7 +5911,7 @@ class VendorProfileController extends Controller
     private function normalizeTableName($tableName)
     {
         $mapping = [
-            'in_house_price_list' => 'inHousePriceList',
+            'in_house_price_lists' => 'inHousePriceList',
             'in_house_languages' => 'inHouseLanguages',
             'vendors_mother_tongue' => 'motherTongues',
             'vendor_sheet' => 'vendor_sheet',

@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class InHouseLanguage extends Model
 {
-    protected $table = 'in_house_language';
+    protected $table = 'in_house_languages';
 
     protected $fillable = [
+        'price_list_id',
         'vendor_id',
         'source_language',
         'source_dialect',
@@ -16,9 +17,9 @@ class InHouseLanguage extends Model
         'target_dialect'
     ];
 
-    public function vendor()
+    public function priceList()
     {
-        return $this->belongsTo(Vendor::class, 'vendor_id');
+        return $this->belongsTo(InHousePriceList::class, 'price_list_id');
     }
 
     public function sourceLanguageRelation()
