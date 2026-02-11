@@ -7,8 +7,10 @@ use App\Models\InHousePriceList;
 use App\Models\InHouseLanguage;
 use App\Models\InHouseUnitConversion;
 use App\Models\Vendor;
+use App\Models\DataLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class InHousePriceListController extends Controller
@@ -88,12 +90,6 @@ class InHousePriceListController extends Controller
             $dayOfMonth = $startDate->day;
             $monthsDiff = $startDate->diffInMonths($endDate);
 
-            // if ($endDate->day != $dayOfMonth && !($endDate->isLastOfMonth() && $dayOfMonth > $endDate->daysInMonth)) {
-            //     return response()->json([
-            //         'message' => 'End date must be on the same day of month as start date'
-            //     ], 400);
-            // }
-
             $overlapping = InHousePriceList::where('vendor_id', $request->vendor_id)
                 ->where(function ($query) use ($startDate, $endDate) {
                     $query->whereBetween('start_date', [$startDate, $endDate])
@@ -104,20 +100,11 @@ class InHousePriceListController extends Controller
                         });
                 });
 
-            if ($request->is_active) {
-                if ($overlapping->where('is_active', true)->exists()) {
-                    return response()->json([
-                        'message' => 'Cannot activate: Another active price list exists in this date range'
-                    ], 400);
-                }
-            } 
-            // else {
-            //     if ($overlapping->exists()) {
-            //         return response()->json([
-            //             'message' => 'Date range overlaps with existing price list'
-            //         ], 400);
-            //     }
-            // }
+            if ($overlapping->exists()) {
+                return response()->json([
+                    'message' => 'Date range overlaps with existing price list'
+                ], 400);
+            }
 
             DB::beginTransaction();
 
@@ -143,6 +130,15 @@ class InHousePriceListController extends Controller
                     ]);
                 }
             }
+
+            DataLogger::addToLogger(
+                Auth::user()->id,
+                'create',
+                $request->url(),
+                'in_house_price_lists',
+                $priceList->toArray(),
+                $priceList->id
+            );
 
             DB::commit();
 
@@ -197,12 +193,6 @@ class InHousePriceListController extends Controller
 
             $dayOfMonth = $startDate->day;
 
-            // if ($endDate->day != $dayOfMonth && !($endDate->isLastOfMonth() && $dayOfMonth > $endDate->daysInMonth)) {
-            //     return response()->json([
-            //         'message' => 'End date must be on the same day of month as start date'
-            //     ], 400);
-            // }
-
             $overlapping = InHousePriceList::where('vendor_id', $request->vendor_id)
                 ->where('id', '!=', $request->id)
                 ->where(function ($query) use ($startDate, $endDate) {
@@ -214,20 +204,13 @@ class InHousePriceListController extends Controller
                         });
                 });
 
-            if ($request->is_active) {
-                if ($overlapping->where('is_active', true)->exists()) {
-                    return response()->json([
-                        'message' => 'Cannot activate: Another active price list exists in this date range'
-                    ], 400);
-                }
-            } 
-            // else {
-            //     if ($overlapping->exists()) {
-            //         return response()->json([
-            //             'message' => 'Date range overlaps with existing price list'
-            //         ], 400);
-            //     }
-            // }
+            if ($overlapping->exists()) {
+                return response()->json([
+                    'message' => 'Date range overlaps with existing price list'
+                ], 400);
+            }
+
+            $oldData = $priceList->toArray();
 
             $priceList->update([
                 'currency' => $request->currency,
@@ -237,6 +220,18 @@ class InHousePriceListController extends Controller
                 'end_date' => $endDate,
                 'is_active' => $request->is_active ?? false
             ]);
+
+            DataLogger::addToLogger(
+                Auth::user()->id,
+                'update',
+                $request->url(),
+                'in_house_price_lists',
+                [
+                    'old' => $oldData,
+                    'new' => $priceList->toArray()
+                ],
+                $priceList->id
+            );
 
             $priceList->load([
                 'currencyRelation:id,name',
@@ -269,7 +264,18 @@ class InHousePriceListController extends Controller
 
         try {
             $priceList = InHousePriceList::find($request->id);
+            $deletedData = $priceList->toArray();
+
             $priceList->delete();
+
+            DataLogger::addToLogger(
+                Auth::user()->id,
+                'delete',
+                $request->url(),
+                'in_house_price_lists',
+                $deletedData,
+                $request->id
+            );
 
             return response()->json([
                 'message' => 'Price list deleted successfully'
@@ -296,28 +302,42 @@ class InHousePriceListController extends Controller
 
             $newStatus = !$priceList->is_active;
 
-            if ($newStatus) {
-                $overlapping = InHousePriceList::where('vendor_id', $priceList->vendor_id)
-                    ->where('id', '!=', $request->id)
-                    ->where('is_active', true)
-                    ->where(function ($query) use ($priceList) {
-                        $query->whereBetween('start_date', [$priceList->start_date, $priceList->end_date])
-                            ->orWhereBetween('end_date', [$priceList->start_date, $priceList->end_date])
-                            ->orWhere(function ($q) use ($priceList) {
-                                $q->where('start_date', '<=', $priceList->start_date)
-                                    ->where('end_date', '>=', $priceList->end_date);
-                            });
-                    })
-                    ->exists();
+            // if ($newStatus) {
+            //     $overlapping = InHousePriceList::where('vendor_id', $priceList->vendor_id)
+            //         ->where('id', '!=', $request->id)
+            //         ->where('is_active', true)
+            //         ->where(function ($query) use ($priceList) {
+            //             $query->whereBetween('start_date', [$priceList->start_date, $priceList->end_date])
+            //                 ->orWhereBetween('end_date', [$priceList->start_date, $priceList->end_date])
+            //                 ->orWhere(function ($q) use ($priceList) {
+            //                     $q->where('start_date', '<=', $priceList->start_date)
+            //                         ->where('end_date', '>=', $priceList->end_date);
+            //                 });
+            //         })
+            //         ->exists();
 
-                if ($overlapping) {
-                    return response()->json([
-                        'message' => 'Cannot activate: Another active price list exists in this date range'
-                    ], 400);
-                }
-            }
+            //     if ($overlapping) {
+            //         return response()->json([
+            //             'message' => 'Cannot activate: Another active price list exists in this date range'
+            //         ], 400);
+            //     }
+            // }
+
+            $oldData = $priceList->toArray();
 
             $priceList->update(['is_active' => $newStatus]);
+
+            DataLogger::addToLogger(
+                Auth::user()->id,
+                'update',
+                $request->url(),
+                'in_house_price_lists',
+                [
+                    'old' => $oldData,
+                    'new' => $priceList->toArray()
+                ],
+                $priceList->id
+            );
 
             $priceList->load([
                 'currencyRelation:id,name',
@@ -376,6 +396,15 @@ class InHousePriceListController extends Controller
                 'target_dialect' => $request->target_dialect
             ]);
 
+            DataLogger::addToLogger(
+                Auth::user()->id,
+                'create',
+                $request->url(),
+                'in_house_languages',
+                $language->toArray(),
+                $language->id
+            );
+
             $language->load([
                 'sourceLanguageRelation:id,name',
                 'targetLanguageRelation:id,name',
@@ -432,12 +461,26 @@ class InHousePriceListController extends Controller
                 ], 400);
             }
 
+            $oldData = $language->toArray();
+
             $language->update([
                 'source_language' => $request->source_language,
                 'source_dialect' => $request->source_dialect,
                 'target_language' => $request->target_language,
                 'target_dialect' => $request->target_dialect
             ]);
+
+            DataLogger::addToLogger(
+                Auth::user()->id,
+                'update',
+                $request->url(),
+                'in_house_languages',
+                [
+                    'old' => $oldData,
+                    'new' => $language->toArray()
+                ],
+                $language->id
+            );
 
             $language->load([
                 'sourceLanguageRelation:id,name',
@@ -469,7 +512,18 @@ class InHousePriceListController extends Controller
 
         try {
             $language = InHouseLanguage::find($request->id);
+            $deletedData = $language->toArray();
+
             $language->delete();
+
+            DataLogger::addToLogger(
+                Auth::user()->id,
+                'delete',
+                $request->url(),
+                'in_house_languages',
+                $deletedData,
+                $request->id
+            );
 
             return response()->json([
                 'message' => 'Language deleted successfully'
@@ -525,6 +579,15 @@ class InHousePriceListController extends Controller
                 'value_to' => $request->value_to
             ]);
 
+            DataLogger::addToLogger(
+                Auth::user()->id,
+                'create',
+                $request->url(),
+                'in_house_unit_conversions',
+                $conversion->toArray(),
+                $conversion->id
+            );
+
             $conversion->load(['taskType:id,name', 'unitFromRelation:id,name', 'unitToRelation:id,name']);
 
             return response()->json([
@@ -575,6 +638,8 @@ class InHousePriceListController extends Controller
                 ], 400);
             }
 
+            $oldData = $conversion->toArray();
+
             $conversion->update([
                 'task_type_id' => $request->task_type_id,
                 'unit_from' => $request->unit_from,
@@ -582,6 +647,18 @@ class InHousePriceListController extends Controller
                 'value_from' => $request->value_from,
                 'value_to' => $request->value_to
             ]);
+
+            DataLogger::addToLogger(
+                Auth::user()->id,
+                'update',
+                $request->url(),
+                'in_house_unit_conversions',
+                [
+                    'old' => $oldData,
+                    'new' => $conversion->toArray()
+                ],
+                $conversion->id
+            );
 
             $conversion->load(['taskType:id,name', 'unitFromRelation:id,name', 'unitToRelation:id,name']);
 
@@ -608,7 +685,18 @@ class InHousePriceListController extends Controller
 
         try {
             $conversion = InHouseUnitConversion::find($request->id);
+            $deletedData = $conversion->toArray();
+
             $conversion->delete();
+
+            DataLogger::addToLogger(
+                Auth::user()->id,
+                'delete',
+                $request->url(),
+                'in_house_unit_conversions',
+                $deletedData,
+                $request->id
+            );
 
             return response()->json([
                 'message' => 'Unit conversion deleted successfully'
