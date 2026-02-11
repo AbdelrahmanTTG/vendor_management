@@ -171,7 +171,11 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         handelingSelect("countries", setOptionsN, "nationality");
         handelingSelect("regions", setOptionsR, "region");
         handelingSelect("vendortimezone", setOptionsT, "timeZone");
-        handelingSelect("dialects", setOptionsDialect, "languages_dialect");
+        handelingSelect(
+            "languages_dialect",
+            setOptionsDialect,
+            "languages_dialect",
+        );
     }, []);
 
     const options = [
