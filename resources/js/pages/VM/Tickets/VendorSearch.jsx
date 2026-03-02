@@ -807,6 +807,10 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                     label: "Freelance",
                                                                 },
                                                                 {
+                                                                    value: "4",
+                                                                    label: "In House",
+                                                                },
+                                                                {
                                                                     value: "2",
                                                                     label: "Agency",
                                                                 },
@@ -816,8 +820,9 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 },
                                                                 {
                                                                     value: "1",
-                                                                    label: "In House",
+                                                                    label: "Ext. In House",
                                                                 },
+                                                              
                                                             ]}
                                                             className="js-example-basic-multiple typeInput mb-1"
                                                             isMulti

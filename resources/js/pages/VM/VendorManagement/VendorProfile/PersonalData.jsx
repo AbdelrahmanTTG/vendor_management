@@ -491,12 +491,14 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                               data.type == 0
                                   ? "Freelance"
                                   : data.type == 1
-                                  ? "In House"
-                                  : data.type == 2
-                                  ? "Agency"
-                                  : data.type == 3
-                                  ? "Contractor"
-                                  : "Unknown",
+                                    ? "Ext In House"
+                                    : data.type == 2
+                                      ? "Agency"
+                                      : data.type == 3
+                                        ? "Contractor"
+                                        : data.type == 4
+                                          ? "In House"
+                                          : "Unknown",
                       };
                       handleVendorTypeChange(vendorTypeOption);
                       setValue("type", vendorTypeOption);
@@ -701,7 +703,7 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                                                                             label: "Freelance",
                                                                         },
                                                                         {
-                                                                            value: "1",
+                                                                            value: "4",
                                                                             label: "In House",
                                                                         },
                                                                         {
@@ -711,6 +713,11 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                                                                         {
                                                                             value: "3",
                                                                             label: "Contractor",
+                                                                        },
+
+                                                                        {
+                                                                            value: "1",
+                                                                            label: "Ext. In House",
                                                                         },
                                                                     ].filter(
                                                                         (
@@ -724,11 +731,15 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                                                                     )
                                                                   : typePermissions.length ===
                                                                       0
-                                                                    ? [] 
+                                                                    ? []
                                                                     : [
                                                                           {
                                                                               value: "0",
                                                                               label: "Freelance",
+                                                                          },
+                                                                          {
+                                                                              value: "4",
+                                                                              label: "In House",
                                                                           },
                                                                           {
                                                                               value: "2",
@@ -740,7 +751,7 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                                                                           },
                                                                           {
                                                                               value: "1",
-                                                                              label: "In House",
+                                                                              label: "Ext. In House",
                                                                           },
                                                                       ]
                                                           }

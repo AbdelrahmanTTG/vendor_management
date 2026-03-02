@@ -1023,7 +1023,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                         label: "Freelance",
                                                                     },
                                                                     {
-                                                                        value: "1",
+                                                                        value: "4",
                                                                         label: "In House",
                                                                     },
                                                                     {
@@ -1033,6 +1033,11 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                     {
                                                                         value: "3",
                                                                         label: "Contractor",
+                                                                    },
+
+                                                                    {
+                                                                        value: "1",
+                                                                        label: "Ext. In House",
                                                                     },
                                                                 ].filter(
                                                                     (option) =>
@@ -1085,7 +1090,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                     label: "Freelance",
                                                                 },
                                                                 {
-                                                                    value: "1",
+                                                                    value: "4",
                                                                     label: "In House",
                                                                 },
                                                                 {
@@ -1095,6 +1100,11 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 {
                                                                     value: "3",
                                                                     label: "Contractor",
+                                                                },
+
+                                                                {
+                                                                    value: "1",
+                                                                    label: "Ext. In House",
                                                                 },
                                                             ]}
                                                             className="js-example-basic-multiple typeInput mb-1"

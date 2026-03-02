@@ -451,7 +451,7 @@ const Vendor = (props) => {
                             processedItem[key] == 0
                                 ? (processedItem[key] = "Freelance")
                                 : "";
-                            processedItem[key] == 1
+                            processedItem[key] == 4
                                 ? (processedItem[key] = "In House")
                                 : "";
                             processedItem[key] == 2
@@ -460,6 +460,9 @@ const Vendor = (props) => {
                             processedItem[key] == 3
                                 ? (processedItem[key] = "Contractor")
                                 : "";
+                              processedItem[key] == 1
+                                  ? (processedItem[key] = " External In House")
+                                  : "";
                         }
                         if (key === "test_type") {
                             processedItem[key] === "0"
@@ -1482,6 +1485,19 @@ const Vendor = (props) => {
                                                                                     )}
                                                                                     {value ==
                                                                                         1 && (
+                                                                                        <span
+                                                                                            style={{
+                                                                                                color: "blue",
+                                                                                            }}
+                                                                                        >
+                                                                                            {" "}
+                                                                                            Ext.
+                                                                                            In
+                                                                                            House
+                                                                                        </span>
+                                                                                    )}
+                                                                                    {value ==
+                                                                                        4 && (
                                                                                         <span
                                                                                             style={{
                                                                                                 color: "blue",
