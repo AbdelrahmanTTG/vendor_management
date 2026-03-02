@@ -70,15 +70,9 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
             try {
                 const { data } = await axiosClient.get("typePermissions");
 
-                if (data.allowedTypes && data.allowedTypes.length > 0) {
-                    setTypePermissions(data.allowedTypes);
-
-                    if (data.allowedTypes.length < 4) {
-                        setHasTypeRestriction(true);
-                    } else {
-                        setHasTypeRestriction(false);
-                    }
-                }
+               if (data.allowedTypes && data.allowedTypes.length > 0) {
+                   setTypePermissions(data.allowedTypes);
+               }
             } catch (err) {
                 console.error("Error fetching type permissions:", err);
             }
@@ -703,8 +697,10 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                                                               }
                                                           }
                                                           options={
-                                                              hasTypeRestriction
-                                                                  ? [
+                                                              typePermissions.length ===
+                                                              0
+                                                                  ? []
+                                                                  : [
                                                                         {
                                                                             value: "0",
                                                                             label: "Freelance",
@@ -721,7 +717,6 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                                                                             value: "3",
                                                                             label: "Contractor",
                                                                         },
-
                                                                         {
                                                                             value: "1",
                                                                             label: "Ext. In House",
@@ -736,31 +731,6 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                                                                                 ),
                                                                             ),
                                                                     )
-                                                                  : typePermissions.length ===
-                                                                      0
-                                                                    ? []
-                                                                    : [
-                                                                          {
-                                                                              value: "0",
-                                                                              label: "Freelance",
-                                                                          },
-                                                                          {
-                                                                              value: "4",
-                                                                              label: "In House",
-                                                                          },
-                                                                          {
-                                                                              value: "2",
-                                                                              label: "Agency",
-                                                                          },
-                                                                          {
-                                                                              value: "3",
-                                                                              label: "Contractor",
-                                                                          },
-                                                                          {
-                                                                              value: "1",
-                                                                              label: "Ext. In House",
-                                                                          },
-                                                                      ]
                                                           }
                                                           isDisabled={
                                                               (props.permission &&
@@ -768,9 +738,8 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                                                                       .permission
                                                                       .type ===
                                                                       "disable") ||
-                                                              (hasTypeRestriction &&
-                                                                  typePermissions.length ===
-                                                                      1)
+                                                              typePermissions.length ===
+                                                                  1
                                                           }
                                                           className="js-example-basic-single col-sm-12"
                                                           onChange={(
@@ -783,12 +752,7 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                                                                   option,
                                                               );
                                                           }}
-                                                          isDisabled={
-                                                              props.permission &&
-                                                              props.permission
-                                                                  .type ===
-                                                                  "disable"
-                                                          }
+                                                          
                                                       />
                                                   )}
                                               />
