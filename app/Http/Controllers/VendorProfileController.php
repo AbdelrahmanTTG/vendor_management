@@ -4865,7 +4865,7 @@ class VendorProfileController extends Controller
         );
 
         $this->applyRelatedColumnsJoins($vendorsQuery, $relatedColumns);
-
+        $vendorsQuery->groupBy('vendor.id');
         $diffFormatArray = $formatArray;
         $formatArray = $this->cleanFormatArray($formatArray, $vendorSheet, $includeCreatedBy);
 
