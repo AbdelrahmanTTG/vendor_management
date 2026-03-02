@@ -1073,7 +1073,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 {
                                                                     typePermissions.length
                                                                 }{" "}
-                                                                of 4)
+                                                                of 5)
                                                             </div>
                                                         </>
                                                     ) : (

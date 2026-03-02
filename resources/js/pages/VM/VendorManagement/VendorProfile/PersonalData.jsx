@@ -501,7 +501,14 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                                           : "Unknown",
                       };
                       handleVendorTypeChange(vendorTypeOption);
-                      setValue("type", vendorTypeOption);
+                      if (
+                          typePermissions.length === 0 ||
+                          typePermissions.includes(data.type)
+                      ) {
+                          setValue("type", vendorTypeOption);
+                      } else {
+                          setValue("type", null);
+                      }
                   }
                   if (data.status !== null && data.status !== undefined) {
                       const statusOption = {
@@ -510,12 +517,12 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                               data.status == 0
                                   ? "Active"
                                   : data.status == 1
-                                  ? "Inactive"
-                                  : data.status == 2
-                                  ? "Wait for Approval"
-                                  : data.status == 3
-                                  ? "Rejected"
-                                  : "Unknown",
+                                    ? "Inactive"
+                                    : data.status == 2
+                                      ? "Wait for Approval"
+                                      : data.status == 3
+                                        ? "Rejected"
+                                        : "Unknown",
                       };
                       handleStatusChange(statusOption);
                       setValue("status", statusOption);
@@ -530,8 +537,8 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                               data.profile_status == 1
                                   ? "Complete"
                                   : data.profile_status == 0
-                                  ? "pending"
-                                  : "Unknown",
+                                    ? "pending"
+                                    : "Unknown",
                       };
 
                       setValue("profile_status", profile_status);
@@ -562,7 +569,7 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                       { value: data?.contact_other3, label: "other3" },
                   ];
                   const filteredContact = contact.filter(
-                      (item) => item?.value !== "" && item?.value !== null
+                      (item) => item?.value !== "" && item?.value !== null,
                   );
                   setInputValues(filteredContact);
                   setValue("contacts", filteredContact);
@@ -630,7 +637,7 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
               }
           }
       }
-  }, [props.vendorPersonalData, setValue]);
+  }, [props.vendorPersonalData, setValue, typePermissions]);
 
 
   return (
