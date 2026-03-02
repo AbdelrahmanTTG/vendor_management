@@ -4865,7 +4865,7 @@ class VendorProfileController extends Controller
         );
 
         $this->applyRelatedColumnsJoins($vendorsQuery, $relatedColumns);
-        $vendorsQuery->groupBy('vendor.id');
+
         $diffFormatArray = $formatArray;
         $formatArray = $this->cleanFormatArray($formatArray, $vendorSheet, $includeCreatedBy);
 
@@ -4893,7 +4893,7 @@ class VendorProfileController extends Controller
 
         $this->applySorting($vendorsQuery, $request);
 
-        $totalVendors = (clone $vendorsQuery)->select(DB::raw('COUNT(DISTINCT vendor.id) as count'))->value('count');
+        $totalVendors = $vendorsQuery->count();
 
         $AllVendors = [];
         $diffFormatArrayEx = [];
@@ -5614,7 +5614,7 @@ class VendorProfileController extends Controller
             $sortDirection = $request->input('sortDirection');
 
             if (in_array($sortDirection, ['asc', 'desc'])) {
-                $vendorsQuery = $vendorsQuery->orderBy('vendor.' . $sortBy, $sortDirection);
+                $vendorsQuery = $vendorsQuery->orderBy($sortBy, $sortDirection);
             }
         }
     }
