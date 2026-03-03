@@ -1467,82 +1467,29 @@ const Vendor = (props) => {
                                                                                     )}
                                                                                 </div>
                                                                             )}
-                                                                            {fields[
-                                                                                index
-                                                                            ] ===
-                                                                                "type" && (
-                                                                                <div>
-                                                                                    {value ==
-                                                                                        0 && (
-                                                                                        <span
-                                                                                            style={{
-                                                                                                color: "green",
-                                                                                            }}
-                                                                                        >
-                                                                                            {" "}
-                                                                                            Freelance
-                                                                                        </span>
-                                                                                    )}
-                                                                                    {value ==
-                                                                                        1 && (
-                                                                                        <span
-                                                                                            style={{
-                                                                                                color: "blue",
-                                                                                            }}
-                                                                                        >
-                                                                                            {" "}
-                                                                                            Ext.
-                                                                                            In
-                                                                                            House
-                                                                                        </span>
-                                                                                    )}
-                                                                                    {value ==
-                                                                                        4 && (
-                                                                                        <span
-                                                                                            style={{
-                                                                                                color: "blue",
-                                                                                            }}
-                                                                                        >
-                                                                                            {" "}
-                                                                                            In
-                                                                                            House
-                                                                                        </span>
-                                                                                    )}
-                                                                                    {value ==
-                                                                                        2 && (
-                                                                                        <span
-                                                                                            style={{
-                                                                                                color: "gray",
-                                                                                            }}
-                                                                                        >
-                                                                                            {" "}
-                                                                                            Agency
-                                                                                        </span>
-                                                                                    )}
-                                                                                    {value ==
-                                                                                        3 && (
-                                                                                        <span
-                                                                                            style={{
-                                                                                                color: "red",
-                                                                                            }}
-                                                                                        >
-                                                                                            {" "}
-                                                                                            Contractor
-                                                                                        </span>
-                                                                                    )}
-                                                                                    {(value <
-                                                                                        0 ||
-                                                                                        value >
-                                                                                            3 ||
-                                                                                        value ==
-                                                                                            null) && (
-                                                                                        <span>
-                                                                                            Type:
-                                                                                            Unknown
-                                                                                        </span>
-                                                                                    )}
-                                                                                </div>
-                                                                            )}
+                                                                           {fields[index] === "type" && (
+  <div>
+    {(() => {
+      const types = {
+        0: { label: "Freelance", color: "green" },
+        1: { label: "Ext. In House", color: "blue" },
+        2: { label: "Agency", color: "gray" },
+        3: { label: "Contractor", color: "red" },
+        4: { label: "In House", color: "blue" },
+      };
+
+      const typeData = types[value];
+
+      return typeData ? (
+        <span style={{ color: typeData.color }}>
+          {typeData.label}
+        </span>
+      ) : (
+        <span>Type: Unknown</span>
+      );
+    })()}
+  </div>
+)}
                                                                             {fields[
                                                                                 index
                                                                             ] ===
