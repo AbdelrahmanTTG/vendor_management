@@ -4895,8 +4895,8 @@ class VendorProfileController extends Controller
         }
 
         $this->applySorting($vendorsQuery, $request);
-        $totalVendors = (clone $vendorsQuery)->toBase()->selectRaw('COUNT(DISTINCT vendor.id) as aggregate')->value('aggregate');
-        // $totalVendors = $vendorsQuery->count();
+        // $totalVendors = (clone $vendorsQuery)->toBase()->selectRaw('COUNT(DISTINCT vendor.id) as aggregate')->value('aggregate');
+        $totalVendors = $vendorsQuery->count();
         // $vendorsQuery->groupBy('vendor.id');
 
         // $totalVendors = DB::table(DB::raw("({$vendorsQuery->toBase()->toSql()}) as sub"))
@@ -5119,23 +5119,27 @@ class VendorProfileController extends Controller
     private function applyRelatedColumnsJoins(&$vendorsQuery, $relatedColumns)
     {
         if (!empty($relatedColumns)) {
-            $joinCount = 0;
             foreach ($relatedColumns as $relation) {
                 if (strpos($relation, '.') !== false) {
                     list($table, $column) = explode('.', $relation);
                     if ($table === 'bank_details' || $table === 'wallets_payment_methods') {
-                        $aliasBilling = "billing_data_{$joinCount}";
-                        $aliasTarget = "{$table}_{$joinCount}";
-                        $vendorsQuery->leftJoin("billing_data as {$aliasBilling}", "{$aliasBilling}.vendor_id", '=', 'vendor.id');
-                        $vendorsQuery->leftJoin("{$table} as {$aliasTarget}", "{$aliasTarget}.billing_data_id", '=', "{$aliasBilling}.id");
-                        $vendorsQuery->addSelect("{$aliasTarget}.{$column} as {$column}");
-                        $vendorsQuery->distinct()->limit(1);
+                        $vendorsQuery->addSelect([
+                            $column => DB::table('billing_data')
+                                ->join("{$table}", "{$table}.billing_data_id", '=', 'billing_data.id')
+                                ->whereColumn('billing_data.vendor_id', 'vendor.id')
+                                ->select("{$table}.{$column}")
+                                ->orderBy("{$table}.id", 'asc')
+                                ->limit(1)
+                        ]);
                     } else {
-                        $alias = "{$table}_{$joinCount}";
-                        $vendorsQuery->leftJoin("{$table} as {$alias}", "{$alias}.vendor_id", '=', 'vendor.id');
-                        $vendorsQuery->addSelect("{$alias}.{$column} as {$column}");
+                        $vendorsQuery->addSelect([
+                            $column => DB::table($table)
+                                ->whereColumn("{$table}.vendor_id", 'vendor.id')
+                                ->select($column)
+                                ->orderBy('id', 'asc')
+                                ->limit(1)
+                        ]);
                     }
-                    $joinCount++;
                 }
             }
         }
