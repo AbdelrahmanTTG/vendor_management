@@ -53,4 +53,5 @@ class DataLogger extends Model
                 });
             });
     }
+    
 }

@@ -43,11 +43,11 @@ const Vendor = (props) => {
                     ? vendor.vendor_sheet
                     : [];
                 const index = validVendorSheet.findIndex(
-                    (item) => item.id === newData.id
+                    (item) => item.id === newData.id,
                 );
                 if (index !== -1) {
-                    const updatedVendorSheet = validVendorSheet.map((item, i) =>
-                        i === index ? newData : item
+                    const updatedVendorSheet = validVendorSheet.map(
+                        (item, i) => (i === index ? newData : item),
                     );
                     return { ...vendor, vendor_sheet: updatedVendorSheet };
                 } else {
@@ -84,7 +84,7 @@ const Vendor = (props) => {
     const [totalVendors, setTotalVendors] = useState(null);
     const [progress, setProgress] = useState(0);
     const [openId, setOpenId] = useState(null);
-    const [perPage, setPerPage] = useState(50);
+    const [perPage, setPerPage] = useState(5);
     const [userTypePermissions, setUserTypePermissions] = useState(null);
     const [canViewInHouse, setCanViewInHouse] = useState(false);
     const handleFormatsChanged = () => {
@@ -94,7 +94,7 @@ const Vendor = (props) => {
         tablename,
         setOptions,
         fieldName,
-        searchTerm = ""
+        searchTerm = "",
     ) => {
         if (!tablename) return;
         try {
@@ -130,31 +130,30 @@ const Vendor = (props) => {
             setLoading(false);
         }
     };
-   useEffect(() => {
-       handelingSelect("countries", setOptionsC, "country");
-       handelingSelect("countries", setOptionsN, "nationality");
-       handelingSelect("regions", setOptionsR, "region");
-       handelingSelect("vendortimezone", setOptionsT, "timeZone");
+    useEffect(() => {
+        handelingSelect("countries", setOptionsC, "country");
+        handelingSelect("countries", setOptionsN, "nationality");
+        handelingSelect("regions", setOptionsR, "region");
+        handelingSelect("vendortimezone", setOptionsT, "timeZone");
 
-       const fetchTypePermissions = async () => {
-           try {
-               const { data } = await axiosClient.get("typePermissions");
-               if (data.allowedTypes) {
-                   setUserTypePermissions(data.allowedTypes);
-                   // Check if user can view In House vendors
-                   setCanViewInHouse(data.allowedTypes.includes(1));
-               } else {
-                   setUserTypePermissions([]);
-                   setCanViewInHouse(false);
-               }
-           } catch (err) {
-               console.error("Error fetching type permissions:", err);
-               setUserTypePermissions([]);
-               setCanViewInHouse(false);
-           }
-       };
-       fetchTypePermissions();
-   }, []);
+        const fetchTypePermissions = async () => {
+            try {
+                const { data } = await axiosClient.get("typePermissions");
+                if (data.allowedTypes) {
+                    setUserTypePermissions(data.allowedTypes);
+                    setCanViewInHouse(data.allowedTypes.includes(1));
+                } else {
+                    setUserTypePermissions([]);
+                    setCanViewInHouse(false);
+                }
+            } catch (err) {
+                console.error("Error fetching type permissions:", err);
+                setUserTypePermissions([]);
+                setCanViewInHouse(false);
+            }
+        };
+        fetchTypePermissions();
+    }, []);
     const [sortConfig, setSortConfig] = useState({
         key: "id",
         direction: "asc",
@@ -183,10 +182,9 @@ const Vendor = (props) => {
                 setTotalVendors(data.totalVendors);
                 if (data.AllVendors) {
                     exportToExcel(data.AllVendors);
-                    setProgress(50);
+                    setProgress(5);
                 }
             } catch (err) {
-                // console.error(err);
             } finally {
                 setLoading2(false);
             }
@@ -266,28 +264,28 @@ const Vendor = (props) => {
                     onClick={() => handlePageChange(i)}
                 >
                     <PaginationLink>{i}</PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         }
         if (startPage > 1) {
             items.unshift(
                 <PaginationItem disabled key="ellipsis-start">
                     <PaginationLink disabled>...</PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         }
         if (endPage < totalPages) {
             items.push(
                 <PaginationItem disabled key="ellipsis-end">
                     <PaginationLink disabled>...</PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         }
         if (startPage > 1) {
             items.unshift(
                 <PaginationItem onClick={() => handlePageChange(1)} key={1}>
                     <PaginationLink>{1}</PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         }
         if (endPage < totalPages) {
@@ -297,7 +295,7 @@ const Vendor = (props) => {
                     key={totalPages}
                 >
                     <PaginationLink>{totalPages}</PaginationLink>
-                </PaginationItem>
+                </PaginationItem>,
             );
         }
 
@@ -313,7 +311,7 @@ const Vendor = (props) => {
     const Add = () => {
         navigate("/vm/vendors/profiletest");
     };
-    
+
     const formatData = (format) => {
         const labelMapping = {
             name: "Name",
@@ -374,6 +372,8 @@ const Vendor = (props) => {
             created_by: "Created by",
             number_of_task: "Number of task",
             "vendors_mother_tongue.language_id": "Mother tongue",
+            completed_at: "Completed At",
+            completed_by: "Completed By",
         };
         format?.flatMap(
             (element) =>
@@ -383,9 +383,8 @@ const Vendor = (props) => {
                         value: trimmedValue,
                         label: labelMapping[trimmedValue] || trimmedValue,
                     };
-                }))
+                })),
         );
-        // return data;
     };
 
     const exportToExcel = async (exportEx) => {
@@ -413,7 +412,7 @@ const Vendor = (props) => {
                                 processedItem[key]?.name ||
                                     processedItem[key]?.gmt ||
                                     processedItem[key]?.dialect ||
-                                    ""
+                                    "",
                             );
                         } else if (
                             processedItem[key] === null ||
@@ -460,9 +459,9 @@ const Vendor = (props) => {
                             processedItem[key] == 3
                                 ? (processedItem[key] = "Contractor")
                                 : "";
-                              processedItem[key] == 1
-                                  ? (processedItem[key] = " External In House")
-                                  : "";
+                            processedItem[key] == 1
+                                ? (processedItem[key] = "External In House")
+                                : "";
                         }
                         if (key === "test_type") {
                             processedItem[key] === "0"
@@ -516,7 +515,7 @@ const Vendor = (props) => {
         });
 
         worksheet.mergeCells(
-            "A1:" + String.fromCharCode(65 + headersArray.length - 1) + "1"
+            "A1:" + String.fromCharCode(65 + headersArray.length - 1) + "1",
         );
         worksheet.getCell("A1").value = "Vendor List";
         worksheet.getCell("A1").alignment = {
@@ -548,7 +547,7 @@ const Vendor = (props) => {
 
         data.forEach((rowData, index) => {
             const row = worksheet.addRow(
-                headersArray.map((header) => rowData[header] ?? "")
+                headersArray.map((header) => rowData[header] ?? ""),
             );
             row.eachCell((cell, colNumber) => {
                 const header = headersArray[colNumber - 1];
@@ -625,8 +624,7 @@ const Vendor = (props) => {
             year_of_graduation: "Year of graduation",
             experience_year: "Experience year",
             bank_name: "Bank name",
-            billing_status: "Billing  status",
-
+            billing_status: "Billing status",
             priceList: "Price List",
             dialect: "Dialect",
             dialect_target: "Dialect target",
@@ -634,7 +632,6 @@ const Vendor = (props) => {
             task_type: "Task type",
             unit: "Unit",
             currency: "Currency",
-            // subject: "Main-Subject Matter",
             rate: "Rate",
             special_rate: "Special rate",
             "vendorTest.source_lang": "Source language",
@@ -650,6 +647,8 @@ const Vendor = (props) => {
             in_house_quota_hours: "In House Quota Hours",
             in_house_salary: "In House Salary",
             in_house_language_pairs: "In House Language Pairs",
+            completed_at: "Completed At",
+            completed_by: "Completed By",
         };
 
         return mapping[input] || input;
@@ -660,7 +659,7 @@ const Vendor = (props) => {
             const response = await axiosClient.post(
                 "download",
                 { filename },
-                { responseType: "blob" }
+                { responseType: "blob" },
             );
             const file = new Blob([response.data], {
                 type: response.headers["content-type"],
@@ -682,10 +681,9 @@ const Vendor = (props) => {
             window.URL.revokeObjectURL(url);
         } catch (err) {
             const response = err.response;
-            // console.error(response);
             alert(
                 "Error downloading the file: " +
-                    (response?.data?.message || "Unknown error")
+                    (response?.data?.message || "Unknown error"),
             );
         }
     };
@@ -749,20 +747,20 @@ const Vendor = (props) => {
                         SweetAlert.fire(
                             "Deleted!",
                             `This price list has been deleted..`,
-                            "success"
+                            "success",
                         );
                     } else {
                         SweetAlert.fire(
                             "Ooops !",
                             " An error occurred while deleting. :)",
-                            "error"
+                            "error",
                         );
                     }
                 } else if (result.dismiss === SweetAlert.DismissReason.cancel) {
                     SweetAlert.fire(
                         "Cancelled",
                         "Your item is safe :)",
-                        "info"
+                        "info",
                     );
                 }
             });
@@ -772,7 +770,7 @@ const Vendor = (props) => {
         if (!props.permissions?.delete) {
             basictoaster(
                 "dangerToast",
-                " Oops! You are not authorized to delete this section ."
+                " Oops! You are not authorized to delete this section .",
             );
             return;
         }
@@ -789,7 +787,7 @@ const Vendor = (props) => {
             const response = err.response;
             if (response && response.data) {
                 setErrorMessage(
-                    response.data.message || "An unexpected error occurred."
+                    response.data.message || "An unexpected error occurred.",
                 );
             } else {
                 setErrorMessage("An unexpected error occurred.");
@@ -804,7 +802,7 @@ const Vendor = (props) => {
                     ? vendor.vendor_sheet
                     : [];
                 const updatedVendorSheet = validVendorSheet.filter(
-                    (item) => item.id !== id
+                    (item) => item.id !== id,
                 );
                 return { ...vendor, vendor_sheet: updatedVendorSheet };
             });
@@ -834,7 +832,7 @@ const Vendor = (props) => {
 
                 if (response.data.status === "true") {
                     setVendors((prevVendors) =>
-                        prevVendors.filter((vendor) => vendor.id !== id)
+                        prevVendors.filter((vendor) => vendor.id !== id),
                     );
 
                     SweetAlert.fire({
@@ -1035,6 +1033,14 @@ const Vendor = (props) => {
                                                     value: "number_of_task",
                                                     label: "Number of task",
                                                 },
+                                                {
+                                                    value: "completed_at",
+                                                    label: "Completed At",
+                                                },
+                                                {
+                                                    value: "completed_by",
+                                                    label: "Completed By",
+                                                },
                                             ],
                                         },
                                         {
@@ -1191,7 +1197,6 @@ const Vendor = (props) => {
                                     Export to Excel
                                 </Btn>
                             </ButtonGroup>
-                            {/* <Btn  className="me-2">Add New vendor</Btn> */}
                         </div>
                     </CardHeader>
                     <CardBody className="pt-0 px-3">
@@ -1199,9 +1204,7 @@ const Vendor = (props) => {
                             {loading2 ? (
                                 <div className="loader-box">
                                     <Spinner
-                                        attrSpinner={{
-                                            className: "loader-6",
-                                        }}
+                                        attrSpinner={{ className: "loader-6" }}
                                     />
                                 </div>
                             ) : (
@@ -1240,7 +1243,7 @@ const Vendor = (props) => {
                                                 (field) =>
                                                     item && field in item
                                                         ? item[field]
-                                                        : ""
+                                                        : "",
                                             );
                                             return (
                                                 <Fragment
@@ -1258,14 +1261,7 @@ const Vendor = (props) => {
                                                                     ] ===
                                                                     "id" ? (
                                                                         <a
-                                                                            href={`/vm/vendors/editprofiletest?data=${encodeURIComponent(
-                                                                                encryptData(
-                                                                                    {
-                                                                                        id: item.id,
-                                                                                        email: item.email,
-                                                                                    },
-                                                                                ),
-                                                                            )}`}
+                                                                            href={`/vm/vendors/editprofiletest?data=${encodeURIComponent(encryptData({ id: item.id, email: item.email }))}`}
                                                                             onClick={(
                                                                                 e,
                                                                             ) => {
@@ -1274,21 +1270,11 @@ const Vendor = (props) => {
                                                                                         1 ||
                                                                                     e.ctrlKey ||
                                                                                     e.metaKey
-                                                                                ) {
+                                                                                )
                                                                                     return;
-                                                                                }
-
                                                                                 e.preventDefault();
-                                                                                const url = `/vm/vendors/editprofiletest?data=${encodeURIComponent(
-                                                                                    encryptData(
-                                                                                        {
-                                                                                            id: item.id,
-                                                                                            email: item.email,
-                                                                                        },
-                                                                                    ),
-                                                                                )}`;
                                                                                 navigate(
-                                                                                    url,
+                                                                                    `/vm/vendors/editprofiletest?data=${encodeURIComponent(encryptData({ id: item.id, email: item.email }))}`,
                                                                                 );
                                                                             }}
                                                                             style={{
@@ -1467,29 +1453,58 @@ const Vendor = (props) => {
                                                                                     )}
                                                                                 </div>
                                                                             )}
-                                                                           {fields[index] === "type" && (
-  <div>
-    {(() => {
-      const types = {
-        0: { label: "Freelance", color: "green" },
-        1: { label: "Ext. In House", color: "blue" },
-        2: { label: "Agency", color: "gray" },
-        3: { label: "Contractor", color: "red" },
-        4: { label: "In House", color: "blue" },
-      };
-
-      const typeData = types[value];
-
-      return typeData ? (
-        <span style={{ color: typeData.color }}>
-          {typeData.label}
-        </span>
-      ) : (
-        <span>Type: Unknown</span>
-      );
-    })()}
-  </div>
-)}
+                                                                            {fields[
+                                                                                index
+                                                                            ] ===
+                                                                                "type" && (
+                                                                                <div>
+                                                                                    {(() => {
+                                                                                        const types =
+                                                                                            {
+                                                                                                0: {
+                                                                                                    label: "Freelance",
+                                                                                                    color: "green",
+                                                                                                },
+                                                                                                1: {
+                                                                                                    label: "Ext. In House",
+                                                                                                    color: "blue",
+                                                                                                },
+                                                                                                2: {
+                                                                                                    label: "Agency",
+                                                                                                    color: "gray",
+                                                                                                },
+                                                                                                3: {
+                                                                                                    label: "Contractor",
+                                                                                                    color: "red",
+                                                                                                },
+                                                                                                4: {
+                                                                                                    label: "In House",
+                                                                                                    color: "blue",
+                                                                                                },
+                                                                                            };
+                                                                                        const typeData =
+                                                                                            types[
+                                                                                                value
+                                                                                            ];
+                                                                                        return typeData ? (
+                                                                                            <span
+                                                                                                style={{
+                                                                                                    color: typeData.color,
+                                                                                                }}
+                                                                                            >
+                                                                                                {
+                                                                                                    typeData.label
+                                                                                                }
+                                                                                            </span>
+                                                                                        ) : (
+                                                                                            <span>
+                                                                                                Type:
+                                                                                                Unknown
+                                                                                            </span>
+                                                                                        );
+                                                                                    })()}
+                                                                                </div>
+                                                                            )}
                                                                             {fields[
                                                                                 index
                                                                             ] ===
@@ -1660,7 +1675,6 @@ const Vendor = (props) => {
                                                                                             Other
                                                                                         </span>
                                                                                     )}
-
                                                                                     {(value <
                                                                                         0 ||
                                                                                         value >
@@ -1680,7 +1694,7 @@ const Vendor = (props) => {
                                                                                         0 && (
                                                                                         <span
                                                                                             style={{
-                                                                                                color: "yellow",
+                                                                                                color: "orange",
                                                                                             }}
                                                                                         >
                                                                                             {" "}
@@ -1701,11 +1715,10 @@ const Vendor = (props) => {
                                                                                     {(value <
                                                                                         0 ||
                                                                                         value >
-                                                                                            3 ||
+                                                                                            1 ||
                                                                                         value ==
                                                                                             null) && (
                                                                                         <span>
-                                                                                            Type:
                                                                                             Unknown
                                                                                         </span>
                                                                                     )}
@@ -1724,14 +1737,7 @@ const Vendor = (props) => {
                                                             ?.edit == 1 && (
                                                             <td>
                                                                 <a
-                                                                    href={`/vm/vendors/editprofiletest?data=${encodeURIComponent(
-                                                                        encryptData(
-                                                                            {
-                                                                                id: item.id,
-                                                                                email: item.email,
-                                                                            },
-                                                                        ),
-                                                                    )}`}
+                                                                    href={`/vm/vendors/editprofiletest?data=${encodeURIComponent(encryptData({ id: item.id, email: item.email }))}`}
                                                                     onClick={(
                                                                         e,
                                                                     ) => {
@@ -1740,21 +1746,11 @@ const Vendor = (props) => {
                                                                                 1 ||
                                                                             e.ctrlKey ||
                                                                             e.metaKey
-                                                                        ) {
+                                                                        )
                                                                             return;
-                                                                        }
-
                                                                         e.preventDefault();
-                                                                        const url = `/vm/vendors/editprofiletest?data=${encodeURIComponent(
-                                                                            encryptData(
-                                                                                {
-                                                                                    id: item.id,
-                                                                                    email: item.email,
-                                                                                },
-                                                                            ),
-                                                                        )}`;
                                                                         navigate(
-                                                                            url,
+                                                                            `/vm/vendors/editprofiletest?data=${encodeURIComponent(encryptData({ id: item.id, email: item.email }))}`,
                                                                         );
                                                                     }}
                                                                     style={{
@@ -1772,15 +1768,7 @@ const Vendor = (props) => {
                                                             ?.add == 1 && (
                                                             <td>
                                                                 <a
-                                                                    href={`/vm/vendors/cloneprofile?data=${encodeURIComponent(
-                                                                        encryptData(
-                                                                            {
-                                                                                id: item.id,
-                                                                                email: item.email,
-                                                                                clone: true,
-                                                                            },
-                                                                        ),
-                                                                    )}`}
+                                                                    href={`/vm/vendors/cloneprofile?data=${encodeURIComponent(encryptData({ id: item.id, email: item.email, clone: true }))}`}
                                                                     onClick={(
                                                                         e,
                                                                     ) => {
@@ -1789,22 +1777,11 @@ const Vendor = (props) => {
                                                                                 1 ||
                                                                             e.ctrlKey ||
                                                                             e.metaKey
-                                                                        ) {
+                                                                        )
                                                                             return;
-                                                                        }
-
                                                                         e.preventDefault();
-                                                                        const url = `/vm/vendors/cloneprofile?data=${encodeURIComponent(
-                                                                            encryptData(
-                                                                                {
-                                                                                    id: item.id,
-                                                                                    email: item.email,
-                                                                                    clone: true,
-                                                                                },
-                                                                            ),
-                                                                        )}`;
                                                                         navigate(
-                                                                            url,
+                                                                            `/vm/vendors/cloneprofile?data=${encodeURIComponent(encryptData({ id: item.id, email: item.email, clone: true }))}`,
                                                                         );
                                                                     }}
                                                                     style={{
@@ -1844,7 +1821,6 @@ const Vendor = (props) => {
                                                                 {canViewInHouse &&
                                                                 item.type ==
                                                                     1 ? (
-                                                                    // In House Table
                                                                     <Table
                                                                         bordered
                                                                     >
@@ -1968,7 +1944,6 @@ const Vendor = (props) => {
                                                                                                     key
                                                                                                 }
                                                                                             >
-                                                                                                {" "}
                                                                                                 {formatString(
                                                                                                     key,
                                                                                                 )}
@@ -2074,24 +2049,6 @@ const Vendor = (props) => {
                                                                                                             </td>
                                                                                                         ),
                                                                                                     )}
-
-                                                                                                {/* <td>
-                                                            {props
-                                                                .permissions
-                                                                ?.edit ==
-                                                                1 && (
-                                                                <LazyWrapper>
-                                                                    <ModelEdit
-                                                                        id={
-                                                                            detail.id
-                                                                        }
-                                                                        getData={
-                                                                            getData
-                                                                        }
-                                                                    />
-                                                                </LazyWrapper>
-                                                            )}
-                                                        </td> */}
                                                                                                 {props
                                                                                                     .permissions
                                                                                                     ?.edit ==
@@ -2109,7 +2066,6 @@ const Vendor = (props) => {
                                                                                                         >
                                                                                                             Edit
                                                                                                         </Btn>
-
                                                                                                         {openId ===
                                                                                                             detail.id && (
                                                                                                             <LazyWrapper>

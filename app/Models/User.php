@@ -81,7 +81,17 @@ class User extends Authenticatable implements JWTSubject
             ->where('id', $userAccount->master_user_id)
             ->update($accountData);
     }
+    
+    public static function SelectData($searchTerm = null)
+    {
 
+        if ($searchTerm) {
+            $query = self::where('user_name', 'like', '%' . $searchTerm . '%')->where('status', 1);
+        } else {
+            $query = self::select('id', 'user_name')->where('status', 1)->limit(5);
+        }
+        return $query->get();
+    }
 
     protected $fillable = [
         'name',

@@ -164,7 +164,10 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return  $this->belongsTo(BrandUsers::class, 'created_by');
     }
-
+    public function completed_by()
+    {
+        return $this->belongsTo(User::class, 'completed_by');
+    }
     protected $fillable = [
         'name',
         'email',
@@ -262,4 +265,5 @@ class Vendor extends Authenticatable  implements JWTSubject
     {
         return $this->hasMany(InHouseLanguage::class, 'vendor_id');
     }
+   
 }

@@ -21,6 +21,8 @@ use App\Models\Major;
 use App\Models\Skill;
 use App\Models\Division;
 use App\Models\BrandUsers;
+use App\Models\User;
+
 
 use App\Models\SubSubjectMatter;
 use App\Models\Vendor;
@@ -31,7 +33,7 @@ use Illuminate\Support\Facades\DB;
  
 class CodingTableController extends Controller
 {
-    protected static $validTables = ['mainsubject', 'division', "subSubject",'regions', 'services', 'languages', "vendortimezone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "University_Degree", "major", "skills",'brand','vendors', 'vendor_payment_methods' , 'users'];
+    protected static $validTables = ['user','mainsubject', 'division', "subSubject",'regions', 'services', 'languages', "vendortimezone", "countries", "messaging_types", "fields", "task_type", "currency", "tools", "languages_dialect", "unit", "University_Degree", "major", "skills",'brand','vendors', 'vendor_payment_methods' , 'users'];
 
     protected static $models = [
         'regions' => Regions::class,
@@ -55,7 +57,9 @@ class CodingTableController extends Controller
         "vendors"=> Vendor::class,
         "vendor_payment_methods" => VendorPaymentMethod::class,
         'users' => BrandUsers::class,
-        'division' => Division::class
+        'division' => Division::class,
+        'user' => User::class
+
 
     ];
     // public function SelectDatatTable(Request $request)

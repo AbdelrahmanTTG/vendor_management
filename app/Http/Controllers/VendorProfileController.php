@@ -44,6 +44,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use App\Services\CancellationService;
+
 class VendorProfileController extends Controller
 {
     protected $cancellationService;
@@ -68,7 +69,7 @@ class VendorProfileController extends Controller
             ->get();
         return $formats;
     }
-    
+
 
     // public function Vendors(Request $request)
     // {
@@ -747,6 +748,7 @@ class VendorProfileController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
         $email = $request->email;
         $brands = is_array($request->vendor_brands)
             ? $request->vendor_brands
@@ -771,8 +773,13 @@ class VendorProfileController extends Controller
 
         $data = $validator->validated();
         $data['brand'] = $data['vendor_brands'];
-        $vendor = Vendor::create($data);
 
+        if (isset($data['profile_status']) && (int)$data['profile_status'] === 1) {
+            $data['completed_at'] = now();
+            $data['completed_by'] = $userId;
+        }
+
+        $vendor = Vendor::create($data);
 
         if ($request->has('mother_tongue_language') && is_array($request->mother_tongue_language)) {
             $motherTongues = [];
@@ -801,6 +808,23 @@ class VendorProfileController extends Controller
             $vendor->toArray(),
             $vendor->id
         );
+
+        if (isset($data['profile_status'])) {
+            DataLogger::addToLogger(
+                $userId,
+                'profile_status_changed',
+                $request->fullUrl(),
+                'vendor',
+                [
+                    'vendor_id'  => $vendor->id,
+                    'old_status' => null,
+                    'new_status' => $data['profile_status'],
+                    'changed_at' => now(),
+                    'changed_by' => $userId,
+                ],
+                $vendor->id
+            );
+        }
 
         return response()->json([
             'message' => 'Vendor created successfully!',
@@ -847,6 +871,8 @@ class VendorProfileController extends Controller
 
         $vendor = Vendor::find($request->id);
         if (!$vendor) return response()->json(['message' => 'Vendor not found'], 404);
+
+        $oldProfileStatus = $vendor->profile_status;
 
         $data = $request->only([
             'name',
@@ -897,6 +923,18 @@ class VendorProfileController extends Controller
         }
 
         $data['brand'] = $data['vendor_brands'];
+
+        if (isset($data['profile_status']) && $oldProfileStatus != $data['profile_status']) {
+            if ((int)$data['profile_status'] === 1) {
+                $userId = JWTAuth::parseToken()->authenticate()->id;
+                $data['completed_at'] = now();
+                $data['completed_by'] = $userId;
+            } else {
+                $data['completed_at'] = null;
+                $data['completed_by'] = null;
+            }
+        }
+
         $vendor->update($data);
 
         if ($request->filled('mother_tongue_language')) {
@@ -912,6 +950,23 @@ class VendorProfileController extends Controller
 
         $userId = JWTAuth::parseToken()->authenticate()->id;
         DataLogger::addToLogger($userId, 'update_vendor', $request->fullUrl(), 'vendor', $vendor->toArray(), $vendor->id);
+
+        if (isset($data['profile_status']) && $oldProfileStatus != $data['profile_status']) {
+            DataLogger::addToLogger(
+                $userId,
+                'profile_status_changed',
+                $request->fullUrl(),
+                'vendor',
+                [
+                    'vendor_id'  => $vendor->id,
+                    'old_status' => $oldProfileStatus,
+                    'new_status' => $data['profile_status'],
+                    'changed_at' => now(),
+                    'changed_by' => $userId,
+                ],
+                $vendor->id
+            );
+        }
 
         if ($request->VendorSide) {
             $brand = $vendor->vendor_brands;
@@ -2541,7 +2596,7 @@ class VendorProfileController extends Controller
         $encryptedNameOnly = pathinfo($fileName, PATHINFO_FILENAME);
         $originalFileName = $fileName;
 
-       
+
 
         try {
             if (ctype_xdigit($encryptedNameOnly)) {
@@ -2564,7 +2619,6 @@ class VendorProfileController extends Controller
         }
 
         return response()->download($filePath, $originalFileName);
-
     }
     private function generateFileName(\Illuminate\Http\UploadedFile $file): string
     {
@@ -4641,7 +4695,7 @@ class VendorProfileController extends Controller
                     $flattenedVendors[] = array_merge(
                         [
                             'id' => $vendorId,
-                            'vendor_price_list' => $vendorPriceListId  
+                            'vendor_price_list' => $vendorPriceListId
                         ],
                         $adjustedVendorData,
                         $sheet
@@ -4693,63 +4747,6 @@ class VendorProfileController extends Controller
             ];
         }
     }
-    // public function typePermissions()
-    // {
-    //     try {
-    //         $user = JWTAuth::parseToken()->authenticate();
-    //         if (!$user) {
-    //             return response()->json(['error' => 'Unauthorized'], 401);
-    //         }
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => 'Token invalid or expired'], 401);
-    //     }
-
-      
-    //     if ($user->use_type == 2) {
-    //         return response()->json([
-    //             'permissions' => [
-    //                 'freelance'  => 1,
-    //                 'in_house'   => 1,
-    //                 'agency'     => 1,
-    //                 'contractor' => 1
-    //             ],
-    //             'allowedTypes' => [0, 1, 2, 3]
-    //         ], 200);
-    //     }
-
-    //     $permissions = DB::table('vendor_permissions')
-    //         ->where('user_id', $user->id)
-    //         ->select('freelance', 'in_house', 'agency', 'contractor')
-    //         ->first();
-
-    //     if (!$permissions) {
-    //         return response()->json([
-    //             'permissions' => [
-    //                 'freelance'  => 0,
-    //                 'in_house'   => 0,
-    //                 'agency'     => 0,
-    //                 'contractor' => 0
-    //             ],
-    //             'allowedTypes' => []
-    //         ], 200);
-    //     }
-
-    //     $allowedTypes = [];
-    //     if ($permissions->freelance == 1)  $allowedTypes[] = 0;
-    //     if ($permissions->in_house == 1)   $allowedTypes[] = 1;
-    //     if ($permissions->agency == 1)     $allowedTypes[] = 2;
-    //     if ($permissions->contractor == 1) $allowedTypes[] = 3;
-
-    //     return response()->json([
-    //         'permissions' => [
-    //             'freelance'  => $permissions->freelance,
-    //             'in_house'   => $permissions->in_house,
-    //             'agency'     => $permissions->agency,
-    //             'contractor' => $permissions->contractor
-    //         ],
-    //         'allowedTypes' => $allowedTypes
-    //     ], 200);
-    // }
 
     private function getUserTypePermissions($userId, $userType)
     {
@@ -4799,10 +4796,10 @@ class VendorProfileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $payload = JWTAuth::getPayload(JWTAuth::getToken());
 
-       
+
         $userTypePermissions = $this->getUserTypePermissions($user->id, $user->use_type);
 
-       
+
         if (empty($userTypePermissions)) {
             return response()->json([
                 'message' => 'You do not have permission to view any vendor types.'
@@ -4820,19 +4817,25 @@ class VendorProfileController extends Controller
         $formatArray = $this->buildFormatArray($formats);
 
         $includeCreatedBy = $this->shouldIncludeCreatedBy($formatArray, $request);
+        $includeCompletedBy = $this->shouldIncludeCompletedBy($formatArray, $request);
         $includeMotherTongue = $this->shouldIncludeMotherTongue($formatArray);
 
         $vendorColumns = Schema::getColumnListing('vendor');
         $vendorSheet = Schema::getColumnListing('vendor_sheet');
 
         $relatedColumns = $this->extractRelatedColumns($formatArray, $vendorColumns, $vendorSheet);
-        $intersectColumns = $this->extractIntersectColumns($formatArray, $vendorColumns, $includeCreatedBy);
+        $intersectColumns = $this->extractIntersectColumns(
+            $formatArray,
+            $vendorColumns,
+            $includeCreatedBy,
+            $includeCompletedBy 
+        );
         $intersectColumnsVendorSheet = array_intersect($formatArray, $vendorSheet);
 
-      
+
         $searchTypeFilter = $this->detectSearchTypeFilter($request);
 
-       
+
         if ($searchTypeFilter !== null) {
             $invalidTypes = array_diff($searchTypeFilter, $userTypePermissions);
             if (!empty($invalidTypes)) {
@@ -4844,10 +4847,10 @@ class VendorProfileController extends Controller
             }
         }
 
-       
+
         $vendorsQuery = $this->initializeVendorsQuery(
-            $intersectColumns, 
-            $userTypePermissions, 
+            $intersectColumns,
+            $userTypePermissions,
             $searchTypeFilter
         );
 
@@ -4856,11 +4859,11 @@ class VendorProfileController extends Controller
         }
 
         $this->handlePriceListAndVendorSheet(
-            $vendorsQuery, 
-            $formatArray, 
-            $intersectColumnsVendorSheet, 
-            $vendorSheet, 
-            $userTypePermissions, 
+            $vendorsQuery,
+            $formatArray,
+            $intersectColumnsVendorSheet,
+            $vendorSheet,
+            $userTypePermissions,
             $searchTypeFilter
         );
 
@@ -4873,41 +4876,42 @@ class VendorProfileController extends Controller
 
         if ($request->has('queryParams') && is_array($request->queryParams)) {
             $this->applyQueryParams(
-                $vendorsQuery, 
-                $request->queryParams, 
-                $formatArray, 
-                $includeMotherTongue, 
+                $vendorsQuery,
+                $request->queryParams,
+                $formatArray,
+                $includeMotherTongue,
                 $includeCreatedBy
             );
             $this->applyFilters(
-                $vendorsQuery, 
-                $request->queryParams, 
-                $formatArray, 
-                $diffFormatArray, 
-                $vendorSheet, 
-                $includeMotherTongue, 
+                $vendorsQuery,
+                $request->queryParams,
+                $formatArray,
+                $diffFormatArray,
+                $vendorSheet,
+                $includeMotherTongue,
                 $includeCreatedBy,
                 $userTypePermissions
             );
         }
 
         $this->applySorting($vendorsQuery, $request);
+        $totalVendors = (clone $vendorsQuery)->toBase()->selectRaw('COUNT(DISTINCT vendor.id) as aggregate')->value('aggregate');
+        // $totalVendors = $vendorsQuery->count();
+        // $vendorsQuery->groupBy('vendor.id');
 
-        $vendorsQuery->groupBy('vendor.id');
-
-        $totalVendors = DB::table(DB::raw("({$vendorsQuery->toBase()->toSql()}) as sub"))
-            ->mergeBindings($vendorsQuery->toBase())
-            ->count();
+        // $totalVendors = DB::table(DB::raw("({$vendorsQuery->toBase()->toSql()}) as sub"))
+        //     ->mergeBindings($vendorsQuery->toBase())
+        //     ->count();
 
         $AllVendors = [];
         $diffFormatArrayEx = [];
         if ($request->has('export') && $request->input('export') === true) {
             list($AllVendors, $diffFormatArrayEx) = $this->exportVendors(
-                $vendorsQuery, 
-                $request, 
-                $diffFormatArray, 
-                $vendorSheet, 
-                $includeMotherTongue, 
+                $vendorsQuery,
+                $request,
+                $diffFormatArray,
+                $vendorSheet,
+                $includeMotherTongue,
                 $userTypePermissions
             );
         }
@@ -5002,6 +5006,20 @@ class VendorProfileController extends Controller
 
         return false;
     }
+    private function shouldIncludeCompletedBy($formatArray, Request $request)
+    {
+        if (in_array('completed_by', $formatArray)) {
+            return true;
+        }
+
+        if ($request->has('queryParams') && is_array($request->queryParams)) {
+            if (array_key_exists('completed_by', $request->queryParams) && !empty($request->queryParams['completed_by'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private function shouldIncludeMotherTongue($formatArray)
     {
@@ -5025,43 +5043,9 @@ class VendorProfileController extends Controller
         return array_values($relatedColumns);
     }
 
-    private function extractIntersectColumns($formatArray, $vendorColumns, $includeCreatedBy)
-    {
-        $intersectColumns = array_intersect($formatArray, $vendorColumns);
-        $mandatoryColumns = ['timezone', 'created_by'];
-        $intersectColumns = array_unique(array_merge($intersectColumns, $mandatoryColumns));
+   
 
-        if ($includeCreatedBy && !in_array('created_by', $intersectColumns)) {
-            $intersectColumns[] = 'created_by';
-        }
-
-        return $intersectColumns;
-    }
-
-    private function initializeVendorsQuery($intersectColumns, $typePermissions, $searchTypeFilter = null)
-    {
-        if (!empty($intersectColumns)) {
-            $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands')
-                ->addSelect(DB::raw(implode(',', $intersectColumns)));
-        } else {
-            $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands');
-        }
-
-        $vendorsQuery->withCount(['tasks as number_of_task']);
-
-        // Apply search type filter first (e.g., In House only)
-        if ($searchTypeFilter !== null && is_array($searchTypeFilter)) {
-            $vendorsQuery->whereIn('vendor.type', $searchTypeFilter);
-        }
-        // Then apply user permissions
-        elseif (is_array($typePermissions) && count($typePermissions) > 0) {
-            $vendorsQuery->whereIn('vendor.type', $typePermissions);
-        } elseif (is_array($typePermissions) && count($typePermissions) === 0) {
-            $vendorsQuery->whereRaw('1 = 0');
-        }
-
-        return $vendorsQuery;
-    }
+   
 
     private function addMotherTongueRelation($vendorsQuery)
     {
@@ -5179,15 +5163,16 @@ class VendorProfileController extends Controller
     private function applyRelationships(&$vendorsQuery, $formatArray)
     {
         $relationships = [
-            'country' => ['id', 'name'],
-            'nationality' => ['id', 'name'],
-            'region' => ['id', 'name'],
-            "timezone" => ['id', 'gmt'],
-            'created_by' => ['id', 'user_name'],
-            'source_lang' => ['id', 'name'],
-            'target_lang' => ['id', 'name'],
-            'main_subject' => ['id', 'name'],
-            'sub_subject' => ['id', 'name'],
+            'country'       => ['id', 'name'],
+            'nationality'   => ['id', 'name'],
+            'region'        => ['id', 'name'],
+            'timezone'      => ['id', 'gmt'],
+            'created_by'    => ['id', 'user_name'],
+            'completed_by'  => ['id', 'user_name'],
+            'source_lang'   => ['id', 'name'],
+            'target_lang'   => ['id', 'name'],
+            'main_subject'  => ['id', 'name'],
+            'sub_subject'   => ['id', 'name'],
         ];
 
         foreach ($relationships as $relation => $columns) {
@@ -5199,27 +5184,7 @@ class VendorProfileController extends Controller
         }
     }
 
-    private function applyQueryParams(&$vendorsQuery, $queryParams, &$formatArray, $includeMotherTongue, $includeCreatedBy)
-    {
-        $this->applyTimezoneFilter($vendorsQuery, $queryParams, $formatArray);
-
-        foreach ($queryParams as $key => $val) {
-            if ($key !== 'filters' && !empty($val)) {
-                if ($key === 'timezone_from' || $key === 'timezone_to' || $key === 'typePermissions') {
-                    continue;
-                }
-
-                if (strpos($key, 'vendors_mother_tongue') !== false) {
-                    $this->applyMotherTongueQueryParam($vendorsQuery, $val, $formatArray);
-                    continue;
-                }
-
-                $this->addQueryParamToFormatArray($key, $formatArray, $includeCreatedBy);
-                $this->applyWhereCondition($vendorsQuery, $key, $val);
-                $this->applyRelationshipIfExists($vendorsQuery, $key);
-            }
-        }
-    }
+  
 
     private function applyTimezoneFilter(&$vendorsQuery, $queryParams, &$formatArray)
     {
@@ -5269,7 +5234,7 @@ class VendorProfileController extends Controller
         }]);
     }
 
-    private function addQueryParamToFormatArray($key, &$formatArray, $includeCreatedBy)
+    private function addQueryParamToFormatArray($key, &$formatArray, $includeCreatedBy, $includeCompletedBy = false)
     {
         if ($key === 'vendor_brands') {
             if (!in_array('brands', $formatArray)) {
@@ -5277,8 +5242,11 @@ class VendorProfileController extends Controller
             }
         } else {
             if (!in_array($key, $formatArray)) {
-                if (!($key === 'created_by' && $includeCreatedBy)) {
-                    // Only add select if not already included via includeCreatedBy
+                if (
+                    !($key === 'created_by' && $includeCreatedBy) &&
+                    !($key === 'completed_by' && $includeCompletedBy)
+                ) {
+                    // Only add select if not already included
                 }
                 $formatArray[] = $key;
             }
@@ -5288,6 +5256,12 @@ class VendorProfileController extends Controller
     private function applyWhereCondition(&$vendorsQuery, $key, $val)
     {
         if (strpos($key, 'vendors_mother_tongue') === false) {
+            $vendorDirectColumns = ['profile_status', 'completed_at', 'completed_by', 'created_by'];
+
+            if (in_array($key, $vendorDirectColumns)) {
+                $vendorsQuery->addSelect('vendor.' . $key);
+            }
+
             if (is_array($val)) {
                 $vendorsQuery->where(function ($query) use ($key, $val) {
                     foreach ($val as $k => $v) {
@@ -5307,15 +5281,16 @@ class VendorProfileController extends Controller
     private function applyRelationshipIfExists(&$vendorsQuery, $key)
     {
         $relationships = [
-            'country' => ['id', 'name'],
-            'nationality' => ['id', 'name'],
-            'region' => ['id', 'name'],
-            "timezone" => ['id', 'gmt'],
-            'created_by' => ['id', 'user_name'],
-            'source_lang' => ['id', 'name'],
-            'target_lang' => ['id', 'name'],
-            'main_subject' => ['id', 'name'],
-            'sub_subject' => ['id', 'name'],
+            'country'       => ['id', 'name'],
+            'nationality'   => ['id', 'name'],
+            'region'        => ['id', 'name'],
+            'timezone'      => ['id', 'gmt'],
+            'created_by'    => ['id', 'user_name'],
+            'completed_by'  => ['id', 'user_name'],
+            'source_lang'   => ['id', 'name'],
+            'target_lang'   => ['id', 'name'],
+            'main_subject'  => ['id', 'name'],
+            'sub_subject'   => ['id', 'name'],
         ];
 
         if (array_key_exists($key, $relationships)) {
@@ -5325,7 +5300,7 @@ class VendorProfileController extends Controller
         }
     }
 
-    
+
     private function applyFilters(&$vendorsQuery, $queryParams, &$formatArray, &$diffFormatArray, $vendorSheet, $includeMotherTongue, $includeCreatedBy, $userTypePermissions)
     {
         if (!isset($queryParams['filters']) || !is_array($queryParams['filters']) || empty($queryParams['filters'])) {
@@ -5868,9 +5843,115 @@ class VendorProfileController extends Controller
         return $mapping[$tableName] ?? $tableName;
     }
 
-   
 
-    
+    private function applyQueryParams(&$vendorsQuery, $queryParams, &$formatArray, $includeMotherTongue, $includeCreatedBy)
+    {
+        $this->applyTimezoneFilter($vendorsQuery, $queryParams, $formatArray);
+        $this->applyDateRangeFilter($vendorsQuery, $queryParams, $formatArray, 'completed_at');
+
+        foreach ($queryParams as $key => $val) {
+            if ($key !== 'filters' && !empty($val)) {
+                if ($key === 'timezone_from' || $key === 'timezone_to' || $key === 'typePermissions') {
+                    continue;
+                }
+
+                if ($key === 'completed_at_from' || $key === 'completed_at_to') {
+                    continue;
+                }
+
+                if (strpos($key, 'vendors_mother_tongue') !== false) {
+                    $this->applyMotherTongueQueryParam($vendorsQuery, $val, $formatArray);
+                    continue;
+                }
+
+                $this->addQueryParamToFormatArray($key, $formatArray, $includeCreatedBy);
+                $this->applyWhereCondition($vendorsQuery, $key, $val);
+                $this->applyRelationshipIfExists($vendorsQuery, $key);
+            }
+        }
+    }
+
+    private function applyDateRangeFilter(&$vendorsQuery, $queryParams, &$formatArray, $column)
+    {
+        $fromKey = $column . '_from';
+        $toKey = $column . '_to';
+
+        $hasFrom = !empty($queryParams[$fromKey]);
+        $hasTo = !empty($queryParams[$toKey]);
+
+        if ($hasFrom || $hasTo) {
+            if ($hasFrom) {
+                $from = is_array($queryParams[$fromKey]) ? $queryParams[$fromKey][0] : $queryParams[$fromKey];
+                $vendorsQuery->where('vendor.' . $column, '>=', $from);
+            }
+
+            if ($hasTo) {
+                $to = is_array($queryParams[$toKey]) ? $queryParams[$toKey][0] : $queryParams[$toKey];
+                $vendorsQuery->where('vendor.' . $column, '<=', $to . ' 23:59:59');
+            }
+
+            if (!in_array($column, $formatArray)) {
+                $formatArray[] = $column;
+            }
+        }
+    }
+
+    private function extractIntersectColumns($formatArray, $vendorColumns, $includeCreatedBy, $includeCompletedBy = false)
+    {
+        $intersectColumns = array_intersect($formatArray, $vendorColumns);
+        $mandatoryColumns = ['timezone'];
+        $intersectColumns = array_unique(array_merge($intersectColumns, $mandatoryColumns));
+
+        if ($includeCreatedBy && !in_array('created_by', $intersectColumns)) {
+            $intersectColumns[] = 'created_by';
+        }
+
+        if ($includeCompletedBy && !in_array('completed_by', $intersectColumns)) {
+            $intersectColumns[] = 'completed_by';
+        }
+
+        $alwaysInclude = ['profile_status', 'completed_at'];
+        foreach ($alwaysInclude as $col) {
+            if (in_array($col, $vendorColumns) && !in_array($col, $intersectColumns)) {
+                if (in_array($col, $formatArray)) {
+                    $intersectColumns[] = $col;
+                }
+            }
+        }
+
+        return $intersectColumns;
+    }
+
+    private function initializeVendorsQuery($intersectColumns, $typePermissions, $searchTypeFilter = null)
+    {
+        if (!empty($intersectColumns)) {
+            $prefixedColumns = array_map(function ($col) {
+                $noPrefixCols = ['timezone'];
+                if (in_array($col, $noPrefixCols)) {
+                    return $col;
+                }
+                return 'vendor.' . $col;
+            }, $intersectColumns);
+
+            $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands')
+                ->addSelect($prefixedColumns);
+        } else {
+            $vendorsQuery = Vendor::select('vendor.id', 'vendor.vendor_brands');
+        }
+
+        $vendorsQuery->withCount(['tasks as number_of_task']);
+
+        if ($searchTypeFilter !== null && is_array($searchTypeFilter)) {
+            $vendorsQuery->whereIn('vendor.type', $searchTypeFilter);
+        } elseif (is_array($typePermissions) && count($typePermissions) > 0) {
+            $vendorsQuery->whereIn('vendor.type', $typePermissions);
+        } elseif (is_array($typePermissions) && count($typePermissions) === 0) {
+            $vendorsQuery->whereRaw('1 = 0');
+        }
+
+        return $vendorsQuery;
+    }
+
     public function typePermissions()
     {
         try {
@@ -5900,5 +5981,4 @@ class VendorProfileController extends Controller
             'allowedTypes' => $allowedTypes
         ], 200);
     }
-
 }

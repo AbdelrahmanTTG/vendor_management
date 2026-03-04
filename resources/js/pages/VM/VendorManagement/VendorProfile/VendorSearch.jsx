@@ -21,7 +21,6 @@ const VendorSearch = ({ onSearch, loading2 }) => {
     const [loading, setLoading] = useState(false);
     const [initialOptions, setInitialOptions] = useState({});
 
-    // State for all select options
     const [optionsC, setOptionsC] = useState([]);
     const [optionsN, setOptionsN] = useState([]);
     const [optionsR, setOptionsR] = useState([]);
@@ -44,6 +43,8 @@ const VendorSearch = ({ onSearch, loading2 }) => {
     const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
     const [selectedOptionType, setSelectedOptionType] = useState(null);
     const [optionsDialect, setOptionsDialect] = useState([]);
+    const [optionsCompletedBy, setOptionsCompletedBy] = useState([]);
+
     const toggleCollapse = () => {
         setIsOpen(!isOpen);
     };
@@ -67,6 +68,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
             }
         }
     };
+
     useEffect(() => {
         const fetchTypePermissions = async () => {
             try {
@@ -96,6 +98,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         };
         fetchTypePermissions();
     }, []);
+
     const handelingSelect = async (
         tablename,
         setOptions,
@@ -142,15 +145,12 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         try {
             setLoading(true);
             const { data } = await axiosClient.get("GetCountry", {
-                params: {
-                    id: id,
-                },
+                params: { id: id },
             });
             const formattedOptions = data.map((item) => ({
                 value: item.id,
                 label: item.name,
             }));
-
             setOptionsC(formattedOptions);
         } catch (err) {
             const response = err.response;
@@ -205,6 +205,8 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                 { value: "profile_status", label: "Profile Status" },
                 { value: "created_by", label: "Created by" },
                 { value: "mother_tongue", label: "Mother Tongue" },
+                { value: "completed_at", label: "Completed At" },
+                { value: "completed_by", label: "Completed By" },
             ],
         },
         {
@@ -258,34 +260,13 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         {
             label: "In House Price List",
             options: [
-                {
-                    value: "in_house_currency",
-                    label: "Currency",
-                },
-                {
-                    value: "in_house_quota_hours",
-                    label: "Quota Hours",
-                },
-                {
-                    value: "in_house_salary",
-                    label: "Salary",
-                },
-                {
-                    value: "in_house_source_language",
-                    label: "Source Language",
-                },
-                {
-                    value: "in_house_source_dialect",
-                    label: "Source Dialect",
-                },
-                {
-                    value: "in_house_target_language",
-                    label: "Target Language",
-                },
-                {
-                    value: "in_house_target_dialect",
-                    label: "Target Dialect",
-                },
+                { value: "in_house_currency", label: "Currency" },
+                { value: "in_house_quota_hours", label: "Quota Hours" },
+                { value: "in_house_salary", label: "Salary" },
+                { value: "in_house_source_language", label: "Source Language" },
+                { value: "in_house_source_dialect", label: "Source Dialect" },
+                { value: "in_house_target_language", label: "Target Language" },
+                { value: "in_house_target_dialect", label: "Target Dialect" },
             ],
         },
     ];
@@ -363,6 +344,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
             "target_language",
             "target_dialect",
         ];
+
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const priceList = [];
@@ -379,9 +361,10 @@ const VendorSearch = ({ onSearch, loading2 }) => {
 
         const data = {};
         const keysToDelete = [];
+
         for (let [key, value] of formData.entries()) {
             if (selectedSearchCol.some((col) => col.startsWith("in_house_"))) {
-                autoDetectedType = [1]; 
+                autoDetectedType = [1];
             }
             if (WalletArr.includes(key)) {
                 const existingFilter = Wallet.find(
@@ -495,7 +478,6 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                 keysToDelete.push(key);
                 continue;
             }
-
             if (
                 key.startsWith("in_house_") &&
                 (key === "in_house_source_language" ||
@@ -526,6 +508,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         for (let [key, value] of formData.entries()) {
             data[key] = formData.getAll(key);
         }
+
         const finalTypePermissions =
             autoDetectedType || (hasTypeRestriction ? typePermissions : null);
 
@@ -587,11 +570,7 @@ const VendorSearch = ({ onSearch, loading2 }) => {
         ]);
         if (divLength > 1) div && div.remove();
     };
-    // useEffect(() => {
-    //     if (hasTypeRestriction && typePermissions.length > 0) {
-    //         onSearch({ typePermissions: typePermissions });
-    //     }
-    // }, [hasTypeRestriction]);
+
     return (
         <Col>
             <Card>
@@ -1034,7 +1013,6 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                         value: "3",
                                                                         label: "Contractor",
                                                                     },
-
                                                                     {
                                                                         value: "1",
                                                                         label: "Ext. In House",
@@ -1101,7 +1079,6 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                     value: "3",
                                                                     label: "Contractor",
                                                                 },
-
                                                                 {
                                                                     value: "1",
                                                                     label: "Ext. In House",
@@ -1190,6 +1167,81 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                 </FormGroup>
                                             </Col>
                                         )}
+                                        {selectedSearchCol.indexOf(
+                                            "completed_at",
+                                        ) > -1 && (
+                                            <>
+                                                <Col md="3">
+                                                    <FormGroup>
+                                                        <Label
+                                                            className="col-form-label-sm f-12"
+                                                            htmlFor="completed_at_from"
+                                                        >
+                                                            {
+                                                                "Completed At From"
+                                                            }
+                                                        </Label>
+                                                        <Input
+                                                            className="form-control form-control-sm"
+                                                            type="date"
+                                                            name="completed_at_from"
+                                                            id="completed_at_from"
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                                <Col md="3">
+                                                    <FormGroup>
+                                                        <Label
+                                                            className="col-form-label-sm f-12"
+                                                            htmlFor="completed_at_to"
+                                                        >
+                                                            {"Completed At To"}
+                                                        </Label>
+                                                        <Input
+                                                            className="form-control form-control-sm"
+                                                            type="date"
+                                                            name="completed_at_to"
+                                                            id="completed_at_to"
+                                                        />
+                                                    </FormGroup>
+                                                </Col>
+                                            </>
+                                        )}
+                                        {selectedSearchCol.indexOf(
+                                            "completed_by",
+                                        ) > -1 && (
+                                            <Col md="3">
+                                                <FormGroup>
+                                                    <Label
+                                                        className="col-form-label-sm f-12"
+                                                        htmlFor="completed_by"
+                                                    >
+                                                        {"Completed By"}
+                                                    </Label>
+                                                    <Select
+                                                        name="completed_by"
+                                                        id="completed_by"
+                                                        required
+                                                        options={
+                                                            optionsCompletedBy
+                                                        }
+                                                        className="js-example-basic-single"
+                                                        onInputChange={(
+                                                            inputValue,
+                                                        ) =>
+                                                            handleInputChange(
+                                                                inputValue,
+                                                                "user",
+                                                                "completed_by",
+                                                                setOptionsCompletedBy,
+                                                                optionsCompletedBy,
+                                                            )
+                                                        }
+                                                        isMulti
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        )}
                                         {selectedSearchCol.indexOf("region") >
                                             -1 && (
                                             <Col md="3">
@@ -1269,7 +1321,6 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                         />
                                                     </FormGroup>
                                                 </Col>
-
                                                 <Col md="3">
                                                     <FormGroup>
                                                         <Label
@@ -1321,7 +1372,6 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                 </FormGroup>
                                             </Col>
                                         )}
-                                        {}
                                         {selectedSearchCol.indexOf("city") >
                                             -1 && (
                                             <Col md="3">
@@ -2172,74 +2222,56 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                     />
                                                 </FormGroup>
                                             </Col>
-                                        )}{" "}
-                                        {
-                                            selectedSearchCol.indexOf("major") >
-                                                -1 && (
-                                                <Col md="3">
-                                                    <FormGroup id="majorInput">
-                                                        <Label
-                                                            className="col-form-label-sm f-12"
-                                                            htmlFor="major"
+                                        )}
+                                        {selectedSearchCol.indexOf("major") >
+                                            -1 && (
+                                            <Col md="3">
+                                                <FormGroup id="majorInput">
+                                                    <Label
+                                                        className="col-form-label-sm f-12"
+                                                        htmlFor="major"
+                                                    >
+                                                        {"Major"}
+                                                        <Btn
+                                                            attrBtn={{
+                                                                datatoggle:
+                                                                    "tooltip",
+                                                                title: "Add More Fields",
+                                                                color: "btn px-2 py-0",
+                                                                onClick: (e) =>
+                                                                    addBtn(
+                                                                        e,
+                                                                        "majorInput",
+                                                                    ),
+                                                            }}
                                                         >
-                                                            {"Major"}
-                                                            <Btn
-                                                                attrBtn={{
-                                                                    datatoggle:
-                                                                        "tooltip",
-                                                                    title: "Add More Fields",
-                                                                    color: "btn px-2 py-0",
-                                                                    onClick: (
+                                                            <i className="fa fa-plus-circle"></i>
+                                                        </Btn>
+                                                        <Btn
+                                                            attrBtn={{
+                                                                datatoggle:
+                                                                    "tooltip",
+                                                                title: "Delete Last Row",
+                                                                color: "btn px-2 py-0",
+                                                                onClick: (e) =>
+                                                                    delBtn(
                                                                         e,
-                                                                    ) =>
-                                                                        addBtn(
-                                                                            e,
-                                                                            "majorInput",
-                                                                        ),
-                                                                }}
-                                                            >
-                                                                <i className="fa fa-plus-circle"></i>
-                                                            </Btn>
-                                                            <Btn
-                                                                attrBtn={{
-                                                                    datatoggle:
-                                                                        "tooltip",
-                                                                    title: "Delete Last Row",
-                                                                    color: "btn px-2 py-0",
-                                                                    onClick: (
-                                                                        e,
-                                                                    ) =>
-                                                                        delBtn(
-                                                                            e,
-                                                                            "majorInput",
-                                                                        ),
-                                                                }}
-                                                            >
-                                                                <i className="fa fa-minus-circle"></i>
-                                                            </Btn>
-                                                        </Label>
-                                                        <Input
-                                                            className="form-control form-control-sm majorInput mb-1"
-                                                            type="text"
-                                                            name="major"
-                                                            required
-                                                        />
-                                                    </FormGroup>
-                                                </Col>
-                                            )
-                                            // <Col md='3'>
-                                            //     <FormGroup>
-                                            //         <Label className="col-form-label-sm f-12" htmlFor='name'>{'Major'}</Label>
-                                            //         <Select name='major' id='major' required
-
-                                            //             options={optionsMaj} className="js-example-basic-single"
-                                            //             onInputChange={(inputValue) =>
-                                            //                 handleInputChange(inputValue, "major", "major", setoptionsMaj, optionsMaj)
-                                            //             }
-                                            //             isMulti />
-                                            //     </FormGroup>
-                                            // </Col>
-                                        }
+                                                                        "majorInput",
+                                                                    ),
+                                                            }}
+                                                        >
+                                                            <i className="fa fa-minus-circle"></i>
+                                                        </Btn>
+                                                    </Label>
+                                                    <Input
+                                                        className="form-control form-control-sm majorInput mb-1"
+                                                        type="text"
+                                                        name="major"
+                                                        required
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                        )}
                                         {selectedSearchCol.indexOf(
                                             "year_of_graduation",
                                         ) > -1 && (
@@ -2490,7 +2522,6 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 Client Test
                                                             </Label>
                                                         </FormGroup>
-
                                                         <FormGroup
                                                             check
                                                             className="ml-3"
@@ -2534,7 +2565,6 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                                                 Pass
                                                             </Label>
                                                         </FormGroup>
-
                                                         <FormGroup
                                                             check
                                                             className="ml-3"
@@ -2743,7 +2773,6 @@ const VendorSearch = ({ onSearch, loading2 }) => {
                                             </div>
                                         </Col>
                                     </Row>
-
                                     <Row>
                                         {selectedSearchCol.indexOf(
                                             "in_house_currency",
