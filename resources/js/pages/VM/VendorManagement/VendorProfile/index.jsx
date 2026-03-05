@@ -84,7 +84,7 @@ const Vendor = (props) => {
     const [totalVendors, setTotalVendors] = useState(null);
     const [progress, setProgress] = useState(0);
     const [openId, setOpenId] = useState(null);
-    const [perPage, setPerPage] = useState(5);
+    const [perPage, setPerPage] = useState(50);
     const [userTypePermissions, setUserTypePermissions] = useState(null);
     const [canViewInHouse, setCanViewInHouse] = useState(false);
     const handleFormatsChanged = () => {
@@ -182,7 +182,7 @@ const Vendor = (props) => {
                 setTotalVendors(data.totalVendors);
                 if (data.AllVendors) {
                     exportToExcel(data.AllVendors);
-                    setProgress(5);
+                    setProgress(50);
                 }
             } catch (err) {
             } finally {

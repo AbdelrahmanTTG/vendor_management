@@ -497,10 +497,10 @@ const [hasTypeRestriction, setHasTypeRestriction] = useState(false);
                       handleVendorTypeChange(vendorTypeOption);
                       if (
                           typePermissions.length === 0 ||
-                          typePermissions.includes(data.type)
+                          typePermissions.includes(parseInt(data.type))
                       ) {
                           setValue("type", vendorTypeOption);
-                      } else {
+                      } else if (typePermissions.length > 0) {
                           setValue("type", null);
                       }
                   }
